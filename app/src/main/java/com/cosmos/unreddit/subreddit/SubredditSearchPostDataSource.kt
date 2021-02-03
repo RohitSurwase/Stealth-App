@@ -2,6 +2,7 @@ package com.cosmos.unreddit.subreddit
 
 import android.util.Log
 import androidx.paging.PagingSource
+import androidx.paging.PagingState
 import com.cosmos.unreddit.api.RedditApi
 import com.cosmos.unreddit.database.PostMapper
 import com.cosmos.unreddit.post.PostEntity
@@ -34,5 +35,9 @@ class SubredditSearchPostDataSource(
             Log.e("SubredditSearchSource", "Error", e)
             LoadResult.Error(e)
         }
+    }
+
+    override fun getRefreshKey(state: PagingState<String, PostEntity>): String? {
+        return null
     }
 }

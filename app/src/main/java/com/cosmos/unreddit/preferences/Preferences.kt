@@ -1,6 +1,6 @@
 package com.cosmos.unreddit.preferences
 
-import androidx.datastore.preferences.core.preferencesKey
+import androidx.datastore.preferences.core.booleanPreferencesKey
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
@@ -31,8 +31,8 @@ class Preferences @Inject constructor(private val dataStore: PreferencesDataStor
     }
 
     object PreferencesKeys {
-        val SHOW_NSFW = preferencesKey<Boolean>("show_nsfw")
-        val SHOW_NSFW_PREVIEW = preferencesKey<Boolean>("show_nsfw_preview")
-        val SHOW_SPOILER_PREVIEW = preferencesKey<Boolean>("show_spoiler_preview")
+        val SHOW_NSFW = booleanPreferencesKey("show_nsfw")
+        val SHOW_NSFW_PREVIEW = booleanPreferencesKey("show_nsfw_preview")
+        val SHOW_SPOILER_PREVIEW = booleanPreferencesKey("show_spoiler_preview")
     }
 }

@@ -2,6 +2,7 @@ package com.cosmos.unreddit.postlist
 
 import android.util.Log
 import androidx.paging.PagingSource
+import androidx.paging.PagingState
 import com.cosmos.unreddit.api.RedditApi
 import com.cosmos.unreddit.api.pojo.details.Listing
 import com.cosmos.unreddit.database.PostMapper
@@ -32,5 +33,9 @@ open class PostListDataSource(
 
     open suspend fun getResponse(query: String, sorting: Sorting, after: String?): Listing {
         return redditApi.getSubreddit(query, sorting.generalSorting, sorting.timeSorting, after)
+    }
+
+    override fun getRefreshKey(state: PagingState<String, PostEntity>): String? {
+        return null
     }
 }
