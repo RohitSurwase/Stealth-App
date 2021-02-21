@@ -1,6 +1,5 @@
 package com.cosmos.unreddit.api.pojo.list
 
-import com.cosmos.unreddit.model.Flair
 import com.cosmos.unreddit.post.PostType
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
@@ -16,6 +15,9 @@ data class PostData(
 
     @Json(name = "link_flair_richtext")
     val linkFlairRichText: List<RichText>,
+
+    @Json(name = "author_flair_richtext")
+    val authorFlairRichText: List<RichText>?,
 
     @Json(name = "title")
     val title: String,
@@ -37,6 +39,9 @@ data class PostData(
 
     @Json(name = "link_flair_text")
     val flair: String?,
+
+    @Json(name = "author_flair_text")
+    val authorFlair: String?,
 
     @Json(name = "score")
     val score: Int,
@@ -130,23 +135,5 @@ data class PostData(
 
     fun getTimeInMillis(): Long {
         return TimeUnit.SECONDS.toMillis(created)
-    }
-
-    fun getFlair(): Flair {
-        val redditFlair = Flair()
-
-        if (linkFlairRichText.isNotEmpty()) {
-            for (richText in linkFlairRichText) {
-                if (!richText.t.isNullOrBlank()) {
-                    redditFlair.addData(richText.t, Flair.FlairType.TEXT)
-                } else if (!richText.u.isNullOrEmpty()) {
-                    redditFlair.addData(richText.u, Flair.FlairType.IMAGE)
-                }
-            }
-        } else if (!flair.isNullOrBlank()) {
-            redditFlair.addData(flair, Flair.FlairType.TEXT)
-        }
-
-        return redditFlair
     }
 }

@@ -5,6 +5,7 @@ import com.cosmos.unreddit.api.pojo.details.Child
 import com.cosmos.unreddit.api.pojo.details.ChildType
 import com.cosmos.unreddit.api.pojo.details.PostChild
 import com.cosmos.unreddit.api.pojo.list.PostData
+import com.cosmos.unreddit.model.Flair
 import com.cosmos.unreddit.model.PosterType
 import com.cosmos.unreddit.parser.HtmlParser
 import com.cosmos.unreddit.post.Award
@@ -22,7 +23,8 @@ object PostMapper {
                 ratio,
                 totalAwards,
                 isOC,
-                getFlair(), // TODO
+                Flair.fromData(linkFlairRichText, flair),
+                Flair.fromData(authorFlairRichText, authorFlair),
                 score,
                 getPostType(),
                 domain,

@@ -26,6 +26,21 @@
             android:text="@{post.author}"
             tools:text="author"/>
 
+        <com.cosmos.unreddit.view.RedditFlairView
+            android:id="@+id/post_flair"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toEndOf="@id/text_post_author"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@id/text_post_author"
+            app:layout_constraintBottom_toBottomOf="@id/text_post_author"
+            app:layout_constrainedWidth="true"
+            app:layout_constraintHorizontal_bias="0"
+            android:layout_marginStart="4dp"
+            android:paddingHorizontal="@dimen/post_flair_padding"
+            android:background="@drawable/post_flair_background"
+            android:visibility="gone"/>
+
         <TextView
             android:id="@+id/text_subreddit"
             android:layout_width="wrap_content"

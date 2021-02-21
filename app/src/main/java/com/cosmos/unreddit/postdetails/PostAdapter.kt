@@ -139,6 +139,15 @@ class PostAdapter(
                         includePostFlairs.postFlair.visibility = View.GONE
                     }
                 }
+                with(includePostInfo.postFlair) {
+                    if (!post.authorFlair.isEmpty()) {
+                        visibility = View.VISIBLE
+
+                        setFlair(post.authorFlair)
+                    } else {
+                        visibility = View.GONE
+                    }
+                }
             }
         }
     }

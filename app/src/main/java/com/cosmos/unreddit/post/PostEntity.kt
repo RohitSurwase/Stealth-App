@@ -44,6 +44,9 @@ data class PostEntity(
     @Ignore
     val flair: Flair,
 
+    @Ignore
+    val authorFlair: Flair,
+
     @ColumnInfo(name = "score")
     val score: Int,
 
@@ -119,9 +122,9 @@ data class PostEntity(
                 isOver18: Boolean, preview: String?, isSpoiler: Boolean, isArchived: Boolean,
                 isLocked: Boolean, posterType: PosterType, author: String, commentsNumber: Int,
                 permalink: String, isStickied: Boolean, url: String, created: Long, seen: Boolean)
-            : this(id, subreddit, title, ratio, totalAwards, isOC, Flair(), score, type, domain,
-        isSelf, selfText, selfTextHtml, Sorting(RedditApi.Sort.BEST), RedditText(), isPinned,
-        isOver18, preview, listOf(), isSpoiler, isArchived, isLocked, posterType, author,
+            : this(id, subreddit, title, ratio, totalAwards, isOC, Flair(), Flair(), score, type,
+        domain, isSelf, selfText, selfTextHtml, Sorting(RedditApi.Sort.BEST), RedditText(),
+        isPinned, isOver18, preview, listOf(), isSpoiler, isArchived, isLocked, posterType, author,
         commentsNumber, permalink, isStickied, url, created, seen)
 
     fun getRatioColor(context: Context): Int {
