@@ -37,6 +37,9 @@ class RedditFlairView @JvmOverloads constructor(
                         R.style.TextAppearancePostFlair
                     ).apply {
                         layoutParams = childParams
+                        scrollBarSize = 0
+                        setSingleLine()
+                        isHorizontalFadingEdgeEnabled = true
                         text = data.first
                     }
                     addView(textView)

@@ -1,5 +1,6 @@
 package com.cosmos.unreddit.database
 
+import com.cosmos.unreddit.api.RedditApi
 import com.cosmos.unreddit.api.pojo.details.Child
 import com.cosmos.unreddit.api.pojo.details.ChildType
 import com.cosmos.unreddit.api.pojo.details.PostChild
@@ -8,6 +9,7 @@ import com.cosmos.unreddit.model.PosterType
 import com.cosmos.unreddit.parser.HtmlParser
 import com.cosmos.unreddit.post.Award
 import com.cosmos.unreddit.post.PostEntity
+import com.cosmos.unreddit.post.Sorting
 
 object PostMapper {
 
@@ -15,18 +17,19 @@ object PostMapper {
         with(data) {
             return PostEntity(
                 name,
-                prefixedSubreddit,
+                subreddit,
                 title,
                 ratio,
                 totalAwards,
                 isOC,
-                getFlair(),
+                getFlair(), // TODO
                 score,
                 getPostType(),
                 domain,
                 isSelf,
                 selfText,
                 selfTextHtml,
+                Sorting(RedditApi.Sort.fromName(suggestedSort)),
                 htmlParser.separateHtmlBlocks(selfTextHtml),
                 isPinned,
                 isOver18,

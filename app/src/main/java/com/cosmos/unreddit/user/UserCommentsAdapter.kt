@@ -44,10 +44,7 @@ class UserCommentsAdapter
                     }
                 }
             }
-
-            with(binding.commentBody) {
-                setText(comment.body)
-            }
+            // TODO: Text
         }
     }
 

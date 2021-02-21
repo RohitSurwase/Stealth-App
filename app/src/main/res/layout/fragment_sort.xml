@@ -1,161 +1,205 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
+<layout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:padding="@dimen/sort_padding">
+    xmlns:tools="http://schemas.android.com/tools">
 
-    <TextView
-        android:id="@+id/text_title"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:textAppearance="@style/TextAppearanceSortTitle"
-        android:text="@string/sort_title"/>
+    <data>
+        <import type="android.view.View"/>
+        <import type="com.cosmos.unreddit.sort.SortFragment.SortType"/>
+        <variable
+            name="type"
+            type="com.cosmos.unreddit.sort.SortFragment.SortType" />
+    </data>
 
-    <com.google.android.material.chip.ChipGroup
-        android:id="@+id/group_general"
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/layout_root"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/text_title"
-        app:singleSelection="true"
-        app:selectionRequired="true"
-        app:checkedChip="@id/chip_hot"
-        android:layout_marginTop="@dimen/sort_margin">
+        android:padding="@dimen/sort_padding">
 
-        <com.google.android.material.chip.Chip
-            android:id="@+id/chip_relevance"
-            style="@style/ChipChoiceStyle"
+        <TextView
+            android:id="@+id/text_title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            app:chipIcon="@drawable/ic_relevance"
-            android:text="@string/sort_relevance"/>
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:textAppearance="@style/TextAppearanceSortTitle"
+            android:text="@string/sort_title"/>
 
-        <com.google.android.material.chip.Chip
-            android:id="@+id/chip_hot"
-            style="@style/ChipChoiceStyle"
+        <com.google.android.material.chip.ChipGroup
+            android:id="@+id/group_general"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/text_title"
+            app:singleSelection="true"
+            app:selectionRequired="true"
+            app:checkedChip="@id/chip_hot"
+            android:layout_marginTop="@dimen/sort_margin">
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chip_relevance"
+                style="@style/ChipChoiceStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:chipIcon="@drawable/ic_relevance"
+                android:text="@string/sort_relevance"
+                android:visibility="@{type == SortType.SEARCH ? View.VISIBLE : View.GONE}"/>
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chip_hot"
+                style="@style/ChipChoiceStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:chipIcon="@drawable/ic_hot"
+                android:text="@string/sort_hot"
+                android:visibility="@{type != SortType.POST ? View.VISIBLE : View.GONE}"/>
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chip_best"
+                style="@style/ChipChoiceStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:chipIcon="@drawable/ic_best"
+                android:text="@string/sort_best"
+                android:visibility="@{type == SortType.POST ? View.VISIBLE : View.GONE}"/>
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chip_new"
+                style="@style/ChipChoiceStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:chipIcon="@drawable/ic_new"
+                android:text="@string/sort_new"/>
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chip_top"
+                style="@style/ChipChoiceStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:chipIcon="@drawable/ic_top"
+                android:text="@string/sort_top"/>
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chip_rising"
+                style="@style/ChipChoiceStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:chipIcon="@drawable/ic_rising"
+                android:text="@string/sort_rising"
+                android:visibility="@{type == SortType.GENERAL ? View.VISIBLE : View.GONE}"/>
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chip_controversial"
+                style="@style/ChipChoiceStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:chipIcon="@drawable/ic_controversial"
+                android:text="@string/sort_controversial"
+                android:visibility="@{type != SortType.SEARCH ? View.VISIBLE : View.GONE}"/>
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chip_comments"
+                style="@style/ChipChoiceStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:chipIcon="@drawable/ic_comments"
+                android:text="@string/sort_comments"
+                android:visibility="@{type == SortType.SEARCH ? View.VISIBLE : View.GONE}"/>
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chip_old"
+                style="@style/ChipChoiceStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:chipIcon="@drawable/ic_old"
+                android:text="@string/sort_old"
+                android:visibility="@{type == SortType.POST ? View.VISIBLE : View.GONE}"/>
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chip_qa"
+                style="@style/ChipChoiceStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:chipIcon="@drawable/ic_question_answer"
+                android:text="@string/sort_qa"
+                android:visibility="@{type == SortType.POST ? View.VISIBLE : View.GONE}"/>
+
+        </com.google.android.material.chip.ChipGroup>
+
+        <androidx.constraintlayout.widget.Group
+            android:id="@+id/group_view_time"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            app:chipIcon="@drawable/ic_hot"
-            android:text="@string/sort_hot"/>
+            app:constraint_referenced_ids="text_time_label, group_time"
+            android:visibility="gone"
+            tools:visibility="visible"/>
 
-        <com.google.android.material.chip.Chip
-            android:id="@+id/chip_new"
-            style="@style/ChipChoiceStyle"
+        <TextView
+            android:id="@+id/text_time_label"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            app:chipIcon="@drawable/ic_new"
-            android:text="@string/sort_new"/>
+            app:layout_constraintTop_toBottomOf="@id/group_general"
+            app:layout_constraintStart_toStartOf="parent"
+            android:layout_marginTop="@dimen/sort_margin"
+            android:textAppearance="@style/TextAppearanceSortLabel"
+            android:text="@string/sort_time_title" />
 
-        <com.google.android.material.chip.Chip
-            android:id="@+id/chip_top"
-            style="@style/ChipChoiceStyle"
-            android:layout_width="wrap_content"
+        <com.google.android.material.chip.ChipGroup
+            android:id="@+id/group_time"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:chipIcon="@drawable/ic_top"
-            android:text="@string/sort_top"/>
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/text_time_label"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:singleSelection="true"
+            android:layout_marginTop="@dimen/sort_margin">
 
-        <com.google.android.material.chip.Chip
-            android:id="@+id/chip_rising"
-            style="@style/ChipChoiceStyle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            app:chipIcon="@drawable/ic_rising"
-            android:text="@string/sort_rising"/>
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chip_hour"
+                style="@style/ChipChoiceStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/sort_time_hour"/>
 
-        <com.google.android.material.chip.Chip
-            android:id="@+id/chip_controversial"
-            style="@style/ChipChoiceStyle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            app:chipIcon="@drawable/ic_controversial"
-            android:text="@string/sort_controversial"/>
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chip_day"
+                style="@style/ChipChoiceStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/sort_time_day"/>
 
-        <com.google.android.material.chip.Chip
-            android:id="@+id/chip_comments"
-            style="@style/ChipChoiceStyle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            app:chipIcon="@drawable/ic_comments"
-            android:text="@string/sort_comments"/>
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chip_week"
+                style="@style/ChipChoiceStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/sort_time_week"/>
 
-    </com.google.android.material.chip.ChipGroup>
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chip_month"
+                style="@style/ChipChoiceStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/sort_time_month"/>
 
-    <androidx.constraintlayout.widget.Group
-        android:id="@+id/group_view_time"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:constraint_referenced_ids="text_time_label, group_time"
-        android:visibility="gone"
-        tools:visibility="visible"/>
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chip_year"
+                style="@style/ChipChoiceStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/sort_time_year"/>
 
-    <TextView
-        android:id="@+id/text_time_label"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:layout_constraintTop_toBottomOf="@id/group_general"
-        app:layout_constraintStart_toStartOf="parent"
-        android:layout_marginTop="@dimen/sort_margin"
-        android:textAppearance="@style/TextAppearanceSortLabel"
-        android:text="@string/sort_time_title" />
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chip_all"
+                style="@style/ChipChoiceStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/sort_time_all"/>
 
-    <com.google.android.material.chip.ChipGroup
-        android:id="@+id/group_time"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/text_time_label"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:singleSelection="true"
-        android:layout_marginTop="@dimen/sort_margin">
+        </com.google.android.material.chip.ChipGroup>
 
-        <com.google.android.material.chip.Chip
-            android:id="@+id/chip_hour"
-            style="@style/ChipChoiceStyle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/sort_time_hour"/>
-
-        <com.google.android.material.chip.Chip
-            android:id="@+id/chip_day"
-            style="@style/ChipChoiceStyle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/sort_time_day"/>
-
-        <com.google.android.material.chip.Chip
-            android:id="@+id/chip_week"
-            style="@style/ChipChoiceStyle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/sort_time_week"/>
-
-        <com.google.android.material.chip.Chip
-            android:id="@+id/chip_month"
-            style="@style/ChipChoiceStyle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/sort_time_month"/>
-
-        <com.google.android.material.chip.Chip
-            android:id="@+id/chip_year"
-            style="@style/ChipChoiceStyle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/sort_time_year"/>
-
-        <com.google.android.material.chip.Chip
-            android:id="@+id/chip_all"
-            style="@style/ChipChoiceStyle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/sort_time_all"/>
-
-    </com.google.android.material.chip.ChipGroup>
-
-</androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>

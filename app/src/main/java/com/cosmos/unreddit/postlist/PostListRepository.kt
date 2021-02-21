@@ -4,6 +4,7 @@ import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import com.cosmos.unreddit.api.RedditApi
+import com.cosmos.unreddit.api.pojo.MoreChildren
 import com.cosmos.unreddit.api.pojo.details.AboutChild
 import com.cosmos.unreddit.api.pojo.details.AboutUserChild
 import com.cosmos.unreddit.api.pojo.details.Listing
@@ -34,8 +35,12 @@ class PostListRepository @Inject constructor(private val redditApi: RedditApi,
                                              private val redditDatabase: RedditDatabase,
                                              private val preferences: Preferences) {
 
-    fun getPost(permalink: String): Flow<List<Listing>> = flow {
-        emit(redditApi.getPost(permalink, 20))
+    fun getPost(permalink: String, sorting: Sorting): Flow<List<Listing>> = flow {
+        emit(redditApi.getPost(permalink, sort = sorting.generalSorting))
+    }
+
+    fun getMoreChildren(children: String, linkId: String): Flow<MoreChildren> = flow {
+        emit(redditApi.getMoreChildren(children, linkId))
     }
 
     //region Subreddit

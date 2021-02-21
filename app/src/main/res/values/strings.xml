@@ -9,6 +9,11 @@
     <string name="time_difference_day">%1$dd ago</string>
     <string name="time_difference_year">%1$dy ago</string>
 
+    <string name="time_difference_minute_short">%1$dm</string>
+    <string name="time_difference_hour_short">%1$dh</string>
+    <string name="time_difference_day_short">%1$dd</string>
+    <string name="time_difference_year_short">%1$dy</string>
+
     <string name="award_count">x%1$d</string>
 
     <string name="tab_user_comments">Comments</string>
@@ -39,6 +44,9 @@
     <string name="sort_controversial">Controversial</string>
     <string name="sort_relevance">Relevance</string>
     <string name="sort_comments">Comments</string>
+    <string name="sort_best">Best</string>
+    <string name="sort_old">Old</string>
+    <string name="sort_qa">Q&amp;A</string>
 
     <string name="fragment_subscriptions_label">Subscriptions</string>
     <string name="subscriptions_search_hint">Search through Reddit</string>
@@ -64,4 +72,9 @@
     <string name="flair_nsfw">NSFW</string>
     <string name="flair_spoiler">Spoiler</string>
     <string name="flair_oc">OC</string>
+
+    <string name="comment_score">%1$s pts</string>
+    <string name="comment_more">More (%1$d)</string>
+    <string name="comment_date_edited">%1$s* (%2$s)</string>
+    <string name="comment_controversiality">✝</string>
 </resources>

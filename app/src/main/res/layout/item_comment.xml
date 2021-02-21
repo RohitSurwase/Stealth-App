@@ -1,24 +1,47 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools">
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <data>
+        <import type="android.view.View"/>
         <import type="com.cosmos.unreddit.util.DateUtil"/>
         <variable
             name="comment"
             type="com.cosmos.unreddit.post.CommentEntity" />
     </data>
 
-    <RelativeLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="8dp">
+        android:paddingHorizontal="@dimen/comment_padding_horizontal"
+        android:paddingVertical="@dimen/comment_padding_vertical">
+
+        <View
+            android:id="@+id/comment_color_indicator"
+            android:layout_width="2dp"
+            android:layout_height="0dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/comment_author"
+            app:layout_constraintTop_toTopOf="@id/comment_author"
+            app:layout_constraintBottom_toBottomOf="@id/comment_body"
+            app:layout_constraintHorizontal_chainStyle="packed"
+            app:layout_constraintHorizontal_bias="0"
+            android:layout_marginEnd="8dp"
+            android:background="@drawable/comment_indicator_background"
+            android:backgroundTint="@color/colorPrimary"
+            android:visibility="gone"
+            tools:visibility="visible"/>
 
         <TextView
             android:id="@+id/comment_author"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toTopOf="@id/comment_score"
+            app:layout_constraintStart_toEndOf="@id/comment_color_indicator"
+            app:layout_constraintEnd_toStartOf="@id/comment_op_icon"
+            android:textAppearance="@style/TextAppearanceCommentAuthor"
             android:text="@{comment.author}"
             tools:text="author"/>
 
@@ -26,32 +49,107 @@
             android:id="@+id/comment_score"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_toRightOf="@id/comment_author"
-            android:layout_toEndOf="@id/comment_author"
-            android:layout_marginLeft="8dp"
-            android:layout_marginStart="8dp"
-            android:text="@{comment.getVoteCount()}"
-            tools:text="1234"/>
+            app:layout_constraintStart_toStartOf="@id/comment_author"
+            app:layout_constraintTop_toBottomOf="@id/comment_author"
+            android:textColor="@null"
+            android:textAppearance="@style/TextAppearanceCommentInfo"
+            android:text="@{@string/comment_score(comment.getVoteCount())}"
+            tools:text="1234 pts"/>
+
+        <TextView
+            android:id="@+id/comment_controversiality_indicator"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toEndOf="@id/comment_score"
+            app:layout_constraintTop_toTopOf="@id/comment_score"
+            android:layout_marginStart="1dp"
+            android:text="@string/comment_controversiality"
+            android:textColor="@null"
+            android:textAppearance="@style/TextAppearanceCommentControversiality"
+            android:visibility="@{comment.controversiality > 0 ? View.VISIBLE : View.GONE}"/>
+
+        <com.cosmos.unreddit.view.AwardView
+            android:id="@+id/comment_awards"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toEndOf="@id/comment_controversiality_indicator"
+            app:layout_constraintTop_toTopOf="@id/comment_score"
+            app:layout_constraintBottom_toBottomOf="@id/comment_score"
+            android:layout_marginStart="4dp"/>
 
         <TextView
             android:id="@+id/comment_date"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_toRightOf="@id/comment_score"
-            android:layout_toEndOf="@id/comment_score"
-            android:layout_marginLeft="8dp"
-            android:layout_marginStart="8dp"
-            android:text="@{DateUtil.getTimeDifference(context, comment.created)}"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toBottomOf="@id/comment_score"
+            android:textColor="@null"
+            android:textAppearance="@style/TextAppearanceCommentInfo"
             tools:text="5h"/>
 
-        <com.cosmos.unreddit.view.RedditTextView
-            android:id="@+id/comment_body"
+        <ImageView
+            android:id="@+id/comment_op_icon"
+            android:layout_width="@dimen/comment_icon_size"
+            android:layout_height="@dimen/comment_icon_size"
+            app:layout_constraintStart_toEndOf="@id/comment_author"
+            app:layout_constraintEnd_toStartOf="@id/comment_flair"
+            app:layout_constraintTop_toTopOf="@id/comment_author"
+            app:layout_constraintBottom_toBottomOf="@id/comment_author"
+            android:layout_marginStart="2dp"
+            android:src="@drawable/ic_mic"
+            android:visibility="gone"
+            tools:visibility="visible"/>
+
+        <com.cosmos.unreddit.view.RedditFlairView
+            android:id="@+id/comment_flair"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@id/comment_author"
-            android:textAppearance="@style/TextAppearance.AppCompat.Body1"
-            tools:text="This is a comment"/>
+            app:layout_constraintStart_toEndOf="@id/comment_op_icon"
+            app:layout_constraintEnd_toStartOf="@id/comment_pinned_icon"
+            app:layout_constraintTop_toTopOf="@id/comment_author"
+            app:layout_constraintBottom_toBottomOf="@id/comment_author"
+            app:layout_constrainedWidth="true"
+            android:layout_marginStart="4dp"
+            android:paddingHorizontal="@dimen/post_flair_padding"
+            android:background="@drawable/post_flair_background"/>
 
-    </RelativeLayout>
+        <ImageView
+            android:id="@+id/comment_pinned_icon"
+            android:layout_width="@dimen/comment_icon_size"
+            android:layout_height="@dimen/comment_icon_size"
+            app:layout_constraintStart_toEndOf="@id/comment_flair"
+            app:layout_constraintEnd_toStartOf="@id/comment_hidden_indicator"
+            app:layout_constraintTop_toTopOf="@id/comment_author"
+            app:layout_constraintBottom_toBottomOf="@id/comment_author"
+            android:layout_marginStart="4dp"
+            android:src="@drawable/ic_pin"
+            android:visibility="@{comment.stickied ? View.VISIBLE : View.GONE}"/>
+
+        <TextView
+            android:id="@+id/comment_hidden_indicator"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toTopOf="@id/comment_author"
+            app:layout_constraintBottom_toBottomOf="@id/comment_author"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:paddingStart="4dp"
+            app:drawableEndCompat="@drawable/ic_reply"
+            android:textColor="@null"
+            android:textAppearance="@style/TextAppearanceCommentInfo"
+            tools:text="5"
+            tools:ignore="RtlSymmetry" />
+
+        <com.cosmos.unreddit.view.RedditView
+            android:id="@+id/comment_body"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toStartOf="@id/comment_author"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/comment_date"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constrainedWidth="true"
+            android:layout_marginTop="8dp"/>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
 </layout>

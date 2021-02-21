@@ -1,26 +1,33 @@
 package com.cosmos.unreddit.post
 
-interface Comment
+import android.content.Context
+import androidx.annotation.ColorRes
+import com.cosmos.unreddit.R
+import com.cosmos.unreddit.model.Flair
+import com.cosmos.unreddit.model.PosterType
+import com.cosmos.unreddit.parser.RedditText
+import kotlin.math.abs
+import kotlin.math.truncate
+
+interface Comment {
+    val name: String
+    val depth: Int
+}
 
 data class CommentEntity(
     val totalAwards: Int,
 
-    val flairType: String?,
-
     val linkId: String,
 
-    val replies: List<Comment>,
+    val replies: MutableList<Comment>,
 
     val author: String,
 
     val score: Int,
 
-    // TODO
-    // val awardings: List<Awarding>,
+    val awards: List<Award>,
 
-    val body: String,
-
-    val bodyHtml: String,
+    val body: RedditText,
 
     val edited: Long,
 
@@ -38,10 +45,18 @@ data class CommentEntity(
 
     val controversiality: Int,
 
-    val flair: String?,
+    val flair: Flair,
 
-    val depth: Int
+    override val name: String,
+
+    override val depth: Int,
+
+    val posterType: PosterType
 ) : Comment {
+    var isExpanded: Boolean = false
+
+    var visibleReplyCount: Int = replies.size
+
     val hasReplies: Boolean
         get() = replies.isNotEmpty()
 
@@ -55,12 +70,36 @@ data class CommentEntity(
             }
         }
     }
+
+    @ColorRes
+    fun getIndicatorColor(context: Context): Int? {
+        if (depth <= 0) return null
+
+        val colorArray = context.resources.getIntArray(R.array.comment_indicator)
+        val arrayBound = colorArray.size - 1
+        val commentDepth = depth - 1
+
+        return if (commentDepth in colorArray.indices) {
+            colorArray[commentDepth]
+        } else {
+            val index = truncate(abs((arrayBound - commentDepth) / arrayBound).toDouble()).toInt()
+            colorArray[index]
+        }
+    }
 }
 
 data class MoreEntity(
-    val more: List<String>,
+    var count: Int,
 
-    val depth: Int
+    val more: MutableList<String>,
+
+    val id: String,
+
+    val parent: String,
+
+    override val name: String,
+
+    override val depth: Int
 ) : Comment
 
 fun Comment.getType(): CommentType = when (this) {

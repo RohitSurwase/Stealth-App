@@ -199,7 +199,11 @@ class SubredditSearchFragment : BaseFragment(), PostListAdapter.PostClickListene
     }
 
     private fun showSortDialog() {
-        SortFragment.show(childFragmentManager, viewModel.sorting.value, true)
+        SortFragment.show(
+            childFragmentManager,
+            viewModel.sorting.value,
+            SortFragment.SortType.SEARCH
+        )
     }
 
     private fun cancelSearch() {

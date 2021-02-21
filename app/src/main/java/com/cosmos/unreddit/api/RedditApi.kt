@@ -1,5 +1,6 @@
 package com.cosmos.unreddit.api
 
+import com.cosmos.unreddit.api.pojo.MoreChildren
 import com.cosmos.unreddit.api.pojo.details.Child
 import com.cosmos.unreddit.api.pojo.details.Listing
 import retrofit2.Call
@@ -8,9 +9,6 @@ import retrofit2.http.Path
 import retrofit2.http.Query
 
 interface RedditApi {
-
-    // TODO: Implement limit
-    // TODO: Suspend
 
     //region Subreddit
 
@@ -40,8 +38,17 @@ interface RedditApi {
     //endregion
 
     @GET("{permalink}.json")
-    suspend fun getPost(@Path("permalink", encoded = true) permalink: String,
-                        @Query("limit") limit: Int? = null): List<Listing>
+    suspend fun getPost(
+        @Path("permalink", encoded = true) permalink: String,
+        @Query("limit") limit: Int? = null,
+        @Query("sort") sort: Sort
+    ): List<Listing>
+
+    @GET("/api/morechildren.json?api_type=json")
+    suspend fun getMoreChildren(
+        @Query("children") children: String,
+        @Query("link_id") linkId: String
+    ): MoreChildren
 
     //region User
 
@@ -96,7 +103,26 @@ interface RedditApi {
 
     enum class Sort(val type: String) {
         HOT("hot"), NEW("new"), TOP("top"), RISING("rising"),
-        CONTROVERSIAL("controversial"), RELEVANCE("relevance"), COMMENTS("comments")
+        CONTROVERSIAL("controversial"), RELEVANCE("relevance"), COMMENTS("comments"),
+        BEST("confidence"), OLD("old"), QA("qa");
+
+        companion object {
+            fun fromName(value: String?, default: Sort = BEST): Sort {
+                return when (value) {
+                    HOT.name -> HOT
+                    NEW.name -> NEW
+                    TOP.name -> TOP
+                    RISING.name -> RISING
+                    CONTROVERSIAL.name -> CONTROVERSIAL
+                    RELEVANCE.name -> RELEVANCE
+                    COMMENTS.name -> COMMENTS
+                    BEST.name -> BEST
+                    OLD.name -> OLD
+                    QA.name -> QA
+                    else -> default
+                }
+            }
+        }
     }
 
     enum class TimeSorting(val type: String) {

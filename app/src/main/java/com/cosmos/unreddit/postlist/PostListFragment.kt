@@ -8,6 +8,7 @@ import android.view.animation.AnimationUtils
 import android.widget.Toast
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentTransaction
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -166,8 +167,15 @@ class PostListFragment : Fragment(), PostListAdapter.PostClickListener,
     }
 
     override fun onClick(post: PostEntity) {
-        val postDetailsFragment = PostDetailsFragment.newInstance(post)
-        postDetailsFragment.show(childFragmentManager, PostDetailsFragment.TAG)
+        parentFragmentManager.beginTransaction()
+            .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
+            .add(
+                R.id.fragment_container,
+                PostDetailsFragment.newInstance(post),
+                PostDetailsFragment.TAG
+            )
+            .addToBackStack(null)
+            .commit()
     }
 
     override fun onLongClick(post: PostEntity) {

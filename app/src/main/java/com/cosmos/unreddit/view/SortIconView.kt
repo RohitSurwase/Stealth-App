@@ -24,6 +24,9 @@ class SortIconView @JvmOverloads constructor(
 
     private var sortType: SortType = SortType.GENERAL
 
+    private val popInAnimation by lazy { AnimationUtils.loadAnimation(context, R.anim.pop_in) }
+    private val popOutAnimation by lazy { AnimationUtils.loadAnimation(context, R.anim.pop_out) }
+
     init {
         context.theme.obtainStyledAttributes(
             attrs,
@@ -53,9 +56,6 @@ class SortIconView @JvmOverloads constructor(
     }
 
     fun setSorting(sorting: Sorting) {
-        val popInAnimation = AnimationUtils.loadAnimation(context, R.anim.pop_in)
-        val popOutAnimation = AnimationUtils.loadAnimation(context, R.anim.pop_out)
-
         with(icon) {
             visibility = getIconVisibility(sorting)
 
@@ -99,6 +99,9 @@ class SortIconView @JvmOverloads constructor(
             RedditApi.Sort.CONTROVERSIAL -> R.drawable.ic_controversial
             RedditApi.Sort.RELEVANCE -> R.drawable.ic_relevance
             RedditApi.Sort.COMMENTS -> R.drawable.ic_comments
+            RedditApi.Sort.BEST -> R.drawable.ic_best
+            RedditApi.Sort.OLD -> R.drawable.ic_old
+            RedditApi.Sort.QA -> R.drawable.ic_question_answer
         }
     }
 
@@ -106,6 +109,7 @@ class SortIconView @JvmOverloads constructor(
         val shouldBeVisible = when (sortType) {
             SortType.GENERAL -> sorting.generalSorting != RedditApi.Sort.HOT
             SortType.SEARCH, SortType.USER -> true
+            SortType.POST -> sorting.generalSorting != RedditApi.Sort.BEST
         }
         return if (shouldBeVisible) View.VISIBLE else View.INVISIBLE
     }
@@ -119,12 +123,13 @@ class SortIconView @JvmOverloads constructor(
                 sorting.generalSorting == RedditApi.Sort.TOP ||
                     sorting.generalSorting == RedditApi.Sort.RELEVANCE ||
                     sorting.generalSorting == RedditApi.Sort.COMMENTS
+            SortType.POST -> false
         }
         return if (shouldBeVisible) View.VISIBLE else View.GONE
     }
 
     private enum class SortType(val value: Int) {
-        GENERAL(0), SEARCH(1), USER(2);
+        GENERAL(0), SEARCH(1), USER(2), POST(3);
 
         companion object {
             fun fromValue(value: Int): SortType {
@@ -132,6 +137,7 @@ class SortIconView @JvmOverloads constructor(
                     0 -> GENERAL
                     1 -> SEARCH
                     2 -> USER
+                    3 -> POST
                     else -> throw IllegalArgumentException("Unknown value $value")
                 }
             }

@@ -3,6 +3,7 @@ package com.cosmos.unreddit.api.pojo.details
 import com.cosmos.unreddit.api.Edited
 import com.cosmos.unreddit.api.Replies
 import com.cosmos.unreddit.api.pojo.list.Awarding
+import com.cosmos.unreddit.api.pojo.list.RichText
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
 import java.util.concurrent.TimeUnit
@@ -12,8 +13,8 @@ class CommentData(
     @Json(name = "total_awards_received")
     val totalAwards: Int,
 
-    @Json(name = "author_flair_type")
-    val flairType: String?,
+    @Json(name = "author_flair_richtext")
+    val authorFlairRichText: List<RichText>?,
 
     @Json(name = "link_id")
     val linkId: String,
@@ -30,9 +31,6 @@ class CommentData(
 
     @Json(name = "all_awardings")
     val awardings: List<Awarding>,
-
-    @Json(name = "body")
-    val body: String,
 
     @Json(name = "body_html")
     val bodyHtml: String,
@@ -56,6 +54,9 @@ class CommentData(
     @Json(name = "id")
     val id: String,
 
+    @Json(name = "name")
+    val name: String,
+
     @Json(name = "created_utc")
     val created: Long,
 
@@ -66,9 +67,19 @@ class CommentData(
     val flair: String?,
 
     @Json(name = "depth")
-    val depth: Int?
+    val depth: Int?,
+
+    @Json(name = "distinguished")
+    val distinguished: String?,
 ) {
     fun getTimeInMillis(): Long {
         return TimeUnit.SECONDS.toMillis(created)
+    }
+
+    fun getEditedTimeInMillis(): Long {
+        if (edited > -1) {
+            return TimeUnit.SECONDS.toMillis(edited)
+        }
+        return edited
     }
 }

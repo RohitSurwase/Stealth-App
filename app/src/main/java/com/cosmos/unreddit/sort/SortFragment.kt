@@ -36,16 +36,8 @@ class SortFragment : BottomSheetDialogFragment() {
     }
 
     private fun initChoices() {
-        val isSearch = arguments?.getBoolean(BUNDLE_KEY_SEARCH) ?: false
-        with(binding) {
-            if (isSearch) {
-                chipRising.visibility = View.GONE
-                chipControversial.visibility = View.GONE
-            } else {
-                chipRelevance.visibility = View.GONE
-                chipComments.visibility = View.GONE
-            }
-        }
+        val type = arguments?.getSerializable(BUNDLE_KEY_TYPE) as? SortType ?: SortType.GENERAL
+        binding.type = type
 
         val sorting = arguments?.getParcelable(BUNDLE_KEY_SORTING) as? Sorting ?: return
         with(sorting) {
@@ -54,12 +46,16 @@ class SortFragment : BottomSheetDialogFragment() {
                 RedditApi.Sort.NEW -> binding.chipNew.isChecked = true
                 RedditApi.Sort.TOP -> {
                     binding.chipTop.isChecked = true
-                    showTimeGroup()
+                    if (type != SortType.POST) {
+                        showTimeGroup()
+                    }
                 }
                 RedditApi.Sort.RISING -> binding.chipRising.isChecked = true
                 RedditApi.Sort.CONTROVERSIAL -> {
                     binding.chipControversial.isChecked = true
-                    showTimeGroup()
+                    if (type != SortType.POST) {
+                        showTimeGroup()
+                    }
                 }
                 RedditApi.Sort.RELEVANCE -> {
                     binding.chipRelevance.isChecked = true
@@ -69,6 +65,9 @@ class SortFragment : BottomSheetDialogFragment() {
                     binding.chipComments.isChecked = true
                     showTimeGroup()
                 }
+                RedditApi.Sort.BEST -> binding.chipBest.isChecked = true
+                RedditApi.Sort.OLD -> binding.chipOld.isChecked = true
+                RedditApi.Sort.QA -> binding.chipQa.isChecked = true
             }
 
             when (timeSorting) {
@@ -83,10 +82,16 @@ class SortFragment : BottomSheetDialogFragment() {
 
         binding.groupGeneral.setOnCheckedChangeListener { _, checkedId ->
             when (checkedId) {
-                binding.chipHot.id, binding.chipNew.id, binding.chipRising.id -> setChoice(false)
-                binding.chipTop.id, binding.chipControversial.id, binding.chipRelevance.id, binding.chipComments.id -> {
-                    binding.groupTime.clearCheck()
-                    showTimeGroup()
+                binding.chipHot.id, binding.chipNew.id, binding.chipRising.id, binding.chipBest.id,
+                binding.chipOld.id, binding.chipQa.id -> setChoice(false)
+                binding.chipTop.id, binding.chipControversial.id, binding.chipRelevance.id,
+                binding.chipComments.id -> {
+                    if (type != SortType.POST) {
+                        binding.groupTime.clearCheck()
+                        showTimeGroup()
+                    } else {
+                        setChoice(false)
+                    }
                 }
             }
         }
@@ -107,6 +112,9 @@ class SortFragment : BottomSheetDialogFragment() {
             binding.chipControversial.id -> RedditApi.Sort.CONTROVERSIAL
             binding.chipRelevance.id -> RedditApi.Sort.RELEVANCE
             binding.chipComments.id -> RedditApi.Sort.COMMENTS
+            binding.chipBest.id -> RedditApi.Sort.BEST
+            binding.chipOld.id -> RedditApi.Sort.OLD
+            binding.chipQa.id -> RedditApi.Sort.QA
             else -> null
         }
     }
@@ -129,7 +137,7 @@ class SortFragment : BottomSheetDialogFragment() {
             addTarget(binding.textTimeLabel)
             addTarget(binding.groupTime)
         }
-        TransitionManager.beginDelayedTransition(binding.root, transition)
+        TransitionManager.beginDelayedTransition(binding.layoutRoot, transition)
         binding.groupViewTime.visibility = View.VISIBLE
         binding.textTimeLabel.visibility = View.VISIBLE
         binding.groupTime.visibility = View.VISIBLE
@@ -156,19 +164,27 @@ class SortFragment : BottomSheetDialogFragment() {
         return R.style.PostDetailsSheetTheme
     }
 
+    enum class SortType {
+        GENERAL, SEARCH, POST
+    }
+
     companion object {
         private const val TAG = "SortFragment"
 
         const val REQUEST_KEY_SORTING = "REQUEST_KEY_SORTING"
 
         const val BUNDLE_KEY_SORTING = "BUNDLE_KEY_SORTING"
-        const val BUNDLE_KEY_SEARCH = "BUNDLE_KEY_SEARCH"
+        const val BUNDLE_KEY_TYPE = "BUNDLE_KEY_TYPE"
 
-        fun show(fragmentManager: FragmentManager, sorting: Sorting, isSearch: Boolean = false) {
+        fun show(
+            fragmentManager: FragmentManager,
+            sorting: Sorting,
+            type: SortType = SortType.GENERAL
+        ) {
             SortFragment().apply {
                 arguments = bundleOf(
                     BUNDLE_KEY_SORTING to sorting,
-                    BUNDLE_KEY_SEARCH to isSearch
+                    BUNDLE_KEY_TYPE to type
                 )
             }.show(fragmentManager, TAG)
         }

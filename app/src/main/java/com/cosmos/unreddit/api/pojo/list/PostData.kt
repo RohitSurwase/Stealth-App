@@ -53,6 +53,9 @@ data class PostData(
     @Json(name = "selftext_html")
     val selfTextHtml: String?,
 
+    @Json(name = "suggested_sort")
+    val suggestedSort: String?,
+
     @Json(name = "archived")
     val isArchived: Boolean,
 

@@ -1,39 +1,62 @@
 package com.cosmos.unreddit.postdetails
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.os.bundleOf
 import androidx.fragment.app.activityViewModels
+import androidx.fragment.app.viewModels
+import androidx.lifecycle.asLiveData
 import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.LinearLayoutManager
-import coil.load
-import coil.size.Precision
-import coil.size.Scale
-import coil.transform.RoundedCornersTransformation
 import com.cosmos.unreddit.R
+import com.cosmos.unreddit.UiViewModel
+import com.cosmos.unreddit.base.BaseFragment
 import com.cosmos.unreddit.databinding.FragmentPostDetailsBinding
-import com.cosmos.unreddit.databinding.IncludePostInfoBinding
-import com.cosmos.unreddit.databinding.IncludePostTitleBinding
+import com.cosmos.unreddit.parser.ClickableMovementMethod
 import com.cosmos.unreddit.post.PostEntity
-import com.cosmos.unreddit.post.PostType
-import com.cosmos.unreddit.view.FullscreenBottomSheetFragment
+import com.cosmos.unreddit.postlist.PostListRepository
+import com.cosmos.unreddit.sort.SortFragment
+import com.cosmos.unreddit.util.betterSmoothScrollToPosition
+import com.cosmos.unreddit.util.setSortingListener
+import com.cosmos.unreddit.view.ElasticDragDismissFrameLayout
 import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
 @AndroidEntryPoint
-class PostDetailsFragment : FullscreenBottomSheetFragment() {
+class PostDetailsFragment :
+    BaseFragment(),
+    ElasticDragDismissFrameLayout.ElasticDragDismissCallback,
+    ClickableMovementMethod.OnLinkClickListener {
 
     private var _binding: FragmentPostDetailsBinding? = null
     private val binding get() = _binding!!
 
-    private val viewModel: PostDetailsViewModel by activityViewModels()
+    private val viewModel: PostDetailsViewModel by viewModels()
+    private val uiViewModel: UiViewModel by activityViewModels()
+
+    private val contentRadius by lazy { resources.getDimension(R.dimen.subreddit_content_radius) }
+    private val contentElevation by lazy {
+        resources.getDimension(R.dimen.subreddit_content_elevation)
+    }
+
+    private val clickableMovementMethod = ClickableMovementMethod(this)
+
+    private lateinit var postAdapter: PostAdapter
+    private lateinit var commentAdapter: CommentAdapter
+
+    @Inject
+    lateinit var repository: PostListRepository
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val post = arguments?.getParcelable(KEY_POST_ENTITY) as? PostEntity
         post?.let {
             viewModel.setPost(it)
+            viewModel.setSorting(it.suggestedSorting)
+            viewModel.setPermalink(it.permalink)
         }
     }
 
@@ -41,14 +64,86 @@ class PostDetailsFragment : FullscreenBottomSheetFragment() {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         _binding = FragmentPostDetailsBinding.inflate(LayoutInflater.from(context))
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        uiViewModel.setNavigationVisibility(false)
+        binding.root.addListener(this)
+        initResultListener()
+        initAppBar()
+        initRecyclerView()
         bindViewModel()
+    }
+
+    private fun initRecyclerView() {
+        postAdapter = PostAdapter(clickableMovementMethod)
+        commentAdapter = CommentAdapter(
+            requireContext(),
+            clickableMovementMethod,
+            repository,
+            viewLifecycleOwner
+        )
+        val concatAdapter = ConcatAdapter(postAdapter, commentAdapter)
+        binding.listComments.apply {
+            layoutManager = LinearLayoutManager(requireContext())
+            adapter = concatAdapter
+        }
+    }
+
+    private fun bindViewModel() {
+        viewModel.cachedPost.observe(viewLifecycleOwner, { bindPost(it, true) })
+        viewModel.post.observe(viewLifecycleOwner, { bindPost(it, false) })
+        viewModel.comments.observe(
+            viewLifecycleOwner,
+            { comments ->
+                commentAdapter.submitData(comments)
+            }
+        )
+        viewModel.sorting.asLiveData().observe(
+            viewLifecycleOwner,
+            {
+                binding.appBar.sortIcon.setSorting(it)
+            }
+        )
+    }
+
+    private fun initAppBar() {
+        with(binding.appBar) {
+            backCard.setOnClickListener { onBackPressed() }
+            sortCard.setOnClickListener { showSortDialog() }
+        }
+    }
+
+    private fun initResultListener() {
+        setSortingListener { sorting ->
+            sorting?.let {
+                viewModel.setSorting(sorting)
+                binding.listComments.betterSmoothScrollToPosition(0)
+            }
+        }
+    }
+
+    private fun bindPost(post: PostEntity, firstBind: Boolean) {
+        binding.appBar.label.text = post.title
+        postAdapter.setPost(post, firstBind)
+        commentAdapter.setLinkId(post.id)
+    }
+
+    private fun showSortDialog() {
+        SortFragment.show(
+            childFragmentManager,
+            viewModel.sorting.value,
+            SortFragment.SortType.POST
+        )
+    }
+
+    override fun onBackPressed() {
+        uiViewModel.setNavigationVisibility(true)
+        super.onBackPressed()
     }
 
     override fun onDestroyView() {
@@ -56,93 +151,27 @@ class PostDetailsFragment : FullscreenBottomSheetFragment() {
         _binding = null
     }
 
-    private fun bindViewModel() {
-        viewModel.cachedPost.observe(viewLifecycleOwner, { cachedPost ->
-            when (cachedPost.type) {
-                PostType.TEXT -> bindPostText(cachedPost)
-                PostType.IMAGE, PostType.VIDEO -> bindPostImage(cachedPost)
-                PostType.LINK -> bindPostLink(cachedPost)
-            }
-        })
-        viewModel.post.observe(viewLifecycleOwner, { post ->
-            // TODO: Necessary?
-            when (post.type) {
-                PostType.TEXT -> {
-                    val layout = binding.layoutIncludeText
-//                    bindPost(post, layout.root, layout.includePostTitle, layout.includePostInfo)
-                }
-                PostType.IMAGE, PostType.VIDEO -> {
-                    val layout = binding.layoutIncludeImage
-//                    bindPost(post, layout.root, layout.includePostTitle, layout.includePostInfo)
-                }
-                PostType.LINK -> {
-                    val layout = binding.layoutIncludeLink
-//                    bindPost(post, layout.root, layout.includePostTitle, layout.includePostInfo)
-                }
-            }
-        })
-        viewModel.comments.observe(viewLifecycleOwner, { comments ->
-            // TODO: Move declaration out of observer
-            val adapters: List<CommentAdapter> = comments.map { comment ->
-                CommentAdapter(comment)
-            }
-            val concatAdapterConfig = ConcatAdapter.Config.Builder()
-                .setIsolateViewTypes(false)
-                .build()
-            val concatAdapter = ConcatAdapter(concatAdapterConfig, adapters)
-            with(binding.listComments) {
-                layoutManager = LinearLayoutManager(context)
-                adapter = concatAdapter
-            }
-        })
+    override fun onDrag(
+        elasticOffset: Float,
+        elasticOffsetPixels: Float,
+        rawOffset: Float,
+        rawOffsetPixels: Float
+    ) {
+        binding.root.cardElevation = contentElevation * rawOffset
+        binding.root.radius = contentRadius * rawOffset
     }
 
-    private fun bindPost(post: PostEntity, rootView: View,
-                         postTitleBinding: IncludePostTitleBinding,
-                         postInfoBinding: IncludePostInfoBinding) {
-        rootView.visibility = View.VISIBLE
-        postTitleBinding.post = post
-        postInfoBinding.post = post
+    override fun onDragDismissed() {
+        uiViewModel.setNavigationVisibility(true)
+        parentFragmentManager.popBackStack()
     }
 
-    private fun bindPostText(post: PostEntity) {
-        val layout = binding.layoutIncludeText
-//        bindPost(post, layout.root, layout.includePostTitle, layout.includePostInfo)
-
-        if (!post.selfText.isNullOrEmpty()) {
-            layout.textPostSelf.text = post.selfText
-            layout.textPostSelf.maxHeight = Int.MAX_VALUE
-        } else {
-            layout.textPostSelf.visibility = View.GONE
-        }
+    override fun onLinkClick(link: String) {
+        Log.e(TAG, link)
     }
 
-    private fun bindPostImage(post: PostEntity) {
-        val layout = binding.layoutIncludeImage
-//        bindPost(post, layout.root, layout.includePostTitle, layout.includePostInfo)
-
-        layout.imagePostPreview.load(post.preview) {
-            crossfade(true)
-            scale(Scale.FILL)
-            precision(Precision.AUTOMATIC)
-            transformations(RoundedCornersTransformation(0F, 0F, 25F, 25F))
-        }
-    }
-
-    private fun bindPostLink(post: PostEntity) {
-        val layout = binding.layoutIncludeLink
-//        bindPost(post, layout.root, layout.includePostTitle, layout.includePostInfo)
-
-        layout.imagePostLinkPreview.load(post.preview) {
-            crossfade(true)
-            scale(Scale.FILL)
-            precision(Precision.AUTOMATIC)
-            transformations(RoundedCornersTransformation(25F))
-        }
-    }
-
-    override fun getTheme(): Int {
-        return R.style.PostDetailsSheetTheme
+    override fun onLinkLongClick(link: String) {
+        Log.e(TAG, link)
     }
 
     companion object {

@@ -352,7 +352,11 @@ class SearchFragment : Fragment(), PostListAdapter.PostClickListener,
     }
 
     private fun showSortDialog() {
-        SortFragment.show(childFragmentManager, viewModel.sorting.value, true)
+        SortFragment.show(
+            childFragmentManager,
+            viewModel.sorting.value,
+            SortFragment.SortType.SEARCH
+        )
     }
 
     override fun onDestroy() {

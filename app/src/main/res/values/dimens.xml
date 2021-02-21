@@ -99,4 +99,20 @@
     <item name="user_name_scale_expanded" type="dimen" format="float">@dimen/subreddit_name_scale_expanded</item>
 
     <dimen name="flair_background_radius">4dp</dimen>
+
+    <dimen name="comment_offset">8dp</dimen>
+    <dimen name="comment_padding_horizontal">16dp</dimen>
+    <dimen name="comment_padding_vertical">8dp</dimen>
+    <dimen name="comment_icon_size">16dp</dimen>
+
+    <dimen name="award_image_size">16dp</dimen>
+    <dimen name="award_overlap_margin">-8dp</dimen>
+    <dimen name="award_chip_padding_vertical">2dp</dimen>
+    <dimen name="award_chip_padding_horizontal">4dp</dimen>
+    <dimen name="award_count_margin">4dp</dimen>
+    <dimen name="award_count_image_margin">2dp</dimen>
+    <dimen name="award_text_size">12sp</dimen>
+
+    <dimen name="post_details_dismiss_distance">112dp</dimen>
+    <item name="post_details_dismiss_scale" type="dimen" format="float">0.95</item>
 </resources>

@@ -9,6 +9,14 @@
             <enum name="general" value="0"/>
             <enum name="search" value="1"/>
             <enum name="user" value="2"/>
+            <enum name="post" value="3"/>
         </attr>
+    </declare-styleable>
+
+    <declare-styleable name="ElasticDragDismissFrameLayout">
+        <attr name="dragDismissDistance" format="dimension" />
+        <attr name="dragDismissFraction" format="float" />
+        <attr name="dragDismissScale" format="float" />
+        <attr name="dragElasticity" format="float" />
     </declare-styleable>
 </resources>

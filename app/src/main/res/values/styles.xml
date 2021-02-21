@@ -65,6 +65,26 @@
         <item name="cornerFamily">rounded</item>
     </style>
 
+    <style name="TextAppearanceCommentAuthor" parent="">
+        <item name="android:textSize">14sp</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <style name="TextAppearanceCommentInfo" parent="">
+        <item name="android:textSize">14sp</item>
+        <item name="android:textColor">@color/text_color_secondary</item>
+    </style>
+
+    <style name="TextAppearanceCommentMore" parent="">
+        <item name="android:textSize">14sp</item>
+        <item name="android:textColor">@color/text_color_secondary</item>
+    </style>
+
+    <style name="TextAppearanceCommentControversiality" parent="">
+        <item name="android:textSize">10sp</item>
+        <item name="android:textColor">@color/colorPrimary</item>
+    </style>
+
     <!-- Preferences -->
 
     <style name="PreferenceTheme" parent="PreferenceThemeOverlay">
@@ -280,6 +300,11 @@
         <item name="tabGravity">center</item>
         <item name="tabSelectedTextColor">@color/colorPrimary</item>
         <item name="android:background">@color/background</item>
+    </style>
+
+    <style name="TextAppearanceAward" parent="">
+        <item name="android:textSize">10sp</item>
+        <item name="android:textColor">@color/text_color</item>
     </style>
 
 </resources>

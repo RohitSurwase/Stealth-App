@@ -9,6 +9,7 @@ import androidx.room.Entity
 import androidx.room.Ignore
 import androidx.room.PrimaryKey
 import com.cosmos.unreddit.R
+import com.cosmos.unreddit.api.RedditApi
 import com.cosmos.unreddit.model.Flair
 import com.cosmos.unreddit.model.PosterType
 import com.cosmos.unreddit.parser.RedditText
@@ -60,6 +61,9 @@ data class PostEntity(
 
     @ColumnInfo(name = "selftext_html")
     val selfTextHtml: String?,
+
+    @Ignore
+    val suggestedSorting: Sorting,
 
     @Ignore
     val selfRedditText: RedditText,
@@ -116,9 +120,9 @@ data class PostEntity(
                 isLocked: Boolean, posterType: PosterType, author: String, commentsNumber: Int,
                 permalink: String, isStickied: Boolean, url: String, created: Long, seen: Boolean)
             : this(id, subreddit, title, ratio, totalAwards, isOC, Flair(), score, type, domain,
-        isSelf, selfText, selfTextHtml, RedditText(), isPinned, isOver18, preview, listOf(),
-        isSpoiler, isArchived, isLocked, posterType, author, commentsNumber, permalink, isStickied,
-        url, created, seen)
+        isSelf, selfText, selfTextHtml, Sorting(RedditApi.Sort.BEST), RedditText(), isPinned,
+        isOver18, preview, listOf(), isSpoiler, isArchived, isLocked, posterType, author,
+        commentsNumber, permalink, isStickied, url, created, seen)
 
     fun getRatioColor(context: Context): Int {
         val low = ContextCompat.getColor(context, R.color.ratio_gradient_low)

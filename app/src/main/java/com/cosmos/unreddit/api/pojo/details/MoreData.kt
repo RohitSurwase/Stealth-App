@@ -11,9 +11,15 @@ class MoreData (
     @Json(name = "name")
     val name: String,
 
+    @Json(name = "id")
+    val id: String,
+
     @Json(name = "depth")
     val depth: Int?,
 
+    @Json(name = "parent_id")
+    val parentId: String,
+
     @Json(name = "children")
-    val children: List<String>
+    val children: MutableList<String>
 )

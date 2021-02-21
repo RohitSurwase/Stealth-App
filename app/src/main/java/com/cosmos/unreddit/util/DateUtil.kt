@@ -3,8 +3,7 @@ package com.cosmos.unreddit.util
 import android.content.Context
 import com.cosmos.unreddit.R
 import java.text.DateFormat
-import java.util.Date
-import java.util.Locale
+import java.util.*
 import java.util.concurrent.TimeUnit
 
 object DateUtil {
@@ -17,21 +16,46 @@ object DateUtil {
     }
 
     @JvmStatic
-    fun getTimeDifference(context: Context, timeInMillis: Long): String { // TODO: USe real date, not time difference
+    @JvmOverloads
+    fun getTimeDifference(
+        context: Context,
+        timeInMillis: Long,
+        withSuffix: Boolean = true
+    ): String {
         val elapsedTime = System.currentTimeMillis() - timeInMillis
         return when {
             elapsedTime < Unit.MINUTE.value -> context.getString(R.string.time_difference_now)
             elapsedTime < Unit.HOURS.value -> {
-                context.getString(R.string.time_difference_minute, TimeUnit.MILLISECONDS.toMinutes(elapsedTime))
+                val timeString = TimeUnit.MILLISECONDS.toMinutes(elapsedTime)
+                if (withSuffix) {
+                    context.getString(R.string.time_difference_minute, timeString)
+                } else {
+                    context.getString(R.string.time_difference_minute_short, timeString)
+                }
             }
             elapsedTime < Unit.DAY.value -> {
-                context.getString(R.string.time_difference_hour, TimeUnit.MILLISECONDS.toHours(elapsedTime))
+                val timeString = TimeUnit.MILLISECONDS.toHours(elapsedTime)
+                if (withSuffix) {
+                    context.getString(R.string.time_difference_hour, timeString)
+                } else {
+                    context.getString(R.string.time_difference_hour_short, timeString)
+                }
             }
             elapsedTime < Unit.YEAR.value -> {
-                context.getString(R.string.time_difference_day, TimeUnit.MILLISECONDS.toDays(elapsedTime))
+                val timeString = TimeUnit.MILLISECONDS.toDays(elapsedTime)
+                if (withSuffix) {
+                    context.getString(R.string.time_difference_day, timeString)
+                } else {
+                    context.getString(R.string.time_difference_day_short, timeString)
+                }
             }
             else -> {
-                context.getString(R.string.time_difference_year, elapsedTime.div(Unit.YEAR.value))
+                val timeString = elapsedTime.div(Unit.YEAR.value)
+                if (withSuffix) {
+                    context.getString(R.string.time_difference_year, timeString)
+                } else {
+                    context.getString(R.string.time_difference_year_short, timeString)
+                }
             }
         }
     }
