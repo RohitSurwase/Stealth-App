@@ -293,6 +293,15 @@
     <style name="TextAppearanceUserMetrics" parent="TextAppearanceSubredditMetricsMain"/>
     <style name="TextAppearanceUserMetricsLabel" parent="TextAppearanceSubredditMetricsMainLabel"/>
 
+    <style name="TextAppearanceUserCommentTitle" parent="">
+        <item name="android:textSize">18sp</item>
+    </style>
+
+    <style name="TextAppearanceUserCommentInfo" parent="">
+        <item name="android:textSize">14sp</item>
+        <item name="android:textColor">@color/text_color_secondary</item>
+    </style>
+
     <style name="TabLayoutStyle" parent="Widget.MaterialComponents.TabLayout">
         <item name="tabIndicator">@drawable/tab_indicator</item>
         <item name="tabIndicatorFullWidth">false</item>

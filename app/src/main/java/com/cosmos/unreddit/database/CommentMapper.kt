@@ -33,9 +33,13 @@ object CommentMapper {
                 getTimeInMillis(),
                 controversiality,
                 Flair.fromData(authorFlairRichText, flair),
+                PosterType.fromDistinguished(distinguished),
+                linkTitle,
+                linkPermalink,
+                linkAuthor,
+                subreddit,
                 name,
-                depth ?: 0,
-                PosterType.fromDistinguished(distinguished)
+                depth ?: 0
             )
         }
     }

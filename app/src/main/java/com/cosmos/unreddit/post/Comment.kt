@@ -47,11 +47,19 @@ data class CommentEntity(
 
     val flair: Flair,
 
+    val posterType: PosterType,
+
+    val linkTitle: String?,
+
+    val linkPermalink: String?,
+
+    val linkAuthor: String?,
+
+    val subreddit: String,
+
     override val name: String,
 
-    override val depth: Int,
-
-    val posterType: PosterType
+    override val depth: Int
 ) : Comment {
     var isExpanded: Boolean = false
 

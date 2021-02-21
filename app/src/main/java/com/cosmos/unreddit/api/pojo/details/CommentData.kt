@@ -71,6 +71,18 @@ class CommentData(
 
     @Json(name = "distinguished")
     val distinguished: String?,
+
+    @Json(name = "subreddit_name_prefixed")
+    val subreddit: String,
+
+    @Json(name = "link_title")
+    val linkTitle: String?,
+
+    @Json(name = "link_permalink")
+    val linkPermalink: String?,
+
+    @Json(name = "link_author")
+    val linkAuthor: String?
 ) {
     fun getTimeInMillis(): Long {
         return TimeUnit.SECONDS.toMillis(created)

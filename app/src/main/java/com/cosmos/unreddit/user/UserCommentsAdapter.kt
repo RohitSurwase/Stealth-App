@@ -1,18 +1,32 @@
 package com.cosmos.unreddit.user
 
-import android.graphics.BlurMaskFilter
+import android.content.Context
+import android.content.res.ColorStateList
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.content.ContextCompat
 import androidx.paging.PagingDataAdapter
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
+import com.cosmos.unreddit.R
 import com.cosmos.unreddit.databinding.ItemUserCommentBinding
+import com.cosmos.unreddit.parser.ClickableMovementMethod
 import com.cosmos.unreddit.post.Comment
 import com.cosmos.unreddit.post.CommentEntity
+import com.cosmos.unreddit.util.DateUtil
+import com.cosmos.unreddit.util.PostUtil
+import com.cosmos.unreddit.util.applyGradient
+import com.cosmos.unreddit.util.blurText
 
-class UserCommentsAdapter
-    : PagingDataAdapter<Comment, UserCommentsAdapter.CommentViewHolder>(COMMENT_COMPARATOR) {
+class UserCommentsAdapter(
+    context: Context,
+    private val clickableMovementMethod: ClickableMovementMethod
+) : PagingDataAdapter<Comment, UserCommentsAdapter.CommentViewHolder>(COMMENT_COMPARATOR) {
+
+    private val colorPrimary by lazy {
+        ColorStateList.valueOf(ContextCompat.getColor(context, R.color.colorPrimary))
+    }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CommentViewHolder {
         val inflater = LayoutInflater.from(parent.context)
@@ -30,21 +44,70 @@ class UserCommentsAdapter
 
         fun bind(comment: CommentEntity) {
             binding.comment = comment
+            binding.includeItemComment.comment = comment
 
             with(comment) {
-                with(binding.commentScore) {
-                    // Blur score when hidden
-                    if (scoreHidden) {
-                        val radius = textSize / 3
-                        val blurMaskFilter = BlurMaskFilter(radius, BlurMaskFilter.Blur.NORMAL)
-                        setLayerType(View.LAYER_TYPE_SOFTWARE, null)
-                        paint.maskFilter = blurMaskFilter
+                with(binding.includeItemComment.commentAuthor) {
+                    applyGradient(
+                        comment.author,
+                        PostUtil.getAuthorGradientColor(
+                            context,
+                            R.color.regular_gradient_start,
+                            R.color.regular_gradient_end
+                        )
+                    )
+                }
+
+                binding.includeItemComment.commentScore.blurText(scoreHidden)
+
+                with(binding.includeItemComment.commentDate) {
+                    val timeDifference = DateUtil.getTimeDifference(context, created)
+                    text = if (edited > -1) {
+                        val editedTimeDifference = DateUtil.getTimeDifference(
+                            context,
+                            edited,
+                            false
+                        )
+                        context.getString(
+                            R.string.comment_date_edited,
+                            timeDifference,
+                            editedTimeDifference
+                        )
                     } else {
-                        paint.maskFilter = null
+                        timeDifference
                     }
                 }
+
+                with(binding.includeItemComment.commentColorIndicator) {
+                    visibility = View.VISIBLE
+                    backgroundTintList = colorPrimary
+                }
+
+                with(binding.includeItemComment.commentFlair) {
+                    if (!flair.isEmpty()) {
+                        visibility = View.VISIBLE
+
+                        setFlair(flair)
+                    } else {
+                        visibility = View.GONE
+                    }
+                }
+
+                with(binding.includeItemComment.commentAwards) {
+                    if (awards.isNotEmpty()) {
+                        visibility = View.VISIBLE
+
+                        setAwards(awards, totalAwards)
+                    } else {
+                        visibility = View.GONE
+                    }
+                }
+
             }
-            // TODO: Text
+
+            with(binding.includeItemComment.commentBody) {
+                setText(comment.body, clickableMovementMethod)
+            }
         }
     }
 
@@ -52,15 +115,11 @@ class UserCommentsAdapter
         private val COMMENT_COMPARATOR = object : DiffUtil.ItemCallback<Comment>() {
 
             override fun areItemsTheSame(oldItem: Comment, newItem: Comment): Boolean {
-                return (oldItem as? CommentEntity)?.id == (newItem as? CommentEntity)?.id
+                return (oldItem as? CommentEntity)?.name == (newItem as? CommentEntity)?.name
             }
 
             override fun areContentsTheSame(oldItem: Comment, newItem: Comment): Boolean {
-                val oldComment = oldItem as? CommentEntity
-                val newComment = (newItem as? CommentEntity)
-                return oldComment?.score == newComment?.score &&
-                    oldComment?.edited == newComment?.edited &&
-                    oldComment?.stickied == newComment?.stickied
+                return oldItem as? CommentEntity == newItem as? CommentEntity
             }
         }
     }

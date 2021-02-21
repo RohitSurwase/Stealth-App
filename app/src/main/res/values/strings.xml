@@ -77,4 +77,6 @@
     <string name="comment_more">More (%1$d)</string>
     <string name="comment_date_edited">%1$s* (%2$s)</string>
     <string name="comment_controversiality">✝</string>
+
+    <string name="comment_link_info">%1$s - u/%2$s</string>
 </resources>

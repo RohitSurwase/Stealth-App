@@ -136,6 +136,8 @@
             app:drawableEndCompat="@drawable/ic_reply"
             android:textColor="@null"
             android:textAppearance="@style/TextAppearanceCommentInfo"
+            android:visibility="gone"
+            tools:visibility="visible"
             tools:text="5"
             tools:ignore="RtlSymmetry" />
 

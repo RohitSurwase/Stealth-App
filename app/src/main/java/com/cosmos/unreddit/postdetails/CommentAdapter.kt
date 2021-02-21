@@ -354,13 +354,13 @@ class CommentAdapter(
         fun bindCommentHiddenIndicator(comment: CommentEntity, showAnimation: Boolean) {
             with(comment) {
                 with(binding.commentHiddenIndicator) {
-                    if (!hasReplies || isExpanded) {
-                        visibility = View.GONE
-                        if (showAnimation) startAnimation(popOutAnimation)
-                    } else if (hasReplies && !isExpanded) {
+                    if (hasReplies && !isExpanded) {
                         visibility = View.VISIBLE
                         text = visibleReplyCount.toString()
                         if (showAnimation) startAnimation(popInAnimation)
+                    } else {
+                        visibility = View.GONE
+                        if (showAnimation) startAnimation(popOutAnimation)
                     }
                 }
             }
