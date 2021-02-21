@@ -1,6 +1,5 @@
 package com.cosmos.unreddit.search
 
-import androidx.hilt.lifecycle.ViewModelInject
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
@@ -13,15 +12,18 @@ import com.cosmos.unreddit.postlist.PostListRepository
 import com.cosmos.unreddit.subreddit.SubredditEntity
 import com.cosmos.unreddit.user.User
 import com.cosmos.unreddit.util.PostUtil
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
+import javax.inject.Inject
 
+@HiltViewModel
 class SearchViewModel
-@ViewModelInject constructor(private val repository: PostListRepository) : ViewModel() {
+@Inject constructor(private val repository: PostListRepository) : ViewModel() {
 
     private val history: Flow<List<String>> = repository.getHistory()
         .map { list -> list.map { it.postId } }

@@ -1,6 +1,5 @@
 package com.cosmos.unreddit.postdetails
 
-import androidx.hilt.lifecycle.ViewModelInject
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.ViewModel
@@ -17,15 +16,18 @@ import com.cosmos.unreddit.post.CommentEntity
 import com.cosmos.unreddit.post.PostEntity
 import com.cosmos.unreddit.post.Sorting
 import com.cosmos.unreddit.postlist.PostListRepository
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combineTransform
 import kotlinx.coroutines.withContext
+import javax.inject.Inject
 
+@HiltViewModel
 class PostDetailsViewModel
-@ViewModelInject constructor(private val repository: PostListRepository) : ViewModel() {
+@Inject constructor(private val repository: PostListRepository) : ViewModel() {
 
     private val _cachedPost: MediatorLiveData<PostEntity> = MediatorLiveData()
     val cachedPost: LiveData<PostEntity>

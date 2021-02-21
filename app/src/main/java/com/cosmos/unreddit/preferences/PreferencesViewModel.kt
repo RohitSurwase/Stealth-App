@@ -1,12 +1,14 @@
 package com.cosmos.unreddit.preferences
 
-import androidx.hilt.lifecycle.ViewModelInject
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.asLiveData
+import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 
+@HiltViewModel
 class PreferencesViewModel
-@ViewModelInject constructor(private val preferences: Preferences) : ViewModel() {
+@Inject constructor(private val preferences: Preferences) : ViewModel() {
 
     val showNsfw: LiveData<Boolean> = preferences.getShowNsfw().asLiveData()
 
