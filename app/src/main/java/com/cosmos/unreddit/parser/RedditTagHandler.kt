@@ -118,6 +118,7 @@ class RedditTagHandler : Html.TagHandler {
             addNewLine(text)
             start(text, Quote())
         } else {
+            addNewLine(text)
             val obj: Any? = getLast(text, Quote::class.java)
             if (obj != null) {
                 var where = text.getSpanStart(obj)
