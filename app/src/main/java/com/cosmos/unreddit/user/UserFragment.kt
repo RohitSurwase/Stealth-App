@@ -52,8 +52,6 @@ class UserFragment : BaseFragment(), PostListAdapter.PostClickListener,
     private lateinit var postListAdapter: PostListAdapter
     private lateinit var commentListAdapter: UserCommentsAdapter
 
-    private val clickableMovementMethod = ClickableMovementMethod(this)
-
     @Inject
     lateinit var repository: PostListRepository
 
@@ -87,7 +85,7 @@ class UserFragment : BaseFragment(), PostListAdapter.PostClickListener,
     }
 
     private fun initViewPager() {
-        postListAdapter = PostListAdapter(repository, this, this)
+        postListAdapter = PostListAdapter(repository, this, clickableMovementMethod)
         commentListAdapter = UserCommentsAdapter(requireContext(), clickableMovementMethod)
 
         val tabs: List<RecyclerViewStateAdapter.Page> = listOf(

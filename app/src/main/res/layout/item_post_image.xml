@@ -68,4 +68,16 @@
         android:layout_marginTop="@dimen/post_margin_top_small"
         layout="@layout/include_post_metrics"/>
 
+    <com.cosmos.unreddit.view.CardButton
+        android:id="@+id/button_type_indicator"
+        android:layout_width="@dimen/app_bar_button_size"
+        android:layout_height="@dimen/app_bar_button_size"
+        app:layout_constraintStart_toStartOf="@id/image_post_preview"
+        app:layout_constraintBottom_toBottomOf="@id/image_post_preview"
+        android:layout_margin="@dimen/post_type_indicator_margin"
+        android:focusable="false"
+        android:clickable="false"
+        style="@style/CardButtonStyle"
+        tools:icon="@drawable/ic_play"/>
+
 </androidx.constraintlayout.widget.ConstraintLayout>

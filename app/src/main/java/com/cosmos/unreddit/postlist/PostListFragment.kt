@@ -5,20 +5,15 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.AnimationUtils
-import android.widget.Toast
 import androidx.core.view.isVisible
-import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentTransaction
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.cosmos.unreddit.R
 import com.cosmos.unreddit.api.RedditApi
+import com.cosmos.unreddit.base.BaseFragment
 import com.cosmos.unreddit.databinding.FragmentPostBinding
-import com.cosmos.unreddit.parser.ClickableMovementMethod
-import com.cosmos.unreddit.post.PostEntity
 import com.cosmos.unreddit.post.Sorting
-import com.cosmos.unreddit.postdetails.PostDetailsFragment
 import com.cosmos.unreddit.sort.SortFragment
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Job
@@ -29,8 +24,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class PostListFragment : Fragment(), PostListAdapter.PostClickListener,
-    ClickableMovementMethod.OnLinkClickListener {
+class PostListFragment : BaseFragment() {
 
     private var _binding: FragmentPostBinding? = null
     private val binding get() = _binding!!
@@ -71,7 +65,7 @@ class PostListFragment : Fragment(), PostListAdapter.PostClickListener,
     }
 
     private fun initRecyclerView() {
-        adapter = PostListAdapter(repository, this, this)
+        adapter = PostListAdapter(repository, this, clickableMovementMethod)
         binding.listPost.layoutManager = LinearLayoutManager(requireContext())
         binding.listPost.adapter = adapter
     }
@@ -164,42 +158,6 @@ class PostListFragment : Fragment(), PostListAdapter.PostClickListener,
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
-    }
-
-    override fun onClick(post: PostEntity) {
-        parentFragmentManager.beginTransaction()
-            .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
-            .add(
-                R.id.fragment_container,
-                PostDetailsFragment.newInstance(post),
-                PostDetailsFragment.TAG
-            )
-            .addToBackStack(null)
-            .commit()
-    }
-
-    override fun onLongClick(post: PostEntity) {
-        Toast.makeText(context, post.domain, Toast.LENGTH_SHORT).show() // TODO
-    }
-
-    override fun onImageClick(post: PostEntity) {
-        Toast.makeText(context, post.preview, Toast.LENGTH_SHORT).show() // TODO
-    }
-
-    override fun onVideoClick(post: PostEntity) {
-        Toast.makeText(context, post.preview, Toast.LENGTH_SHORT).show() // TODO
-    }
-
-    override fun onLinkClick(post: PostEntity) {
-        Toast.makeText(context, post.url, Toast.LENGTH_SHORT).show() // TODO
-    }
-
-    override fun onLinkClick(link: String) {
-        TODO("Not yet implemented")
-    }
-
-    override fun onLinkLongClick(link: String) {
-        TODO("Not yet implemented")
     }
 
     companion object {

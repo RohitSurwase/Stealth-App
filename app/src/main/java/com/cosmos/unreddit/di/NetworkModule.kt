@@ -5,6 +5,8 @@ import com.cosmos.unreddit.api.RawJsonInterceptor
 import com.cosmos.unreddit.api.RedditApi
 import com.cosmos.unreddit.api.RepliesAdapter
 import com.cosmos.unreddit.api.SortingConverterFactory
+import com.cosmos.unreddit.api.adapter.MediaMetadataAdapter
+import com.cosmos.unreddit.api.imgur.ImgurApi
 import com.cosmos.unreddit.api.pojo.details.AboutChild
 import com.cosmos.unreddit.api.pojo.details.AboutUserChild
 import com.cosmos.unreddit.api.pojo.details.Child
@@ -22,15 +24,25 @@ import okhttp3.HttpUrl
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
+import javax.inject.Qualifier
 import javax.inject.Singleton
 
 @InstallIn(SingletonComponent::class)
 @Module
 object NetworkModule {
 
+    @Qualifier
+    @Retention(AnnotationRetention.BINARY)
+    annotation class RedditMoshi
+
+    @Qualifier
+    @Retention(AnnotationRetention.BINARY)
+    annotation class ImgurMoshi
+
+    @RedditMoshi
     @Provides
     @Singleton
-    fun provideMoshi(): Moshi {
+    fun provideRedditMoshi(): Moshi {
         return Moshi.Builder()
             .add(PolymorphicJsonAdapterFactory.of(Child::class.java, "kind")
                 .withSubtype(CommentChild::class.java, ChildType.t1.name)
@@ -38,8 +50,17 @@ object NetworkModule {
                 .withSubtype(PostChild::class.java, ChildType.t3.name)
                 .withSubtype(AboutChild::class.java, ChildType.t5.name)
                 .withSubtype(MoreChild::class.java, ChildType.more.name))
+            .add(MediaMetadataAdapter.Factory)
             .add(RepliesAdapter())
             .add(EditedAdapter())
+            .build()
+    }
+
+    @ImgurMoshi
+    @Provides
+    @Singleton
+    fun provideImgurMoshi(): Moshi {
+        return Moshi.Builder()
             .build()
     }
 
@@ -53,7 +74,7 @@ object NetworkModule {
 
     @Provides
     @Singleton
-    fun provideRedditApi(moshi: Moshi, okHttpClient: OkHttpClient): RedditApi {
+    fun provideRedditApi(@RedditMoshi moshi: Moshi, okHttpClient: OkHttpClient): RedditApi {
         return Retrofit.Builder()
             .baseUrl(HttpUrl.parse(RedditApi.BASE_URL)!!)
             .addConverterFactory(MoshiConverterFactory.create(moshi))
@@ -61,5 +82,16 @@ object NetworkModule {
             .client(okHttpClient)
             .build()
             .create(RedditApi::class.java)
+    }
+
+    @Provides
+    @Singleton
+    fun provideImgurApi(@ImgurMoshi moshi: Moshi, okHttpClient: OkHttpClient): ImgurApi {
+        return Retrofit.Builder()
+            .baseUrl(HttpUrl.parse(ImgurApi.BASE_URL)!!)
+            .addConverterFactory(MoshiConverterFactory.create(moshi))
+            .client(okHttpClient)
+            .build()
+            .create(ImgurApi::class.java)
     }
 }

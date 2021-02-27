@@ -116,7 +116,7 @@ class SubredditSearchFragment : BaseFragment(), PostListAdapter.PostClickListene
     }
 
     private fun initRecyclerView() {
-        adapter = PostListAdapter(repository, this, this).apply {
+        adapter = PostListAdapter(repository, this, clickableMovementMethod).apply {
             stateRestorationPolicy = RecyclerView.Adapter.StateRestorationPolicy.PREVENT_WHEN_EMPTY
         }
 

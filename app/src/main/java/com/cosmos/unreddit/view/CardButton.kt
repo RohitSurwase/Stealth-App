@@ -28,7 +28,9 @@ class CardButton @JvmOverloads constructor(
         ).apply {
             try {
                 val iconResId = getResourceId(R.styleable.CardButton_icon, -1)
-                iconDrawable = AppCompatResources.getDrawable(context, iconResId)
+                if (iconResId != -1) {
+                    iconDrawable = AppCompatResources.getDrawable(context, iconResId)
+                }
             } finally {
                 recycle()
             }

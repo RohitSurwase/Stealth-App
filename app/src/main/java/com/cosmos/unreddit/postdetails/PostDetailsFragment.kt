@@ -42,8 +42,6 @@ class PostDetailsFragment :
         resources.getDimension(R.dimen.subreddit_content_elevation)
     }
 
-    private val clickableMovementMethod = ClickableMovementMethod(this)
-
     private lateinit var postAdapter: PostAdapter
     private lateinit var commentAdapter: CommentAdapter
 

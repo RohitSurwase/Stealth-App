@@ -24,6 +24,8 @@ buildscript {
 
         material = '1.3.0'
 
+        touchImageView = '3.0.3'
+
         retrofit = '2.9.0'
 
         moshi = '1.11.0'
@@ -55,6 +57,7 @@ allprojects {
     repositories {
         google()
         jcenter()
+        maven { url 'https://jitpack.io' }
     }
 }
 

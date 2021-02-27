@@ -23,7 +23,6 @@ import com.cosmos.unreddit.databinding.FragmentSubredditBinding
 import com.cosmos.unreddit.databinding.LayoutSubredditAboutBinding
 import com.cosmos.unreddit.databinding.LayoutSubredditContentBinding
 import com.cosmos.unreddit.parser.ClickableMovementMethod
-import com.cosmos.unreddit.post.PostEntity
 import com.cosmos.unreddit.post.Sorting
 import com.cosmos.unreddit.postlist.PostListAdapter
 import com.cosmos.unreddit.postlist.PostListRepository
@@ -57,8 +56,6 @@ class SubredditFragment : BaseFragment(), PostListAdapter.PostClickListener, Vie
     private var loadPostsJob: Job? = null
 
     private lateinit var adapter: PostListAdapter
-
-    private val clickableMovementMethod by lazy { ClickableMovementMethod(this@SubredditFragment) }
 
     @Inject
     lateinit var repository: PostListRepository
@@ -134,7 +131,7 @@ class SubredditFragment : BaseFragment(), PostListAdapter.PostClickListener, Vie
     }
 
     private fun initRecyclerView() {
-        adapter = PostListAdapter(repository, this, this).apply {
+        adapter = PostListAdapter(repository, this, clickableMovementMethod).apply {
             stateRestorationPolicy = RecyclerView.Adapter.StateRestorationPolicy.PREVENT_WHEN_EMPTY
         }
 
@@ -250,34 +247,6 @@ class SubredditFragment : BaseFragment(), PostListAdapter.PostClickListener, Vie
         _binding = null
         _bindingContent = null
         _bindingAbout = null
-    }
-
-    override fun onClick(post: PostEntity) {
-        // TODO("Not yet implemented")
-    }
-
-    override fun onLongClick(post: PostEntity) {
-        // TODO("Not yet implemented")
-    }
-
-    override fun onImageClick(post: PostEntity) {
-        // TODO("Not yet implemented")
-    }
-
-    override fun onVideoClick(post: PostEntity) {
-        // TODO("Not yet implemented")
-    }
-
-    override fun onLinkClick(post: PostEntity) {
-        // TODO("Not yet implemented")
-    }
-
-    override fun onLinkClick(link: String) {
-        // TODO("Not yet implemented")
-    }
-
-    override fun onLinkLongClick(link: String) {
-        // TODO("Not yet implemented")
     }
 
     override fun onClick(v: View?) {

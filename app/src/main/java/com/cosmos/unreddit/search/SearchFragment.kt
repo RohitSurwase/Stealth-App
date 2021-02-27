@@ -12,7 +12,6 @@ import android.view.inputmethod.EditorInfo
 import androidx.activity.OnBackPressedCallback
 import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
-import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
@@ -24,9 +23,8 @@ import androidx.viewpager2.widget.ViewPager2
 import com.cosmos.unreddit.R
 import com.cosmos.unreddit.UiViewModel
 import com.cosmos.unreddit.api.RedditApi
+import com.cosmos.unreddit.base.BaseFragment
 import com.cosmos.unreddit.databinding.FragmentSearchBinding
-import com.cosmos.unreddit.parser.ClickableMovementMethod
-import com.cosmos.unreddit.post.PostEntity
 import com.cosmos.unreddit.post.Sorting
 import com.cosmos.unreddit.postlist.PostListAdapter
 import com.cosmos.unreddit.postlist.PostListRepository
@@ -47,8 +45,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class SearchFragment : Fragment(), PostListAdapter.PostClickListener,
-    ClickableMovementMethod.OnLinkClickListener {
+class SearchFragment : BaseFragment() {
 
     private var _binding: FragmentSearchBinding? = null
     private val binding get() = _binding!!
@@ -135,7 +132,7 @@ class SearchFragment : Fragment(), PostListAdapter.PostClickListener,
     }
 
     private fun initViewPager() {
-        postListAdapter = PostListAdapter(repository, this, this)
+        postListAdapter = PostListAdapter(repository, this, clickableMovementMethod)
         subredditAdapter = SearchSubredditAdapter { onSubredditClick(it) }
         userAdapter = SearchUserAdapter { onUserClick(it) }
 
@@ -362,34 +359,6 @@ class SearchFragment : Fragment(), PostListAdapter.PostClickListener,
     override fun onDestroy() {
         super.onDestroy()
         _binding = null
-    }
-
-    override fun onClick(post: PostEntity) {
-        TODO("Not yet implemented")
-    }
-
-    override fun onLongClick(post: PostEntity) {
-        TODO("Not yet implemented")
-    }
-
-    override fun onImageClick(post: PostEntity) {
-        TODO("Not yet implemented")
-    }
-
-    override fun onVideoClick(post: PostEntity) {
-        TODO("Not yet implemented")
-    }
-
-    override fun onLinkClick(post: PostEntity) {
-        TODO("Not yet implemented")
-    }
-
-    override fun onLinkClick(link: String) {
-        TODO("Not yet implemented")
-    }
-
-    override fun onLinkLongClick(link: String) {
-        TODO("Not yet implemented")
     }
 
     companion object {

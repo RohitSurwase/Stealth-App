@@ -4,10 +4,20 @@ import android.os.Bundle
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.addCallback
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentTransaction
+import com.cosmos.unreddit.R
+import com.cosmos.unreddit.mediaviewer.MediaViewerFragment
+import com.cosmos.unreddit.parser.ClickableMovementMethod
+import com.cosmos.unreddit.post.PostEntity
+import com.cosmos.unreddit.postdetails.PostDetailsFragment
+import com.cosmos.unreddit.postlist.PostListAdapter
 
-open class BaseFragment : Fragment() {
+open class BaseFragment : Fragment(), PostListAdapter.PostClickListener,
+    ClickableMovementMethod.OnLinkClickListener {
 
     private lateinit var onBackPressedCallback: OnBackPressedCallback
+
+    protected val clickableMovementMethod by lazy { ClickableMovementMethod(this) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -19,5 +29,55 @@ open class BaseFragment : Fragment() {
     protected open fun onBackPressed() {
         onBackPressedCallback.isEnabled = false
         activity?.onBackPressed()
+    }
+
+    override fun onClick(post: PostEntity) {
+        parentFragmentManager.beginTransaction()
+            .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
+            .add(
+                R.id.fragment_container,
+                PostDetailsFragment.newInstance(post),
+                PostDetailsFragment.TAG
+            )
+            .addToBackStack(null)
+            .commit()
+    }
+
+    override fun onLongClick(post: PostEntity) {
+        TODO("Not yet implemented")
+    }
+
+    override fun onImageClick(post: PostEntity) {
+        val mediaViewerFragment = if (post.gallery.isNotEmpty()) {
+            MediaViewerFragment.newInstance(post.gallery)
+        } else {
+            MediaViewerFragment.newInstance(post.mediaUrl, post.mediaType)
+        }
+
+        parentFragmentManager.beginTransaction()
+            .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
+            .add(
+                R.id.fragment_container,
+                mediaViewerFragment,
+                MediaViewerFragment.TAG
+            )
+            .addToBackStack(null)
+            .commit()
+    }
+
+    override fun onVideoClick(post: PostEntity) {
+        TODO("Not yet implemented")
+    }
+
+    override fun onLinkClick(post: PostEntity) {
+        TODO("Not yet implemented")
+    }
+
+    override fun onLinkClick(link: String) {
+        TODO("Not yet implemented")
+    }
+
+    override fun onLinkLongClick(link: String) {
+        TODO("Not yet implemented")
     }
 }

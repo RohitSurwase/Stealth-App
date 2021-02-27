@@ -18,7 +18,7 @@ object PostMapper {
         with(data) {
             return PostEntity(
                 name,
-                subreddit,
+                prefixedSubreddit,
                 title,
                 ratio,
                 totalAwards,
@@ -26,7 +26,7 @@ object PostMapper {
                 Flair.fromData(linkFlairRichText, flair),
                 Flair.fromData(authorFlairRichText, authorFlair),
                 score,
-                getPostType(),
+                postType,
                 domain,
                 isSelf,
                 selfText,
@@ -47,6 +47,9 @@ object PostMapper {
                 isStickied,
                 url,
                 getTimeInMillis(),
+                mediaType,
+                mediaUrl,
+                getGallery(),
                 false
             )
         }

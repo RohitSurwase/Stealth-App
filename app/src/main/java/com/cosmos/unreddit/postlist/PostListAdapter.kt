@@ -17,7 +17,7 @@ import kotlinx.coroutines.launch
 class PostListAdapter(
     private val repository: PostListRepository,
     private val listener: PostClickListener,
-    linkClickListener: ClickableMovementMethod.OnLinkClickListener
+    private val clickableMovementMethod: ClickableMovementMethod
 ) : PagingDataAdapter<PostEntity, RecyclerView.ViewHolder>(POST_COMPARATOR) {
 
     interface PostClickListener {
@@ -32,8 +32,6 @@ class PostListAdapter(
         fun onLinkClick(post: PostEntity)
     }
 
-    private val clickableMovementMethod by lazy { ClickableMovementMethod(linkClickListener) }
-
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         val inflater = LayoutInflater.from(parent.context)
 
@@ -45,7 +43,12 @@ class PostListAdapter(
                 clickableMovementMethod
             )
             // Image post
-            PostType.IMAGE.value, PostType.VIDEO.value -> PostViewHolder.ImagePostViewHolder(
+            PostType.IMAGE.value -> PostViewHolder.ImagePostViewHolder(
+                ItemPostImageBinding.inflate(inflater, parent, false),
+                listener
+            )
+            // Video post
+            PostType.VIDEO.value -> PostViewHolder.VideoPostViewHolder(
                 ItemPostImageBinding.inflate(inflater, parent, false),
                 listener
             )
@@ -73,13 +76,16 @@ class PostListAdapter(
         when (getItemViewType(position)) {
             // Text post
             PostType.TEXT.value ->
-                (holder as PostViewHolder.TextPostViewHolder).bind(item, position, this::onClick)
+                (holder as PostViewHolder.TextPostViewHolder).bind(item, this::onClick)
             // Image post
-            PostType.IMAGE.value, PostType.VIDEO.value ->
-                (holder as PostViewHolder.ImagePostViewHolder).bind(item, position, this::onClick)
+            PostType.IMAGE.value ->
+                (holder as PostViewHolder.ImagePostViewHolder).bind(item, this::onClick)
+            // Video post
+            PostType.VIDEO.value ->
+                (holder as PostViewHolder.VideoPostViewHolder).bind(item, this::onClick)
             // Link post
             PostType.LINK.value ->
-                (holder as PostViewHolder.LinkPostViewHolder).bind(item, position, this::onClick)
+                (holder as PostViewHolder.LinkPostViewHolder).bind(item, this::onClick)
             else -> throw IllegalArgumentException("Unknown type")
         }
     }
@@ -105,18 +111,7 @@ class PostListAdapter(
             }
 
             override fun areContentsTheSame(oldItem: PostEntity, newItem: PostEntity): Boolean {
-                return oldItem.score == newItem.score
-                        && oldItem.commentsNumber == newItem.commentsNumber
-                        && oldItem.totalAwards == newItem.totalAwards
-                        && oldItem.isOC == newItem.isOC
-                        && oldItem.flair == newItem.flair
-                        && oldItem.selfText == newItem.selfText
-                        && oldItem.isStickied == newItem.isStickied
-                        && oldItem.isOver18 == newItem.isOver18
-                        && oldItem.isSpoiler == newItem.isSpoiler
-                        && oldItem.isLocked == newItem.isLocked
-                        && oldItem.isArchived == newItem.isArchived
-                        && oldItem.seen == newItem.seen
+                return oldItem == newItem
             }
         }
     }

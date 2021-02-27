@@ -49,8 +49,22 @@
         android:elevation="@dimen/post_elevation"
         app:shapeAppearanceOverlay="@style/RoundedImageViewStyle"
         android:visibility="gone"
-        tools:visibility="gone"
+        tools:visibility="visible"
         tools:src="@tools:sample/backgrounds/scenic"/>
+
+    <com.cosmos.unreddit.view.CardButton
+        android:id="@+id/button_type_indicator"
+        android:layout_width="@dimen/app_bar_button_size"
+        android:layout_height="@dimen/app_bar_button_size"
+        app:layout_constraintStart_toStartOf="@id/image_post"
+        app:layout_constraintBottom_toBottomOf="@id/image_post"
+        android:layout_margin="@dimen/post_type_indicator_margin"
+        android:focusable="false"
+        android:clickable="false"
+        style="@style/CardButtonStyle"
+        android:visibility="gone"
+        tools:visibility="visible"
+        tools:icon="@drawable/ic_play"/>
 
     <com.cosmos.unreddit.view.RedditView
         android:id="@+id/text_post"

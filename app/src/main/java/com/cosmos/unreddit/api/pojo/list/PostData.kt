@@ -1,5 +1,8 @@
 package com.cosmos.unreddit.api.pojo.list
 
+import com.cosmos.unreddit.api.pojo.MediaMetadata
+import com.cosmos.unreddit.model.GalleryMedia
+import com.cosmos.unreddit.model.MediaType
 import com.cosmos.unreddit.post.PostType
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
@@ -106,34 +109,104 @@ data class PostData(
     @Json(name = "media")
     val media: Media?,
 
+    @Json(name = "media_metadata")
+    val mediaMetadata: MediaMetadata?,
+
+    @Json(name = "is_gallery")
+    val isRedditGallery: Boolean?,
+
     @Json(name = "is_video")
     val isVideo: Boolean
 ) {
-    fun getPostType(): PostType {
-        if (isSelf) {
-            return PostType.TEXT
-        }
-
-        if (isVideo
-            || media?.redditVideoPreview != null
-            || mediaPreview?.videoPreview != null) {
-            return PostType.VIDEO
-        }
-
-        hint?.let {
-            if (it.contains("image")) {
-                return PostType.IMAGE
+    val mediaType: MediaType
+        get() = when {
+            isSelf -> MediaType.NO_MEDIA
+            isRedditGallery == true -> MediaType.REDDIT_GALLERY
+            isVideo -> MediaType.REDDIT_VIDEO
+            domain == "imgur.com" -> {
+                when {
+                    url.contains("imgur.com/a/") -> MediaType.IMGUR_ALBUM
+                    url.contains("imgur.com/gallery/") -> MediaType.IMGUR_GALLERY
+                    else -> MediaType.IMGUR_LINK
+                }
             }
+            domain == "i.imgur.com" -> {
+                when {
+                    url.endsWith(".gifv") || url.endsWith(".gif") -> MediaType.IMGUR_GIF
+                    url.endsWith(".mp4") -> MediaType.IMGUR_VIDEO
+                    else -> MediaType.IMGUR_IMAGE
+                }
+            }
+            domain == "gfycat.com" -> MediaType.GFYCAT
+            domain == "v.redd.it" -> MediaType.REDDIT_VIDEO
+            media?.redditVideoPreview != null ||
+                    mediaPreview?.videoPreview != null ||
+                    url.endsWith(".gif") ||
+                    url.endsWith(".gifv") ||
+                    url.endsWith(".mp4") ||
+                    url.endsWith(".webm") -> {
+                MediaType.VIDEO
+            }
+            domain == "i.redd.it" -> MediaType.IMAGE
+            hint?.contains("image") == true -> MediaType.IMAGE
+            else -> MediaType.LINK
         }
 
-        return PostType.LINK
-    }
+    val mediaUrl: String
+        get() = when (mediaType) {
+            MediaType.REDDIT_VIDEO -> {
+                media?.redditVideoPreview?.fallbackUrl
+                    ?: mediaPreview?.videoPreview?.fallbackUrl
+            }
+            MediaType.VIDEO -> {
+                media?.redditVideoPreview?.fallbackUrl
+                    ?: mediaPreview?.videoPreview?.fallbackUrl
+                    ?: mediaPreview?.images?.getOrNull(0)?.variants?.mp4?.imageSource?.url
+            }
+            MediaType.IMGUR_LINK -> mediaPreview?.images?.getOrNull(0)?.imageSource?.url
+            MediaType.GFYCAT -> media?.embed?.thumbnailUrl
+            else -> url
+        } ?: url
+
+    val postType: PostType
+        get() = when (mediaType) {
+            MediaType.NO_MEDIA -> PostType.TEXT
+
+            MediaType.REDDIT_VIDEO,
+            MediaType.IMGUR_VIDEO,
+            MediaType.IMGUR_GIF,
+            MediaType.GFYCAT,
+            MediaType.VIDEO -> PostType.VIDEO
+
+            MediaType.REDDIT_GALLERY,
+            MediaType.IMGUR_GALLERY,
+            MediaType.IMGUR_ALBUM,
+            MediaType.IMGUR_IMAGE,
+            MediaType.IMGUR_LINK,
+            MediaType.IMAGE -> PostType.IMAGE
+
+            MediaType.LINK -> PostType.LINK
+        }
 
     fun getPreviewUrl(): String {
-        return mediaPreview?.images?.get(0)?.imageSource?.url ?: url
+        return mediaPreview?.images?.getOrNull(0)?.imageSource?.url
+            ?: mediaMetadata?.items?.getOrNull(0)?.image?.url
+            ?: url
     }
 
     fun getTimeInMillis(): Long {
         return TimeUnit.SECONDS.toMillis(created)
+    }
+
+    fun getGallery(): List<GalleryMedia> {
+        val gallery = mutableListOf<GalleryMedia>()
+
+        mediaMetadata?.items?.map { item ->
+            item.image?.let {
+                gallery.add(GalleryMedia(GalleryMedia.Type.IMAGE, it.url))
+            }
+        }
+
+        return gallery
     }
 }

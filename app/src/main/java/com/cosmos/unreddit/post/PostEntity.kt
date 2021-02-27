@@ -11,6 +11,8 @@ import androidx.room.PrimaryKey
 import com.cosmos.unreddit.R
 import com.cosmos.unreddit.api.RedditApi
 import com.cosmos.unreddit.model.Flair
+import com.cosmos.unreddit.model.GalleryMedia
+import com.cosmos.unreddit.model.MediaType
 import com.cosmos.unreddit.model.PosterType
 import com.cosmos.unreddit.parser.RedditText
 import com.cosmos.unreddit.util.PostUtil
@@ -113,6 +115,15 @@ data class PostEntity(
     @ColumnInfo(name = "timestamp")
     val created: Long,
 
+    @Ignore
+    val mediaType: MediaType,
+
+    @Ignore
+    val mediaUrl: String,
+
+    @Ignore
+    val gallery: List<GalleryMedia>,
+
     var seen: Boolean
 ) : Parcelable {
 
@@ -125,7 +136,7 @@ data class PostEntity(
             : this(id, subreddit, title, ratio, totalAwards, isOC, Flair(), Flair(), score, type,
         domain, isSelf, selfText, selfTextHtml, Sorting(RedditApi.Sort.BEST), RedditText(),
         isPinned, isOver18, preview, listOf(), isSpoiler, isArchived, isLocked, posterType, author,
-        commentsNumber, permalink, isStickied, url, created, seen)
+        commentsNumber, permalink, isStickied, url, created, MediaType.NO_MEDIA, url, listOf(), seen)
 
     fun getRatioColor(context: Context): Int {
         val low = ContextCompat.getColor(context, R.color.ratio_gradient_low)

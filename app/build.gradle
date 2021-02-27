@@ -80,6 +80,8 @@ dependencies {
     implementation "io.coil-kt:coil:$rootProject.coil"
     implementation "io.coil-kt:coil-gif:$rootProject.coil"
 
+    implementation "com.github.MikeOrtiz:TouchImageView:$rootProject.touchImageView"
+
     implementation "org.jsoup:jsoup:$rootProject.jsoup"
 
     testImplementation "junit:junit:$rootProject.jUnit"

@@ -7,7 +7,9 @@ import androidx.recyclerview.widget.RecyclerView
 import coil.load
 import coil.size.Precision
 import coil.size.Scale
+import com.cosmos.unreddit.R
 import com.cosmos.unreddit.databinding.ItemPostHeaderBinding
+import com.cosmos.unreddit.model.MediaType
 import com.cosmos.unreddit.model.PosterType
 import com.cosmos.unreddit.parser.ClickableMovementMethod
 import com.cosmos.unreddit.post.PostEntity
@@ -85,6 +87,24 @@ class PostAdapter(
                                 scale(Scale.FILL)
                                 precision(Precision.AUTOMATIC)
                             }
+                        }
+                    }
+                }
+
+                with(buttonTypeIndicator) {
+                    when {
+                        post.mediaType == MediaType.REDDIT_GALLERY ||
+                                post.mediaType == MediaType.IMGUR_ALBUM ||
+                                post.mediaType == MediaType.IMGUR_GALLERY -> {
+                            visibility = View.VISIBLE
+                            setIcon(R.drawable.ic_gallery)
+                        }
+                        post.type == PostType.VIDEO -> {
+                            visibility = View.VISIBLE
+                            setIcon(R.drawable.ic_play)
+                        }
+                        else -> {
+                            visibility = View.GONE
                         }
                     }
                 }
