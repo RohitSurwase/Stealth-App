@@ -316,4 +316,10 @@
         <item name="android:textColor">@color/text_color</item>
     </style>
 
+    <style name="TextAppearancePlayerText" parent="">
+        <item name="android:textSize">14sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@color/text_color_secondary</item>
+    </style>
+
 </resources>

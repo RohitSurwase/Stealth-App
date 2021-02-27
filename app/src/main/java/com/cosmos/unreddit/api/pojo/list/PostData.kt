@@ -122,7 +122,13 @@ data class PostData(
         get() = when {
             isSelf -> MediaType.NO_MEDIA
             isRedditGallery == true -> MediaType.REDDIT_GALLERY
-            isVideo -> MediaType.REDDIT_VIDEO
+            isVideo -> {
+                if (media?.redditVideoPreview?.isGif == true) {
+                    MediaType.REDDIT_GIF
+                } else {
+                    MediaType.REDDIT_VIDEO
+                }
+            }
             domain == "imgur.com" -> {
                 when {
                     url.contains("imgur.com/a/") -> MediaType.IMGUR_ALBUM
@@ -138,7 +144,15 @@ data class PostData(
                 }
             }
             domain == "gfycat.com" -> MediaType.GFYCAT
-            domain == "v.redd.it" -> MediaType.REDDIT_VIDEO
+            domain == "redgifs.com" -> MediaType.REDGIFS
+            domain == "streamable.com" -> MediaType.STREAMABLE
+            domain == "v.redd.it" -> {
+                if (media?.redditVideoPreview?.isGif == true) {
+                    MediaType.REDDIT_GIF
+                } else {
+                    MediaType.REDDIT_VIDEO
+                }
+            }
             media?.redditVideoPreview != null ||
                     mediaPreview?.videoPreview != null ||
                     url.endsWith(".gif") ||
@@ -154,7 +168,7 @@ data class PostData(
 
     val mediaUrl: String
         get() = when (mediaType) {
-            MediaType.REDDIT_VIDEO -> {
+            MediaType.REDDIT_VIDEO, MediaType.REDDIT_GIF -> {
                 media?.redditVideoPreview?.fallbackUrl
                     ?: mediaPreview?.videoPreview?.fallbackUrl
             }
@@ -173,9 +187,12 @@ data class PostData(
             MediaType.NO_MEDIA -> PostType.TEXT
 
             MediaType.REDDIT_VIDEO,
+            MediaType.REDDIT_GIF,
             MediaType.IMGUR_VIDEO,
             MediaType.IMGUR_GIF,
             MediaType.GFYCAT,
+            MediaType.REDGIFS,
+            MediaType.STREAMABLE,
             MediaType.VIDEO -> PostType.VIDEO
 
             MediaType.REDDIT_GALLERY,

@@ -119,4 +119,7 @@
     <item name="post_details_dismiss_scale" type="dimen" format="float">0.95</item>
 
     <dimen name="media_thumbnail_size">64dp</dimen>
+
+    <dimen name="exoplayer_margin_horizontal">8dp</dimen>
+    <dimen name="exoplayer_button_size">56dp</dimen>
 </resources>

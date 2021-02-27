@@ -66,7 +66,15 @@ open class BaseFragment : Fragment(), PostListAdapter.PostClickListener,
     }
 
     override fun onVideoClick(post: PostEntity) {
-        TODO("Not yet implemented")
+        parentFragmentManager.beginTransaction()
+            .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
+            .add(
+                R.id.fragment_container,
+                MediaViewerFragment.newInstance(post.mediaUrl, post.mediaType),
+                MediaViewerFragment.TAG
+            )
+            .addToBackStack(null)
+            .commit()
     }
 
     override fun onLinkClick(post: PostEntity) {

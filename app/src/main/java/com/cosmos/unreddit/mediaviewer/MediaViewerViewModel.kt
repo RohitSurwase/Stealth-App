@@ -7,7 +7,9 @@ import androidx.lifecycle.viewModelScope
 import com.cosmos.unreddit.model.GalleryMedia
 import com.cosmos.unreddit.model.GalleryMedia.Type
 import com.cosmos.unreddit.model.MediaType
+import com.cosmos.unreddit.parser.link.LinkParser
 import com.cosmos.unreddit.repository.ImgurRepository
+import com.cosmos.unreddit.repository.StreamableRepository
 import com.cosmos.unreddit.util.LinkUtil
 import com.cosmos.unreddit.util.updateValue
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -18,7 +20,10 @@ import javax.inject.Inject
 
 @HiltViewModel
 class MediaViewerViewModel
-@Inject constructor(private val repository: ImgurRepository) : ViewModel() {
+@Inject constructor(
+    private val imgurRepository: ImgurRepository,
+    private val streamableRepository: StreamableRepository
+) : ViewModel() {
 
     private val _media: MutableLiveData<List<GalleryMedia>> = MutableLiveData()
     val media: LiveData<List<GalleryMedia>> get() = _media
@@ -36,19 +41,41 @@ class MediaViewerViewModel
         viewModelScope.launch {
             when (mediaType) {
                 MediaType.IMGUR_IMAGE, MediaType.IMGUR_LINK, MediaType.IMAGE -> {
-                    setMedia(listOf(GalleryMedia(Type.IMAGE, link)))
+                    setMedia(GalleryMedia.singleton(Type.IMAGE, link))
                 }
-                MediaType.REDDIT_VIDEO, MediaType.IMGUR_VIDEO -> {
-                    setMedia(listOf(GalleryMedia(Type.VIDEO, link)))
+                MediaType.IMGUR_GIF -> {
+                    setMedia(GalleryMedia.singleton(Type.VIDEO, LinkUtil.getImgurVideo(link)))
+                }
+                MediaType.REDDIT_GIF, MediaType.IMGUR_VIDEO, MediaType.VIDEO -> {
+                    setMedia(GalleryMedia.singleton(Type.VIDEO, link))
+                }
+                MediaType.REDDIT_VIDEO -> {
+                    setMedia(
+                        GalleryMedia.singleton(Type.VIDEO, link, LinkUtil.getRedditSoundTrack(link))
+                    )
+                }
+                MediaType.GFYCAT -> {
+                    setMedia(GalleryMedia.singleton(Type.VIDEO, LinkUtil.getGfycatVideo(link)))
+                }
+                MediaType.REDGIFS -> {
+                    setMedia(LinkParser.parseRedgifsLink(link))
+                }
+                MediaType.STREAMABLE -> {
+                    val shortcode = LinkUtil.getStreamableShortcode(link)
+                    streamableRepository.getVideo(shortcode).map { video ->
+                        GalleryMedia.singleton(Type.VIDEO, video.files.mp4.url)
+                    }.collect {
+                        setMedia(it)
+                    }
                 }
                 MediaType.IMGUR_ALBUM, MediaType.IMGUR_GALLERY -> {
                     val albumId = LinkUtil.getAlbumIdFromImgurLink(link)
-                    repository.getAlbum(albumId).map { album ->
+                    imgurRepository.getAlbum(albumId).map { album ->
                         album.data.images.map { image ->
                             GalleryMedia(
                                 if (image.preferVideo) Type.VIDEO else Type.IMAGE,
                                 LinkUtil.getUrlFromImgurImage(image),
-                                image.description
+                                description = image.description
                             )
                         }
                     }.collect {

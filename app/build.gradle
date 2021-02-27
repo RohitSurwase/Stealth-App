@@ -82,6 +82,8 @@ dependencies {
 
     implementation "com.github.MikeOrtiz:TouchImageView:$rootProject.touchImageView"
 
+    implementation "com.google.android.exoplayer:exoplayer:$rootProject.exoPlayer"
+
     implementation "org.jsoup:jsoup:$rootProject.jsoup"
 
     testImplementation "junit:junit:$rootProject.jUnit"

@@ -14,6 +14,7 @@ import com.cosmos.unreddit.api.pojo.details.ChildType
 import com.cosmos.unreddit.api.pojo.details.CommentChild
 import com.cosmos.unreddit.api.pojo.details.MoreChild
 import com.cosmos.unreddit.api.pojo.details.PostChild
+import com.cosmos.unreddit.api.streamable.StreamableApi
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.adapters.PolymorphicJsonAdapterFactory
 import dagger.Module
@@ -37,7 +38,7 @@ object NetworkModule {
 
     @Qualifier
     @Retention(AnnotationRetention.BINARY)
-    annotation class ImgurMoshi
+    annotation class BasicMoshi
 
     @RedditMoshi
     @Provides
@@ -56,10 +57,10 @@ object NetworkModule {
             .build()
     }
 
-    @ImgurMoshi
+    @BasicMoshi
     @Provides
     @Singleton
-    fun provideImgurMoshi(): Moshi {
+    fun provideBasicMoshi(): Moshi {
         return Moshi.Builder()
             .build()
     }
@@ -86,12 +87,23 @@ object NetworkModule {
 
     @Provides
     @Singleton
-    fun provideImgurApi(@ImgurMoshi moshi: Moshi, okHttpClient: OkHttpClient): ImgurApi {
+    fun provideImgurApi(@BasicMoshi moshi: Moshi, okHttpClient: OkHttpClient): ImgurApi {
         return Retrofit.Builder()
             .baseUrl(HttpUrl.parse(ImgurApi.BASE_URL)!!)
             .addConverterFactory(MoshiConverterFactory.create(moshi))
             .client(okHttpClient)
             .build()
             .create(ImgurApi::class.java)
+    }
+
+    @Provides
+    @Singleton
+    fun provideStreamableApi(@BasicMoshi moshi: Moshi, okHttpClient: OkHttpClient): StreamableApi {
+        return Retrofit.Builder()
+            .baseUrl(HttpUrl.parse(StreamableApi.BASE_URL)!!)
+            .addConverterFactory(MoshiConverterFactory.create(moshi))
+            .client(okHttpClient)
+            .build()
+            .create(StreamableApi::class.java)
     }
 }

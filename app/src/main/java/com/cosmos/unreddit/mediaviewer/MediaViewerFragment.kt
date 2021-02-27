@@ -99,7 +99,7 @@ class MediaViewerFragment : BaseFragment() {
     }
 
     private fun initViewPager() {
-        mediaAdapter = MediaViewerAdapter()
+        mediaAdapter = MediaViewerAdapter(requireContext())
         binding.viewPager.apply {
             adapter = mediaAdapter
             getRecyclerView()?.overScrollMode = RecyclerView.OVER_SCROLL_NEVER
@@ -123,6 +123,7 @@ class MediaViewerFragment : BaseFragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
+        mediaAdapter.clear()
         _binding = null
     }
 

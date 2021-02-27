@@ -1,6 +1,7 @@
 package com.cosmos.unreddit.mediaviewer
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
@@ -12,32 +13,68 @@ import coil.request.ImageRequest
 import coil.size.Precision
 import coil.size.Scale
 import com.cosmos.unreddit.databinding.ItemImageBinding
+import com.cosmos.unreddit.databinding.ItemVideoBinding
 import com.cosmos.unreddit.model.GalleryMedia
+import com.cosmos.unreddit.util.ExoPlayerHelper
+import com.google.android.exoplayer2.Player
+import com.google.android.exoplayer2.SimpleExoPlayer
+import com.google.android.exoplayer2.source.MergingMediaSource
 
-class MediaViewerAdapter : RecyclerView.Adapter<MediaViewerAdapter.ViewHolder>() {
+class MediaViewerAdapter(context: Context) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
-    private val images: MutableList<GalleryMedia> = mutableListOf()
+    private val media: MutableList<GalleryMedia> = mutableListOf()
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
+    private val players: MutableList<Player> = mutableListOf()
+
+    private val exoPlayerHelper by lazy { ExoPlayerHelper(context) }
+
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         val inflater = LayoutInflater.from(parent.context)
-        return ViewHolder(ItemImageBinding.inflate(inflater, parent, false))
+
+        return when (viewType) {
+            GalleryMedia.Type.IMAGE.value -> ImageViewHolder(
+                ItemImageBinding.inflate(inflater, parent, false)
+            )
+            GalleryMedia.Type.VIDEO.value -> VideoViewHolder(
+                ItemVideoBinding.inflate(inflater, parent, false)
+            )
+            else -> throw IllegalArgumentException("Unknown type $viewType")
+        }
     }
 
-    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.bind(images[position])
+    override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
+        when (getItemViewType(position)) {
+            GalleryMedia.Type.IMAGE.value -> (holder as ImageViewHolder).bind(media[position])
+            GalleryMedia.Type.VIDEO.value -> (holder as VideoViewHolder).bind(media[position])
+        }
     }
 
     override fun getItemCount(): Int {
-        return images.size
+        return media.size
+    }
+
+    override fun getItemViewType(position: Int): Int {
+        return when (media[position].type) {
+            GalleryMedia.Type.IMAGE -> GalleryMedia.Type.IMAGE.value
+            GalleryMedia.Type.VIDEO -> GalleryMedia.Type.VIDEO.value
+        }
     }
 
     fun submitData(images: List<GalleryMedia>) {
-        this.images.clear()
-        this.images.addAll(images)
+        this.media.clear()
+        this.media.addAll(images)
         notifyDataSetChanged()
     }
 
-    inner class ViewHolder(
+    fun clear() {
+        for (player in players) {
+            player.release()
+        }
+        players.clear()
+        exoPlayerHelper.clearCache()
+    }
+
+    inner class ImageViewHolder(
         private val binding: ItemImageBinding
     ) : RecyclerView.ViewHolder(binding.root), View.OnTouchListener {
 
@@ -54,7 +91,7 @@ class MediaViewerAdapter : RecyclerView.Adapter<MediaViewerAdapter.ViewHolder>()
                         target { drawable -> setImageDrawable(drawable) }
                     }.build()
                 )
-                setOnTouchListener(this@ViewHolder)
+                setOnTouchListener(this@ImageViewHolder)
             }
         }
 
@@ -83,6 +120,38 @@ class MediaViewerAdapter : RecyclerView.Adapter<MediaViewerAdapter.ViewHolder>()
             } else {
                 true
             }
+        }
+    }
+
+    inner class VideoViewHolder(
+        private val binding: ItemVideoBinding
+    ) : RecyclerView.ViewHolder(binding.root) {
+
+        fun bind(video: GalleryMedia) {
+            val videoItem = exoPlayerHelper.getMediaItem(video.url)
+
+            val player = SimpleExoPlayer.Builder(binding.video.context)
+                .setMediaSourceFactory(exoPlayerHelper.defaultMediaSourceFactory)
+                .build()
+
+            if (video.sound != null) {
+                val videoSource = exoPlayerHelper.getMediaSource(videoItem)
+                val audioSource = exoPlayerHelper.getMediaSource(video.sound)
+                val mergedSource = MergingMediaSource(videoSource, audioSource)
+                player.setMediaSource(mergedSource)
+            } else {
+                player.setMediaItem(videoItem)
+            }
+
+            player.apply {
+                repeatMode = Player.REPEAT_MODE_ALL
+                prepare()
+                play()
+            }
+
+            players.add(player)
+
+            binding.video.player = player
         }
     }
 }
