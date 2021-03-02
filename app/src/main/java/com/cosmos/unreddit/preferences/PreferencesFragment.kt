@@ -6,7 +6,7 @@ import androidx.fragment.app.activityViewModels
 import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.SwitchPreferenceCompat
 import com.cosmos.unreddit.R
-import com.cosmos.unreddit.preferences.Preferences.PreferencesKeys
+import com.cosmos.unreddit.preferences.ContentPreferences.PreferencesKeys
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint

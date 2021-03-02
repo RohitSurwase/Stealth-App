@@ -12,6 +12,8 @@ import com.cosmos.unreddit.post.Comment
 import com.cosmos.unreddit.post.PostEntity
 import com.cosmos.unreddit.post.Sorting
 import com.cosmos.unreddit.postlist.PostListRepository
+import com.cosmos.unreddit.preferences.ContentPreferences
+import com.cosmos.unreddit.repository.PreferencesRepository
 import com.cosmos.unreddit.util.PagerHelper
 import com.cosmos.unreddit.util.PostUtil
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -25,14 +27,16 @@ import kotlinx.coroutines.flow.transform
 import javax.inject.Inject
 
 @HiltViewModel
-class UserViewModel
-@Inject constructor(private val repository: PostListRepository) : ViewModel() {
+class UserViewModel @Inject constructor(
+    private val repository: PostListRepository,
+    preferencesRepository: PreferencesRepository
+) : ViewModel() {
 
     private val history: Flow<List<String>> = repository.getHistoryIds()
         .distinctUntilChanged()
 
-    private val showNsfw: Flow<Boolean> = repository.getShowNsfw()
-        .distinctUntilChanged()
+    private val contentPreferences: Flow<ContentPreferences> =
+        preferencesRepository.getContentPreferences()
 
     private val _sorting: MutableStateFlow<Sorting> = MutableStateFlow(DEFAULT_SORTING)
     val sorting: StateFlow<Sorting> = _sorting
@@ -64,8 +68,11 @@ class UserViewModel
     }
 
     fun loadAndFilterPosts(user: String, sorting: Sorting): Flow<PagingData<PostEntity>> {
-        return PostUtil.filterPosts(postPagerHelper.loadData(user, sorting), history, showNsfw)
-            .cachedIn(viewModelScope)
+        return PostUtil.filterPosts(
+            postPagerHelper.loadData(user, sorting),
+            history,
+            contentPreferences
+        ).cachedIn(viewModelScope)
     }
 
     fun loadAndFilterComments(user: String, sorting: Sorting): Flow<PagingData<Comment>> {

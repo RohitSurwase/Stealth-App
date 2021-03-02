@@ -9,6 +9,8 @@ import com.cosmos.unreddit.api.RedditApi
 import com.cosmos.unreddit.post.PostEntity
 import com.cosmos.unreddit.post.Sorting
 import com.cosmos.unreddit.postlist.PostListRepository
+import com.cosmos.unreddit.preferences.ContentPreferences
+import com.cosmos.unreddit.repository.PreferencesRepository
 import com.cosmos.unreddit.subreddit.SubredditEntity
 import com.cosmos.unreddit.user.User
 import com.cosmos.unreddit.util.PostUtil
@@ -22,15 +24,17 @@ import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
 @HiltViewModel
-class SearchViewModel
-@Inject constructor(private val repository: PostListRepository) : ViewModel() {
+class SearchViewModel @Inject constructor(
+    private val repository: PostListRepository,
+    preferencesRepository: PreferencesRepository
+) : ViewModel() {
 
     private val history: Flow<List<String>> = repository.getHistory()
         .map { list -> list.map { it.postId } }
         .distinctUntilChanged()
 
-    private val showNsfw: Flow<Boolean> = repository.getShowNsfw()
-        .distinctUntilChanged()
+    private val contentPreferences: Flow<ContentPreferences> =
+        preferencesRepository.getContentPreferences()
 
     private val _sorting: MutableStateFlow<Sorting> = MutableStateFlow(DEFAULT_SORTING)
     val sorting: StateFlow<Sorting> = _sorting
@@ -54,7 +58,7 @@ class SearchViewModel
     private var currentUsers: Flow<PagingData<User>>? = null
 
     fun searchAndFilterPosts(query: String, sorting: Sorting): Flow<PagingData<PostEntity>> {
-        return PostUtil.filterPosts(searchPost(query, sorting), history, showNsfw)
+        return PostUtil.filterPosts(searchPost(query, sorting), history, contentPreferences)
             .cachedIn(viewModelScope)
     }
 
@@ -80,9 +84,12 @@ class SearchViewModel
         query: String,
         sorting: Sorting
     ): Flow<PagingData<SubredditEntity>> {
-        return combine(searchSubreddit(query, sorting), showNsfw) { _subreddits, _showNsfw ->
+        return combine(
+            searchSubreddit(query, sorting),
+            contentPreferences
+        ) { _subreddits, _contentPreferences ->
             _subreddits.filter { subreddit ->
-                _showNsfw || !subreddit.over18
+                _contentPreferences.showNsfw || !subreddit.over18
             }
         }.cachedIn(viewModelScope)
     }
@@ -112,9 +119,12 @@ class SearchViewModel
         query: String,
         sorting: Sorting
     ): Flow<PagingData<User>> {
-        return combine(searchUser(query, sorting), showNsfw) { _users, _showNsfw ->
+        return combine(
+            searchUser(query, sorting),
+            contentPreferences
+        ) { _users, _contentPreferences ->
             _users.filter { user ->
-                _showNsfw || !user.over18
+                _contentPreferences.showNsfw || !user.over18
             }
         }.cachedIn(viewModelScope)
     }

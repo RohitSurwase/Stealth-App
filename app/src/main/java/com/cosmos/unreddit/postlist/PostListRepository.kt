@@ -12,7 +12,6 @@ import com.cosmos.unreddit.database.RedditDatabase
 import com.cosmos.unreddit.post.Comment
 import com.cosmos.unreddit.post.PostEntity
 import com.cosmos.unreddit.post.Sorting
-import com.cosmos.unreddit.preferences.Preferences
 import com.cosmos.unreddit.search.SearchPostDataSource
 import com.cosmos.unreddit.search.SearchSubredditDataSource
 import com.cosmos.unreddit.search.SearchUserDataSource
@@ -31,9 +30,10 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class PostListRepository @Inject constructor(private val redditApi: RedditApi,
-                                             private val redditDatabase: RedditDatabase,
-                                             private val preferences: Preferences) {
+class PostListRepository @Inject constructor(
+    private val redditApi: RedditApi,
+    private val redditDatabase: RedditDatabase
+) {
 
     fun getPost(permalink: String, sorting: Sorting): Flow<List<Listing>> = flow {
         emit(redditApi.getPost(permalink, sort = sorting.generalSorting))
@@ -160,10 +160,6 @@ class PostListRepository @Inject constructor(private val redditApi: RedditApi,
 
     suspend fun insertPostInHistory(id: String) {
         redditDatabase.historyDao().upsert(History(id, System.currentTimeMillis()))
-    }
-
-    fun getShowNsfw(): Flow<Boolean> {
-        return preferences.getShowNsfw()
     }
 
     companion object {

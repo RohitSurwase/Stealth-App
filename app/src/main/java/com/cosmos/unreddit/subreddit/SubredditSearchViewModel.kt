@@ -8,6 +8,8 @@ import com.cosmos.unreddit.api.RedditApi
 import com.cosmos.unreddit.post.PostEntity
 import com.cosmos.unreddit.post.Sorting
 import com.cosmos.unreddit.postlist.PostListRepository
+import com.cosmos.unreddit.preferences.ContentPreferences
+import com.cosmos.unreddit.repository.PreferencesRepository
 import com.cosmos.unreddit.util.PagerHelper
 import com.cosmos.unreddit.util.PostUtil
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -18,14 +20,16 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import javax.inject.Inject
 
 @HiltViewModel
-class SubredditSearchViewModel
-@Inject constructor(private val repository: PostListRepository) : ViewModel() {
+class SubredditSearchViewModel @Inject constructor(
+    private val repository: PostListRepository,
+    preferencesRepository: PreferencesRepository
+) : ViewModel() {
 
     private val history: Flow<List<String>> = repository.getHistoryIds()
         .distinctUntilChanged()
 
-    private val showNsfw: Flow<Boolean> = repository.getShowNsfw()
-        .distinctUntilChanged()
+    private val contentPreferences: Flow<ContentPreferences> =
+        preferencesRepository.getContentPreferences()
 
     private val _sorting: MutableStateFlow<Sorting> = MutableStateFlow(DEFAULT_SORTING)
     val sorting: StateFlow<Sorting> = _sorting
@@ -47,8 +51,11 @@ class SubredditSearchViewModel
     }
 
     fun searchAndFilterPosts(query: String, sorting: Sorting): Flow<PagingData<PostEntity>> {
-        return PostUtil.filterPosts(searchPagerHelper.loadData(query, sorting), history, showNsfw)
-            .cachedIn(viewModelScope)
+        return PostUtil.filterPosts(
+            searchPagerHelper.loadData(query, sorting),
+            history,
+            contentPreferences
+        ).cachedIn(viewModelScope)
     }
 
     fun setQuery(subreddit: String) {
