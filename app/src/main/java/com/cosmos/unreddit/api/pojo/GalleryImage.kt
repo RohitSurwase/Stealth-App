@@ -6,11 +6,14 @@ import com.squareup.moshi.JsonClass
 @JsonClass(generateAdapter = true)
 data class GalleryImage(
     @Json(name = "y")
-    var height: Int,
+    val height: Int,
 
     @Json(name = "x")
-    var width: Int,
+    val width: Int,
 
     @Json(name = "u")
-    var url: String
+    val url: String?,
+
+    @Json(name = "mp4")
+    val mp4: String?
 )

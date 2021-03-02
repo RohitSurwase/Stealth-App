@@ -208,6 +208,7 @@ data class PostData(
     fun getPreviewUrl(): String {
         return mediaPreview?.images?.getOrNull(0)?.imageSource?.url
             ?: mediaMetadata?.items?.getOrNull(0)?.image?.url
+            ?: mediaMetadata?.items?.getOrNull(0)?.previews?.last()?.url
             ?: url
     }
 
@@ -220,7 +221,17 @@ data class PostData(
 
         mediaMetadata?.items?.map { item ->
             item.image?.let {
-                gallery.add(GalleryMedia(GalleryMedia.Type.IMAGE, it.url))
+                when {
+                    it.url != null -> {
+                        gallery.add(GalleryMedia(GalleryMedia.Type.IMAGE, it.url))
+                    }
+                    it.mp4 != null -> {
+                        gallery.add(GalleryMedia(GalleryMedia.Type.VIDEO, it.mp4))
+                    }
+                    else -> {
+                        // ignore
+                    }
+                }
             }
         }
 
