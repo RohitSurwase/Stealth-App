@@ -19,6 +19,7 @@ import com.cosmos.unreddit.parser.ClickableMovementMethod
 import com.cosmos.unreddit.parser.TextBlock
 import com.cosmos.unreddit.post.PostEntity
 import com.cosmos.unreddit.preferences.ContentPreferences
+import com.cosmos.unreddit.view.AwardView
 import com.cosmos.unreddit.view.RedditView
 import com.google.android.material.card.MaterialCardView
 
@@ -45,6 +46,7 @@ abstract class PostViewHolder(
             DataBindingUtil.bind<IncludePostFlairsBinding>(postFlairs) ?: return
 
         val title = itemView.findViewById<TextView>(R.id.text_post_title)
+        val awards = itemView.findViewById<AwardView>(R.id.awards)
 
         postInfoBinding.post = postEntity
         postMetricsBinding.post = postEntity
@@ -55,7 +57,14 @@ abstract class PostViewHolder(
             setTextColor(postEntity.getSeenColor(title.context))
         }
 
-        postMetricsBinding.awards.setAwards(postEntity.awards)
+        with(awards) {
+            if (postEntity.totalAwards > 0) {
+                visibility = View.VISIBLE
+                setAwards(postEntity.awards, postEntity.totalAwards)
+            } else {
+                visibility = View.GONE
+            }
+        }
 
         with(postInfoBinding.textPostAuthor) {
             val width = paint.measureText(postEntity.author)

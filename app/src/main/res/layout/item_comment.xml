@@ -75,6 +75,8 @@
             app:layout_constraintStart_toEndOf="@id/comment_controversiality_indicator"
             app:layout_constraintTop_toTopOf="@id/comment_score"
             app:layout_constraintBottom_toBottomOf="@id/comment_score"
+            android:paddingVertical="@dimen/award_chip_padding_vertical"
+            android:paddingHorizontal="@dimen/award_chip_padding_horizontal"
             android:layout_marginStart="4dp"/>
 
         <TextView

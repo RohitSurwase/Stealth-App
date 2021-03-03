@@ -20,28 +20,36 @@ class AwardView @JvmOverloads constructor(
     defStyleAttr: Int = 0
 ) : LinearLayoutCompat(context, attrs, defStyleAttr) {
 
-    private val awardImageSize by lazy {
-        context.resources.getDimension(R.dimen.award_image_size).toInt()
-    }
+    private val awardImageSize = context.resources.getDimension(R.dimen.award_image_size).toInt()
+
+    private val countMargin = context.resources.getDimension(R.dimen.award_count_margin).toInt()
+
     private val overlapMargin by lazy {
         context.resources.getDimension(R.dimen.award_overlap_margin).toInt()
     }
-    private val countMargin by lazy {
-        context.resources.getDimension(R.dimen.award_count_margin).toInt()
-    }
+
     private val countImageMargin by lazy {
         context.resources.getDimension(R.dimen.award_count_image_margin).toInt()
     }
 
+    private var textStyleRes: Int = R.style.TextAppearanceAward
+
     init {
+        context.theme.obtainStyledAttributes(
+            attrs,
+            R.styleable.AwardView,
+            0, 0
+        ).apply {
+            try {
+                textStyleRes = getResourceId(
+                    R.styleable.AwardView_textStyle,
+                    R.style.TextAppearanceAward
+                )
+            } finally {
+                recycle()
+            }
+        }
         background = ContextCompat.getDrawable(context, R.drawable.award_background)
-        val paddingVertical = context.resources.getDimension(
-            R.dimen.award_chip_padding_vertical
-        ).toInt()
-        val paddingHorizontal = context.resources.getDimension(
-            R.dimen.award_chip_padding_horizontal
-        ).toInt()
-        setPadding(paddingHorizontal, paddingVertical, paddingHorizontal, paddingVertical)
         orientation = HORIZONTAL
     }
 
@@ -107,7 +115,7 @@ class AwardView @JvmOverloads constructor(
             context,
             null,
             0,
-            R.style.TextAppearanceAward
+            textStyleRes
         ).apply {
             layoutParams = LayoutParams(
                 LayoutParams.WRAP_CONTENT,

@@ -110,7 +110,9 @@
     <dimen name="award_image_size">16dp</dimen>
     <dimen name="award_overlap_margin">-8dp</dimen>
     <dimen name="award_chip_padding_vertical">2dp</dimen>
+    <dimen name="award_chip_padding_vertical_post">4dp</dimen>
     <dimen name="award_chip_padding_horizontal">4dp</dimen>
+    <dimen name="award_chip_padding_horizontal_post">6dp</dimen>
     <dimen name="award_count_margin">4dp</dimen>
     <dimen name="award_count_image_margin">2dp</dimen>
     <dimen name="award_text_size">12sp</dimen>

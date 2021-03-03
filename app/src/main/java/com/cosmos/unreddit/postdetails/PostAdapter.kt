@@ -73,7 +73,7 @@ class PostAdapter(
                     PosterType.getGradientColors(itemView.context, post.posterType)
                 )
 
-                includePostMetrics.awards.setAwards(post.awards)
+                bindAwards(post)
 
                 bindFlairs(post)
 
@@ -120,7 +120,7 @@ class PostAdapter(
                     bindText(post)
                 }
 
-                includePostMetrics.awards.setAwards(post.awards)
+                bindAwards(post)
 
                 bindFlairs(post)
             }
@@ -167,6 +167,17 @@ class PostAdapter(
                     } else {
                         visibility = View.GONE
                     }
+                }
+            }
+        }
+
+        private fun bindAwards(post: PostEntity) {
+            with(binding.awards) {
+                if (post.totalAwards > 0) {
+                    visibility = View.VISIBLE
+                    setAwards(post.awards)
+                } else {
+                    visibility = View.GONE
                 }
             }
         }

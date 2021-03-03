@@ -36,7 +36,7 @@ object PostMapper {
                 isPinned,
                 isOver18,
                 getPreviewUrl(),
-                awardings.map { Award(it.count, it.getIcon()) },
+                awardings.sortedByDescending { it.count }.map { Award(it.count, it.getIcon()) },
                 isSpoiler,
                 isArchived,
                 isLocked,
