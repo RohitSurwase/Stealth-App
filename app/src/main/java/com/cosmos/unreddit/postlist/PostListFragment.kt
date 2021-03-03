@@ -70,7 +70,7 @@ class PostListFragment : BaseFragment() {
     }
 
     private fun initRecyclerView() {
-        adapter = PostListAdapter(repository, this, clickableMovementMethod)
+        adapter = PostListAdapter(repository, this, this)
         binding.listPost.layoutManager = LinearLayoutManager(requireContext())
         binding.listPost.adapter = adapter
     }

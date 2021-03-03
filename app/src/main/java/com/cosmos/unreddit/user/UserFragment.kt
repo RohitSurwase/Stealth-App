@@ -15,7 +15,6 @@ import com.cosmos.unreddit.R
 import com.cosmos.unreddit.base.BaseFragment
 import com.cosmos.unreddit.databinding.FragmentUserBinding
 import com.cosmos.unreddit.databinding.ItemListContentBinding
-import com.cosmos.unreddit.parser.ClickableMovementMethod
 import com.cosmos.unreddit.post.PostEntity
 import com.cosmos.unreddit.post.Sorting
 import com.cosmos.unreddit.postlist.PostListAdapter
@@ -38,8 +37,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class UserFragment : BaseFragment(), PostListAdapter.PostClickListener,
-    ClickableMovementMethod.OnLinkClickListener {
+class UserFragment : BaseFragment(), PostListAdapter.PostClickListener {
 
     private var _binding: FragmentUserBinding? = null
     private val binding get() = _binding!!
@@ -91,8 +89,8 @@ class UserFragment : BaseFragment(), PostListAdapter.PostClickListener,
     }
 
     private fun initViewPager() {
-        postListAdapter = PostListAdapter(repository, this, clickableMovementMethod)
-        commentListAdapter = UserCommentsAdapter(requireContext(), clickableMovementMethod)
+        postListAdapter = PostListAdapter(repository, this, this)
+        commentListAdapter = UserCommentsAdapter(requireContext(), this)
 
         val tabs: List<RecyclerViewStateAdapter.Page> = listOf(
             RecyclerViewStateAdapter.Page(R.string.tab_user_submitted, postListAdapter),

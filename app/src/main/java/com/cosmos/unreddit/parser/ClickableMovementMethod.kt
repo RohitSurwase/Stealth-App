@@ -11,13 +11,17 @@ import android.widget.TextView
 import androidx.core.os.postDelayed
 
 class ClickableMovementMethod(
-    private val onLinkClickListener: OnLinkClickListener
+    private val clickListener: OnClickListener
 ) : LinkMovementMethod() {
 
-    interface OnLinkClickListener {
+    interface OnClickListener {
         fun onLinkClick(link: String)
 
         fun onLinkLongClick(link: String)
+
+        fun onClick()
+
+        fun onLongClick()
     }
 
     private val longClickHandler = Handler(Looper.getMainLooper())
@@ -43,6 +47,7 @@ class ClickableMovementMethod(
             val off = layout.getOffsetForHorizontal(line, x.toFloat())
 
             val links = buffer.getSpans(off, off, URLSpan::class.java)
+            val spoilers = buffer.getSpans(off, off, SpoilerSpan::class.java)
 
             if (links.isNotEmpty()) {
                 val url = links[0].url
@@ -52,7 +57,7 @@ class ClickableMovementMethod(
                         longClickHandler.postDelayed(
                             ViewConfiguration.getLongPressTimeout().toLong()
                         ) {
-                            onLinkClickListener.onLinkLongClick(url)
+                            clickListener.onLinkLongClick(url)
                             longClicked = true
                         }
                     }
@@ -60,7 +65,29 @@ class ClickableMovementMethod(
                         longClickHandler.removeCallbacksAndMessages(null)
 
                         if (!longClicked) {
-                            onLinkClickListener.onLinkClick(url)
+                            clickListener.onLinkClick(url)
+                        }
+
+                        longClicked = false
+                    }
+                }
+
+                return true
+            } else if (spoilers.isEmpty()) {
+                when (action) {
+                    MotionEvent.ACTION_DOWN -> {
+                        longClickHandler.postDelayed(
+                            ViewConfiguration.getLongPressTimeout().toLong()
+                        ) {
+                            clickListener.onLongClick()
+                            longClicked = true
+                        }
+                    }
+                    MotionEvent.ACTION_UP -> {
+                        longClickHandler.removeCallbacksAndMessages(null)
+
+                        if (!longClicked) {
+                            clickListener.onClick()
                         }
 
                         longClicked = false

@@ -11,17 +11,17 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.cosmos.unreddit.R
 import com.cosmos.unreddit.databinding.ItemUserCommentBinding
-import com.cosmos.unreddit.parser.ClickableMovementMethod
 import com.cosmos.unreddit.post.Comment
 import com.cosmos.unreddit.post.CommentEntity
 import com.cosmos.unreddit.util.DateUtil
 import com.cosmos.unreddit.util.PostUtil
 import com.cosmos.unreddit.util.applyGradient
 import com.cosmos.unreddit.util.blurText
+import com.cosmos.unreddit.view.RedditView
 
 class UserCommentsAdapter(
     context: Context,
-    private val clickableMovementMethod: ClickableMovementMethod
+    private val onLinkClickListener: RedditView.OnLinkClickListener? = null
 ) : PagingDataAdapter<Comment, UserCommentsAdapter.CommentViewHolder>(COMMENT_COMPARATOR) {
 
     private val colorPrimary by lazy {
@@ -106,7 +106,8 @@ class UserCommentsAdapter(
             }
 
             with(binding.includeItemComment.commentBody) {
-                setText(comment.body, clickableMovementMethod)
+                setText(comment.body)
+                setOnLinkClickListener(onLinkClickListener)
             }
         }
     }

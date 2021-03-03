@@ -11,13 +11,13 @@ import com.cosmos.unreddit.R
 import com.cosmos.unreddit.databinding.ItemPostHeaderBinding
 import com.cosmos.unreddit.model.MediaType
 import com.cosmos.unreddit.model.PosterType
-import com.cosmos.unreddit.parser.ClickableMovementMethod
 import com.cosmos.unreddit.post.PostEntity
 import com.cosmos.unreddit.post.PostType
 import com.cosmos.unreddit.util.applyGradient
+import com.cosmos.unreddit.view.RedditView
 
 class PostAdapter(
-    private val clickableMovementMethod: ClickableMovementMethod
+    private val onLinkClickListener: RedditView.OnLinkClickListener? = null
 ) : RecyclerView.Adapter<PostAdapter.ViewHolder>() {
 
     private var post: PostEntity? = null
@@ -130,7 +130,8 @@ class PostAdapter(
             with(binding.textPost) {
                 if (post.selfRedditText.isNotEmpty()) {
                     visibility = View.VISIBLE
-                    setText(post.selfRedditText, clickableMovementMethod)
+                    setText(post.selfRedditText)
+                    setOnLinkClickListener(onLinkClickListener)
                 } else {
                     visibility = View.GONE
                 }

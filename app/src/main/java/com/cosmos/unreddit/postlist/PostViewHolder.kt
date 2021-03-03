@@ -15,7 +15,6 @@ import coil.transform.BlurTransformation
 import com.cosmos.unreddit.R
 import com.cosmos.unreddit.databinding.*
 import com.cosmos.unreddit.model.MediaType
-import com.cosmos.unreddit.parser.ClickableMovementMethod
 import com.cosmos.unreddit.parser.TextBlock
 import com.cosmos.unreddit.post.PostEntity
 import com.cosmos.unreddit.preferences.ContentPreferences
@@ -189,7 +188,7 @@ abstract class PostViewHolder(
     class TextPostViewHolder(
         binding: ItemPostTextBinding,
         listener: PostListAdapter.PostClickListener,
-        private val clickableMovementMethod: ClickableMovementMethod
+        private val onLinkClickListener: RedditView.OnLinkClickListener? = null
     ) : PostViewHolder(binding.root, listener) {
         private val selfText: RedditView = binding.textPostSelf
         private val selfTextCard: MaterialCardView = binding.textPostSelfCard
@@ -208,9 +207,9 @@ abstract class PostViewHolder(
                 ) {
                     selfTextCard.visibility = View.VISIBLE
                     setPreviewText(
-                        postEntity.selfRedditText.blocks[0].block as TextBlock,
-                        clickableMovementMethod
+                        postEntity.selfRedditText.blocks[0].block as TextBlock
                     )
+                    setOnLinkClickListener(onLinkClickListener)
                     setTextColor(postEntity.getSeenColor(context))
                 } else {
                     selfTextCard.visibility = View.GONE

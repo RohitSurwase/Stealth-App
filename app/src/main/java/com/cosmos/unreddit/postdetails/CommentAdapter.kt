@@ -17,22 +17,22 @@ import com.cosmos.unreddit.database.CommentMapper
 import com.cosmos.unreddit.databinding.ItemCommentBinding
 import com.cosmos.unreddit.databinding.ItemMoreBinding
 import com.cosmos.unreddit.model.PosterType
-import com.cosmos.unreddit.parser.ClickableMovementMethod
 import com.cosmos.unreddit.post.Comment
 import com.cosmos.unreddit.post.CommentEntity
 import com.cosmos.unreddit.post.MoreEntity
 import com.cosmos.unreddit.postlist.PostListRepository
 import com.cosmos.unreddit.util.DateUtil
 import com.cosmos.unreddit.util.applyGradient
+import com.cosmos.unreddit.view.RedditView
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
 class CommentAdapter(
     context: Context,
-    private val clickableMovementMethod: ClickableMovementMethod,
     private val repository: PostListRepository,
-    private val viewLifecycleOwner: LifecycleOwner
+    private val viewLifecycleOwner: LifecycleOwner,
+    private val onLinkClickListener: RedditView.OnLinkClickListener? = null
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     private var linkId: String? = null
@@ -347,7 +347,11 @@ class CommentAdapter(
             }
 
             with(binding.commentBody) {
-                setText(comment.body, clickableMovementMethod)
+                setText(comment.body)
+                setOnLinkClickListener(onLinkClickListener)
+                setOnClickListener {
+                    onCommentClick(bindingAdapterPosition)
+                }
             }
         }
 

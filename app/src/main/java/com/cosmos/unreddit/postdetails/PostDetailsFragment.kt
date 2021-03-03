@@ -15,7 +15,6 @@ import com.cosmos.unreddit.R
 import com.cosmos.unreddit.UiViewModel
 import com.cosmos.unreddit.base.BaseFragment
 import com.cosmos.unreddit.databinding.FragmentPostDetailsBinding
-import com.cosmos.unreddit.parser.ClickableMovementMethod
 import com.cosmos.unreddit.post.PostEntity
 import com.cosmos.unreddit.postlist.PostListRepository
 import com.cosmos.unreddit.sort.SortFragment
@@ -28,8 +27,7 @@ import javax.inject.Inject
 @AndroidEntryPoint
 class PostDetailsFragment :
     BaseFragment(),
-    ElasticDragDismissFrameLayout.ElasticDragDismissCallback,
-    ClickableMovementMethod.OnLinkClickListener {
+    ElasticDragDismissFrameLayout.ElasticDragDismissCallback {
 
     private var _binding: FragmentPostDetailsBinding? = null
     private val binding get() = _binding!!
@@ -78,12 +76,12 @@ class PostDetailsFragment :
     }
 
     private fun initRecyclerView() {
-        postAdapter = PostAdapter(clickableMovementMethod)
+        postAdapter = PostAdapter(this)
         commentAdapter = CommentAdapter(
             requireContext(),
-            clickableMovementMethod,
             repository,
-            viewLifecycleOwner
+            viewLifecycleOwner,
+            this
         )
         val concatAdapter = ConcatAdapter(postAdapter, commentAdapter)
         binding.listComments.apply {

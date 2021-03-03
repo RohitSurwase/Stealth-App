@@ -22,7 +22,6 @@ import com.cosmos.unreddit.base.BaseFragment
 import com.cosmos.unreddit.databinding.FragmentSubredditBinding
 import com.cosmos.unreddit.databinding.LayoutSubredditAboutBinding
 import com.cosmos.unreddit.databinding.LayoutSubredditContentBinding
-import com.cosmos.unreddit.parser.ClickableMovementMethod
 import com.cosmos.unreddit.post.Sorting
 import com.cosmos.unreddit.postlist.PostListAdapter
 import com.cosmos.unreddit.postlist.PostListRepository
@@ -39,8 +38,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class SubredditFragment : BaseFragment(), PostListAdapter.PostClickListener, View.OnClickListener,
-    ClickableMovementMethod.OnLinkClickListener {
+class SubredditFragment : BaseFragment(), PostListAdapter.PostClickListener, View.OnClickListener {
 
     private var _binding: FragmentSubredditBinding? = null
     private val binding get() = _binding!!
@@ -136,7 +134,7 @@ class SubredditFragment : BaseFragment(), PostListAdapter.PostClickListener, Vie
     }
 
     private fun initRecyclerView() {
-        adapter = PostListAdapter(repository, this, clickableMovementMethod).apply {
+        adapter = PostListAdapter(repository, this, this).apply {
             stateRestorationPolicy = RecyclerView.Adapter.StateRestorationPolicy.PREVENT_WHEN_EMPTY
         }
 
@@ -195,15 +193,18 @@ class SubredditFragment : BaseFragment(), PostListAdapter.PostClickListener, Vie
             }
 
             if (publicDescription.isNotEmpty()) {
-                bindingAbout.subredditPublicDescription.setText(
-                    publicDescription,
-                    clickableMovementMethod
-                )
+                bindingAbout.subredditPublicDescription.apply {
+                    setText(publicDescription)
+                    setOnLinkClickListener(this@SubredditFragment)
+                }
             } else {
                 bindingAbout.subredditPublicDescription.visibility = View.GONE
             }
             if (description.isNotEmpty()) {
-                bindingAbout.subredditDescription.setText(description, clickableMovementMethod)
+                bindingAbout.subredditDescription.apply {
+                    setText(description)
+                    setOnLinkClickListener(this@SubredditFragment)
+                }
             }
         }
     }

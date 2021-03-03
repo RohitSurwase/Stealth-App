@@ -7,17 +7,15 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentTransaction
 import com.cosmos.unreddit.R
 import com.cosmos.unreddit.mediaviewer.MediaViewerFragment
-import com.cosmos.unreddit.parser.ClickableMovementMethod
 import com.cosmos.unreddit.post.PostEntity
 import com.cosmos.unreddit.postdetails.PostDetailsFragment
 import com.cosmos.unreddit.postlist.PostListAdapter
+import com.cosmos.unreddit.view.RedditView
 
 open class BaseFragment : Fragment(), PostListAdapter.PostClickListener,
-    ClickableMovementMethod.OnLinkClickListener {
+    RedditView.OnLinkClickListener {
 
     private lateinit var onBackPressedCallback: OnBackPressedCallback
-
-    protected val clickableMovementMethod by lazy { ClickableMovementMethod(this) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

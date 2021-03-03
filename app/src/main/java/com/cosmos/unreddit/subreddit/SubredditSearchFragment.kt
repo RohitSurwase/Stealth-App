@@ -16,7 +16,6 @@ import androidx.recyclerview.widget.RecyclerView
 import com.cosmos.unreddit.R
 import com.cosmos.unreddit.base.BaseFragment
 import com.cosmos.unreddit.databinding.FragmentSubredditSearchBinding
-import com.cosmos.unreddit.parser.ClickableMovementMethod
 import com.cosmos.unreddit.post.PostEntity
 import com.cosmos.unreddit.post.Sorting
 import com.cosmos.unreddit.postlist.PostListAdapter
@@ -36,8 +35,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class SubredditSearchFragment : BaseFragment(), PostListAdapter.PostClickListener,
-    ClickableMovementMethod.OnLinkClickListener {
+class SubredditSearchFragment : BaseFragment(), PostListAdapter.PostClickListener {
 
     private var _binding: FragmentSubredditSearchBinding? = null
     private val binding get() = _binding!!
@@ -118,7 +116,7 @@ class SubredditSearchFragment : BaseFragment(), PostListAdapter.PostClickListene
     }
 
     private fun initRecyclerView() {
-        adapter = PostListAdapter(repository, this, clickableMovementMethod).apply {
+        adapter = PostListAdapter(repository, this, this).apply {
             stateRestorationPolicy = RecyclerView.Adapter.StateRestorationPolicy.PREVENT_WHEN_EMPTY
         }
 

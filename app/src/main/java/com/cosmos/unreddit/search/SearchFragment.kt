@@ -138,7 +138,7 @@ class SearchFragment : BaseFragment() {
     }
 
     private fun initViewPager() {
-        postListAdapter = PostListAdapter(repository, this, clickableMovementMethod)
+        postListAdapter = PostListAdapter(repository, this, this)
         subredditAdapter = SearchSubredditAdapter { onSubredditClick(it) }
         userAdapter = SearchUserAdapter { onUserClick(it) }
 

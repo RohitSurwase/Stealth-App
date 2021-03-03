@@ -8,17 +8,17 @@ import androidx.recyclerview.widget.RecyclerView
 import com.cosmos.unreddit.databinding.ItemPostImageBinding
 import com.cosmos.unreddit.databinding.ItemPostLinkBinding
 import com.cosmos.unreddit.databinding.ItemPostTextBinding
-import com.cosmos.unreddit.parser.ClickableMovementMethod
 import com.cosmos.unreddit.post.PostEntity
 import com.cosmos.unreddit.post.PostType
 import com.cosmos.unreddit.preferences.ContentPreferences
+import com.cosmos.unreddit.view.RedditView
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
 class PostListAdapter(
     private val repository: PostListRepository,
     private val listener: PostClickListener,
-    private val clickableMovementMethod: ClickableMovementMethod
+    private val onLinkClickListener: RedditView.OnLinkClickListener? = null
 ) : PagingDataAdapter<PostEntity, RecyclerView.ViewHolder>(POST_COMPARATOR) {
 
     interface PostClickListener {
@@ -47,7 +47,7 @@ class PostListAdapter(
             PostType.TEXT.value -> PostViewHolder.TextPostViewHolder(
                 ItemPostTextBinding.inflate(inflater, parent, false),
                 listener,
-                clickableMovementMethod
+                onLinkClickListener
             )
             // Image post
             PostType.IMAGE.value -> PostViewHolder.ImagePostViewHolder(

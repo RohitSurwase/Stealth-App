@@ -1,16 +1,13 @@
 package com.cosmos.unreddit.view
 
 import android.content.Context
-import android.text.method.LinkMovementMethod
 import android.util.AttributeSet
-import android.view.GestureDetector
-import android.view.MotionEvent
 import android.view.View
 import android.widget.HorizontalScrollView
 import androidx.annotation.ColorInt
 import androidx.appcompat.widget.LinearLayoutCompat
-import androidx.core.view.GestureDetectorCompat
 import androidx.core.view.children
+import com.cosmos.unreddit.parser.ClickableMovementMethod
 import com.cosmos.unreddit.parser.HtmlBlock
 import com.cosmos.unreddit.parser.RedditText
 import com.cosmos.unreddit.parser.TableBlock
@@ -20,29 +17,32 @@ class RedditView @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0
-) : LinearLayoutCompat(context, attrs, defStyleAttr) {
+) : LinearLayoutCompat(context, attrs, defStyleAttr), ClickableMovementMethod.OnClickListener {
 
-    private val gestureDetector: GestureDetectorCompat = GestureDetectorCompat(
-        context,
-        GestureListener()
-    )
+    interface OnLinkClickListener {
+        fun onLinkClick(link: String)
+
+        fun onLinkLongClick(link: String)
+    }
 
     private val childParams = LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT)
 
+    private val clickableMovementMethod = ClickableMovementMethod(this)
+
+    private var onLinkClickListener: OnLinkClickListener? = null
+
     init {
         orientation = VERTICAL
-        isFocusable = true
-        isClickable = true
     }
 
-    fun setText(redditText: RedditText, linkMovementMethod: LinkMovementMethod? = null) {
+    fun setText(redditText: RedditText) {
         removeAllViews()
 
         val blocks = redditText.blocks
         for (block in blocks) {
             when (block.type) {
                 HtmlBlock.BlockType.TEXT -> {
-                    addText(block.block as TextBlock, linkMovementMethod)
+                    addText(block.block as TextBlock)
                 }
                 HtmlBlock.BlockType.CODE -> {
                     addCode(block.block as TextBlock)
@@ -54,9 +54,9 @@ class RedditView @JvmOverloads constructor(
         }
     }
 
-    fun setPreviewText(textBlock: TextBlock, linkMovementMethod: LinkMovementMethod? = null) {
+    fun setPreviewText(textBlock: TextBlock) {
         removeAllViews()
-        addText(textBlock, linkMovementMethod)
+        addText(textBlock)
     }
 
     fun setTextColor(@ColorInt color: Int) {
@@ -67,13 +67,11 @@ class RedditView @JvmOverloads constructor(
         }
     }
 
-    private fun addText(textBlock: TextBlock, linkMovementMethod: LinkMovementMethod? = null) {
+    private fun addText(textBlock: TextBlock) {
         val redditTextView = RedditTextView(context).apply {
             layoutParams = childParams
             text = textBlock.text
-            if (linkMovementMethod != null) {
-                movementMethod = linkMovementMethod
-            }
+            movementMethod = this@RedditView.clickableMovementMethod
         }
         addView(redditTextView)
     }
@@ -99,20 +97,23 @@ class RedditView @JvmOverloads constructor(
         }
     }
 
-    override fun onInterceptTouchEvent(ev: MotionEvent?): Boolean {
-        gestureDetector.onTouchEvent(ev)
-        return super.onInterceptTouchEvent(ev)
+    fun setOnLinkClickListener(onLinkClickListener: OnLinkClickListener?) {
+        this.onLinkClickListener = onLinkClickListener
     }
 
-    private inner class GestureListener : GestureDetector.SimpleOnGestureListener() {
+    override fun onLinkClick(link: String) {
+        onLinkClickListener?.onLinkClick(link)
+    }
 
-        override fun onDown(e: MotionEvent?): Boolean {
-            return true
-        }
+    override fun onLinkLongClick(link: String) {
+        onLinkClickListener?.onLinkLongClick(link)
+    }
 
-        override fun onSingleTapUp(e: MotionEvent?): Boolean {
-            performClick()
-            return true
-        }
+    override fun onClick() {
+        performClick()
+    }
+
+    override fun onLongClick() {
+        performLongClick()
     }
 }
