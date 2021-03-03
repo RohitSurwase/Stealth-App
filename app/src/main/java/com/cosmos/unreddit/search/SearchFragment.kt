@@ -122,7 +122,13 @@ class SearchFragment : BaseFragment() {
         }
         viewLifecycleOwner.lifecycleScope.launchWhenStarted {
             // TODO: Back to top when query changed
-            combine(viewModel.query, viewModel.sorting, viewModel.page) { query, sorting, page ->
+            combine(
+                viewModel.query,
+                viewModel.sorting,
+                viewModel.page,
+                viewModel.contentPreferences
+            ) { query, sorting, page, contentPreferences ->
+                postListAdapter.setContentPreferences(contentPreferences)
                 query?.let {
                     search(page, query, sorting)
                 }

@@ -75,7 +75,13 @@ class UserFragment : BaseFragment(), PostListAdapter.PostClickListener,
     private fun bindViewModel() {
         viewModel.about.observe(viewLifecycleOwner, this::bindInfo)
         viewLifecycleOwner.lifecycleScope.launchWhenStarted {
-            combine(viewModel.user, viewModel.sorting, viewModel.page) { user, sorting, page ->
+            combine(
+                viewModel.user,
+                viewModel.sorting,
+                viewModel.page,
+                viewModel.contentPreferences
+            ) { user, sorting, page, contentPreferences ->
+                postListAdapter.setContentPreferences(contentPreferences)
                 user?.let {
                     load(page, user, sorting)
                 }

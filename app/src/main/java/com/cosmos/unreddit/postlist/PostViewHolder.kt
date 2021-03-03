@@ -7,15 +7,18 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.databinding.DataBindingUtil
 import androidx.recyclerview.widget.RecyclerView
-import coil.load
+import coil.imageLoader
+import coil.request.ImageRequest
 import coil.size.Precision
 import coil.size.Scale
+import coil.transform.BlurTransformation
 import com.cosmos.unreddit.R
 import com.cosmos.unreddit.databinding.*
 import com.cosmos.unreddit.model.MediaType
 import com.cosmos.unreddit.parser.ClickableMovementMethod
 import com.cosmos.unreddit.parser.TextBlock
 import com.cosmos.unreddit.post.PostEntity
+import com.cosmos.unreddit.preferences.ContentPreferences
 import com.cosmos.unreddit.view.RedditView
 import com.google.android.material.card.MaterialCardView
 
@@ -24,7 +27,11 @@ abstract class PostViewHolder(
     protected val listener: PostListAdapter.PostClickListener
 ) : RecyclerView.ViewHolder(itemView) {
 
-    open fun bind(postEntity: PostEntity, onClick: (Int) -> Unit) {
+    open fun bind(
+        postEntity: PostEntity,
+        contentPreferences: ContentPreferences,
+        onClick: (Int) -> Unit
+    ) {
         val postInfo = itemView.findViewById<View>(R.id.include_post_info)
         val postInfoBinding =
             DataBindingUtil.bind<IncludePostInfoBinding>(postInfo) ?: return
@@ -90,20 +97,44 @@ abstract class PostViewHolder(
         }
     }
 
+    protected fun ImageView.load(
+        post: PostEntity,
+        contentPreferences: ContentPreferences,
+        builder: ImageRequest.Builder.() -> Unit = {}
+    ) {
+        val request = ImageRequest.Builder(context)
+            .data(post.preview)
+            .target(this)
+            .crossfade(true)
+            .scale(Scale.FILL)
+            .precision(Precision.AUTOMATIC)
+            .apply(builder)
+            .apply {
+                if ((post.isOver18 && !contentPreferences.showNsfwPreview) ||
+                    (post.isSpoiler && !contentPreferences.showSpoilerPreview)
+                ) {
+                    transformations(BlurTransformation(context, BLUR_RADIUS, BLUR_SAMPLING))
+                }
+            }
+            .build()
+        context.imageLoader.enqueue(request)
+    }
+
     class ImagePostViewHolder(
         private val binding: ItemPostImageBinding,
         listener: PostListAdapter.PostClickListener
     ) : PostViewHolder(binding.root, listener) {
 
-        override fun bind(postEntity: PostEntity, onClick: (Int) -> Unit) {
-            super.bind(postEntity, onClick)
+        override fun bind(
+            postEntity: PostEntity,
+            contentPreferences: ContentPreferences,
+            onClick: (Int) -> Unit
+        ) {
+            super.bind(postEntity, contentPreferences, onClick)
 
             with(binding.imagePostPreview) {
-                load(postEntity.preview) {
-                    crossfade(true)
-                    scale(Scale.FILL)
-                    precision(Precision.AUTOMATIC)
-                }
+                load(postEntity, contentPreferences)
+
                 setOnClickListener { listener.onImageClick(postEntity) }
             }
 
@@ -126,15 +157,16 @@ abstract class PostViewHolder(
         listener: PostListAdapter.PostClickListener
     ) : PostViewHolder(binding.root, listener) {
 
-        override fun bind(postEntity: PostEntity, onClick: (Int) -> Unit) {
-            super.bind(postEntity, onClick)
+        override fun bind(
+            postEntity: PostEntity,
+            contentPreferences: ContentPreferences,
+            onClick: (Int) -> Unit
+        ) {
+            super.bind(postEntity, contentPreferences, onClick)
 
             with(binding.imagePostPreview) {
-                load(postEntity.preview) {
-                    crossfade(true)
-                    scale(Scale.FILL)
-                    precision(Precision.AUTOMATIC)
-                }
+                load(postEntity, contentPreferences)
+
                 setOnClickListener { listener.onVideoClick(postEntity) }
             }
 
@@ -153,11 +185,18 @@ abstract class PostViewHolder(
         private val selfText: RedditView = binding.textPostSelf
         private val selfTextCard: MaterialCardView = binding.textPostSelfCard
 
-        override fun bind(postEntity: PostEntity, onClick: (Int) -> Unit) {
-            super.bind(postEntity, onClick)
+        override fun bind(
+            postEntity: PostEntity,
+            contentPreferences: ContentPreferences,
+            onClick: (Int) -> Unit
+        ) {
+            super.bind(postEntity, contentPreferences, onClick)
 
             with(selfText) {
-                if (postEntity.selfRedditText.isFirstBlockText()) {
+                if (postEntity.selfRedditText.isFirstBlockText() &&
+                    (!postEntity.isOver18 || contentPreferences.showNsfwPreview) &&
+                    (!postEntity.isSpoiler || contentPreferences.showSpoilerPreview)
+                ) {
                     selfTextCard.visibility = View.VISIBLE
                     setPreviewText(
                         postEntity.selfRedditText.blocks[0].block as TextBlock,
@@ -177,15 +216,16 @@ abstract class PostViewHolder(
     ) : PostViewHolder(binding.root, listener) {
         private val preview: ImageView = binding.imagePostLinkPreview
 
-        override fun bind(postEntity: PostEntity, onClick: (Int) -> Unit) {
-            super.bind(postEntity, onClick)
+        override fun bind(
+            postEntity: PostEntity,
+            contentPreferences: ContentPreferences,
+            onClick: (Int) -> Unit
+        ) {
+            super.bind(postEntity, contentPreferences, onClick)
 
             with(preview) {
-                load(postEntity.preview) {
-                    crossfade(true)
-                    scale(Scale.FILL)
-                    precision(Precision.AUTOMATIC)
-                }
+                load(postEntity, contentPreferences)
+
                 setOnClickListener { listener.onLinkClick(postEntity) }
             }
         }
@@ -193,5 +233,10 @@ abstract class PostViewHolder(
 
     class PollPostViewHolder() {
 
+    }
+
+    companion object {
+        private const val BLUR_RADIUS = 25F
+        private const val BLUR_SAMPLING = 4F
     }
 }

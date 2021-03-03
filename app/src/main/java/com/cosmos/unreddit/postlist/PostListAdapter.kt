@@ -11,6 +11,7 @@ import com.cosmos.unreddit.databinding.ItemPostTextBinding
 import com.cosmos.unreddit.parser.ClickableMovementMethod
 import com.cosmos.unreddit.post.PostEntity
 import com.cosmos.unreddit.post.PostType
+import com.cosmos.unreddit.preferences.ContentPreferences
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
@@ -31,6 +32,12 @@ class PostListAdapter(
 
         fun onLinkClick(post: PostEntity)
     }
+
+    private var contentPreferences: ContentPreferences = ContentPreferences(
+        showNsfw = false,
+        showNsfwPreview = false,
+        showSpoilerPreview = false
+    )
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         val inflater = LayoutInflater.from(parent.context)
@@ -75,17 +82,29 @@ class PostListAdapter(
 
         when (getItemViewType(position)) {
             // Text post
-            PostType.TEXT.value ->
-                (holder as PostViewHolder.TextPostViewHolder).bind(item, this::onClick)
+            PostType.TEXT.value -> (holder as PostViewHolder.TextPostViewHolder).bind(
+                item,
+                contentPreferences,
+                this::onClick
+            )
             // Image post
-            PostType.IMAGE.value ->
-                (holder as PostViewHolder.ImagePostViewHolder).bind(item, this::onClick)
+            PostType.IMAGE.value -> (holder as PostViewHolder.ImagePostViewHolder).bind(
+                item,
+                contentPreferences,
+                this::onClick
+            )
             // Video post
-            PostType.VIDEO.value ->
-                (holder as PostViewHolder.VideoPostViewHolder).bind(item, this::onClick)
+            PostType.VIDEO.value -> (holder as PostViewHolder.VideoPostViewHolder).bind(
+                item,
+                contentPreferences,
+                this::onClick
+            )
             // Link post
-            PostType.LINK.value ->
-                (holder as PostViewHolder.LinkPostViewHolder).bind(item, this::onClick)
+            PostType.LINK.value -> (holder as PostViewHolder.LinkPostViewHolder).bind(
+                item,
+                contentPreferences,
+                this::onClick
+            )
             else -> throw IllegalArgumentException("Unknown type")
         }
     }
@@ -101,6 +120,15 @@ class PostListAdapter(
     private fun insertPostInHistory(id: String) {
         GlobalScope.launch {
             repository.insertPostInHistory(id)
+        }
+    }
+
+    fun setContentPreferences(contentPreferences: ContentPreferences) {
+        if (this.contentPreferences.showNsfwPreview != contentPreferences.showNsfwPreview ||
+            this.contentPreferences.showSpoilerPreview != contentPreferences.showSpoilerPreview
+        ) {
+            this.contentPreferences = contentPreferences
+            notifyDataSetChanged()
         }
     }
 

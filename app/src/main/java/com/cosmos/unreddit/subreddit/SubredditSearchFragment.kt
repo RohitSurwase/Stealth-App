@@ -105,8 +105,10 @@ class SubredditSearchFragment : BaseFragment(), PostListAdapter.PostClickListene
             combine(
                 viewModel.subreddit,
                 viewModel.query,
-                viewModel.sorting
-            ) { subreddit, query, sorting ->
+                viewModel.sorting,
+                viewModel.contentPreferences
+            ) { subreddit, query, sorting, contentPreferences ->
+                adapter.setContentPreferences(contentPreferences)
                 if (subreddit != null && query != null) {
                     searchPost(query, sorting)
                 }

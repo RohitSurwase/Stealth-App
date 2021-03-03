@@ -30,7 +30,7 @@ class PostListViewModel
         .map { list -> list.map { it.postId } }
         .distinctUntilChanged()
 
-    private val contentPreferences: Flow<ContentPreferences> =
+    val contentPreferences: Flow<ContentPreferences> =
         preferencesRepository.getContentPreferences()
 
     private val _sorting: MutableStateFlow<Sorting> = MutableStateFlow(DEFAULT_SORTING)

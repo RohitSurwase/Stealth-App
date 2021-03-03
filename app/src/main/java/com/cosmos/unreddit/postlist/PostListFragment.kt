@@ -57,10 +57,15 @@ class PostListFragment : BaseFragment() {
 
     private fun bindViewModel() {
         viewLifecycleOwner.lifecycleScope.launchWhenStarted {
-            combine(viewModel.subreddit, viewModel.sorting) { subreddit, sorting ->
+            combine(
+                viewModel.subreddit,
+                viewModel.sorting,
+                viewModel.contentPreferences
+            ) { subreddit, sorting, contentPreferences ->
+                adapter.setContentPreferences(contentPreferences)
                 loadPosts(subreddit, sorting)
                 setSortIcon(sorting)
-            }.collect { scrollToTop() } // TODO: Sometimes does not scroll to top
+            }.collect() // TODO: Sometimes does not scroll to top
         }
     }
 

@@ -121,7 +121,12 @@ class SubredditFragment : BaseFragment(), PostListAdapter.PostClickListener, Vie
             }
         )
         viewLifecycleOwner.lifecycleScope.launchWhenStarted {
-            combine(viewModel.subreddit, viewModel.sorting) { subreddit, sorting ->
+            combine(
+                viewModel.subreddit,
+                viewModel.sorting,
+                viewModel.contentPreferences
+            ) { subreddit, sorting, contentPreferences ->
+                adapter.setContentPreferences(contentPreferences)
                 subreddit?.let {
                     loadPosts(subreddit, sorting)
                 }

@@ -28,7 +28,7 @@ class SubredditSearchViewModel @Inject constructor(
     private val history: Flow<List<String>> = repository.getHistoryIds()
         .distinctUntilChanged()
 
-    private val contentPreferences: Flow<ContentPreferences> =
+    val contentPreferences: Flow<ContentPreferences> =
         preferencesRepository.getContentPreferences()
 
     private val _sorting: MutableStateFlow<Sorting> = MutableStateFlow(DEFAULT_SORTING)
