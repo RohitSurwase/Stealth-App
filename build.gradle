@@ -2,7 +2,7 @@ buildscript {
 
     ext {
         kotlin = '1.4.30'
-        androidGradlePlugin = '4.2.0-beta04'
+        androidGradlePlugin = '4.2.0-beta05'
         hiltGradlePlugin = '2.32-alpha'
 
         hilt = '1.0.0-alpha03'
@@ -16,6 +16,8 @@ buildscript {
         coordinatorlayout = '1.1.0'
         viewpager2 = '1.0.0'
         preference = '1.1.1'
+
+        navigation = '2.3.3'
 
         room = '2.2.6'
         datastore = '1.0.0-alpha06'
@@ -52,6 +54,7 @@ buildscript {
         classpath "com.android.tools.build:gradle:$androidGradlePlugin"
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin"
         classpath "com.google.dagger:hilt-android-gradle-plugin:$hiltGradlePlugin"
+        classpath "androidx.navigation:navigation-safe-args-gradle-plugin:$navigation"
     }
 }
 

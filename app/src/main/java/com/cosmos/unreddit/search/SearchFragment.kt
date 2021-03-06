@@ -10,11 +10,11 @@ import android.view.ViewGroup
 import android.view.animation.AnimationUtils
 import android.view.inputmethod.EditorInfo
 import androidx.activity.OnBackPressedCallback
-import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.navArgs
 import androidx.transition.Fade
 import androidx.transition.Slide
 import androidx.transition.TransitionManager
@@ -32,6 +32,7 @@ import com.cosmos.unreddit.sort.SortFragment
 import com.cosmos.unreddit.util.RecyclerViewStateAdapter
 import com.cosmos.unreddit.util.RedditUri
 import com.cosmos.unreddit.util.hideSoftKeyboard
+import com.cosmos.unreddit.util.setSortingListener
 import com.cosmos.unreddit.util.showSoftKeyboard
 import com.google.android.material.tabs.TabLayoutMediator
 import com.google.android.material.transition.MaterialFadeThrough
@@ -52,6 +53,8 @@ class SearchFragment : BaseFragment() {
 
     private val viewModel: SearchViewModel by viewModels()
     private val uiViewModel: UiViewModel by activityViewModels()
+
+    private val args: SearchFragmentArgs by navArgs()
 
     private var searchPostJob: Job? = null
     private var searchSubredditJob: Job? = null
@@ -79,10 +82,10 @@ class SearchFragment : BaseFragment() {
         super.onViewCreated(view, savedInstanceState)
         uiViewModel.setNavigationVisibility(false)
 
-        arguments?.getString(KEY_QUERY)?.let { query ->
-            binding.appBar.searchInput.setText(query)
-            viewModel.setQuery(query)
-        }
+        val query = args.query
+
+        binding.appBar.searchInput.setText(query)
+        viewModel.setQuery(query)
 
         initResultListener()
         initAppBar()
@@ -193,13 +196,7 @@ class SearchFragment : BaseFragment() {
     }
 
     private fun initResultListener() {
-        childFragmentManager.setFragmentResultListener(
-            SortFragment.REQUEST_KEY_SORTING,
-            viewLifecycleOwner
-        ) { _, bundle ->
-            val sorting = bundle.getParcelable(SortFragment.BUNDLE_KEY_SORTING) as? Sorting
-            sorting?.let { viewModel.setSorting(it) }
-        }
+        setSortingListener { sorting -> sorting?.let { viewModel.setSorting(it) } }
     }
 
     private fun setSortIcon(sorting: Sorting) {
@@ -371,13 +368,5 @@ class SearchFragment : BaseFragment() {
         const val TAG = "SearchFragment"
 
         const val QUERY_MIN_LENGTH = 3
-
-        private const val KEY_QUERY = "KEY_QUERY"
-
-        fun newInstance(query: String): SearchFragment = SearchFragment().apply {
-            arguments = bundleOf(
-                KEY_QUERY to query
-            )
-        }
     }
 }

@@ -13,13 +13,13 @@ import androidx.core.view.isVisible
 import androidx.core.widget.doOnTextChanged
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.transition.Fade
 import androidx.transition.Slide
 import androidx.transition.Transition
 import androidx.transition.TransitionManager
 import androidx.transition.TransitionSet
-import com.cosmos.unreddit.R
 import com.cosmos.unreddit.databinding.FragmentSubscriptionsBinding
 import com.cosmos.unreddit.search.SearchFragment
 import com.cosmos.unreddit.util.RedditUri
@@ -177,11 +177,7 @@ class SubscriptionsFragment : Fragment() {
     private fun showSearchFragment(query: String) {
         binding.appBar.searchInput.hideSoftKeyboard()
 
-        parentFragmentManager.beginTransaction()
-            .setReorderingAllowed(true)
-            .replace(R.id.fragment_container, SearchFragment.newInstance(query), SearchFragment.TAG)
-            .addToBackStack(null)
-            .commit()
+        findNavController().navigate(SubscriptionsFragmentDirections.search(query))
 
         binding.appBar.searchInput.text?.clear()
     }

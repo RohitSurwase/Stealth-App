@@ -7,14 +7,18 @@ import android.view.ViewGroup
 import android.view.animation.AnimationUtils
 import androidx.core.view.isVisible
 import androidx.fragment.app.activityViewModels
+import androidx.fragment.app.setFragmentResultListener
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.cosmos.unreddit.R
+import com.cosmos.unreddit.UiViewModel
 import com.cosmos.unreddit.api.RedditApi
 import com.cosmos.unreddit.base.BaseFragment
 import com.cosmos.unreddit.databinding.FragmentPostBinding
 import com.cosmos.unreddit.post.Sorting
+import com.cosmos.unreddit.postdetails.PostDetailsFragment
 import com.cosmos.unreddit.sort.SortFragment
+import com.cosmos.unreddit.util.setSortingListener
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.collect
@@ -30,6 +34,7 @@ class PostListFragment : BaseFragment() {
     private val binding get() = _binding!!
 
     private val viewModel: PostListViewModel by activityViewModels()
+    private val uiViewModel: UiViewModel by activityViewModels()
 
     private var loadPostsJob: Job? = null
 
@@ -80,12 +85,11 @@ class PostListFragment : BaseFragment() {
     }
 
     private fun initResultListener() {
-        childFragmentManager.setFragmentResultListener(
-            SortFragment.REQUEST_KEY_SORTING,
-            viewLifecycleOwner
-        ) { _, bundle ->
-            val sorting = bundle.getParcelable(SortFragment.BUNDLE_KEY_SORTING) as? Sorting
-            sorting?.let { viewModel.setSorting(it) }
+        setSortingListener { sorting -> sorting?.let { viewModel.setSorting(it) } }
+
+        setFragmentResultListener(PostDetailsFragment.REQUEST_KEY_NAVIGATION) { _, bundle ->
+            val showNavigation = bundle.getBoolean(PostDetailsFragment.BUNDLE_KEY_NAVIGATION)
+            uiViewModel.setNavigationVisibility(showNavigation)
         }
     }
 

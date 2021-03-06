@@ -3,6 +3,7 @@ apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-parcelize'
 apply plugin: 'kotlin-kapt'
 apply plugin: 'dagger.hilt.android.plugin'
+apply plugin: "androidx.navigation.safeargs.kotlin"
 
 android {
     compileSdkVersion 29
@@ -60,6 +61,9 @@ dependencies {
     implementation "androidx.coordinatorlayout:coordinatorlayout:$rootProject.coordinatorlayout"
     implementation "androidx.viewpager2:viewpager2:$rootProject.viewpager2"
     implementation "androidx.preference:preference-ktx:$rootProject.preference"
+
+    implementation "androidx.navigation:navigation-fragment-ktx:$rootProject.navigation"
+    implementation "androidx.navigation:navigation-ui-ktx:$rootProject.navigation"
 
     implementation "androidx.room:room-runtime:$rootProject.room"
     kapt "androidx.room:room-compiler:$rootProject.room"

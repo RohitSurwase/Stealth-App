@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/home"
+    app:startDestination="@id/postListFragment">
+
+    <include app:graph="@navigation/viewer" />
+
+    <fragment
+        android:id="@+id/postListFragment"
+        android:name="com.cosmos.unreddit.postlist.PostListFragment"
+        tools:layout="@layout/fragment_post">
+        <action
+            android:id="@+id/openGallery"
+            app:destination="@id/viewer">
+            <argument
+                android:name="images"
+                app:argType="com.cosmos.unreddit.model.GalleryMedia[]"/>
+        </action>
+
+        <action
+            android:id="@+id/openMedia"
+            app:destination="@id/viewer">
+            <argument
+                android:name="link"
+                app:argType="string"/>
+            <argument
+                android:name="type"
+                app:argType="com.cosmos.unreddit.model.MediaType"/>
+        </action>
+    </fragment>
+
+</navigation>

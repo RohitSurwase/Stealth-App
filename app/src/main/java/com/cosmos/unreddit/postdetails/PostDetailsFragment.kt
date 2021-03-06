@@ -6,13 +6,12 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.os.bundleOf
-import androidx.fragment.app.activityViewModels
+import androidx.fragment.app.setFragmentResult
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.asLiveData
 import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.cosmos.unreddit.R
-import com.cosmos.unreddit.UiViewModel
 import com.cosmos.unreddit.base.BaseFragment
 import com.cosmos.unreddit.databinding.FragmentPostDetailsBinding
 import com.cosmos.unreddit.post.PostEntity
@@ -33,7 +32,6 @@ class PostDetailsFragment :
     private val binding get() = _binding!!
 
     private val viewModel: PostDetailsViewModel by viewModels()
-    private val uiViewModel: UiViewModel by activityViewModels()
 
     private val contentRadius by lazy { resources.getDimension(R.dimen.subreddit_content_radius) }
     private val contentElevation by lazy {
@@ -67,7 +65,7 @@ class PostDetailsFragment :
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        uiViewModel.setNavigationVisibility(false)
+        showNavigation(false)
         binding.root.addListener(this)
         initResultListener()
         initAppBar()
@@ -137,9 +135,13 @@ class PostDetailsFragment :
         )
     }
 
+    private fun showNavigation(show: Boolean) {
+        setFragmentResult(REQUEST_KEY_NAVIGATION, bundleOf(BUNDLE_KEY_NAVIGATION to show))
+    }
+
     override fun onBackPressed() {
-        uiViewModel.setNavigationVisibility(true)
-        super.onBackPressed()
+        showNavigation(true)
+        parentFragmentManager.popBackStack()
     }
 
     override fun onDestroyView() {
@@ -158,7 +160,7 @@ class PostDetailsFragment :
     }
 
     override fun onDragDismissed() {
-        uiViewModel.setNavigationVisibility(true)
+        showNavigation(true)
         parentFragmentManager.popBackStack()
     }
 
@@ -172,6 +174,9 @@ class PostDetailsFragment :
 
     companion object {
         const val TAG = "PostDetailsFragment"
+
+        const val REQUEST_KEY_NAVIGATION = "REQUEST_KEY_NAVIGATION"
+        const val BUNDLE_KEY_NAVIGATION = "BUNDLE_KEY_NAVIGATION"
 
         private const val KEY_POST_ENTITY = "KEY_POST_ENTITY"
 

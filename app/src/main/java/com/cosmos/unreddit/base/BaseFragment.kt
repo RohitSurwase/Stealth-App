@@ -5,8 +5,9 @@ import androidx.activity.OnBackPressedCallback
 import androidx.activity.addCallback
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentTransaction
+import androidx.navigation.fragment.findNavController
 import com.cosmos.unreddit.R
-import com.cosmos.unreddit.mediaviewer.MediaViewerFragment
+import com.cosmos.unreddit.ViewerDirections
 import com.cosmos.unreddit.post.PostEntity
 import com.cosmos.unreddit.postdetails.PostDetailsFragment
 import com.cosmos.unreddit.postlist.PostListAdapter
@@ -46,33 +47,21 @@ open class BaseFragment : Fragment(), PostListAdapter.PostClickListener,
     }
 
     override fun onImageClick(post: PostEntity) {
-        val mediaViewerFragment = if (post.gallery.isNotEmpty()) {
-            MediaViewerFragment.newInstance(post.gallery)
-        } else {
-            MediaViewerFragment.newInstance(post.mediaUrl, post.mediaType)
-        }
-
-        parentFragmentManager.beginTransaction()
-            .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
-            .add(
-                R.id.fragment_container,
-                mediaViewerFragment,
-                MediaViewerFragment.TAG
+        if (post.gallery.isNotEmpty()) {
+            findNavController().navigate(
+                ViewerDirections.openGallery(post.gallery.toTypedArray())
             )
-            .addToBackStack(null)
-            .commit()
+        } else {
+            findNavController().navigate(
+                ViewerDirections.openMedia(post.mediaUrl, post.mediaType)
+            )
+        }
     }
 
     override fun onVideoClick(post: PostEntity) {
-        parentFragmentManager.beginTransaction()
-            .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
-            .add(
-                R.id.fragment_container,
-                MediaViewerFragment.newInstance(post.mediaUrl, post.mediaType),
-                MediaViewerFragment.TAG
-            )
-            .addToBackStack(null)
-            .commit()
+        findNavController().navigate(
+            ViewerDirections.openMedia(post.mediaUrl, post.mediaType)
+        )
     }
 
     override fun onLinkClick(post: PostEntity) {

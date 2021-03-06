@@ -10,10 +10,11 @@
         android:icon="@drawable/ic_subscriptions"
         android:title="Subscriptions" />
 
-    <item
-        android:id="@+id/profile"
-        android:icon="@drawable/ic_profile_selector"
-        android:title="Profile" />
+    <!-- TODO: Profile -->
+<!--    <item-->
+<!--        android:id="@+id/profile"-->
+<!--        android:icon="@drawable/ic_profile_selector"-->
+<!--        android:title="Profile" />-->
 
     <item
         android:id="@+id/settings"

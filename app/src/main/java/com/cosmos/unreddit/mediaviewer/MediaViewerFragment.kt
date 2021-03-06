@@ -4,16 +4,15 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.core.os.bundleOf
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
+import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager2.widget.ViewPager2
 import com.cosmos.unreddit.UiViewModel
 import com.cosmos.unreddit.base.BaseFragment
 import com.cosmos.unreddit.databinding.FragmentMediaViewerBinding
-import com.cosmos.unreddit.model.GalleryMedia
 import com.cosmos.unreddit.model.MediaType
 import com.cosmos.unreddit.util.betterSmoothScrollToPosition
 import com.cosmos.unreddit.util.getRecyclerView
@@ -28,22 +27,17 @@ class MediaViewerFragment : BaseFragment() {
     private val viewModel: MediaViewerViewModel by viewModels()
     private val uiViewModel: UiViewModel by activityViewModels()
 
+    private val args: MediaViewerFragmentArgs by navArgs()
+
     private lateinit var mediaAdapter: MediaViewerAdapter
     private lateinit var thumbnailAdapter: MediaViewerThumbnailAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        arguments?.let { bundle ->
-            if (bundle.containsKey(BUNDLE_KEY_IMAGES)) {
-                val images = bundle.getParcelableArrayList<GalleryMedia>(BUNDLE_KEY_IMAGES)
-                if (images != null) {
-                    viewModel.setMedia(images.toList())
-                }
-            } else if (bundle.containsKey(BUNDLE_KEY_LINK)) {
-                val link = bundle.getString(BUNDLE_KEY_LINK, "")
-                val type = bundle.getSerializable(BUNDLE_KEY_TYPE) as? MediaType ?: MediaType.LINK
-                viewModel.loadMedia(link, type)
-            }
+        if (args.images != null) {
+            viewModel.setMedia(args.images!!.toList())
+        } else if (args.link != null && args.type != MediaType.NO_MEDIA) {
+            viewModel.loadMedia(args.link!!, args.type)
         }
     }
 
@@ -129,22 +123,5 @@ class MediaViewerFragment : BaseFragment() {
 
     companion object {
         const val TAG = "ImageViewerFragment"
-
-        private const val BUNDLE_KEY_IMAGES = "BUNDLE_KEY_IMAGES"
-        private const val BUNDLE_KEY_LINK = "BUNDLE_KEY_LINK"
-        private const val BUNDLE_KEY_TYPE = "BUNDLE_KEY_TYPE"
-
-        fun newInstance(images: List<GalleryMedia>) = MediaViewerFragment().apply {
-            arguments = bundleOf(
-                BUNDLE_KEY_IMAGES to images
-            )
-        }
-
-        fun newInstance(link: String, type: MediaType) = MediaViewerFragment().apply {
-            arguments = bundleOf(
-                BUNDLE_KEY_LINK to link,
-                BUNDLE_KEY_TYPE to type
-            )
-        }
     }
 }
