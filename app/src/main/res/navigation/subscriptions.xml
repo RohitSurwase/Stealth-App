@@ -5,6 +5,7 @@
     android:id="@+id/subscriptions"
     app:startDestination="@id/subscriptionsFragment">
 
+    <include app:graph="@navigation/subreddit" />
     <include app:graph="@navigation/viewer" />
 
     <fragment
@@ -47,5 +48,13 @@
                 app:argType="com.cosmos.unreddit.model.MediaType"/>
         </action>
     </fragment>
+
+    <action
+        android:id="@+id/openSubreddit"
+        app:destination="@id/subreddit">
+        <argument
+            android:name="subreddit"
+            app:argType="string" />
+    </action>
 
 </navigation>

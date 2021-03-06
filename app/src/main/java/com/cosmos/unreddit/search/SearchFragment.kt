@@ -14,6 +14,7 @@ import androidx.core.view.isVisible
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.transition.Fade
 import androidx.transition.Slide
@@ -21,6 +22,7 @@ import androidx.transition.TransitionManager
 import androidx.transition.TransitionSet
 import androidx.viewpager2.widget.ViewPager2
 import com.cosmos.unreddit.R
+import com.cosmos.unreddit.SubscriptionsDirections
 import com.cosmos.unreddit.UiViewModel
 import com.cosmos.unreddit.api.RedditApi
 import com.cosmos.unreddit.base.BaseFragment
@@ -340,9 +342,7 @@ class SearchFragment : BaseFragment() {
     }
 
     private fun onSubredditClick(subreddit: String) {
-        val intent = Intent(Intent.ACTION_VIEW)
-        intent.data = RedditUri.getSubredditUri(subreddit)
-        startActivity(intent)
+        findNavController().navigate(SubscriptionsDirections.openSubreddit(subreddit))
     }
 
     private fun onUserClick(user: String) {

@@ -1,7 +1,6 @@
 package com.cosmos.unreddit.subscriptions
 
 import android.content.Context
-import android.content.Intent
 import android.os.Bundle
 import android.view.Gravity
 import android.view.LayoutInflater
@@ -22,7 +21,6 @@ import androidx.transition.TransitionManager
 import androidx.transition.TransitionSet
 import com.cosmos.unreddit.databinding.FragmentSubscriptionsBinding
 import com.cosmos.unreddit.search.SearchFragment
-import com.cosmos.unreddit.util.RedditUri
 import com.cosmos.unreddit.util.hideSoftKeyboard
 import com.cosmos.unreddit.util.showSoftKeyboard
 import com.google.android.material.transition.MaterialFadeThrough
@@ -183,9 +181,7 @@ class SubscriptionsFragment : Fragment() {
     }
 
     private fun onClick(subreddit: String) {
-        val intent = Intent(Intent.ACTION_VIEW)
-        intent.data = RedditUri.getSubredditUri(subreddit)
-        startActivity(intent)
+        findNavController().navigate(SubscriptionsFragmentDirections.openSubreddit(subreddit))
     }
 
     override fun onHiddenChanged(hidden: Boolean) {

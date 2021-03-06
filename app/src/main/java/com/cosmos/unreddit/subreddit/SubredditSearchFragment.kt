@@ -5,11 +5,11 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
-import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
-import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
+import androidx.hilt.navigation.fragment.hiltNavGraphViewModels
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.navArgs
 import androidx.paging.LoadState
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -40,8 +40,10 @@ class SubredditSearchFragment : BaseFragment(), PostListAdapter.PostClickListene
     private var _binding: FragmentSubredditSearchBinding? = null
     private val binding get() = _binding!!
 
-    private val subredditViewModel: SubredditViewModel by activityViewModels()
+    private val subredditViewModel: SubredditViewModel by hiltNavGraphViewModels(R.id.subreddit)
     private val viewModel: SubredditSearchViewModel by viewModels()
+
+    private val args: SubredditSearchFragmentArgs by navArgs()
 
     private var searchPostJob: Job? = null
 
@@ -52,10 +54,7 @@ class SubredditSearchFragment : BaseFragment(), PostListAdapter.PostClickListene
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val subreddit = arguments?.getString(KEY_SUBREDDIT)
-        subreddit?.let {
-            viewModel.setSubreddit(it)
-        }
+        viewModel.setSubreddit(args.subreddit)
     }
 
     override fun onCreateView(
@@ -258,13 +257,5 @@ class SubredditSearchFragment : BaseFragment(), PostListAdapter.PostClickListene
 
     companion object {
         const val TAG = "SubredditSearchFragment"
-
-        private const val KEY_SUBREDDIT = "KEY_SUBREDDIT"
-
-        fun newInstance(subreddit: String) = SubredditSearchFragment().apply {
-            arguments = bundleOf(
-                KEY_SUBREDDIT to subreddit
-            )
-        }
     }
 }

@@ -1,5 +1,6 @@
 package com.cosmos.unreddit
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import androidx.activity.viewModels
@@ -26,9 +27,15 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        // Workaround to prevent activity from being created twice
+        val newIntent = intent.clone() as Intent
+        intent.data = null
+
         if (savedInstanceState == null) {
             initNavigation()
         }
+
+        currentNavController?.value?.handleDeepLink(newIntent)
 
         viewModel.navigationVisibility.observe(this, this::showNavigation)
     }

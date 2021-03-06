@@ -5,6 +5,7 @@
     android:id="@+id/home"
     app:startDestination="@id/postListFragment">
 
+    <include app:graph="@navigation/subreddit" />
     <include app:graph="@navigation/viewer" />
 
     <fragment

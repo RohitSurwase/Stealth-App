@@ -6,11 +6,12 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.constraintlayout.widget.ConstraintSet
-import androidx.core.os.bundleOf
 import androidx.core.view.GravityCompat
 import androidx.fragment.app.activityViewModels
-import androidx.fragment.app.commit
+import androidx.hilt.navigation.fragment.hiltNavGraphViewModels
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
+import androidx.navigation.fragment.navArgs
 import androidx.paging.LoadState
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -18,6 +19,7 @@ import coil.load
 import coil.size.Precision
 import coil.size.Scale
 import com.cosmos.unreddit.R
+import com.cosmos.unreddit.UiViewModel
 import com.cosmos.unreddit.base.BaseFragment
 import com.cosmos.unreddit.databinding.FragmentSubredditBinding
 import com.cosmos.unreddit.databinding.LayoutSubredditAboutBinding
@@ -49,7 +51,10 @@ class SubredditFragment : BaseFragment(), PostListAdapter.PostClickListener, Vie
     private var _bindingAbout: LayoutSubredditAboutBinding? = null
     private val bindingAbout get() = _bindingAbout!!
 
-    private val viewModel: SubredditViewModel by activityViewModels()
+    private val viewModel: SubredditViewModel by hiltNavGraphViewModels(R.id.subreddit)
+    private val uiViewModel: UiViewModel by activityViewModels()
+
+    private val args: SubredditFragmentArgs by navArgs()
 
     private var loadPostsJob: Job? = null
 
@@ -60,10 +65,7 @@ class SubredditFragment : BaseFragment(), PostListAdapter.PostClickListener, Vie
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val subreddit = arguments?.getString(KEY_SUBREDDIT)
-        subreddit?.let {
-            viewModel.setSubreddit(it)
-        }
+        viewModel.setSubreddit(args.subreddit)
     }
 
     override fun onCreateView(
@@ -79,6 +81,7 @@ class SubredditFragment : BaseFragment(), PostListAdapter.PostClickListener, Vie
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        uiViewModel.setNavigationVisibility(false)
         initResultListener()
         initAppBar()
         initRecyclerView()
@@ -163,7 +166,7 @@ class SubredditFragment : BaseFragment(), PostListAdapter.PostClickListener, Vie
     private fun initAppBar() {
         with(bindingContent) {
             sortCard.setOnClickListener { showSortDialog() }
-            backCard.setOnClickListener { activity?.onBackPressed() }
+            backCard.setOnClickListener { onBackPressed() }
             searchCard.setOnClickListener { showSearchFragment() }
         }
     }
@@ -224,16 +227,9 @@ class SubredditFragment : BaseFragment(), PostListAdapter.PostClickListener, Vie
     }
 
     private fun showSearchFragment() {
-        // TODO: Navigation
-        parentFragmentManager.commit {
-            setReorderingAllowed(true)
-            add(
-                R.id.fragment_container,
-                SubredditSearchFragment.newInstance(viewModel.subreddit.value!!),
-                SubredditSearchFragment.TAG
-            )
-            addToBackStack(null)
-        }
+        findNavController().navigate(
+            SubredditFragmentDirections.openSearch(viewModel.subreddit.value!!)
+        )
     }
 
     private fun showSortDialog() {
@@ -244,6 +240,7 @@ class SubredditFragment : BaseFragment(), PostListAdapter.PostClickListener, Vie
         if (binding.drawerLayout.isDrawerOpen(GravityCompat.END)) {
             binding.drawerLayout.closeDrawer(GravityCompat.END)
         } else {
+            uiViewModel.setNavigationVisibility(true)
             super.onBackPressed()
         }
     }
@@ -264,17 +261,6 @@ class SubredditFragment : BaseFragment(), PostListAdapter.PostClickListener, Vie
     }
 
     companion object {
-        private const val KEY_SUBREDDIT = "KEY_SUBREDDIT"
-
         private const val DESCRIPTION_MAX_HEIGHT = 200F
-
-        @JvmStatic
-        fun newInstance(subreddit: String) = SubredditFragment().apply {
-            arguments = bundleOf(
-                KEY_SUBREDDIT to subreddit
-            )
-        }
-
-        fun newInstance() = SubredditFragment()
     }
 }
