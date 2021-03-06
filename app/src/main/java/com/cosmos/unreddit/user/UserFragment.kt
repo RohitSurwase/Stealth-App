@@ -5,13 +5,16 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.activityViewModels
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager2.widget.ViewPager2
 import coil.load
 import coil.size.Precision
 import coil.size.Scale
 import com.cosmos.unreddit.R
+import com.cosmos.unreddit.UiViewModel
 import com.cosmos.unreddit.base.BaseFragment
 import com.cosmos.unreddit.databinding.FragmentUserBinding
 import com.cosmos.unreddit.databinding.ItemListContentBinding
@@ -42,7 +45,10 @@ class UserFragment : BaseFragment(), PostListAdapter.PostClickListener {
     private var _binding: FragmentUserBinding? = null
     private val binding get() = _binding!!
 
-    private val viewModel: UserViewModel by activityViewModels()
+    private val viewModel: UserViewModel by viewModels()
+    private val uiViewModel: UiViewModel by activityViewModels()
+
+    private val args: UserFragmentArgs by navArgs()
 
     private var userPostJob: Job? = null
     private var userCommentJob: Job? = null
@@ -52,6 +58,11 @@ class UserFragment : BaseFragment(), PostListAdapter.PostClickListener {
 
     @Inject
     lateinit var repository: PostListRepository
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        viewModel.setUser(args.user)
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -64,6 +75,7 @@ class UserFragment : BaseFragment(), PostListAdapter.PostClickListener {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        uiViewModel.setNavigationVisibility(false)
         initResultListener()
         initAppBar()
         initViewPager()
@@ -228,6 +240,11 @@ class UserFragment : BaseFragment(), PostListAdapter.PostClickListener {
 
     override fun onLinkLongClick(link: String) {
         TODO("Not yet implemented")
+    }
+
+    override fun onBackPressed() {
+        uiViewModel.setNavigationVisibility(true)
+        super.onBackPressed()
     }
 
     override fun onDestroyView() {

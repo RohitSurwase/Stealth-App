@@ -1,7 +1,6 @@
 package com.cosmos.unreddit.search
 
 import android.content.Context
-import android.content.Intent
 import android.os.Bundle
 import android.view.Gravity
 import android.view.LayoutInflater
@@ -32,7 +31,6 @@ import com.cosmos.unreddit.postlist.PostListAdapter
 import com.cosmos.unreddit.postlist.PostListRepository
 import com.cosmos.unreddit.sort.SortFragment
 import com.cosmos.unreddit.util.RecyclerViewStateAdapter
-import com.cosmos.unreddit.util.RedditUri
 import com.cosmos.unreddit.util.hideSoftKeyboard
 import com.cosmos.unreddit.util.setSortingListener
 import com.cosmos.unreddit.util.showSoftKeyboard
@@ -346,9 +344,7 @@ class SearchFragment : BaseFragment() {
     }
 
     private fun onUserClick(user: String) {
-        val intent = Intent(Intent.ACTION_VIEW)
-        intent.data = RedditUri.getUserUri(user)
-        startActivity(intent)
+        findNavController().navigate(SearchFragmentDirections.openUser(user))
     }
 
     private fun showSortDialog() {

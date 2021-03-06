@@ -14,7 +14,7 @@
         android:id="@+id/layout_root"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:context=".user.UserActivity"
+        tools:context=".MainActivity"
         app:layoutDescription="@xml/scene_user"
         tools:showPaths="true">
 
