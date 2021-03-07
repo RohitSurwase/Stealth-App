@@ -19,6 +19,8 @@ import androidx.transition.Slide
 import androidx.transition.Transition
 import androidx.transition.TransitionManager
 import androidx.transition.TransitionSet
+import com.cosmos.unreddit.R
+import com.cosmos.unreddit.UiViewModel
 import com.cosmos.unreddit.databinding.FragmentSubscriptionsBinding
 import com.cosmos.unreddit.search.SearchFragment
 import com.cosmos.unreddit.util.hideSoftKeyboard
@@ -33,6 +35,7 @@ class SubscriptionsFragment : Fragment() {
     private val binding get() = _binding!!
 
     private val viewModel: SubscriptionsViewModel by activityViewModels()
+    private val uiViewModel: UiViewModel by activityViewModels()
 
     private lateinit var adapter: SubscriptionsAdapter
 
@@ -49,6 +52,12 @@ class SubscriptionsFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        findNavController().addOnDestinationChangedListener { _, destination, _ ->
+            when (destination.id) {
+                R.id.subscriptionsFragment -> uiViewModel.setNavigationVisibility(true)
+                else -> uiViewModel.setNavigationVisibility(false)
+            }
+        }
         initAppBar()
         initRecyclerView()
         bindViewModel()

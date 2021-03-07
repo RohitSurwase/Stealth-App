@@ -4,7 +4,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.navArgs
@@ -14,7 +13,6 @@ import coil.load
 import coil.size.Precision
 import coil.size.Scale
 import com.cosmos.unreddit.R
-import com.cosmos.unreddit.UiViewModel
 import com.cosmos.unreddit.base.BaseFragment
 import com.cosmos.unreddit.databinding.FragmentUserBinding
 import com.cosmos.unreddit.databinding.ItemListContentBinding
@@ -45,7 +43,6 @@ class UserFragment : BaseFragment(), PostListAdapter.PostClickListener {
     private val binding get() = _binding!!
 
     private val viewModel: UserViewModel by viewModels()
-    private val uiViewModel: UiViewModel by activityViewModels()
 
     private val args: UserFragmentArgs by navArgs()
 
@@ -74,7 +71,6 @@ class UserFragment : BaseFragment(), PostListAdapter.PostClickListener {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        uiViewModel.setNavigationVisibility(false)
         initResultListener()
         initAppBar()
         initViewPager()
@@ -211,11 +207,6 @@ class UserFragment : BaseFragment(), PostListAdapter.PostClickListener {
                 listContent.betterSmoothScrollToPosition(0)
             }
         }
-    }
-
-    override fun onBackPressed() {
-        uiViewModel.setNavigationVisibility(true)
-        super.onBackPressed()
     }
 
     override fun onDestroyView() {

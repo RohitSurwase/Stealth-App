@@ -10,7 +10,6 @@ import android.view.animation.AnimationUtils
 import android.view.inputmethod.EditorInfo
 import androidx.activity.OnBackPressedCallback
 import androidx.core.view.isVisible
-import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
@@ -22,7 +21,6 @@ import androidx.transition.TransitionSet
 import androidx.viewpager2.widget.ViewPager2
 import com.cosmos.unreddit.R
 import com.cosmos.unreddit.SubscriptionsDirections
-import com.cosmos.unreddit.UiViewModel
 import com.cosmos.unreddit.api.RedditApi
 import com.cosmos.unreddit.base.BaseFragment
 import com.cosmos.unreddit.databinding.FragmentSearchBinding
@@ -52,7 +50,6 @@ class SearchFragment : BaseFragment() {
     private val binding get() = _binding!!
 
     private val viewModel: SearchViewModel by viewModels()
-    private val uiViewModel: UiViewModel by activityViewModels()
 
     private val args: SearchFragmentArgs by navArgs()
 
@@ -80,8 +77,6 @@ class SearchFragment : BaseFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        uiViewModel.setNavigationVisibility(false)
-
         val query = args.query
 
         binding.appBar.searchInput.setText(query)
@@ -105,7 +100,6 @@ class SearchFragment : BaseFragment() {
                 if (binding.appBar.searchInput.isVisible) {
                     showSearchInput(false)
                 } else {
-                    uiViewModel.setNavigationVisibility(true)
                     isEnabled = false
                     requireActivity().onBackPressed()
                 }

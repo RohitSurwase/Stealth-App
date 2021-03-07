@@ -4,13 +4,11 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager2.widget.ViewPager2
-import com.cosmos.unreddit.UiViewModel
 import com.cosmos.unreddit.base.BaseFragment
 import com.cosmos.unreddit.databinding.FragmentMediaViewerBinding
 import com.cosmos.unreddit.model.MediaType
@@ -25,7 +23,6 @@ class MediaViewerFragment : BaseFragment() {
     private val binding get() = _binding!!
 
     private val viewModel: MediaViewerViewModel by viewModels()
-    private val uiViewModel: UiViewModel by activityViewModels()
 
     private val args: MediaViewerFragmentArgs by navArgs()
 
@@ -52,7 +49,6 @@ class MediaViewerFragment : BaseFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        uiViewModel.setNavigationVisibility(false)
         initRecyclerView()
         initViewPager()
         bindViewModel()
@@ -108,11 +104,6 @@ class MediaViewerFragment : BaseFragment() {
 
     private fun onThumbnailClick(position: Int) {
         binding.viewPager.currentItem = position
-    }
-
-    override fun onBackPressed() {
-        uiViewModel.setNavigationVisibility(true)
-        super.onBackPressed()
     }
 
     override fun onDestroyView() {

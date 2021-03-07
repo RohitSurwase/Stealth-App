@@ -7,7 +7,6 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.core.view.GravityCompat
-import androidx.fragment.app.activityViewModels
 import androidx.hilt.navigation.fragment.hiltNavGraphViewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
@@ -19,7 +18,6 @@ import coil.load
 import coil.size.Precision
 import coil.size.Scale
 import com.cosmos.unreddit.R
-import com.cosmos.unreddit.UiViewModel
 import com.cosmos.unreddit.base.BaseFragment
 import com.cosmos.unreddit.databinding.FragmentSubredditBinding
 import com.cosmos.unreddit.databinding.LayoutSubredditAboutBinding
@@ -52,7 +50,6 @@ class SubredditFragment : BaseFragment(), PostListAdapter.PostClickListener, Vie
     private val bindingAbout get() = _bindingAbout!!
 
     private val viewModel: SubredditViewModel by hiltNavGraphViewModels(R.id.subreddit)
-    private val uiViewModel: UiViewModel by activityViewModels()
 
     private val args: SubredditFragmentArgs by navArgs()
 
@@ -81,7 +78,6 @@ class SubredditFragment : BaseFragment(), PostListAdapter.PostClickListener, Vie
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        uiViewModel.setNavigationVisibility(false)
         initResultListener()
         initAppBar()
         initRecyclerView()
@@ -240,7 +236,6 @@ class SubredditFragment : BaseFragment(), PostListAdapter.PostClickListener, Vie
         if (binding.drawerLayout.isDrawerOpen(GravityCompat.END)) {
             binding.drawerLayout.closeDrawer(GravityCompat.END)
         } else {
-            uiViewModel.setNavigationVisibility(true)
             super.onBackPressed()
         }
     }
