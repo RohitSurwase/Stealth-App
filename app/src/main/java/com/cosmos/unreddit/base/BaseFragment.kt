@@ -11,6 +11,7 @@ import com.cosmos.unreddit.R
 import com.cosmos.unreddit.SubredditDirections
 import com.cosmos.unreddit.UserDirections
 import com.cosmos.unreddit.ViewerDirections
+import com.cosmos.unreddit.model.GalleryMedia
 import com.cosmos.unreddit.model.MediaType
 import com.cosmos.unreddit.post.PostEntity
 import com.cosmos.unreddit.postdetails.PostDetailsFragment
@@ -54,20 +55,14 @@ open class BaseFragment : Fragment(), PostListAdapter.PostClickListener,
 
     override fun onImageClick(post: PostEntity) {
         if (post.gallery.isNotEmpty()) {
-            findNavController().navigate(
-                ViewerDirections.openGallery(post.gallery.toTypedArray())
-            )
+            openGallery(post.gallery)
         } else {
-            findNavController().navigate(
-                ViewerDirections.openMedia(post.mediaUrl, post.mediaType)
-            )
+            openMedia(post.mediaUrl, post.mediaType)
         }
     }
 
     override fun onVideoClick(post: PostEntity) {
-        findNavController().navigate(
-            ViewerDirections.openMedia(post.mediaUrl, post.mediaType)
-        )
+        openMedia(post.mediaUrl, post.mediaType)
     }
 
     override fun onLinkClick(post: PostEntity) {
@@ -78,36 +73,25 @@ open class BaseFragment : Fragment(), PostListAdapter.PostClickListener,
         when (val mediaType = LinkUtil.getLinkType(link)) {
             MediaType.REDDIT_SUBREDDIT -> {
                 val subreddit = link.removePrefix("/r/")
-                findNavController().navigate(
-                    SubredditDirections.openSubreddit(subreddit)
-                )
+                openSubreddit(subreddit)
             }
 
             MediaType.REDDIT_USER -> {
                 val user = link.removePrefix("/u/")
-                findNavController().navigate(
-                    UserDirections.openUser(user)
-                )
+                openUser(user)
             }
 
-            MediaType.REDDIT_LINK -> {
-                findNavController().navigate(Uri.parse(link))
-            }
+            MediaType.REDDIT_LINK -> openRedditLink(link)
 
             MediaType.IMGUR_ALBUM,
             MediaType.IMGUR_GALLERY,
-            MediaType.IMGUR_LINK,
             MediaType.IMGUR_GIF,
             MediaType.IMGUR_VIDEO,
             MediaType.IMGUR_IMAGE,
             MediaType.REDGIFS,
             MediaType.STREAMABLE,
             MediaType.IMAGE,
-            MediaType.VIDEO -> {
-                findNavController().navigate(
-                    ViewerDirections.openMedia(link, mediaType)
-                )
-            }
+            MediaType.VIDEO -> openMedia(link, mediaType)
 
             else -> openExternalLink(link)
         }
@@ -115,5 +99,25 @@ open class BaseFragment : Fragment(), PostListAdapter.PostClickListener,
 
     override fun onLinkLongClick(link: String) {
         TODO("Not yet implemented")
+    }
+
+    open fun openGallery(images: List<GalleryMedia>) {
+        findNavController().navigate(ViewerDirections.openGallery(images.toTypedArray()))
+    }
+
+    open fun openMedia(link: String, mediaType: MediaType) {
+        findNavController().navigate(ViewerDirections.openMedia(link, mediaType))
+    }
+
+    open fun openSubreddit(subreddit: String) {
+        findNavController().navigate(SubredditDirections.openSubreddit(subreddit))
+    }
+
+    open fun openUser(user: String) {
+        findNavController().navigate(UserDirections.openUser(user))
+    }
+
+    open fun openRedditLink(link: String) {
+        findNavController().navigate(Uri.parse(link))
     }
 }

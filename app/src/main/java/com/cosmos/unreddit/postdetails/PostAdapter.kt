@@ -5,18 +5,18 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import coil.load
-import coil.size.Precision
-import coil.size.Scale
 import com.cosmos.unreddit.R
 import com.cosmos.unreddit.databinding.ItemPostHeaderBinding
 import com.cosmos.unreddit.model.MediaType
 import com.cosmos.unreddit.model.PosterType
 import com.cosmos.unreddit.post.PostEntity
 import com.cosmos.unreddit.post.PostType
+import com.cosmos.unreddit.postlist.PostListAdapter
 import com.cosmos.unreddit.util.applyGradient
 import com.cosmos.unreddit.view.RedditView
 
 class PostAdapter(
+    private val postClickListener: PostListAdapter.PostClickListener,
     private val onLinkClickListener: RedditView.OnLinkClickListener? = null
 ) : RecyclerView.Adapter<PostAdapter.ViewHolder>() {
 
@@ -79,15 +79,17 @@ class PostAdapter(
 
                 when (post.type) {
                     PostType.TEXT -> bindText(post)
-                    PostType.IMAGE, PostType.LINK, PostType.VIDEO -> {
-                        with(imagePost) {
-                            visibility = View.VISIBLE
-                            load(preview) {
-                                crossfade(true)
-                                scale(Scale.FILL)
-                                precision(Precision.AUTOMATIC)
-                            }
-                        }
+                    PostType.IMAGE -> {
+                        bindImage()
+                        imagePost.setOnClickListener { postClickListener.onImageClick(post) }
+                    }
+                    PostType.LINK -> {
+                        bindImage()
+                        imagePost.setOnClickListener { postClickListener.onLinkClick(post) }
+                    }
+                    PostType.VIDEO -> {
+                        bindImage()
+                        imagePost.setOnClickListener { postClickListener.onVideoClick(post) }
                     }
                 }
 
@@ -179,6 +181,17 @@ class PostAdapter(
                     setAwards(post.awards)
                 } else {
                     visibility = View.GONE
+                }
+            }
+        }
+
+        private fun bindImage() {
+            with(binding.imagePost) {
+                visibility = View.VISIBLE
+                load(preview) {
+                    crossfade(true)
+                    scale(coil.size.Scale.FILL)
+                    precision(coil.size.Precision.AUTOMATIC)
                 }
             }
         }

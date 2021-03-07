@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.os.bundleOf
+import androidx.fragment.app.FragmentTransaction
 import androidx.fragment.app.setFragmentResult
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.asLiveData
@@ -14,6 +15,9 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.cosmos.unreddit.R
 import com.cosmos.unreddit.base.BaseFragment
 import com.cosmos.unreddit.databinding.FragmentPostDetailsBinding
+import com.cosmos.unreddit.mediaviewer.MediaViewerFragment
+import com.cosmos.unreddit.model.GalleryMedia
+import com.cosmos.unreddit.model.MediaType
 import com.cosmos.unreddit.post.PostEntity
 import com.cosmos.unreddit.postlist.PostListRepository
 import com.cosmos.unreddit.sort.SortFragment
@@ -88,7 +92,7 @@ class PostDetailsFragment :
     }
 
     private fun initRecyclerView() {
-        postAdapter = PostAdapter(this)
+        postAdapter = PostAdapter(this, this)
         commentAdapter = CommentAdapter(
             requireContext(),
             repository,
@@ -148,6 +152,14 @@ class PostDetailsFragment :
         )
     }
 
+    private fun showMediaViewer(mediaViewerFragment: MediaViewerFragment) {
+        parentFragmentManager.beginTransaction()
+            .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
+            .add(R.id.fragment_container, mediaViewerFragment, MediaViewerFragment.TAG)
+            .addToBackStack(null)
+            .commit()
+    }
+
     private fun showNavigation(show: Boolean) {
         setFragmentResult(REQUEST_KEY_NAVIGATION, bundleOf(BUNDLE_KEY_NAVIGATION to show))
     }
@@ -175,6 +187,14 @@ class PostDetailsFragment :
     override fun onDragDismissed() {
         showNavigation(true)
         parentFragmentManager.popBackStack()
+    }
+
+    override fun openGallery(images: List<GalleryMedia>) {
+        showMediaViewer(MediaViewerFragment.newInstance(images))
+    }
+
+    override fun openMedia(link: String, mediaType: MediaType) {
+        showMediaViewer(MediaViewerFragment.newInstance(link, mediaType))
     }
 
     companion object {
