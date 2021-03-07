@@ -7,7 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.core.view.GravityCompat
-import androidx.hilt.navigation.fragment.hiltNavGraphViewModels
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
@@ -49,7 +49,7 @@ class SubredditFragment : BaseFragment(), PostListAdapter.PostClickListener, Vie
     private var _bindingAbout: LayoutSubredditAboutBinding? = null
     private val bindingAbout get() = _bindingAbout!!
 
-    private val viewModel: SubredditViewModel by hiltNavGraphViewModels(R.id.subreddit)
+    private val viewModel: SubredditViewModel by viewModels()
 
     private val args: SubredditFragmentArgs by navArgs()
 
@@ -224,7 +224,10 @@ class SubredditFragment : BaseFragment(), PostListAdapter.PostClickListener, Vie
 
     private fun showSearchFragment() {
         findNavController().navigate(
-            SubredditFragmentDirections.openSearch(viewModel.subreddit.value!!)
+            SubredditFragmentDirections.openSearch(
+                viewModel.subreddit.value!!,
+                viewModel.about.value?.icon
+            )
         )
     }
 

@@ -7,7 +7,6 @@ import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
 import androidx.core.view.isVisible
 import androidx.fragment.app.viewModels
-import androidx.hilt.navigation.fragment.hiltNavGraphViewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.navArgs
 import androidx.paging.LoadState
@@ -40,7 +39,6 @@ class SubredditSearchFragment : BaseFragment(), PostListAdapter.PostClickListene
     private var _binding: FragmentSubredditSearchBinding? = null
     private val binding get() = _binding!!
 
-    private val subredditViewModel: SubredditViewModel by hiltNavGraphViewModels(R.id.subreddit)
     private val viewModel: SubredditSearchViewModel by viewModels()
 
     private val args: SubredditSearchFragmentArgs by navArgs()
@@ -78,12 +76,6 @@ class SubredditSearchFragment : BaseFragment(), PostListAdapter.PostClickListene
     }
 
     private fun bindViewModel() {
-        subredditViewModel.about.observe(
-            viewLifecycleOwner,
-            { subreddit ->
-                binding.appBar.subredditImage.loadSubredditIcon(subreddit.icon)
-            }
-        )
         viewLifecycleOwner.lifecycleScope.launchWhenStarted {
             viewModel.query.collectLatest { query ->
                 query?.let {
@@ -133,6 +125,7 @@ class SubredditSearchFragment : BaseFragment(), PostListAdapter.PostClickListene
 
     private fun initAppBar() {
         with(binding.appBar) {
+            subredditImage.loadSubredditIcon(args.icon)
             sortCard.setOnClickListener { showSortDialog() }
             cancelCard.setOnClickListener { cancelSearch() }
             backCard.setOnClickListener { activity?.onBackPressed() }

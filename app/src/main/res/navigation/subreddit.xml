@@ -35,6 +35,10 @@
             <argument
                 android:name="subreddit"
                 app:argType="string" />
+            <argument
+                android:name="icon"
+                app:argType="string"
+                app:nullable="true"/>
         </action>
     </fragment>
 
@@ -46,6 +50,11 @@
         <argument
             android:name="subreddit"
             app:argType="string"/>
+        <argument
+            android:name="icon"
+            app:argType="string"
+            app:nullable="true"
+            android:defaultValue="@null"/>
     </fragment>
 
     <action
