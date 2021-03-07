@@ -18,7 +18,6 @@ import com.cosmos.unreddit.UiViewModel
 import com.cosmos.unreddit.base.BaseFragment
 import com.cosmos.unreddit.databinding.FragmentUserBinding
 import com.cosmos.unreddit.databinding.ItemListContentBinding
-import com.cosmos.unreddit.post.PostEntity
 import com.cosmos.unreddit.post.Sorting
 import com.cosmos.unreddit.postlist.PostListAdapter
 import com.cosmos.unreddit.postlist.PostListRepository
@@ -212,34 +211,6 @@ class UserFragment : BaseFragment(), PostListAdapter.PostClickListener {
                 listContent.betterSmoothScrollToPosition(0)
             }
         }
-    }
-
-    override fun onClick(post: PostEntity) {
-        TODO("Not yet implemented")
-    }
-
-    override fun onLongClick(post: PostEntity) {
-        TODO("Not yet implemented")
-    }
-
-    override fun onImageClick(post: PostEntity) {
-        TODO("Not yet implemented")
-    }
-
-    override fun onVideoClick(post: PostEntity) {
-        TODO("Not yet implemented")
-    }
-
-    override fun onLinkClick(post: PostEntity) {
-        TODO("Not yet implemented")
-    }
-
-    override fun onLinkClick(link: String) {
-        TODO("Not yet implemented")
-    }
-
-    override fun onLinkLongClick(link: String) {
-        TODO("Not yet implemented")
     }
 
     override fun onBackPressed() {

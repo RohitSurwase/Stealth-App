@@ -1,7 +1,6 @@
 package com.cosmos.unreddit.postdetails
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -9,6 +8,7 @@ import androidx.core.os.bundleOf
 import androidx.fragment.app.setFragmentResult
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.asLiveData
+import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.cosmos.unreddit.R
@@ -33,6 +33,8 @@ class PostDetailsFragment :
 
     private val viewModel: PostDetailsViewModel by viewModels()
 
+    private val args: PostDetailsFragmentArgs by navArgs()
+
     private val contentRadius by lazy { resources.getDimension(R.dimen.subreddit_content_radius) }
     private val contentElevation by lazy {
         resources.getDimension(R.dimen.subreddit_content_elevation)
@@ -46,11 +48,16 @@ class PostDetailsFragment :
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val post = arguments?.getParcelable(KEY_POST_ENTITY) as? PostEntity
-        post?.let {
-            viewModel.setPost(it)
-            viewModel.setSorting(it.suggestedSorting)
-            viewModel.setPermalink(it.permalink)
+        if (args.subreddit != null && args.id != null) {
+            val permalink = "/r/${args.subreddit}/comments/${args.id}"
+            viewModel.setPermalink(permalink)
+        } else {
+            val post = arguments?.getParcelable(KEY_POST_ENTITY) as? PostEntity
+            post?.let {
+                viewModel.setPost(it)
+                viewModel.setSorting(it.suggestedSorting)
+                viewModel.setPermalink(it.permalink)
+            }
         }
     }
 
@@ -162,14 +169,6 @@ class PostDetailsFragment :
     override fun onDragDismissed() {
         showNavigation(true)
         parentFragmentManager.popBackStack()
-    }
-
-    override fun onLinkClick(link: String) {
-        Log.e(TAG, link)
-    }
-
-    override fun onLinkLongClick(link: String) {
-        Log.e(TAG, link)
     }
 
     companion object {

@@ -5,17 +5,56 @@
     android:id="@+id/user"
     app:startDestination="@id/userFragment">
 
+    <include app:graph="@navigation/viewer" />
+
     <fragment
         android:id="@+id/userFragment"
         android:name="com.cosmos.unreddit.user.UserFragment"
         android:label="UserFragment"
         tools:layout="@layout/fragment_user">
         <deepLink
-            android:id="@+id/deepLink"
+            android:id="@+id/deepLinkUserInternal"
             app:uri="content://reddit/user/{user}" />
+        <deepLink
+            android:id="@+id/deepLinkUserExternal"
+            app:uri="www.reddit.com/user/{user}" />
+        <deepLink
+            android:id="@+id/deepLinkOldUserExternal"
+            app:uri="old.reddit.com/user/{user}" />
+        <deepLink
+            android:id="@+id/deepLinkNpUserExternal"
+            app:uri="np.reddit.com/user/{user}" />
+
+        <argument
+            android:name="user"
+            app:argType="string" />
+
+        <action
+            android:id="@+id/openGallery"
+            app:destination="@id/viewer">
+            <argument
+                android:name="images"
+                app:argType="com.cosmos.unreddit.model.GalleryMedia[]" />
+        </action>
+
+        <action
+            android:id="@+id/openMedia"
+            app:destination="@id/viewer">
+            <argument
+                android:name="link"
+                app:argType="string" />
+            <argument
+                android:name="type"
+                app:argType="com.cosmos.unreddit.model.MediaType" />
+        </action>
+    </fragment>
+
+    <action
+        android:id="@+id/openUser"
+        app:destination="@id/userFragment">
         <argument
             android:name="user"
             app:argType="string"/>
-    </fragment>
+    </action>
 
 </navigation>

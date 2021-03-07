@@ -2,6 +2,8 @@ package com.cosmos.unreddit.util
 
 import android.app.Activity
 import android.content.Context
+import android.content.Intent
+import android.net.Uri
 import android.view.View
 import android.view.WindowManager
 import android.view.inputmethod.InputMethodManager
@@ -65,6 +67,16 @@ fun Fragment.setSortingListener(result: (Sorting?) -> Unit) {
     ) { _, bundle ->
         val sorting = bundle.getParcelable(SortFragment.BUNDLE_KEY_SORTING) as? Sorting
         result(sorting)
+    }
+}
+
+fun Fragment.openExternalLink(url: String) {
+    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+
+    val packageManager = activity?.packageManager ?: return
+
+    if (intent.resolveActivity(packageManager) != null) {
+        startActivity(intent)
     }
 }
 

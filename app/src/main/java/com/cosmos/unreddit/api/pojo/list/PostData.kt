@@ -133,6 +133,8 @@ data class PostData(
                 when {
                     url.contains("imgur.com/a/") -> MediaType.IMGUR_ALBUM
                     url.contains("imgur.com/gallery/") -> MediaType.IMGUR_GALLERY
+                    url.endsWith(".gifv") || url.endsWith(".gif") -> MediaType.IMGUR_GIF
+                    url.endsWith(".mp4") -> MediaType.IMGUR_VIDEO
                     else -> MediaType.IMGUR_LINK
                 }
             }
@@ -202,7 +204,7 @@ data class PostData(
             MediaType.IMGUR_LINK,
             MediaType.IMAGE -> PostType.IMAGE
 
-            MediaType.LINK -> PostType.LINK
+            else -> PostType.LINK
         }
 
     fun getPreviewUrl(): String {
