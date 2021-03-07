@@ -42,16 +42,16 @@ class PostAdapter(
 
     override fun getItemCount(): Int = 1
 
-    fun setPost(post: PostEntity, firstBind: Boolean) {
-        this.post = post
-
+    fun setPost(post: PostEntity, fromCache: Boolean) {
         var payload: Any? = null
 
-        if (firstBind) {
+        if (fromCache || this.post == null) {
             preview = post.preview
         } else {
             payload = post
         }
+
+        this.post = post
 
         notifyItemChanged(0, payload)
     }

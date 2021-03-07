@@ -1,7 +1,6 @@
 package com.cosmos.unreddit.postdetails
 
 import androidx.lifecycle.LiveData
-import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.asLiveData
 import androidx.lifecycle.liveData
@@ -28,10 +27,6 @@ import javax.inject.Inject
 @HiltViewModel
 class PostDetailsViewModel
 @Inject constructor(private val repository: PostListRepository) : ViewModel() {
-
-    private val _cachedPost: MediatorLiveData<PostEntity> = MediatorLiveData()
-    val cachedPost: LiveData<PostEntity>
-        get() = _cachedPost
 
     private val _sorting: MutableStateFlow<Sorting> = MutableStateFlow(DEFAULT_SORTING)
     val sorting: StateFlow<Sorting> = _sorting
@@ -69,12 +64,6 @@ class PostDetailsViewModel
                 }
             }
             comments
-        }
-    }
-
-    fun setPost(post: PostEntity) {
-        if (_cachedPost.value != post) {
-            _cachedPost.value = post
         }
     }
 

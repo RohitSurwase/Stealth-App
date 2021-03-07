@@ -54,7 +54,6 @@ class PostDetailsFragment :
         } else {
             val post = arguments?.getParcelable(KEY_POST_ENTITY) as? PostEntity
             post?.let {
-                viewModel.setPost(it)
                 viewModel.setSorting(it.suggestedSorting)
                 viewModel.setPermalink(it.permalink)
             }
@@ -73,10 +72,18 @@ class PostDetailsFragment :
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         showNavigation(false)
+
         binding.root.addListener(this)
+
         initResultListener()
         initAppBar()
         initRecyclerView()
+
+        val post = arguments?.getParcelable(KEY_POST_ENTITY) as? PostEntity
+        post?.let {
+            bindPost(it, true)
+        }
+
         bindViewModel()
     }
 
@@ -96,7 +103,6 @@ class PostDetailsFragment :
     }
 
     private fun bindViewModel() {
-        viewModel.cachedPost.observe(viewLifecycleOwner, { bindPost(it, true) })
         viewModel.post.observe(viewLifecycleOwner, { bindPost(it, false) })
         viewModel.comments.observe(
             viewLifecycleOwner,
@@ -128,9 +134,9 @@ class PostDetailsFragment :
         }
     }
 
-    private fun bindPost(post: PostEntity, firstBind: Boolean) {
+    private fun bindPost(post: PostEntity, fromCache: Boolean) {
         binding.appBar.label.text = post.title
-        postAdapter.setPost(post, firstBind)
+        postAdapter.setPost(post, fromCache)
         commentAdapter.setLinkId(post.id)
     }
 
