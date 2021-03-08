@@ -28,6 +28,9 @@ class MediaViewerFragment : BaseFragment() {
 
     private val args: MediaViewerFragmentArgs by navArgs()
 
+    // Flag to check if fragment was open from FragmentManager or Navigation
+    private var isLegacyNavigation: Boolean = false
+
     private lateinit var mediaAdapter: MediaViewerAdapter
     private lateinit var thumbnailAdapter: MediaViewerThumbnailAdapter
 
@@ -122,7 +125,17 @@ class MediaViewerFragment : BaseFragment() {
                         ?: MediaType.LINK
                     viewModel.loadMedia(link, type)
                 }
+                isLegacyNavigation = true
             }
+        }
+    }
+
+    override fun onBackPressed() {
+        if (isLegacyNavigation) {
+            // Prevent onBackPressed event to be passed to PostDetailsFragment and show bottom nav
+            parentFragmentManager.popBackStack()
+        } else {
+            super.onBackPressed()
         }
     }
 
