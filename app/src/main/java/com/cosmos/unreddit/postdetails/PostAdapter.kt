@@ -4,7 +4,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
-import coil.load
 import com.cosmos.unreddit.R
 import com.cosmos.unreddit.databinding.ItemPostHeaderBinding
 import com.cosmos.unreddit.model.MediaType
@@ -12,10 +11,13 @@ import com.cosmos.unreddit.model.PosterType
 import com.cosmos.unreddit.post.PostEntity
 import com.cosmos.unreddit.post.PostType
 import com.cosmos.unreddit.postlist.PostListAdapter
+import com.cosmos.unreddit.preferences.ContentPreferences
 import com.cosmos.unreddit.util.applyGradient
+import com.cosmos.unreddit.util.load
 import com.cosmos.unreddit.view.RedditView
 
 class PostAdapter(
+    private val contentPreferences: ContentPreferences,
     private val postClickListener: PostListAdapter.PostClickListener,
     private val onLinkClickListener: RedditView.OnLinkClickListener? = null
 ) : RecyclerView.Adapter<PostAdapter.ViewHolder>() {
@@ -80,15 +82,15 @@ class PostAdapter(
                 when (post.type) {
                     PostType.TEXT -> bindText(post)
                     PostType.IMAGE -> {
-                        bindImage()
+                        bindImage(post)
                         imagePost.setOnClickListener { postClickListener.onImageClick(post) }
                     }
                     PostType.LINK -> {
-                        bindImage()
+                        bindImage(post)
                         imagePost.setOnClickListener { postClickListener.onLinkClick(post) }
                     }
                     PostType.VIDEO -> {
-                        bindImage()
+                        bindImage(post)
                         imagePost.setOnClickListener { postClickListener.onVideoClick(post) }
                     }
                 }
@@ -185,14 +187,10 @@ class PostAdapter(
             }
         }
 
-        private fun bindImage() {
+        private fun bindImage(post: PostEntity) {
             with(binding.imagePost) {
                 visibility = View.VISIBLE
-                load(preview) {
-                    crossfade(true)
-                    scale(coil.size.Scale.FILL)
-                    precision(coil.size.Precision.AUTOMATIC)
-                }
+                load(preview, !post.shouldShowPreview(contentPreferences))
             }
         }
     }

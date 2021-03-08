@@ -9,6 +9,7 @@ import androidx.fragment.app.FragmentTransaction
 import androidx.fragment.app.setFragmentResult
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.asLiveData
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -20,11 +21,14 @@ import com.cosmos.unreddit.model.GalleryMedia
 import com.cosmos.unreddit.model.MediaType
 import com.cosmos.unreddit.post.PostEntity
 import com.cosmos.unreddit.postlist.PostListRepository
+import com.cosmos.unreddit.repository.PreferencesRepository
 import com.cosmos.unreddit.sort.SortFragment
 import com.cosmos.unreddit.util.betterSmoothScrollToPosition
 import com.cosmos.unreddit.util.setSortingListener
 import com.cosmos.unreddit.view.ElasticDragDismissFrameLayout
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.runBlocking
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -50,8 +54,16 @@ class PostDetailsFragment :
     @Inject
     lateinit var repository: PostListRepository
 
+    @Inject
+    lateinit var preferencesRepository: PreferencesRepository
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        lifecycleScope.launchWhenStarted {
+            preferencesRepository.getContentPreferences().first()
+        }
+
         if (args.subreddit != null && args.id != null) {
             val permalink = "/r/${args.subreddit}/comments/${args.id}"
             viewModel.setPermalink(permalink)
@@ -92,7 +104,10 @@ class PostDetailsFragment :
     }
 
     private fun initRecyclerView() {
-        postAdapter = PostAdapter(this, this)
+        val contentPreferences = runBlocking {
+            preferencesRepository.getContentPreferences().first()
+        }
+        postAdapter = PostAdapter(contentPreferences, this, this)
         commentAdapter = CommentAdapter(
             requireContext(),
             repository,

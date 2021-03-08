@@ -15,6 +15,7 @@ import com.cosmos.unreddit.model.GalleryMedia
 import com.cosmos.unreddit.model.MediaType
 import com.cosmos.unreddit.model.PosterType
 import com.cosmos.unreddit.parser.RedditText
+import com.cosmos.unreddit.preferences.ContentPreferences
 import com.cosmos.unreddit.util.PostUtil
 import com.cosmos.unreddit.util.formatNumber
 import com.cosmos.unreddit.util.getPercentageValue
@@ -187,5 +188,10 @@ data class PostEntity(
     fun hasFlairs(): Boolean {
         return isOver18 || isSpoiler || isOC || !flair.isEmpty() || isStickied || isArchived ||
                 isLocked
+    }
+
+    fun shouldShowPreview(contentPreferences: ContentPreferences): Boolean {
+        return (contentPreferences.showNsfwPreview || !isOver18) &&
+                (contentPreferences.showSpoilerPreview || !isSpoiler)
     }
 }
