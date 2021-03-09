@@ -112,6 +112,10 @@ class PostAdapter(
                         }
                     }
                 }
+
+                includePostMetrics.buttonMore.setOnClickListener {
+                    postClickListener.onMenuClick(post)
+                }
             }
         }
 
