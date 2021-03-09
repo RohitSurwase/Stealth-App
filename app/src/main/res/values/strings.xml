@@ -86,5 +86,6 @@
 
     <string name="menu_open_link">Open Externally</string>
     <string name="menu_share_link">Share Link</string>
+    <string name="menu_copy_link">Copy Link</string>
     <string name="menu_share_post">Share Post</string>
 </resources>

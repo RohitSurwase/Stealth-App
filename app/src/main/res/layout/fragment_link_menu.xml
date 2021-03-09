@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+        <variable
+            name="link"
+            type="String" />
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="@dimen/dialog_menu_padding">
+
+        <TextView
+            android:id="@+id/text_link"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toTopOf="@id/flow_action"
+            android:ellipsize="none"
+            android:singleLine="true"
+            android:requiresFadingEdge="horizontal"
+            android:textAppearance="@style/TextAppearanceMenu"
+            android:text="@{link}"
+            tools:text="www.reddit.com"/>
+
+        <androidx.constraintlayout.helper.widget.Flow
+            android:id="@+id/flow_action"
+            android:layout_width="wrap_content"
+            android:layout_height="0dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/text_link"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintHorizontal_bias="0.5"
+            android:layout_marginTop="@dimen/dialog_menu_margin"
+            app:constraint_referenced_ids="button_open,button_share_link,button_copy_link"
+            app:flow_wrapMode="chain"
+            app:flow_horizontalAlign="center"
+            android:orientation="vertical"/>
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/button_open"
+            android:layout_width="@dimen/dialog_menu_button_size"
+            android:layout_height="wrap_content"
+            style="@style/ChipActionStyle"
+            app:chipIcon="@drawable/ic_open_in_browser"
+            android:text="@string/menu_open_link"/>
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/button_share_link"
+            android:layout_width="@dimen/dialog_menu_button_size"
+            android:layout_height="wrap_content"
+            style="@style/ChipActionStyle"
+            app:chipIcon="@drawable/ic_link"
+            android:text="@string/menu_share_link" />
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/button_copy_link"
+            android:layout_width="@dimen/dialog_menu_button_size"
+            android:layout_height="wrap_content"
+            style="@style/ChipActionStyle"
+            app:chipIcon="@drawable/ic_copy"
+            android:text="@string/menu_copy_link" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>

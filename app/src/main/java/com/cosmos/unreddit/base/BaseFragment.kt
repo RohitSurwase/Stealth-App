@@ -11,6 +11,7 @@ import com.cosmos.unreddit.R
 import com.cosmos.unreddit.SubredditDirections
 import com.cosmos.unreddit.UserDirections
 import com.cosmos.unreddit.ViewerDirections
+import com.cosmos.unreddit.linkmenu.LinkMenuFragment
 import com.cosmos.unreddit.model.GalleryMedia
 import com.cosmos.unreddit.model.MediaType
 import com.cosmos.unreddit.post.PostEntity
@@ -103,7 +104,7 @@ open class BaseFragment : Fragment(), PostListAdapter.PostClickListener,
     }
 
     override fun onLinkLongClick(link: String) {
-        TODO("Not yet implemented")
+        LinkMenuFragment.show(parentFragmentManager, link)
     }
 
     open fun openGallery(images: List<GalleryMedia>) {
