@@ -124,4 +124,9 @@
 
     <dimen name="exoplayer_margin_horizontal">8dp</dimen>
     <dimen name="exoplayer_button_size">56dp</dimen>
+
+    <dimen name="dialog_menu_padding">16dp</dimen>
+    <dimen name="dialog_menu_margin">16dp</dimen>
+    <dimen name="dialog_menu_icon_padding">16dp</dimen>
+    <dimen name="dialog_menu_button_size">192dp</dimen>
 </resources>

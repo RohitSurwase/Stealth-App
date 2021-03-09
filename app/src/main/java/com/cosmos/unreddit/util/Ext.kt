@@ -8,6 +8,7 @@ import android.view.View
 import android.view.WindowManager
 import android.view.inputmethod.InputMethodManager
 import android.widget.ImageView
+import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.Fragment
 import androidx.paging.LoadState
 import androidx.paging.PagingDataAdapter
@@ -78,6 +79,26 @@ fun Fragment.openExternalLink(url: String) {
     if (intent.resolveActivity(packageManager) != null) {
         startActivity(intent)
     }
+}
+
+fun Fragment.shareExternalLink(url: String, title: String? = null) {
+    val share = Intent.createChooser(
+        Intent().apply {
+            action = Intent.ACTION_SEND
+            putExtra(Intent.EXTRA_TEXT, url)
+
+            title?.let {
+                putExtra(Intent.EXTRA_TITLE, it)
+            }
+        },
+        null
+    )
+    startActivity(share)
+}
+
+fun DialogFragment.doAndDismiss(block: () -> Unit) {
+    block()
+    dismiss()
 }
 
 suspend fun PagingDataAdapter<out Any, out RecyclerView.ViewHolder>.onRefreshFromNetwork(

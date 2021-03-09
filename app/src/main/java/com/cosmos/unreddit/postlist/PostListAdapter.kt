@@ -26,6 +26,8 @@ class PostListAdapter(
 
         fun onLongClick(post: PostEntity)
 
+        fun onMenuClick(post: PostEntity)
+
         fun onImageClick(post: PostEntity)
 
         fun onVideoClick(post: PostEntity)

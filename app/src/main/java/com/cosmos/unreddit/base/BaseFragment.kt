@@ -16,6 +16,7 @@ import com.cosmos.unreddit.model.MediaType
 import com.cosmos.unreddit.post.PostEntity
 import com.cosmos.unreddit.postdetails.PostDetailsFragment
 import com.cosmos.unreddit.postlist.PostListAdapter
+import com.cosmos.unreddit.postmenu.PostMenuFragment
 import com.cosmos.unreddit.util.LinkUtil
 import com.cosmos.unreddit.util.openExternalLink
 import com.cosmos.unreddit.view.RedditView
@@ -50,7 +51,11 @@ open class BaseFragment : Fragment(), PostListAdapter.PostClickListener,
     }
 
     override fun onLongClick(post: PostEntity) {
-        TODO("Not yet implemented")
+        PostMenuFragment.show(parentFragmentManager, post)
+    }
+
+    override fun onMenuClick(post: PostEntity) {
+        PostMenuFragment.show(parentFragmentManager, post)
     }
 
     override fun onImageClick(post: PostEntity) {

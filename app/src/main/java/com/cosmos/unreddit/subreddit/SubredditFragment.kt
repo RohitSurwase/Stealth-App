@@ -22,9 +22,11 @@ import com.cosmos.unreddit.base.BaseFragment
 import com.cosmos.unreddit.databinding.FragmentSubredditBinding
 import com.cosmos.unreddit.databinding.LayoutSubredditAboutBinding
 import com.cosmos.unreddit.databinding.LayoutSubredditContentBinding
+import com.cosmos.unreddit.post.PostEntity
 import com.cosmos.unreddit.post.Sorting
 import com.cosmos.unreddit.postlist.PostListAdapter
 import com.cosmos.unreddit.postlist.PostListRepository
+import com.cosmos.unreddit.postmenu.PostMenuFragment
 import com.cosmos.unreddit.sort.SortFragment
 import com.cosmos.unreddit.util.toPixels
 import dagger.hilt.android.AndroidEntryPoint
@@ -38,7 +40,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class SubredditFragment : BaseFragment(), PostListAdapter.PostClickListener, View.OnClickListener {
+class SubredditFragment : BaseFragment(), View.OnClickListener {
 
     private var _binding: FragmentSubredditBinding? = null
     private val binding get() = _binding!!
@@ -248,6 +250,14 @@ class SubredditFragment : BaseFragment(), PostListAdapter.PostClickListener, Vie
         _binding = null
         _bindingContent = null
         _bindingAbout = null
+    }
+
+    override fun onLongClick(post: PostEntity) {
+        PostMenuFragment.show(parentFragmentManager, post, PostMenuFragment.MenuType.SUBREDDIT)
+    }
+
+    override fun onMenuClick(post: PostEntity) {
+        PostMenuFragment.show(parentFragmentManager, post, PostMenuFragment.MenuType.SUBREDDIT)
     }
 
     override fun onClick(v: View?) {

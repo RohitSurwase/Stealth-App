@@ -326,4 +326,20 @@
         <item name="android:textColor">@color/text_color_secondary</item>
     </style>
 
+    <!-- Menu -->
+
+    <style name="TextAppearanceMenu" parent="">
+        <item name="android:textSize">20sp</item>
+    </style>
+
+    <style name="ChipActionStyle" parent="Widget.MaterialComponents.Chip.Action">
+        <item name="chipBackgroundColor">@color/background</item>
+        <item name="chipStrokeWidth">1dp</item>
+        <item name="chipStrokeColor">@color/colorPrimary</item>
+        <item name="chipIconTint">@color/colorPrimary</item>
+        <item name="chipStartPadding">16dp</item>
+        <item name="chipEndPadding">16dp</item>
+        <item name="android:textAlignment">center</item>
+    </style>
+
 </resources>

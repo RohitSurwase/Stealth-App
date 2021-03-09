@@ -70,5 +70,16 @@
             android:text="@{post.getCommentCount()}"
             tools:text="1234"/>
 
+        <ImageButton
+            android:id="@+id/button_more"
+            android:layout_width="@dimen/post_icon_size"
+            android:layout_height="@dimen/post_icon_size"
+            app:layout_constraintTop_toTopOf="@id/image_vote_icon"
+            app:layout_constraintBottom_toBottomOf="@id/image_vote_icon"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginEnd="@dimen/post_padding_horizontal"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:src="@drawable/ic_more"/>
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

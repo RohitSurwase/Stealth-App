@@ -103,6 +103,8 @@ abstract class PostViewHolder(
                 return@setOnLongClickListener true
             }
         }
+
+        postMetricsBinding.buttonMore.setOnClickListener { listener.onMenuClick(postEntity) }
     }
 
     protected fun ImageView.load(

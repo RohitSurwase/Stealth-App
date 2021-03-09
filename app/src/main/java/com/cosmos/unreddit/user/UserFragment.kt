@@ -16,9 +16,11 @@ import com.cosmos.unreddit.R
 import com.cosmos.unreddit.base.BaseFragment
 import com.cosmos.unreddit.databinding.FragmentUserBinding
 import com.cosmos.unreddit.databinding.ItemListContentBinding
+import com.cosmos.unreddit.post.PostEntity
 import com.cosmos.unreddit.post.Sorting
 import com.cosmos.unreddit.postlist.PostListAdapter
 import com.cosmos.unreddit.postlist.PostListRepository
+import com.cosmos.unreddit.postmenu.PostMenuFragment
 import com.cosmos.unreddit.sort.SortFragment
 import com.cosmos.unreddit.util.RecyclerViewStateAdapter
 import com.cosmos.unreddit.util.betterSmoothScrollToPosition
@@ -37,7 +39,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class UserFragment : BaseFragment(), PostListAdapter.PostClickListener {
+class UserFragment : BaseFragment() {
 
     private var _binding: FragmentUserBinding? = null
     private val binding get() = _binding!!
@@ -207,6 +209,14 @@ class UserFragment : BaseFragment(), PostListAdapter.PostClickListener {
                 listContent.betterSmoothScrollToPosition(0)
             }
         }
+    }
+
+    override fun onLongClick(post: PostEntity) {
+        PostMenuFragment.show(parentFragmentManager, post, PostMenuFragment.MenuType.USER)
+    }
+
+    override fun onMenuClick(post: PostEntity) {
+        PostMenuFragment.show(parentFragmentManager, post, PostMenuFragment.MenuType.USER)
     }
 
     override fun onDestroyView() {

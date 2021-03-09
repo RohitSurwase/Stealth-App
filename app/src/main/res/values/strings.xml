@@ -81,4 +81,10 @@
     <string name="comment_link_info">%1$s - u/%2$s</string>
 
     <string name="media_page_counter_label">of</string>
+
+    <string name="reddit_user_prefixed">u/%1$s</string>
+
+    <string name="menu_open_link">Open Externally</string>
+    <string name="menu_share_link">Share Link</string>
+    <string name="menu_share_post">Share Post</string>
 </resources>
