@@ -48,6 +48,8 @@ class PostDetailsFragment :
         resources.getDimension(R.dimen.subreddit_content_elevation)
     }
 
+    private var isLegacyNavigation: Boolean = false
+
     private lateinit var postAdapter: PostAdapter
     private lateinit var commentAdapter: CommentAdapter
 
@@ -73,6 +75,7 @@ class PostDetailsFragment :
                 viewModel.setSorting(it.suggestedSorting)
                 viewModel.setPermalink(it.permalink)
             }
+            isLegacyNavigation = true
         }
     }
 
@@ -181,7 +184,12 @@ class PostDetailsFragment :
 
     override fun onBackPressed() {
         showNavigation(true)
-        parentFragmentManager.popBackStack()
+        if (isLegacyNavigation) {
+            // Prevent onBackPressed event to be passed to PostDetailsFragment and show bottom nav
+            parentFragmentManager.popBackStack()
+        } else {
+            super.onBackPressed()
+        }
     }
 
     override fun onDestroyView() {
@@ -200,8 +208,7 @@ class PostDetailsFragment :
     }
 
     override fun onDragDismissed() {
-        showNavigation(true)
-        parentFragmentManager.popBackStack()
+        onBackPressed()
     }
 
     override fun openGallery(images: List<GalleryMedia>) {
