@@ -16,7 +16,12 @@ class MediaMetadataAdapter(
     private val galleryItemAdapter: JsonAdapter<GalleryItem> =
         moshi.adapter(GalleryItem::class.java, emptySet())
 
-    override fun fromJson(reader: JsonReader): MediaMetadata {
+    override fun fromJson(reader: JsonReader): MediaMetadata? {
+        if (reader.peek() == JsonReader.Token.NULL) {
+            reader.skipValue()
+            return null
+        }
+
         val items = mutableListOf<GalleryItem>()
 
         reader.beginObject()
