@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.fragment.app.FragmentTransaction
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.navArgs
@@ -16,8 +17,10 @@ import com.cosmos.unreddit.R
 import com.cosmos.unreddit.base.BaseFragment
 import com.cosmos.unreddit.databinding.FragmentUserBinding
 import com.cosmos.unreddit.databinding.ItemListContentBinding
+import com.cosmos.unreddit.post.CommentEntity
 import com.cosmos.unreddit.post.PostEntity
 import com.cosmos.unreddit.post.Sorting
+import com.cosmos.unreddit.postdetails.PostDetailsFragment
 import com.cosmos.unreddit.postlist.PostListAdapter
 import com.cosmos.unreddit.postlist.PostListRepository
 import com.cosmos.unreddit.postmenu.PostMenuFragment
@@ -99,7 +102,7 @@ class UserFragment : BaseFragment() {
 
     private fun initViewPager() {
         postListAdapter = PostListAdapter(repository, this, this)
-        commentListAdapter = UserCommentsAdapter(requireContext(), this)
+        commentListAdapter = UserCommentsAdapter(requireContext(), this, this::onCommentClick)
 
         val tabs: List<RecyclerViewStateAdapter.Page> = listOf(
             RecyclerViewStateAdapter.Page(R.string.tab_user_submitted, postListAdapter),
@@ -146,6 +149,18 @@ class UserFragment : BaseFragment() {
                 scrollToTop(1)
             }
         }
+    }
+
+    private fun onCommentClick(comment: CommentEntity) {
+        parentFragmentManager.beginTransaction()
+            .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
+            .add(
+                R.id.fragment_container,
+                PostDetailsFragment.newInstance(comment.permalink),
+                PostDetailsFragment.TAG
+            )
+            .addToBackStack(null)
+            .commit()
     }
 
     private fun initAppBar() {

@@ -21,7 +21,8 @@ import com.cosmos.unreddit.view.RedditView
 
 class UserCommentsAdapter(
     context: Context,
-    private val onLinkClickListener: RedditView.OnLinkClickListener? = null
+    private val onLinkClickListener: RedditView.OnLinkClickListener? = null,
+    private val onCommentClick: (CommentEntity) -> Unit
 ) : PagingDataAdapter<Comment, UserCommentsAdapter.CommentViewHolder>(COMMENT_COMPARATOR) {
 
     private val colorPrimary by lazy {
@@ -108,7 +109,10 @@ class UserCommentsAdapter(
             with(binding.includeItemComment.commentBody) {
                 setText(comment.body)
                 setOnLinkClickListener(onLinkClickListener)
+                setOnClickListener { onCommentClick(comment) }
             }
+
+            itemView.setOnClickListener { onCommentClick(comment) }
         }
     }
 

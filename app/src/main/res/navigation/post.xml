@@ -21,6 +21,16 @@
             android:id="@+id/deepLinkNpPost"
             app:uri="np.reddit.com/r/{subreddit}/comments/{id}/"/>
 
+        <deepLink
+            android:id="@+id/deepLinkPostThread"
+            app:uri="www.reddit.com/r/{subreddit}/comments/{id}/{title}/{comment}/"/>
+        <deepLink
+            android:id="@+id/deepLinkOldPostThread"
+            app:uri="old.reddit.com/r/{subreddit}/comments/{id}/{title}/{comment}/"/>
+        <deepLink
+            android:id="@+id/deepLinkNpPostThread"
+            app:uri="np.reddit.com/r/{subreddit}/comments/{id}/{title}/{comment}/"/>
+
         <argument
             android:name="subreddit"
             android:defaultValue="@null"
@@ -28,6 +38,16 @@
             app:nullable="true" />
         <argument
             android:name="id"
+            android:defaultValue="@null"
+            app:argType="string"
+            app:nullable="true" />
+        <argument
+            android:name="title"
+            android:defaultValue="@null"
+            app:argType="string"
+            app:nullable="true" />
+        <argument
+            android:name="comment"
             android:defaultValue="@null"
             app:argType="string"
             app:nullable="true" />

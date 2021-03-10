@@ -1,6 +1,7 @@
 package com.cosmos.unreddit.postdetails
 
 import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.asLiveData
 import androidx.lifecycle.liveData
@@ -15,6 +16,7 @@ import com.cosmos.unreddit.post.CommentEntity
 import com.cosmos.unreddit.post.PostEntity
 import com.cosmos.unreddit.post.Sorting
 import com.cosmos.unreddit.postlist.PostListRepository
+import com.cosmos.unreddit.util.updateValue
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -33,6 +35,9 @@ class PostDetailsViewModel
 
     private val _permalink: MutableStateFlow<String?> = MutableStateFlow(null)
     val permalink: StateFlow<String?> = _permalink
+
+    private val _singleThread: MutableLiveData<Boolean> = MutableLiveData(false)
+    val singleThread: LiveData<Boolean> = _singleThread
 
     private val _listings: LiveData<List<Listing>> = combineTransform(
         _permalink,
@@ -77,6 +82,10 @@ class PostDetailsViewModel
         if (_permalink.value != permalink) {
             _permalink.value = permalink
         }
+    }
+
+    fun setSingleThread(singleThread: Boolean) {
+        _singleThread.updateValue(singleThread)
     }
 
     companion object {

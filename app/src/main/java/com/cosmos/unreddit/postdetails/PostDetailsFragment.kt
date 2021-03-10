@@ -1,6 +1,7 @@
 package com.cosmos.unreddit.postdetails
 
 import android.os.Bundle
+import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -13,6 +14,8 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.transition.Slide
+import androidx.transition.TransitionManager
 import com.cosmos.unreddit.R
 import com.cosmos.unreddit.base.BaseFragment
 import com.cosmos.unreddit.databinding.FragmentPostDetailsBinding
@@ -67,13 +70,31 @@ class PostDetailsFragment :
         }
 
         if (args.subreddit != null && args.id != null) {
-            val permalink = "/r/${args.subreddit}/comments/${args.id}"
+            val stringBuilder = StringBuilder().apply {
+                append("/r/").append(args.subreddit).append("/comments/").append(args.id)
+            }
+
+            if (args.title != null && args.comment != null) {
+                stringBuilder.append("/").append(args.title).append("/").append(args.comment)
+                viewModel.setSingleThread(true)
+            }
+
+            val permalink = stringBuilder.toString()
+
             viewModel.setPermalink(permalink)
         } else {
-            val post = arguments?.getParcelable(KEY_POST_ENTITY) as? PostEntity
-            post?.let {
-                viewModel.setSorting(it.suggestedSorting)
-                viewModel.setPermalink(it.permalink)
+            if (arguments?.containsKey(KEY_POST_ENTITY) == true) {
+                val post = arguments?.getParcelable(KEY_POST_ENTITY) as? PostEntity
+                post?.let {
+                    viewModel.setSorting(it.suggestedSorting)
+                    viewModel.setPermalink(it.permalink)
+                }
+            } else if (arguments?.containsKey(KEY_THREAD_PERMALINK) == true) {
+                val threadPermalink = arguments?.getString(KEY_THREAD_PERMALINK)
+                threadPermalink?.let {
+                    viewModel.setPermalink(it)
+                    viewModel.setSingleThread(true)
+                }
             }
             isLegacyNavigation = true
         }
@@ -104,6 +125,8 @@ class PostDetailsFragment :
         }
 
         bindViewModel()
+
+        binding.singleThreadLayout.setOnClickListener { loadFullDiscussion() }
     }
 
     private fun initRecyclerView() {
@@ -138,6 +161,14 @@ class PostDetailsFragment :
                 binding.appBar.sortIcon.setSorting(it)
             }
         )
+        viewModel.singleThread.observe(viewLifecycleOwner) { isSingleThread ->
+            val transition = Slide(Gravity.TOP).apply {
+                duration = 500
+                addTarget(binding.singleThreadLayout)
+            }
+            TransitionManager.beginDelayedTransition(binding.root, transition)
+            binding.singleThreadLayout.visibility = if (isSingleThread) View.VISIBLE else View.GONE
+        }
     }
 
     private fun initAppBar() {
@@ -160,6 +191,15 @@ class PostDetailsFragment :
         binding.appBar.label.text = post.title
         postAdapter.setPost(post, fromCache)
         commentAdapter.setLinkId(post.id)
+    }
+
+    private fun loadFullDiscussion() {
+        val permalink = viewModel.permalink.value
+        permalink?.let {
+            val newPermalink = it.removeSuffix("/").substringBeforeLast("/")
+            viewModel.setPermalink(newPermalink)
+            viewModel.setSingleThread(false)
+        }
     }
 
     private fun showSortDialog() {
@@ -227,10 +267,18 @@ class PostDetailsFragment :
 
         private const val KEY_POST_ENTITY = "KEY_POST_ENTITY"
 
+        private const val KEY_THREAD_PERMALINK = "KEY_THREAD_PERMALINK"
+
         @JvmStatic
         fun newInstance(post: PostEntity) = PostDetailsFragment().apply {
             arguments = bundleOf(
                 KEY_POST_ENTITY to post
+            )
+        }
+
+        fun newInstance(threadPermalink: String) = PostDetailsFragment().apply {
+            arguments = bundleOf(
+                KEY_THREAD_PERMALINK to threadPermalink
             )
         }
     }

@@ -88,4 +88,6 @@
     <string name="menu_share_link">Share Link</string>
     <string name="menu_copy_link">Copy Link</string>
     <string name="menu_share_post">Share Post</string>
+
+    <string name="post_load_discussion">View Entire Discussion</string>
 </resources>
