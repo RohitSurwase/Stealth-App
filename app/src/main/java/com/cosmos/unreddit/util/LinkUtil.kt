@@ -16,8 +16,13 @@ object LinkUtil {
         return HttpUrl.parse(link)?.pathSegments()?.getOrNull(1) ?: ""
     }
 
-    fun getUrlFromImgurImage(image: Image): String {
-        return "https://i.imgur.com/${image.hash}${image.ext}"
+    fun getUrlFromImgurImage(image: Image, convertToMp4: Boolean = true): String {
+        val ext = if (convertToMp4 && image.ext.contains(GIF_REGEX)) {
+            ".mp4"
+        } else {
+            image.ext
+        }
+        return "https://i.imgur.com/${image.hash}$ext"
     }
 
     fun getImgurVideo(link: String): String {
