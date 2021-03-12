@@ -129,4 +129,6 @@
     <dimen name="dialog_menu_margin">16dp</dimen>
     <dimen name="dialog_menu_icon_padding">16dp</dimen>
     <dimen name="dialog_menu_button_size">192dp</dimen>
+
+    <dimen name="info_bar_margin_top">8dp</dimen>
 </resources>

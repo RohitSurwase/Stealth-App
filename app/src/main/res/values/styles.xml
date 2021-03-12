@@ -342,4 +342,15 @@
         <item name="android:textAlignment">center</item>
     </style>
 
+    <style name="InfoBarStyle" parent="">
+        <item name="cardBackgroundColor">@color/colorPrimaryLight</item>
+        <item name="cardElevation">8dp</item>
+        <item name="cardCornerRadius">8dp</item>
+        <item name="android:layout_marginStart">16dp</item>
+        <item name="android:layout_marginEnd">16dp</item>
+        <item name="textMessageColor">@android:color/white</item>
+        <item name="textActionColor">@android:color/white</item>
+        <item name="slideEdge">top</item>
+    </style>
+
 </resources>

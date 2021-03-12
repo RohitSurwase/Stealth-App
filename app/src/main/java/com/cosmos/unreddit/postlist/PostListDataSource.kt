@@ -8,6 +8,8 @@ import com.cosmos.unreddit.api.pojo.details.Listing
 import com.cosmos.unreddit.database.PostMapper
 import com.cosmos.unreddit.post.PostEntity
 import com.cosmos.unreddit.post.Sorting
+import retrofit2.HttpException
+import java.io.IOException
 
 open class PostListDataSource(
     private val redditApi: RedditApi,
@@ -25,9 +27,12 @@ open class PostListDataSource(
             val items = PostMapper.dataToEntities(data.children)
 
             LoadResult.Page(items, data.before, data.after)
-        } catch (e: Exception) {
-            Log.e("PostListDataSource", "Error", e)
-            LoadResult.Error(e)
+        } catch (exception: IOException) {
+            Log.e("PostListDataSource", "Error", exception)
+            LoadResult.Error(exception)
+        } catch (exception: HttpException) {
+            Log.e("PostListDataSource", "Error", exception)
+            LoadResult.Error(exception)
         }
     }
 

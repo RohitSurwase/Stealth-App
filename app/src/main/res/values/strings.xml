@@ -90,4 +90,7 @@
     <string name="menu_share_post">Share Post</string>
 
     <string name="post_load_discussion">View Entire Discussion</string>
+
+    <string name="network_retry_message">Something went wrong</string>
+    <string name="network_retry_action">Retry</string>
 </resources>

@@ -10,12 +10,14 @@ import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.setFragmentResultListener
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
+import androidx.paging.LoadState
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.cosmos.unreddit.R
 import com.cosmos.unreddit.UiViewModel
 import com.cosmos.unreddit.api.RedditApi
 import com.cosmos.unreddit.base.BaseFragment
 import com.cosmos.unreddit.databinding.FragmentPostBinding
+import com.cosmos.unreddit.loadstate.NetworkLoadStateAdapter
 import com.cosmos.unreddit.post.Sorting
 import com.cosmos.unreddit.postdetails.PostDetailsFragment
 import com.cosmos.unreddit.sort.SortFragment
@@ -65,6 +67,7 @@ class PostListFragment : BaseFragment() {
         initAppBar()
         initRecyclerView()
         bindViewModel()
+        binding.infoRetry.setActionClickListener { adapter.retry() }
     }
 
     private fun bindViewModel() {
@@ -74,6 +77,7 @@ class PostListFragment : BaseFragment() {
                 viewModel.sorting,
                 viewModel.contentPreferences
             ) { subreddit, sorting, contentPreferences ->
+                binding.infoRetry.hide()
                 adapter.setContentPreferences(contentPreferences)
                 loadPosts(subreddit, sorting)
                 setSortIcon(sorting)
@@ -82,9 +86,23 @@ class PostListFragment : BaseFragment() {
     }
 
     private fun initRecyclerView() {
-        adapter = PostListAdapter(repository, this, this)
+        adapter = PostListAdapter(repository, this, this).apply {
+            addLoadStateListener { loadState ->
+                binding.listPost.isVisible = loadState.source.refresh is LoadState.NotLoading
+
+                binding.loadingCradle.isVisible = loadState.source.refresh is LoadState.Loading
+
+                val errorState = loadState.source.refresh as? LoadState.Error
+                errorState?.let {
+                    binding.infoRetry.show()
+                }
+            }
+        }
         binding.listPost.layoutManager = LinearLayoutManager(requireContext())
-        binding.listPost.adapter = adapter
+        binding.listPost.adapter = adapter.withLoadStateHeaderAndFooter(
+            header = NetworkLoadStateAdapter { adapter.retry() },
+            footer = NetworkLoadStateAdapter { adapter.retry() }
+        )
     }
 
     private fun initAppBar() {

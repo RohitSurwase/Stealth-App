@@ -23,4 +23,17 @@
     <declare-styleable name="AwardView">
         <attr name="textStyle" format="reference"/>
     </declare-styleable>
+
+    <declare-styleable name="InfoBarView">
+        <attr name="textMessage" format="reference"/>
+        <attr name="textMessageColor" format="reference"/>
+        <attr name="textAction" format="reference"/>
+        <attr name="textActionColor" format="reference"/>
+        <attr name="slideEdge" format="enum">
+            <enum name="start" value="0"/>
+            <enum name="end" value="1"/>
+            <enum name="top" value="2"/>
+            <enum name="bottom" value="3"/>
+        </attr>
+    </declare-styleable>
 </resources>

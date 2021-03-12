@@ -74,11 +74,6 @@ class PostListAdapter(
         return getItem(position)?.type?.value ?: -1
     }
 
-    override fun getItemCount(): Int {
-        // TODO: Add loading item when network is loading item
-        return super.getItemCount()
-    }
-
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         val item = getItem(position) ?: return
 
