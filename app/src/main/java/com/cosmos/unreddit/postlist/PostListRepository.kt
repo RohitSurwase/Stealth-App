@@ -55,7 +55,7 @@ class PostListRepository @Inject constructor(
         }.flow
     }
 
-    fun getSubredditInfo(subreddit: String): Flow<AboutChild> = flow { // TODO: Manage errors
+    fun getSubredditInfo(subreddit: String): Flow<AboutChild> = flow {
         emit(redditApi.getSubredditInfo(subreddit) as AboutChild)
     }
 

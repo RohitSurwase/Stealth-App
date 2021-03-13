@@ -97,6 +97,12 @@
             app:layout_constraintEnd_toEndOf="@id/subreddit_active_users"
             app:layout_constraintTop_toBottomOf="@id/subreddit_active_users"
             app:layout_constraintBottom_toBottomOf="@id/subreddit_metrics_header"/>
+        <Constraint
+            android:id="@id/list_post">
+            <PropertySet
+                android:visibility="visible"
+                app:visibilityMode="ignore" />
+        </Constraint>
     </ConstraintSet>
 
     <ConstraintSet android:id="@+id/collapsed">
@@ -194,6 +200,12 @@
             android:scaleX="0.0"
             android:scaleY="0.0"
             android:alpha="0"/>
+        <Constraint
+            android:id="@id/list_post">
+            <PropertySet
+                android:visibility="visible"
+                app:visibilityMode="ignore" />
+        </Constraint>
     </ConstraintSet>
 
 </MotionScene>

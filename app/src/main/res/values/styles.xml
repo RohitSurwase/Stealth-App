@@ -15,6 +15,8 @@
         <item name="preferenceTheme">@style/PreferenceTheme</item>
 
         <item name="switchStyle">@style/SwitchStyle</item>
+
+        <item name="materialAlertDialogTheme">@style/MaterialAlertDialogTheme</item>
     </style>
 
     <style name="CardStyle" parent="Widget.MaterialComponents.CardView">
@@ -351,6 +353,34 @@
         <item name="textMessageColor">@android:color/white</item>
         <item name="textActionColor">@android:color/white</item>
         <item name="slideEdge">top</item>
+    </style>
+
+    <!-- Dialog -->
+
+    <style name="MaterialAlertDialogTheme" parent="ThemeOverlay.MaterialComponents.MaterialAlertDialog">
+        <item name="colorSurface">@color/background</item>
+        <item name="alertDialogStyle">@style/MaterialAlertDialogStyle</item>
+        <item name="materialAlertDialogTitleTextStyle">@style/MaterialAlertDialogTitleText</item>
+        <item name="materialAlertDialogBodyTextStyle">@style/MaterialAlertDialogBodyText</item>
+    </style>
+
+    <style name="MaterialAlertDialogStyle" parent="MaterialAlertDialog.MaterialComponents">
+        <item name="shapeAppearance">@style/MaterialAlertDialogShapeAppearance</item>
+    </style>
+
+    <style name="MaterialAlertDialogShapeAppearance" parent="ShapeAppearance.MaterialComponents.MediumComponent">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">16dp</item>
+    </style>
+
+    <style name="MaterialAlertDialogTitleText" parent="MaterialAlertDialog.MaterialComponents.Title.Text">
+        <item name="android:textSize">20sp</item>
+        <item name="android:textColor">@color/text_color</item>
+    </style>
+
+    <style name="MaterialAlertDialogBodyText" parent="MaterialAlertDialog.MaterialComponents.Body.Text">
+        <item name="android:textSize">16sp</item>
+        <item name="android:textColor">@color/text_color_secondary</item>
     </style>
 
 </resources>

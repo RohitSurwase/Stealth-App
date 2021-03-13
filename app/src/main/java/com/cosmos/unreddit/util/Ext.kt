@@ -8,6 +8,7 @@ import android.view.View
 import android.view.WindowManager
 import android.view.inputmethod.InputMethodManager
 import android.widget.ImageView
+import androidx.core.view.isVisible
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.Fragment
 import androidx.paging.LoadState
@@ -19,6 +20,7 @@ import coil.load
 import coil.size.Precision
 import coil.size.Scale
 import com.cosmos.unreddit.R
+import com.cosmos.unreddit.databinding.IncludeLoadingStateBinding
 import com.cosmos.unreddit.post.Sorting
 import com.cosmos.unreddit.sort.SortFragment
 import kotlinx.coroutines.flow.collect
@@ -107,6 +109,37 @@ suspend fun PagingDataAdapter<out Any, out RecyclerView.ViewHolder>.onRefreshFro
     loadStateFlow.distinctUntilChangedBy { it.refresh }
         .filter { it.refresh is LoadState.NotLoading }
         .collect { onRefresh() }
+}
+
+fun PagingDataAdapter<out Any, out RecyclerView.ViewHolder>.isEmpty(): Boolean {
+    return itemCount == 0
+}
+
+fun PagingDataAdapter<out Any, out RecyclerView.ViewHolder>.addLoadStateListener(
+    list: RecyclerView,
+    binding: IncludeLoadingStateBinding,
+    onError: () -> Unit
+) {
+    addLoadStateListener { loadState ->
+        list.visibility = when (loadState.source.refresh) {
+            is LoadState.NotLoading -> View.VISIBLE
+            else -> View.INVISIBLE // Set to INVISIBLE to keep MotionLayout gestures
+        }
+
+        binding.loadingCradle.isVisible = loadState.source.refresh is LoadState.Loading
+
+        val errorState = loadState.source.refresh as? LoadState.Error
+        errorState?.let {
+            onError.invoke()
+        }
+
+        // TODO: Animation
+        val noData = loadState.source.refresh is LoadState.NotLoading &&
+                loadState.append.endOfPaginationReached &&
+                this.isEmpty()
+        binding.emptyData.isVisible = noData
+        binding.textEmptyData.isVisible = noData
+    }
 }
 
 fun ViewPager2.getRecyclerView(): RecyclerView? {

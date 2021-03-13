@@ -1,23 +1,20 @@
 package com.cosmos.unreddit.api
 
-enum class Status {
-    SUCCESS,
-    ERROR,
-    LOADING
-}
+sealed class Resource<out T> {
 
-data class Resource<out T>(val status: Status, val data: T?, val message: String?) {
-    companion object {
-        fun <T> success(data: T?): Resource<T> {
-            return Resource(Status.SUCCESS, data, null)
+    val dataValue: T?
+        get() = when (this) {
+            is Success -> data
+            is Loading -> null
+            is Error -> null
         }
 
-        fun <T> error(msg: String?, data: T? = null): Resource<T> {
-            return Resource(Status.ERROR, data, msg)
-        }
+    data class Success<out T>(val data: T) : Resource<T>()
 
-        fun <T> loading(data: T? = null): Resource<T> {
-            return Resource(Status.LOADING, data, null)
-        }
-    }
+    class Loading<out T> : Resource<T>()
+
+    data class Error<out T>(
+        val code: Int? = null,
+        val message: String? = null
+    ) : Resource<T>()
 }

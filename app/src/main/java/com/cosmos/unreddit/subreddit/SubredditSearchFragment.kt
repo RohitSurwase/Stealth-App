@@ -11,16 +11,17 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.navArgs
 import androidx.paging.LoadState
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import com.cosmos.unreddit.R
 import com.cosmos.unreddit.base.BaseFragment
 import com.cosmos.unreddit.databinding.FragmentSubredditSearchBinding
+import com.cosmos.unreddit.loadstate.NetworkLoadStateAdapter
 import com.cosmos.unreddit.post.PostEntity
 import com.cosmos.unreddit.post.Sorting
 import com.cosmos.unreddit.postlist.PostListAdapter
 import com.cosmos.unreddit.postlist.PostListRepository
 import com.cosmos.unreddit.sort.SortFragment
 import com.cosmos.unreddit.util.SearchUtil
+import com.cosmos.unreddit.util.addLoadStateListener
 import com.cosmos.unreddit.util.hideSoftKeyboard
 import com.cosmos.unreddit.util.loadSubredditIcon
 import dagger.hilt.android.AndroidEntryPoint
@@ -45,7 +46,7 @@ class SubredditSearchFragment : BaseFragment(), PostListAdapter.PostClickListene
 
     private var searchPostJob: Job? = null
 
-    private lateinit var adapter: PostListAdapter
+    private lateinit var postListAdapter: PostListAdapter
 
     @Inject
     lateinit var repository: PostListRepository
@@ -70,9 +71,9 @@ class SubredditSearchFragment : BaseFragment(), PostListAdapter.PostClickListene
         initAppBar()
         initRecyclerView()
         bindViewModel()
-
         // TODO: Animation
         showSearchInput(true)
+        binding.loadingState.infoRetry.setActionClickListener { postListAdapter.retry() }
     }
 
     private fun bindViewModel() {
@@ -97,7 +98,8 @@ class SubredditSearchFragment : BaseFragment(), PostListAdapter.PostClickListene
                 viewModel.sorting,
                 viewModel.contentPreferences
             ) { subreddit, query, sorting, contentPreferences ->
-                adapter.setContentPreferences(contentPreferences)
+                binding.loadingState.infoRetry.hide()
+                postListAdapter.setContentPreferences(contentPreferences)
                 if (subreddit != null && query != null) {
                     searchPost(query, sorting)
                 }
@@ -107,17 +109,22 @@ class SubredditSearchFragment : BaseFragment(), PostListAdapter.PostClickListene
     }
 
     private fun initRecyclerView() {
-        adapter = PostListAdapter(repository, this, this).apply {
-            stateRestorationPolicy = RecyclerView.Adapter.StateRestorationPolicy.PREVENT_WHEN_EMPTY
+        postListAdapter = PostListAdapter(repository, this, this).apply {
+            addLoadStateListener(binding.listPost, binding.loadingState) {
+                showRetryBar()
+            }
         }
 
         with(binding.listPost) {
             layoutManager = LinearLayoutManager(requireContext())
-            adapter = this@SubredditSearchFragment.adapter
+            adapter = postListAdapter.withLoadStateHeaderAndFooter(
+                header = NetworkLoadStateAdapter { postListAdapter.retry() },
+                footer = NetworkLoadStateAdapter { postListAdapter.retry() }
+            )
         }
 
         lifecycleScope.launch {
-            adapter.loadStateFlow.distinctUntilChangedBy { it.refresh }
+            postListAdapter.loadStateFlow.distinctUntilChangedBy { it.refresh }
                 .filter { it.refresh is LoadState.NotLoading }
                 .collect { scrollToTop() }
         }
@@ -172,7 +179,7 @@ class SubredditSearchFragment : BaseFragment(), PostListAdapter.PostClickListene
         searchPostJob?.cancel()
         searchPostJob = viewLifecycleOwner.lifecycleScope.launch {
             viewModel.searchAndFilterPosts(query, sorting).collectLatest {
-                adapter.submitData(it)
+                postListAdapter.submitData(it)
             }
         }
     }
@@ -196,6 +203,12 @@ class SubredditSearchFragment : BaseFragment(), PostListAdapter.PostClickListene
             viewModel.sorting.value,
             SortFragment.SortType.SEARCH
         )
+    }
+
+    private fun showRetryBar() {
+        if (!binding.loadingState.infoRetry.isVisible) {
+            binding.loadingState.infoRetry.show()
+        }
     }
 
     private fun cancelSearch() {

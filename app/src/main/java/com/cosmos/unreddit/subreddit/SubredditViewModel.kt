@@ -8,6 +8,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import com.cosmos.unreddit.api.RedditApi
+import com.cosmos.unreddit.api.Resource
 import com.cosmos.unreddit.database.SubredditMapper
 import com.cosmos.unreddit.post.PostEntity
 import com.cosmos.unreddit.post.Sorting
@@ -20,11 +21,15 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.transform
 import kotlinx.coroutines.launch
+import retrofit2.HttpException
+import java.io.IOException
 import javax.inject.Inject
 
 @HiltViewModel
@@ -45,6 +50,9 @@ class SubredditViewModel @Inject constructor(
     private val _subreddit: MutableStateFlow<String?> = MutableStateFlow(null)
     val subreddit: StateFlow<String?> = _subreddit
 
+    private val _about: MutableLiveData<Resource<SubredditEntity>> = MutableLiveData()
+    val about: LiveData<Resource<SubredditEntity>> = _about
+
     private val _isDescriptionCollapsed = MutableLiveData(true)
     val isDescriptionCollapsed: LiveData<Boolean> get() = _isDescriptionCollapsed
 
@@ -54,21 +62,13 @@ class SubredditViewModel @Inject constructor(
         }
     }
 
-    val about: LiveData<SubredditEntity> = _subreddit.transform { _subreddit ->
-        _subreddit?.let { subreddit ->
-            repository.getSubredditInfo(subreddit).map { subredditInfo ->
-                emit(SubredditMapper.dataToEntity(subredditInfo.data))
-            }.collect()
-        }
-    }.asLiveData()
-
     val isSubscribed: LiveData<Boolean> = _subreddit.transform { _subreddit ->
         _subreddit?.let { subreddit ->
             repository.getSubscriptions().map { list ->
                 emit(list.any { it.name.equals(subreddit, ignoreCase = true) })
             }.collect()
         }
-    }.asLiveData()
+    }.asLiveData(viewModelScope.coroutineContext)
 
     fun loadAndFilterPosts(subreddit: String, sorting: Sorting): Flow<PagingData<PostEntity>> {
         return PostUtil.filterPosts(
@@ -76,6 +76,34 @@ class SubredditViewModel @Inject constructor(
             history,
             contentPreferences
         ).cachedIn(viewModelScope)
+    }
+
+    fun loadSubredditInfo(forceUpdate: Boolean) {
+        if (_subreddit.value != null) {
+            if (_about.value == null || forceUpdate) {
+                loadSubredditInfo(_subreddit.value!!)
+            }
+        } else {
+            _about.value = Resource.Error()
+        }
+    }
+
+    private fun loadSubredditInfo(subreddit: String) {
+        viewModelScope.launch {
+            repository.getSubredditInfo(subreddit).onStart {
+                _about.value = Resource.Loading()
+            }.catch {
+                when (it) {
+                    is IOException -> _about.value = Resource.Error(message = it.message)
+                    is HttpException -> _about.value = Resource.Error(it.code(), it.message())
+                    else -> _about.value = Resource.Error()
+                }
+            }.map {
+                SubredditMapper.dataToEntity(it.data)
+            }.collect {
+                _about.value = Resource.Success(it)
+            }
+        }
     }
 
     fun setSubreddit(subreddit: String) {
@@ -99,13 +127,13 @@ class SubredditViewModel @Inject constructor(
             if (isSubscribed.value == true) {
                 repository.unsubscribe(getSubredditName())
             } else {
-                repository.subscribe(getSubredditName(), about.value?.icon)
+                repository.subscribe(getSubredditName(), about.value?.dataValue?.icon)
             }
         }
     }
 
     private fun getSubredditName(): String {
-        return about.value?.displayName ?: subreddit.value!!
+        return about.value?.dataValue?.displayName ?: subreddit.value!!
     }
 
     companion object {

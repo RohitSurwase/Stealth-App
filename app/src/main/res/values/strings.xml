@@ -93,4 +93,12 @@
 
     <string name="network_retry_message">Something went wrong</string>
     <string name="network_retry_action">Retry</string>
+
+    <string name="dialog_subreddit_not_found_title">Subreddit not found</string>
+    <string name="dialog_subreddit_not_found_body">This subreddit does not exist or may have been banned.</string>
+    <string name="dialog_ok">OK</string>
+    <string name="dialog_subreddit_unauthorized_title">Subreddit is private</string>
+    <string name="dialog_subreddit_unauthorized_body">You do not have access to this subreddit.</string>
+
+    <string name="empty_data">Nothing to see here…</string>
 </resources>
