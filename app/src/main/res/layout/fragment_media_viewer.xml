@@ -15,7 +15,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toTopOf="@id/view_pager"
-        app:constraint_referenced_ids="text_page_current, text_page_label, text_page_count"
+        app:constraint_referenced_ids="text_page_current,text_page_label,text_page_count"
         app:flow_horizontalGap="8dp"
         android:visibility="invisible"
         tools:visibility="visible"/>
@@ -59,6 +59,31 @@
         android:overScrollMode="never"
         android:orientation="horizontal"
         android:visibility="invisible"
+        tools:visibility="visible"/>
+
+    <com.cosmos.unreddit.view.InfoBarView
+        android:id="@+id/info_retry"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/flow_page_counter"
+        android:layout_marginTop="@dimen/info_bar_margin_top"
+        style="@style/InfoBarStyle"
+        app:textMessage="@string/network_retry_message"
+        app:textAction="@string/network_retry_action"
+        android:visibility="gone"
+        tools:visibility="visible"/>
+
+    <com.cosmos.unreddit.view.CradleView
+        android:id="@+id/loading_cradle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:visibility="gone"
         tools:visibility="visible"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

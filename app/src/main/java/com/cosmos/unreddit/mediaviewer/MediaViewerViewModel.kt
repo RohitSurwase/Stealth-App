@@ -4,35 +4,41 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.cosmos.unreddit.api.Resource
 import com.cosmos.unreddit.model.GalleryMedia
 import com.cosmos.unreddit.model.GalleryMedia.Type
 import com.cosmos.unreddit.model.MediaType
-import com.cosmos.unreddit.parser.link.LinkParser
+import com.cosmos.unreddit.repository.GfycatRepository
 import com.cosmos.unreddit.repository.ImgurRepository
 import com.cosmos.unreddit.repository.StreamableRepository
 import com.cosmos.unreddit.util.LinkUtil
 import com.cosmos.unreddit.util.updateValue
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
+import retrofit2.HttpException
+import java.io.IOException
 import javax.inject.Inject
 
 @HiltViewModel
 class MediaViewerViewModel
 @Inject constructor(
     private val imgurRepository: ImgurRepository,
-    private val streamableRepository: StreamableRepository
+    private val streamableRepository: StreamableRepository,
+    private val gfycatRepository: GfycatRepository
 ) : ViewModel() {
 
-    private val _media: MutableLiveData<List<GalleryMedia>> = MutableLiveData()
-    val media: LiveData<List<GalleryMedia>> get() = _media
+    private val _media: MutableLiveData<Resource<List<GalleryMedia>>> = MutableLiveData()
+    val media: LiveData<Resource<List<GalleryMedia>>> get() = _media
 
     private val _selectedPage: MutableLiveData<Int> = MutableLiveData()
     val selectedPage: LiveData<Int> get() = _selectedPage
 
-    fun loadMedia(link: String, mediaType: MediaType) {
-        if (_media.value == null) {
+    fun loadMedia(link: String, mediaType: MediaType, forceUpdate: Boolean = false) {
+        if (_media.value == null || forceUpdate) {
             retrieveMedia(link, mediaType)
         }
     }
@@ -58,11 +64,21 @@ class MediaViewerViewModel
                     setMedia(GalleryMedia.singleton(Type.VIDEO, LinkUtil.getGfycatVideo(link)))
                 }
                 MediaType.REDGIFS -> {
-                    setMedia(LinkParser.parseRedgifsLink(link))
+                    gfycatRepository.parseRedgifsLink(link).onStart {
+                        _media.value = Resource.Loading()
+                    }.catch {
+                        catchError(it)
+                    }.collect {
+                        setMedia(it)
+                    }
                 }
                 MediaType.STREAMABLE -> {
                     val shortcode = LinkUtil.getStreamableShortcode(link)
-                    streamableRepository.getVideo(shortcode).map { video ->
+                    streamableRepository.getVideo(shortcode).onStart {
+                        _media.value = Resource.Loading()
+                    }.catch {
+                        catchError(it)
+                    }.map { video ->
                         GalleryMedia.singleton(Type.VIDEO, video.files.mp4.url)
                     }.collect {
                         setMedia(it)
@@ -70,7 +86,11 @@ class MediaViewerViewModel
                 }
                 MediaType.IMGUR_ALBUM, MediaType.IMGUR_GALLERY -> {
                     val albumId = LinkUtil.getAlbumIdFromImgurLink(link)
-                    imgurRepository.getAlbum(albumId).map { album ->
+                    imgurRepository.getAlbum(albumId).onStart {
+                        _media.value = Resource.Loading()
+                    }.catch {
+                        catchError(it)
+                    }.map { album ->
                         album.data.images.map { image ->
                             GalleryMedia(
                                 if (image.preferVideo) Type.VIDEO else Type.IMAGE,
@@ -82,13 +102,23 @@ class MediaViewerViewModel
                         setMedia(it)
                     }
                 }
-                else -> {}
+                else -> {
+                    _media.value = Resource.Error()
+                }
             }
         }
     }
 
+    private fun catchError(throwable: Throwable) {
+        when (throwable) {
+            is IOException -> _media.value = Resource.Error(message = throwable.message)
+            is HttpException -> _media.value = Resource.Error(throwable.code(), throwable.message())
+            else -> _media.value = Resource.Error()
+        }
+    }
+
     fun setMedia(media: List<GalleryMedia>) {
-        _media.updateValue(media)
+        _media.updateValue(Resource.Success(media))
     }
 
     fun setSelectedPage(position: Int) {

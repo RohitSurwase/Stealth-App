@@ -106,5 +106,8 @@
     <string name="dialog_user_unauthorized_title">User is suspended</string>
     <string name="dialog_user_unauthorized_body">This user has been suspended.</string>
 
+    <string name="dialog_media_not_found_title">Media not found</string>
+    <string name="dialog_media_not_found_body">This image or video you are looking for does not exist or may have been removed.</string>
+
     <string name="empty_data">Nothing to see here…</string>
 </resources>

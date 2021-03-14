@@ -5,17 +5,21 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.os.bundleOf
+import androidx.core.view.isVisible
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager2.widget.ViewPager2
+import com.cosmos.unreddit.R
+import com.cosmos.unreddit.api.Resource
 import com.cosmos.unreddit.base.BaseFragment
 import com.cosmos.unreddit.databinding.FragmentMediaViewerBinding
 import com.cosmos.unreddit.model.GalleryMedia
 import com.cosmos.unreddit.model.MediaType
 import com.cosmos.unreddit.util.betterSmoothScrollToPosition
 import com.cosmos.unreddit.util.getRecyclerView
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -53,32 +57,25 @@ class MediaViewerFragment : BaseFragment() {
         initRecyclerView()
         initViewPager()
         bindViewModel()
+        binding.infoRetry.setActionClickListener { retry() }
     }
 
     private fun bindViewModel() {
-        viewModel.media.observe(
-            viewLifecycleOwner,
-            { media ->
-                if (media.size > 1) {
-                    thumbnailAdapter.submitData(media)
-                    binding.textPageCount.text = media.size.toString()
-                    binding.listThumbnails.visibility = View.VISIBLE
-                    binding.flowPageCounter.visibility = View.VISIBLE
-                } else {
-                    binding.listThumbnails.visibility = View.GONE
-                    binding.flowPageCounter.visibility = View.GONE
+        viewModel.media.observe(viewLifecycleOwner) {
+            binding.loadingCradle.isVisible = it is Resource.Loading
+            when (it) {
+                is Resource.Success -> bindMedia(it.data)
+                is Resource.Error -> handleError(it.code)
+                is Resource.Loading -> {
+                    // ignore
                 }
-                mediaAdapter.submitData(media)
             }
-        )
-        viewModel.selectedPage.observe(
-            viewLifecycleOwner,
-            {
-                binding.listThumbnails.betterSmoothScrollToPosition(it)
-                thumbnailAdapter.selectItem(it)
-                binding.textPageCurrent.text = it.plus(1).toString()
-            }
-        )
+        }
+        viewModel.selectedPage.observe(viewLifecycleOwner) {
+            binding.listThumbnails.betterSmoothScrollToPosition(it)
+            thumbnailAdapter.selectItem(it)
+            binding.textPageCurrent.text = it.plus(1).toString()
+        }
     }
 
     private fun initRecyclerView() {
@@ -128,6 +125,53 @@ class MediaViewerFragment : BaseFragment() {
                 isLegacyNavigation = true
             }
         }
+    }
+
+    private fun bindMedia(media: List<GalleryMedia>) {
+        if (media.size > 1) {
+            thumbnailAdapter.submitData(media)
+            binding.textPageCount.text = media.size.toString()
+            binding.listThumbnails.visibility = View.VISIBLE
+            binding.flowPageCounter.visibility = View.VISIBLE
+        } else {
+            binding.listThumbnails.visibility = View.GONE
+            binding.flowPageCounter.visibility = View.GONE
+        }
+        mediaAdapter.submitData(media)
+    }
+
+    private fun handleError(code: Int?) {
+        when (code) {
+            403, 404 -> showNotFoundDialog()
+            else -> showRetryBar()
+        }
+    }
+
+    private fun retry() {
+        if (args.link != null) {
+            viewModel.loadMedia(args.link!!, args.type, true)
+        } else {
+            val link = arguments?.getString(BUNDLE_KEY_LINK)
+            val type = arguments?.getSerializable(BUNDLE_KEY_TYPE) as? MediaType
+            if (link != null && type != null) {
+                viewModel.loadMedia(link, type, true)
+            }
+        }
+    }
+
+    private fun showRetryBar() {
+        if (!binding.infoRetry.isVisible) {
+            binding.infoRetry.show()
+        }
+    }
+
+    private fun showNotFoundDialog() {
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle(R.string.dialog_media_not_found_title)
+            .setMessage(R.string.dialog_media_not_found_body)
+            .setPositiveButton(R.string.dialog_ok) { _, _ -> onBackPressed() }
+            .setCancelable(false)
+            .show()
     }
 
     override fun onBackPressed() {

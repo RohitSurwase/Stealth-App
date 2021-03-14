@@ -16,6 +16,7 @@ import com.cosmos.unreddit.databinding.ItemImageBinding
 import com.cosmos.unreddit.databinding.ItemVideoBinding
 import com.cosmos.unreddit.model.GalleryMedia
 import com.cosmos.unreddit.util.ExoPlayerHelper
+import com.google.android.exoplayer2.ExoPlaybackException
 import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.SimpleExoPlayer
 import com.google.android.exoplayer2.source.MergingMediaSource
@@ -74,11 +75,21 @@ class MediaViewerAdapter(context: Context) : RecyclerView.Adapter<RecyclerView.V
         exoPlayerHelper.clearCache()
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     inner class ImageViewHolder(
         private val binding: ItemImageBinding
     ) : RecyclerView.ViewHolder(binding.root), View.OnTouchListener {
 
+        init {
+            binding.image.setOnTouchListener(this)
+        }
+
         fun bind(image: GalleryMedia) {
+            loadImage(image)
+            binding.infoRetry.setActionClickListener { loadImage(image) }
+        }
+
+        private fun loadImage(image: GalleryMedia) {
             with(binding.image) {
                 Coil.imageLoader(context).enqueue(
                     ImageRequest.Builder(context).apply {
@@ -88,14 +99,28 @@ class MediaViewerAdapter(context: Context) : RecyclerView.Adapter<RecyclerView.V
                         precision(Precision.EXACT)
                         memoryCachePolicy(CachePolicy.READ_ONLY)
                         diskCachePolicy(CachePolicy.READ_ONLY)
+                        listener(
+                            onStart = {
+                                binding.loadingCradle.isVisible = true
+                                binding.infoRetry.hide()
+                            },
+                            onCancel = {
+                                binding.loadingCradle.isVisible = false
+                            },
+                            onError = { _, _ ->
+                                binding.loadingCradle.isVisible = false
+                                binding.infoRetry.show()
+                            },
+                            onSuccess = { _, _ ->
+                                binding.loadingCradle.isVisible = false
+                            }
+                        )
                         target { drawable -> setImageDrawable(drawable) }
                     }.build()
                 )
-                setOnTouchListener(this@ImageViewHolder)
             }
         }
 
-        @SuppressLint("ClickableViewAccessibility")
         override fun onTouch(view: View, event: MotionEvent): Boolean {
             return if (
                 event.pointerCount >= 2 ||
@@ -125,7 +150,7 @@ class MediaViewerAdapter(context: Context) : RecyclerView.Adapter<RecyclerView.V
 
     inner class VideoViewHolder(
         private val binding: ItemVideoBinding
-    ) : RecyclerView.ViewHolder(binding.root) {
+    ) : RecyclerView.ViewHolder(binding.root), Player.EventListener {
 
         fun bind(video: GalleryMedia) {
             val videoItem = exoPlayerHelper.getMediaItem(video.url)
@@ -145,6 +170,7 @@ class MediaViewerAdapter(context: Context) : RecyclerView.Adapter<RecyclerView.V
 
             player.apply {
                 repeatMode = Player.REPEAT_MODE_ALL
+                addListener(this@VideoViewHolder)
                 prepare()
                 play()
             }
@@ -152,6 +178,12 @@ class MediaViewerAdapter(context: Context) : RecyclerView.Adapter<RecyclerView.V
             players.add(player)
 
             binding.video.player = player
+
+            binding.infoRetry.setActionClickListener { player.prepare() }
+        }
+
+        override fun onPlayerError(error: ExoPlaybackException) {
+            binding.infoRetry.show()
         }
     }
 }
