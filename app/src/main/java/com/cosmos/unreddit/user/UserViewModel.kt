@@ -1,12 +1,13 @@
 package com.cosmos.unreddit.user
 
 import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import com.cosmos.unreddit.api.RedditApi
+import com.cosmos.unreddit.api.Resource
 import com.cosmos.unreddit.database.UserMapper
 import com.cosmos.unreddit.post.Comment
 import com.cosmos.unreddit.post.PostEntity
@@ -20,10 +21,14 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.transform
+import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.launch
+import retrofit2.HttpException
+import java.io.IOException
 import javax.inject.Inject
 
 @HiltViewModel
@@ -47,13 +52,8 @@ class UserViewModel @Inject constructor(
     private val _page: MutableStateFlow<Int> = MutableStateFlow(0)
     val page: StateFlow<Int> get() = _page
 
-    val about: LiveData<User> = _user.transform { _user ->
-        _user?.let { user ->
-            repository.getUserInfo(user).map { userInfo ->
-                emit(UserMapper.dataToEntity(userInfo.data))
-            }.collect()
-        }
-    }.asLiveData()
+    private val _about: MutableLiveData<Resource<User>> = MutableLiveData()
+    val about: LiveData<Resource<User>> = _about
 
     private val postPagerHelper = object : PagerHelper<PostEntity>() {
         override fun getResults(query: String, sorting: Sorting): Flow<PagingData<PostEntity>> {
@@ -77,6 +77,34 @@ class UserViewModel @Inject constructor(
 
     fun loadAndFilterComments(user: String, sorting: Sorting): Flow<PagingData<Comment>> {
         return commentPagerHelper.loadData(user, sorting).cachedIn(viewModelScope)
+    }
+
+    fun loadUserInfo(forceUpdate: Boolean) {
+        if (_user.value != null) {
+            if (_about.value == null || forceUpdate) {
+                loadUserInfo(_user.value!!)
+            }
+        } else {
+            _about.value = Resource.Error()
+        }
+    }
+
+    private fun loadUserInfo(user: String) {
+        viewModelScope.launch {
+            repository.getUserInfo(user).onStart {
+                _about.value = Resource.Loading()
+            }.catch {
+                when (it) {
+                    is IOException -> _about.value = Resource.Error(message = it.message)
+                    is HttpException -> _about.value = Resource.Error(it.code(), it.message())
+                    else -> _about.value = Resource.Error()
+                }
+            }.map {
+                UserMapper.dataToEntity(it.data)
+            }.collect {
+                _about.value = Resource.Success(it)
+            }
+        }
     }
 
     fun setSorting(sorting: Sorting) {

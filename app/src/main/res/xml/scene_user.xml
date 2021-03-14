@@ -115,6 +115,12 @@
             app:layout_constraintEnd_toEndOf="@id/user_cake_day"
             app:layout_constraintTop_toBottomOf="@id/user_cake_day"
             app:layout_constraintBottom_toBottomOf="@id/user_metrics_header" />
+        <Constraint
+            android:id="@id/info_retry">
+            <PropertySet
+                android:visibility="gone"
+                app:visibilityMode="ignore" />
+        </Constraint>
     </ConstraintSet>
 
     <ConstraintSet android:id="@+id/collapsed">
@@ -235,6 +241,12 @@
             android:scaleX="0.0"
             android:scaleY="0.0"
             android:alpha="0"/>
+        <Constraint
+            android:id="@id/info_retry">
+            <PropertySet
+                android:visibility="gone"
+                app:visibilityMode="ignore" />
+        </Constraint>
     </ConstraintSet>
 
 </MotionScene>

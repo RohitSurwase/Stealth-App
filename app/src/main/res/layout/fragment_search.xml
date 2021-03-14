@@ -3,6 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:background="?android:attr/windowBackground">
 
     <include
@@ -28,5 +29,19 @@
         app:layout_constraintTop_toBottomOf="@id/tabs"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"/>
+
+    <com.cosmos.unreddit.view.InfoBarView
+        android:id="@+id/info_retry"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tabs"
+        android:layout_marginTop="@dimen/info_bar_margin_top"
+        style="@style/InfoBarStyle"
+        app:textMessage="@string/network_retry_message"
+        app:textAction="@string/network_retry_action"
+        android:visibility="gone"
+        tools:visibility="visible"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

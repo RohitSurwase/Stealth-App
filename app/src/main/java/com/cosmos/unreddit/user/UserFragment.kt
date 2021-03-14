@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.view.isVisible
 import androidx.fragment.app.FragmentTransaction
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
@@ -14,6 +15,7 @@ import coil.load
 import coil.size.Precision
 import coil.size.Scale
 import com.cosmos.unreddit.R
+import com.cosmos.unreddit.api.Resource
 import com.cosmos.unreddit.base.BaseFragment
 import com.cosmos.unreddit.databinding.FragmentUserBinding
 import com.cosmos.unreddit.databinding.ItemListContentBinding
@@ -31,6 +33,7 @@ import com.cosmos.unreddit.util.getItemView
 import com.cosmos.unreddit.util.getRecyclerView
 import com.cosmos.unreddit.util.onRefreshFromNetwork
 import com.cosmos.unreddit.util.setSortingListener
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
 import dagger.hilt.android.AndroidEntryPoint
@@ -80,10 +83,19 @@ class UserFragment : BaseFragment() {
         initAppBar()
         initViewPager()
         bindViewModel()
+        binding.infoRetry.setActionClickListener { retry() }
     }
 
     private fun bindViewModel() {
-        viewModel.about.observe(viewLifecycleOwner, this::bindInfo)
+        viewModel.about.observe(viewLifecycleOwner) {
+            when (it) {
+                is Resource.Success -> bindInfo(it.data)
+                is Resource.Error -> handleError(it.code)
+                is Resource.Loading -> {
+                    // ignore
+                }
+            }
+        }
         viewLifecycleOwner.lifecycleScope.launchWhenStarted {
             combine(
                 viewModel.user,
@@ -93,6 +105,7 @@ class UserFragment : BaseFragment() {
             ) { user, sorting, page, contentPreferences ->
                 postListAdapter.setContentPreferences(contentPreferences)
                 user?.let {
+                    viewModel.loadUserInfo(false)
                     load(page, user, sorting)
                 }
                 binding.sortIcon.setSorting(sorting)
@@ -109,7 +122,12 @@ class UserFragment : BaseFragment() {
             RecyclerViewStateAdapter.Page(R.string.tab_user_comments, commentListAdapter)
         )
 
-        val userStateAdapter = RecyclerViewStateAdapter().apply { submitList(tabs) }
+        val userStateAdapter = RecyclerViewStateAdapter {
+            showRetryBar()
+        }.apply {
+            submitList(tabs)
+        }
+
         binding.viewPager.apply {
             adapter = userStateAdapter
             getRecyclerView()?.overScrollMode = RecyclerView.OVER_SCROLL_NEVER
@@ -177,6 +195,11 @@ class UserFragment : BaseFragment() {
     }
 
     private fun bindInfo(user: User) {
+        if (user.isSuspended) {
+            showUnauthorizedDialog()
+            return
+        }
+
         with(user) {
             binding.user = this
 
@@ -213,8 +236,51 @@ class UserFragment : BaseFragment() {
         }
     }
 
+    private fun handleError(code: Int?) {
+        when (code) {
+            403 -> showUnauthorizedDialog()
+            404 -> showNotFoundDialog()
+            else -> showRetryBar()
+        }
+    }
+
+    private fun retry() {
+        viewModel.about.value?.let {
+            if (it is Resource.Error) {
+                viewModel.loadUserInfo(true)
+            }
+        }
+        // TODO: Don't retry if not necessary
+        postListAdapter.retry()
+        commentListAdapter.retry()
+    }
+
+    private fun showRetryBar() {
+        if (!binding.infoRetry.isVisible) {
+            binding.infoRetry.show()
+        }
+    }
+
     private fun showSortDialog() {
         SortFragment.show(childFragmentManager, viewModel.sorting.value)
+    }
+
+    private fun showNotFoundDialog() {
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle(R.string.dialog_user_not_found_title)
+            .setMessage(R.string.dialog_user_not_found_body)
+            .setPositiveButton(R.string.dialog_ok) { _, _ -> onBackPressed() }
+            .setCancelable(false)
+            .show()
+    }
+
+    private fun showUnauthorizedDialog() {
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle(R.string.dialog_user_unauthorized_title)
+            .setMessage(R.string.dialog_user_unauthorized_body)
+            .setPositiveButton(R.string.dialog_ok) { _, _ -> onBackPressed() }
+            .setCancelable(false)
+            .show()
     }
 
     private fun scrollToTop(page: Int) {

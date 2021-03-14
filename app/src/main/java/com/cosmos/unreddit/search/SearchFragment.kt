@@ -87,6 +87,8 @@ class SearchFragment : BaseFragment() {
         initViewPager()
         bindViewModel()
 
+        binding.infoRetry.setActionClickListener { retry() }
+
         lifecycleScope.launch {
             delay(250)
             showSearchInput(false)
@@ -145,7 +147,12 @@ class SearchFragment : BaseFragment() {
             RecyclerViewStateAdapter.Page(R.string.tab_search_user, userAdapter)
         )
 
-        val searchStateAdapter = RecyclerViewStateAdapter().apply { submitList(tabs) }
+        val searchStateAdapter = RecyclerViewStateAdapter {
+            showRetryBar()
+        }.apply {
+            submitList(tabs)
+        }
+
         binding.viewPager.apply {
             adapter = searchStateAdapter
             registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
@@ -339,6 +346,19 @@ class SearchFragment : BaseFragment() {
 
     private fun onUserClick(user: String) {
         findNavController().navigate(SearchFragmentDirections.openUser(user))
+    }
+
+    private fun retry() {
+        // TODO: Don't retry if not necessary
+        postListAdapter.retry()
+        subredditAdapter.retry()
+        userAdapter.retry()
+    }
+
+    private fun showRetryBar() {
+        if (!binding.infoRetry.isVisible) {
+            binding.infoRetry.show()
+        }
     }
 
     private fun showSortDialog() {

@@ -14,4 +14,14 @@
         app:layout_constraintBottom_toBottomOf="parent"
         android:overScrollMode="never"/>
 
+    <include
+        android:id="@+id/loading_state"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        layout="@layout/include_loading_state"/>
+
 </androidx.constraintlayout.widget.ConstraintLayout>

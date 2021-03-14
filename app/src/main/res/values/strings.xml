@@ -100,5 +100,10 @@
     <string name="dialog_subreddit_unauthorized_title">Subreddit is private</string>
     <string name="dialog_subreddit_unauthorized_body">You do not have access to this subreddit.</string>
 
+    <string name="dialog_user_not_found_title">User not found</string>
+    <string name="dialog_user_not_found_body">This user does not exist.</string>
+    <string name="dialog_user_unauthorized_title">User is suspended</string>
+    <string name="dialog_user_unauthorized_body">This user has been suspended.</string>
+
     <string name="empty_data">Nothing to see here…</string>
 </resources>
