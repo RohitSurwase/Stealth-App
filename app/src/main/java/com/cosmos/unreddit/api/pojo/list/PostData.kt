@@ -180,7 +180,9 @@ data class PostData(
                     ?: mediaPreview?.images?.getOrNull(0)?.variants?.mp4?.imageSource?.url
             }
             MediaType.IMGUR_LINK -> mediaPreview?.images?.getOrNull(0)?.imageSource?.url
-            MediaType.GFYCAT -> media?.embed?.thumbnailUrl
+            MediaType.GFYCAT -> {
+                media?.embed?.thumbnailUrl ?: mediaPreview?.videoPreview?.fallbackUrl
+            }
             else -> url
         } ?: url
 
