@@ -108,7 +108,11 @@ data class MoreEntity(
     override val name: String,
 
     override val depth: Int
-) : Comment
+) : Comment {
+    var isLoading: Boolean = false
+
+    var isError: Boolean = false
+}
 
 fun Comment.getType(): CommentType = when (this) {
     is CommentEntity -> CommentType.COMMENT

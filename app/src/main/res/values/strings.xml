@@ -75,6 +75,7 @@
 
     <string name="comment_score">%1$s pts</string>
     <string name="comment_more">More (%1$d)</string>
+    <string name="comment_more_error">Error loading more comments. Tap to retry.</string>
     <string name="comment_date_edited">%1$s* (%2$s)</string>
     <string name="comment_controversiality">✝</string>
 

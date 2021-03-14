@@ -8,6 +8,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.animation.AnimationUtils
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.view.isVisible
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.DiffUtil
@@ -24,8 +25,10 @@ import com.cosmos.unreddit.postlist.PostListRepository
 import com.cosmos.unreddit.util.DateUtil
 import com.cosmos.unreddit.util.applyGradient
 import com.cosmos.unreddit.view.RedditView
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
 
 class CommentAdapter(
@@ -140,7 +143,19 @@ class CommentAdapter(
                         }
                     }
 
-                    repository.getMoreChildren(children, link).map {
+                    repository.getMoreChildren(children, link).onStart {
+                        comment.apply {
+                            isLoading = true
+                            isError = false
+                        }
+                        notifyItemChanged(position)
+                    }.catch {
+                        comment.apply {
+                            isLoading = false
+                            isError = true
+                        }
+                        notifyItemChanged(position)
+                    }.map {
                         CommentMapper.dataToEntities(it.json.data.things)
                     }.map {
                         it.filter { comment -> comment.depth < COMMENT_DEPTH_LIMIT }
@@ -378,7 +393,8 @@ class CommentAdapter(
         fun bind(more: MoreEntity) {
             binding.more = more
 
-            binding.progress.visibility = View.GONE
+            binding.loadingCradle.isVisible = more.isLoading
+            binding.textError.isVisible = more.isError
 
             with(binding.commentBody) {
                 val params = ConstraintLayout.LayoutParams(
@@ -394,7 +410,6 @@ class CommentAdapter(
             }
 
             itemView.setOnClickListener {
-                binding.progress.visibility = View.VISIBLE
                 onCommentClick(bindingAdapterPosition)
             }
         }

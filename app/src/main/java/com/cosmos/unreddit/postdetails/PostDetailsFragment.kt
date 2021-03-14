@@ -17,8 +17,10 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.transition.Slide
 import androidx.transition.TransitionManager
 import com.cosmos.unreddit.R
+import com.cosmos.unreddit.api.Resource
 import com.cosmos.unreddit.base.BaseFragment
 import com.cosmos.unreddit.databinding.FragmentPostDetailsBinding
+import com.cosmos.unreddit.loadstate.ResourceStateAdapter
 import com.cosmos.unreddit.mediaviewer.MediaViewerFragment
 import com.cosmos.unreddit.model.GalleryMedia
 import com.cosmos.unreddit.model.MediaType
@@ -30,6 +32,8 @@ import com.cosmos.unreddit.util.betterSmoothScrollToPosition
 import com.cosmos.unreddit.util.setSortingListener
 import com.cosmos.unreddit.view.ElasticDragDismissFrameLayout
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import javax.inject.Inject
@@ -55,6 +59,7 @@ class PostDetailsFragment :
 
     private lateinit var postAdapter: PostAdapter
     private lateinit var commentAdapter: CommentAdapter
+    private lateinit var resourceStateAdapter: ResourceStateAdapter
 
     @Inject
     lateinit var repository: PostListRepository
@@ -133,14 +138,12 @@ class PostDetailsFragment :
         val contentPreferences = runBlocking {
             preferencesRepository.getContentPreferences().first()
         }
+
         postAdapter = PostAdapter(contentPreferences, this, this)
-        commentAdapter = CommentAdapter(
-            requireContext(),
-            repository,
-            viewLifecycleOwner,
-            this
-        )
-        val concatAdapter = ConcatAdapter(postAdapter, commentAdapter)
+        commentAdapter = CommentAdapter(requireContext(), repository, viewLifecycleOwner, this)
+        resourceStateAdapter = ResourceStateAdapter { retry() }
+
+        val concatAdapter = ConcatAdapter(postAdapter, resourceStateAdapter, commentAdapter)
         binding.listComments.apply {
             layoutManager = LinearLayoutManager(requireContext())
             adapter = concatAdapter
@@ -148,13 +151,30 @@ class PostDetailsFragment :
     }
 
     private fun bindViewModel() {
-        viewModel.post.observe(viewLifecycleOwner, { bindPost(it, false) })
-        viewModel.comments.observe(
-            viewLifecycleOwner,
-            { comments ->
-                commentAdapter.submitData(comments)
+        viewLifecycleOwner.lifecycleScope.launchWhenStarted {
+            combine(viewModel.permalink, viewModel.sorting) { permalink, _ ->
+                permalink?.let {
+                    viewModel.loadPost(false)
+                }
+            }.collect()
+        }
+        viewModel.post.observe(viewLifecycleOwner) {
+            when (it) {
+                is Resource.Success -> bindPost(it.data, false)
+                else -> {
+                    // ignore
+                }
             }
-        )
+        }
+        viewModel.comments.observe(viewLifecycleOwner) {
+            resourceStateAdapter.resource = it
+            when (it) {
+                is Resource.Success -> commentAdapter.submitData(it.data)
+                else -> {
+                    // ignore
+                }
+            }
+        }
         viewModel.sorting.asLiveData().observe(
             viewLifecycleOwner,
             {
@@ -200,6 +220,10 @@ class PostDetailsFragment :
             viewModel.setPermalink(newPermalink)
             viewModel.setSingleThread(false)
         }
+    }
+
+    private fun retry() {
+        viewModel.loadPost(true)
     }
 
     private fun showSortDialog() {

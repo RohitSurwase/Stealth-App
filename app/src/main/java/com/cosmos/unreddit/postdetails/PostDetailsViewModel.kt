@@ -3,10 +3,11 @@ package com.cosmos.unreddit.postdetails
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.asLiveData
 import androidx.lifecycle.liveData
 import androidx.lifecycle.switchMap
+import androidx.lifecycle.viewModelScope
 import com.cosmos.unreddit.api.RedditApi
+import com.cosmos.unreddit.api.Resource
 import com.cosmos.unreddit.api.pojo.details.Listing
 import com.cosmos.unreddit.api.pojo.details.PostChild
 import com.cosmos.unreddit.database.CommentMapper
@@ -21,9 +22,13 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.combineTransform
+import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import retrofit2.HttpException
+import java.io.IOException
 import javax.inject.Inject
 
 @HiltViewModel
@@ -39,22 +44,36 @@ class PostDetailsViewModel
     private val _singleThread: MutableLiveData<Boolean> = MutableLiveData(false)
     val singleThread: LiveData<Boolean> = _singleThread
 
-    private val _listings: LiveData<List<Listing>> = combineTransform(
-        _permalink,
-        _sorting
-    ) { _permalink, _sorting ->
-        _permalink?.let { permalink ->
-            repository.getPost(permalink, _sorting).collect { emit(it) }
-        }
-    }.asLiveData()
+    private val _listings: MutableLiveData<Resource<List<Listing>>> = MutableLiveData()
 
-    val post: LiveData<PostEntity> = _listings.switchMap {
-        liveData { emit(PostMapper.dataToEntity((it[0].data.children[0] as PostChild).data)) }
+    val post: LiveData<Resource<PostEntity>> = _listings.switchMap {
+        liveData {
+            val resource = when (it) {
+                is Resource.Success -> {
+                    val data = PostMapper.dataToEntity(
+                        (it.data[0].data.children[0] as PostChild).data
+                    )
+                    Resource.Success(data)
+                }
+                is Resource.Loading -> Resource.Loading()
+                is Resource.Error -> Resource.Error(it.code, it.message)
+            }
+            emit(resource)
+        }
     }
 
-    val comments: LiveData<List<Comment>> = _listings.switchMap {
+    val comments: LiveData<Resource<List<Comment>>> = _listings.switchMap {
         liveData {
-            emit(getComments(CommentMapper.dataToEntities(it[1].data.children), DEPTH_LIMIT))
+            val resource = when (it) {
+                is Resource.Success -> {
+                    val list = CommentMapper.dataToEntities(it.data[1].data.children)
+                    val data = getComments(list, DEPTH_LIMIT)
+                    Resource.Success(data)
+                }
+                is Resource.Loading -> Resource.Loading()
+                is Resource.Error -> Resource.Error(it.code, it.message)
+            }
+            emit(resource)
         }
     }
 
@@ -69,6 +88,32 @@ class PostDetailsViewModel
                 }
             }
             comments
+        }
+    }
+
+    fun loadPost(forceUpdate: Boolean) {
+        if (_permalink.value != null) {
+            if (_listings.value == null || forceUpdate) {
+                this.loadPost(_permalink.value!!, _sorting.value)
+            }
+        } else {
+            _listings.value = Resource.Error()
+        }
+    }
+
+    private fun loadPost(permalink: String, sorting: Sorting) {
+        viewModelScope.launch {
+            repository.getPost(permalink, sorting).onStart {
+                _listings.value = Resource.Loading()
+            }.catch {
+                when (it) {
+                    is IOException -> _listings.value = Resource.Error(message = it.message)
+                    is HttpException -> _listings.value = Resource.Error(it.code(), it.message())
+                    else -> _listings.value = Resource.Error()
+                }
+            }.collect {
+                _listings.value = Resource.Success(it)
+            }
         }
     }
 
