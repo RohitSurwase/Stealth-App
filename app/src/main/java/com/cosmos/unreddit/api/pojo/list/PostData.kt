@@ -129,7 +129,7 @@ data class PostData(
                     MediaType.REDDIT_VIDEO
                 }
             }
-            domain == "imgur.com" -> {
+            domain == "imgur.com" || domain == "m.imgur.com" -> {
                 when {
                     url.contains("imgur.com/a/") -> MediaType.IMGUR_ALBUM
                     url.contains("imgur.com/gallery/") -> MediaType.IMGUR_GALLERY

@@ -54,7 +54,7 @@ object LinkUtil {
             domain == "www.reddit.com" || domain == "old.reddit.com" ||
                     domain == "np.reddit.com" -> MediaType.REDDIT_LINK
 
-            domain == "imgur.com" -> {
+            domain == "imgur.com" || domain == "m.imgur.com" -> {
                 when {
                     link.contains("imgur.com/a/") -> MediaType.IMGUR_ALBUM
                     link.contains("imgur.com/gallery/") -> MediaType.IMGUR_GALLERY
