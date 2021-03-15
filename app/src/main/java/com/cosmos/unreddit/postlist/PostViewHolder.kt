@@ -118,6 +118,7 @@ abstract class PostViewHolder(
             .crossfade(true)
             .scale(Scale.FILL)
             .precision(Precision.AUTOMATIC)
+            .placeholder(R.drawable.image_placeholder)
             .apply(builder)
             .apply {
                 if ((post.isOver18 && !contentPreferences.showNsfwPreview) ||
@@ -143,7 +144,10 @@ abstract class PostViewHolder(
             super.bind(postEntity, contentPreferences, onClick)
 
             with(binding.imagePostPreview) {
-                load(postEntity, contentPreferences)
+                load(postEntity, contentPreferences) {
+                    error(R.drawable.preview_image_fallback)
+                    fallback(R.drawable.preview_image_fallback)
+                }
 
                 setOnClickListener { listener.onImageClick(postEntity) }
             }
@@ -175,7 +179,10 @@ abstract class PostViewHolder(
             super.bind(postEntity, contentPreferences, onClick)
 
             with(binding.imagePostPreview) {
-                load(postEntity, contentPreferences)
+                load(postEntity, contentPreferences) {
+                    error(R.drawable.preview_video_fallback)
+                    fallback(R.drawable.preview_video_fallback)
+                }
 
                 setOnClickListener { listener.onVideoClick(postEntity) }
             }
@@ -234,7 +241,10 @@ abstract class PostViewHolder(
             super.bind(postEntity, contentPreferences, onClick)
 
             with(preview) {
-                load(postEntity, contentPreferences)
+                load(postEntity, contentPreferences) {
+                    error(R.drawable.preview_link_fallback)
+                    fallback(R.drawable.preview_link_fallback)
+                }
 
                 setOnClickListener { listener.onLinkClick(postEntity) }
             }
