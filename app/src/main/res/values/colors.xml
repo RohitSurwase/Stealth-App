@@ -56,8 +56,7 @@
     <color name="spoiler_gradient_start">#90A4AE</color>
     <color name="spoiler_gradient_end">#CFD8DC</color>
 
-    <color name="op_gradient_start">#03A9F4</color>
-    <color name="op_gradient_end">#81D4FA</color>
+    <color name="text_color_op">#03A9F4</color>
 
     <color name="comment_indicator_1">#EF5350</color>
     <color name="comment_indicator_2">#BA68C8</color>

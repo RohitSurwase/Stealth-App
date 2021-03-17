@@ -40,7 +40,7 @@
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toTopOf="@id/comment_score"
             app:layout_constraintStart_toEndOf="@id/comment_color_indicator"
-            app:layout_constraintEnd_toStartOf="@id/comment_op_icon"
+            app:layout_constraintEnd_toStartOf="@id/comment_op_text"
             android:textAppearance="@style/TextAppearanceCommentAuthor"
             android:text="@{comment.author}"
             tools:text="author"/>
@@ -89,16 +89,18 @@
             android:textAppearance="@style/TextAppearanceCommentInfo"
             tools:text="5h"/>
 
-        <ImageView
-            android:id="@+id/comment_op_icon"
-            android:layout_width="@dimen/comment_icon_size"
-            android:layout_height="@dimen/comment_icon_size"
+        <TextView
+            android:id="@+id/comment_op_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             app:layout_constraintStart_toEndOf="@id/comment_author"
             app:layout_constraintEnd_toStartOf="@id/comment_flair"
             app:layout_constraintTop_toTopOf="@id/comment_author"
             app:layout_constraintBottom_toBottomOf="@id/comment_author"
-            android:layout_marginStart="2dp"
-            android:src="@drawable/ic_mic"
+            android:layout_marginStart="4dp"
+            android:text="@string/comment_op"
+            android:textAppearance="@style/TextAppearanceCommentOp"
+            android:textColor="@null"
             android:visibility="gone"
             tools:visibility="visible"/>
 
@@ -106,7 +108,7 @@
             android:id="@+id/comment_flair"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            app:layout_constraintStart_toEndOf="@id/comment_op_icon"
+            app:layout_constraintStart_toEndOf="@id/comment_op_text"
             app:layout_constraintEnd_toStartOf="@id/comment_pinned_icon"
             app:layout_constraintTop_toTopOf="@id/comment_author"
             app:layout_constraintBottom_toBottomOf="@id/comment_author"

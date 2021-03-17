@@ -359,7 +359,7 @@ class CommentAdapter(
                     }
                 }
 
-                binding.commentOpIcon.visibility = if (isSubmitter) View.VISIBLE else View.GONE
+                binding.commentOpText.visibility = if (isSubmitter) View.VISIBLE else View.GONE
 
                 itemView.setOnClickListener {
                     onCommentClick(bindingAdapterPosition)
