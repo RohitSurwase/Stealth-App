@@ -17,13 +17,7 @@
             app:uri="content://reddit/subreddit/{subreddit}" />
         <deepLink
             android:id="@+id/deepLinkSubredditExternal"
-            app:uri="www.reddit.com/r/{subreddit}" />
-        <deepLink
-            android:id="@+id/deepLinkOldSubredditExternal"
-            app:uri="old.reddit.com/r/{subreddit}" />
-        <deepLink
-            android:id="@+id/deepLinkNpSubredditExternal"
-            app:uri="np.reddit.com/r/{subreddit}" />
+            app:uri=".*.reddit.com/r/{subreddit}" />
 
         <argument
             android:name="subreddit"
