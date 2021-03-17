@@ -5,7 +5,8 @@ import android.os.Bundle
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.addCallback
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentTransaction
+import androidx.navigation.NavDirections
+import androidx.navigation.NavOptions
 import androidx.navigation.fragment.findNavController
 import com.cosmos.unreddit.R
 import com.cosmos.unreddit.SubredditDirections
@@ -27,6 +28,15 @@ open class BaseFragment : Fragment(), PostListAdapter.PostClickListener,
 
     private lateinit var onBackPressedCallback: OnBackPressedCallback
 
+    private val navOptions: NavOptions by lazy {
+        NavOptions.Builder()
+            .setEnterAnim(R.anim.nav_enter_anim)
+            .setExitAnim(R.anim.nav_exit_anim)
+            .setPopEnterAnim(R.anim.nav_enter_anim)
+            .setPopExitAnim(R.anim.nav_exit_anim)
+            .build()
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         onBackPressedCallback = requireActivity().onBackPressedDispatcher.addCallback(this) {
@@ -39,9 +49,22 @@ open class BaseFragment : Fragment(), PostListAdapter.PostClickListener,
         activity?.onBackPressed()
     }
 
+    protected fun navigate(directions: NavDirections, navOptions: NavOptions = this.navOptions) {
+        findNavController().navigate(directions, navOptions)
+    }
+
+    protected fun navigate(deepLink: Uri, navOptions: NavOptions = this.navOptions) {
+        findNavController().navigate(deepLink, navOptions)
+    }
+
     override fun onClick(post: PostEntity) {
         parentFragmentManager.beginTransaction()
-            .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
+            .setCustomAnimations(
+                R.anim.nav_enter_anim,
+                R.anim.nav_exit_anim,
+                R.anim.nav_enter_anim,
+                R.anim.nav_exit_anim
+            )
             .add(
                 R.id.fragment_container,
                 PostDetailsFragment.newInstance(post),
@@ -108,22 +131,22 @@ open class BaseFragment : Fragment(), PostListAdapter.PostClickListener,
     }
 
     open fun openGallery(images: List<GalleryMedia>) {
-        findNavController().navigate(ViewerDirections.openGallery(images.toTypedArray()))
+        navigate(ViewerDirections.openGallery(images.toTypedArray()))
     }
 
     open fun openMedia(link: String, mediaType: MediaType) {
-        findNavController().navigate(ViewerDirections.openMedia(link, mediaType))
+        navigate(ViewerDirections.openMedia(link, mediaType))
     }
 
     open fun openSubreddit(subreddit: String) {
-        findNavController().navigate(SubredditDirections.openSubreddit(subreddit))
+        navigate(SubredditDirections.openSubreddit(subreddit))
     }
 
     open fun openUser(user: String) {
-        findNavController().navigate(UserDirections.openUser(user))
+        navigate(UserDirections.openUser(user))
     }
 
     open fun openRedditLink(link: String) {
-        findNavController().navigate(Uri.parse(link))
+        navigate(Uri.parse(link))
     }
 }

@@ -12,7 +12,6 @@ import androidx.activity.OnBackPressedCallback
 import androidx.core.view.isVisible
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
-import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.transition.Fade
 import androidx.transition.Slide
@@ -341,11 +340,11 @@ class SearchFragment : BaseFragment() {
     }
 
     private fun onSubredditClick(subreddit: String) {
-        findNavController().navigate(SubscriptionsDirections.openSubreddit(subreddit))
+        navigate(SubscriptionsDirections.openSubreddit(subreddit))
     }
 
     private fun onUserClick(user: String) {
-        findNavController().navigate(SearchFragmentDirections.openUser(user))
+        navigate(SearchFragmentDirections.openUser(user))
     }
 
     private fun retry() {

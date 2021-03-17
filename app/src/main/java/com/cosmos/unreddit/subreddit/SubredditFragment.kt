@@ -10,7 +10,6 @@ import androidx.core.view.GravityCompat
 import androidx.core.view.isVisible
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
-import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.paging.LoadState
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -268,7 +267,7 @@ class SubredditFragment : BaseFragment(), View.OnClickListener {
     }
 
     private fun showSearchFragment() {
-        findNavController().navigate(
+        navigate(
             SubredditFragmentDirections.openSearch(
                 viewModel.subreddit.value!!,
                 viewModel.about.value?.dataValue?.icon

@@ -10,7 +10,6 @@ import android.view.inputmethod.EditorInfo
 import androidx.activity.OnBackPressedCallback
 import androidx.core.view.isVisible
 import androidx.core.widget.doOnTextChanged
-import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -21,6 +20,7 @@ import androidx.transition.TransitionManager
 import androidx.transition.TransitionSet
 import com.cosmos.unreddit.R
 import com.cosmos.unreddit.UiViewModel
+import com.cosmos.unreddit.base.BaseFragment
 import com.cosmos.unreddit.databinding.FragmentSubscriptionsBinding
 import com.cosmos.unreddit.search.SearchFragment
 import com.cosmos.unreddit.util.hideSoftKeyboard
@@ -29,7 +29,7 @@ import com.google.android.material.transition.MaterialFadeThrough
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
-class SubscriptionsFragment : Fragment() {
+class SubscriptionsFragment : BaseFragment() {
 
     private var _binding: FragmentSubscriptionsBinding? = null
     private val binding get() = _binding!!
@@ -184,13 +184,13 @@ class SubscriptionsFragment : Fragment() {
     private fun showSearchFragment(query: String) {
         binding.appBar.searchInput.hideSoftKeyboard()
 
-        findNavController().navigate(SubscriptionsFragmentDirections.search(query))
+        navigate(SubscriptionsFragmentDirections.search(query))
 
         binding.appBar.searchInput.text?.clear()
     }
 
     private fun onClick(subreddit: String) {
-        findNavController().navigate(SubscriptionsFragmentDirections.openSubreddit(subreddit))
+        navigate(SubscriptionsFragmentDirections.openSubreddit(subreddit))
     }
 
     override fun onHiddenChanged(hidden: Boolean) {
