@@ -74,34 +74,11 @@ class PostDetailsFragment :
             preferencesRepository.getContentPreferences().first()
         }
 
-        if (args.subreddit != null && args.id != null) {
-            val stringBuilder = StringBuilder().apply {
-                append("/r/").append(args.subreddit).append("/comments/").append(args.id)
-            }
-
-            if (args.title != null && args.comment != null) {
-                stringBuilder.append("/").append(args.title).append("/").append(args.comment)
-                viewModel.setSingleThread(true)
-            }
-
-            val permalink = stringBuilder.toString()
-
-            viewModel.setPermalink(permalink)
-        } else {
-            if (arguments?.containsKey(KEY_POST_ENTITY) == true) {
-                val post = arguments?.getParcelable(KEY_POST_ENTITY) as? PostEntity
-                post?.let {
-                    viewModel.setPermalink(it.permalink)
-                }
-            } else if (arguments?.containsKey(KEY_THREAD_PERMALINK) == true) {
-                val threadPermalink = arguments?.getString(KEY_THREAD_PERMALINK)
-                threadPermalink?.let {
-                    viewModel.setPermalink(it)
-                    viewModel.setSingleThread(true)
-                }
-            }
-            isLegacyNavigation = true
+        if (savedInstanceState == null) {
+            handleArguments()
         }
+
+        isLegacyNavigation = (args.subreddit == null || args.id == null)
     }
 
     override fun onCreateView(
@@ -212,12 +189,43 @@ class PostDetailsFragment :
         commentAdapter.setLinkId(post.id)
     }
 
+    private fun handleArguments() {
+        if (args.subreddit != null && args.id != null) {
+            val stringBuilder = StringBuilder().apply {
+                append("/r/").append(args.subreddit).append("/comments/").append(args.id)
+            }
+
+            if (args.title != null && args.comment != null) {
+                stringBuilder.append("/").append(args.title).append("/").append(args.comment)
+                viewModel.setSingleThread(true)
+            }
+
+            val permalink = stringBuilder.toString()
+
+            viewModel.setPermalink(permalink)
+        } else {
+            if (arguments?.containsKey(KEY_POST_ENTITY) == true) {
+                val post = arguments?.getParcelable(KEY_POST_ENTITY) as? PostEntity
+                post?.let {
+                    viewModel.setPermalink(it.permalink)
+                }
+            } else if (arguments?.containsKey(KEY_THREAD_PERMALINK) == true) {
+                val threadPermalink = arguments?.getString(KEY_THREAD_PERMALINK)
+                threadPermalink?.let {
+                    viewModel.setPermalink(it)
+                    viewModel.setSingleThread(true)
+                }
+            }
+        }
+    }
+
     private fun loadFullDiscussion() {
         val permalink = viewModel.permalink.value
         permalink?.let {
             val newPermalink = it.removeSuffix("/").substringBeforeLast("/")
             viewModel.setPermalink(newPermalink)
             viewModel.setSingleThread(false)
+            viewModel.loadPost(false)
         }
     }
 

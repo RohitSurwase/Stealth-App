@@ -95,7 +95,7 @@ open class BaseFragment : Fragment(), PostListAdapter.PostClickListener,
     }
 
     override fun onLinkClick(post: PostEntity) {
-        TODO("Not yet implemented")
+        onLinkClick(post.url)
     }
 
     override fun onLinkClick(link: String) {

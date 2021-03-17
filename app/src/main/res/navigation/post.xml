@@ -13,23 +13,11 @@
         tools:layout="@layout/fragment_post_details">
         <deepLink
             android:id="@+id/deepLinkPost"
-            app:uri="www.reddit.com/r/{subreddit}/comments/{id}/"/>
-        <deepLink
-            android:id="@+id/deepLinkOldPost"
-            app:uri="old.reddit.com/r/{subreddit}/comments/{id}/"/>
-        <deepLink
-            android:id="@+id/deepLinkNpPost"
-            app:uri="np.reddit.com/r/{subreddit}/comments/{id}/"/>
+            app:uri=".*.reddit.com/r/{subreddit}/comments/{id}"/>
 
         <deepLink
             android:id="@+id/deepLinkPostThread"
-            app:uri="www.reddit.com/r/{subreddit}/comments/{id}/{title}/{comment}/"/>
-        <deepLink
-            android:id="@+id/deepLinkOldPostThread"
-            app:uri="old.reddit.com/r/{subreddit}/comments/{id}/{title}/{comment}/"/>
-        <deepLink
-            android:id="@+id/deepLinkNpPostThread"
-            app:uri="np.reddit.com/r/{subreddit}/comments/{id}/{title}/{comment}/"/>
+            app:uri=".*.reddit.com/r/{subreddit}/comments/{id}/{title}/{comment}"/>
 
         <argument
             android:name="subreddit"

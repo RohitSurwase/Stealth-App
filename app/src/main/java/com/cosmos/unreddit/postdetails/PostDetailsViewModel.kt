@@ -91,14 +91,17 @@ class PostDetailsViewModel
         }
     }
 
+    private var currentPermalink: String? = null
     private var currentSorting: Sorting? = null
 
     fun loadPost(forceUpdate: Boolean) {
         if (_permalink.value != null) {
             if (_listings.value == null ||
+                _permalink.value != currentPermalink ||
                 _sorting.value != currentSorting ||
                 forceUpdate
             ) {
+                currentPermalink = _permalink.value
                 currentSorting = _sorting.value
                 loadPost(_permalink.value!!, _sorting.value)
             }
