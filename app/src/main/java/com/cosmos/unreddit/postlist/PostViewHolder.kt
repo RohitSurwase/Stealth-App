@@ -218,6 +218,11 @@ abstract class PostViewHolder(
                     setPreviewText(
                         postEntity.selfRedditText.blocks[0].block as TextBlock
                     )
+                    setOnClickListener { listener.onClick(postEntity) }
+                    setOnLongClickListener {
+                        listener.onLongClick(postEntity)
+                        true
+                    }
                     setOnLinkClickListener(onLinkClickListener)
                     setTextColor(postEntity.getSeenColor(context))
                 } else {
