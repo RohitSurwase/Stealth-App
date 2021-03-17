@@ -162,6 +162,11 @@ class CommentAdapter(
                     }.map {
                         restoreCommentHierarchy(it, comment.depth)
                     }.collectLatest { comments ->
+                        comment.apply {
+                            isLoading = false
+                            isError = false
+                        }
+
                         if (comment.depth > 0) {
                             val parentComment = visibleComments.find { it.name == comment.parent }
 
