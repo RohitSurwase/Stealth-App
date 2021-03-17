@@ -91,10 +91,16 @@ class PostDetailsViewModel
         }
     }
 
+    private var currentSorting: Sorting? = null
+
     fun loadPost(forceUpdate: Boolean) {
         if (_permalink.value != null) {
-            if (_listings.value == null || forceUpdate) {
-                this.loadPost(_permalink.value!!, _sorting.value)
+            if (_listings.value == null ||
+                _sorting.value != currentSorting ||
+                forceUpdate
+            ) {
+                currentSorting = _sorting.value
+                loadPost(_permalink.value!!, _sorting.value)
             }
         } else {
             _listings.value = Resource.Error()

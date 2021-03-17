@@ -91,7 +91,6 @@ class PostDetailsFragment :
             if (arguments?.containsKey(KEY_POST_ENTITY) == true) {
                 val post = arguments?.getParcelable(KEY_POST_ENTITY) as? PostEntity
                 post?.let {
-                    viewModel.setSorting(it.suggestedSorting)
                     viewModel.setPermalink(it.permalink)
                 }
             } else if (arguments?.containsKey(KEY_THREAD_PERMALINK) == true) {
