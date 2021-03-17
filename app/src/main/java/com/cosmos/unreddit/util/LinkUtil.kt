@@ -80,10 +80,10 @@ object LinkUtil {
 
             domain == "i.redd.it" -> MediaType.IMAGE
 
-            link.endsWith(".jpg") || link.endsWith(".jpeg") ||
-                    link.endsWith(".png") -> MediaType.IMAGE
+            link.contains(".jpg") || link.contains(".jpeg") ||
+                    link.contains(".png") -> MediaType.IMAGE
 
-            link.endsWith(".mp4") || link.endsWith(".webm") -> MediaType.VIDEO
+            link.contains(".mp4") || link.contains(".webm") -> MediaType.VIDEO
 
             else -> MediaType.LINK
         }
