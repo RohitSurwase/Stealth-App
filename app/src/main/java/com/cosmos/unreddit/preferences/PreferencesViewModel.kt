@@ -14,6 +14,8 @@ class PreferencesViewModel @Inject constructor(
     private val preferencesRepository: PreferencesRepository
 ) : ViewModel() {
 
+    val nightMode: LiveData<Int> = preferencesRepository.getNightMode().asLiveData()
+
     val showNsfw: LiveData<Boolean> = preferencesRepository.getShowNsfw()
         .asLiveData()
 
@@ -22,6 +24,12 @@ class PreferencesViewModel @Inject constructor(
 
     val showSpoilerPreview: LiveData<Boolean> = preferencesRepository.getShowSpoilerPreview()
         .asLiveData()
+
+    fun setNightMode(nightMode: Int) {
+        viewModelScope.launch {
+            preferencesRepository.setNightMode(nightMode)
+        }
+    }
 
     fun setShowNsfw(showNsfw: Boolean) {
         viewModelScope.launch {

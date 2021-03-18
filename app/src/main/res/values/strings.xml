@@ -110,5 +110,19 @@
     <string name="dialog_media_not_found_title">Media not found</string>
     <string name="dialog_media_not_found_body">This image or video you are looking for does not exist or may have been removed.</string>
 
+    <string name="dialog_night_mode_title">Theme</string>
+
     <string name="empty_data">Nothing to see here…</string>
+
+    <string name="preference_category_ui">UI</string>
+    <string name="preference_category_content">Content</string>
+
+    <string name="preference_night_mode">Theme</string>
+    <string name="preference_night_mode_light">Light Theme</string>
+    <string name="preference_night_mode_dark">Dark Theme</string>
+    <string name="preference_night_mode_system">Follow System</string>
+
+    <string name="preference_show_nsfw">Show NSFW content</string>
+    <string name="preference_show_nsfw_preview">Show NSFW preview</string>
+    <string name="preference_show_spoiler_preview">Show Spoiler preview</string>
 </resources>

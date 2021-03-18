@@ -1,9 +1,11 @@
 package com.cosmos.unreddit.repository
 
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.emptyPreferences
 import com.cosmos.unreddit.preferences.ContentPreferences
+import com.cosmos.unreddit.preferences.UiPreferences
 import com.cosmos.unreddit.util.getValue
 import com.cosmos.unreddit.util.setValue
 import kotlinx.coroutines.flow.Flow
@@ -17,6 +19,18 @@ import javax.inject.Singleton
 class PreferencesRepository @Inject constructor(
     private val preferencesDatastore: DataStore<Preferences>
 ) {
+
+    //region Ui
+
+    suspend fun setNightMode(nightMode: Int) {
+        preferencesDatastore.setValue(UiPreferences.PreferencesKeys.NIGHT_MODE, nightMode)
+    }
+
+    fun getNightMode(defaultValue: Int = AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM): Flow<Int> {
+        return preferencesDatastore.getValue(UiPreferences.PreferencesKeys.NIGHT_MODE, defaultValue)
+    }
+
+    //endregion
 
     //region Content
 
