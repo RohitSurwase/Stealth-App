@@ -11,6 +11,8 @@ import androidx.transition.Slide
 import androidx.transition.TransitionManager
 import com.cosmos.unreddit.databinding.ActivityMainBinding
 import com.cosmos.unreddit.util.setupWithNavController
+import com.google.android.material.shape.CornerFamily
+import com.google.android.material.shape.MaterialShapeDrawable
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -26,6 +28,8 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        initBottomNavigationView()
 
         // Workaround to prevent activity from being created twice
         val newIntent = intent.clone() as Intent
@@ -60,6 +64,18 @@ class MainActivity : AppCompatActivity() {
         )
 
         currentNavController = controller
+    }
+
+    private fun initBottomNavigationView() {
+        val radius = resources.getDimension(R.dimen.bottom_navigation_radius)
+        val bottomNavigationBackground = binding.bottomNavigation.background
+                as? MaterialShapeDrawable
+
+        bottomNavigationBackground?.apply {
+            shapeAppearanceModel = shapeAppearanceModel.toBuilder()
+                .setAllCorners(CornerFamily.ROUNDED, radius)
+                .build()
+        }
     }
 
     private fun showNavigation(show: Boolean) {

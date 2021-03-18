@@ -23,10 +23,9 @@
     <color name="background">#FAFAFF</color>
 
     <color name="chip_background_color">#EBEBFF</color>
+    <color name="chip_selected_text_color">@color/colorPrimary</color>
 
     <color name="icon_navigation_color_unpressed">#D1C4E9</color>
-
-    <color name="subscription_background_color">#F3EFFF</color>
 
     <color name="card_background_color">#F3EFFF</color>
 

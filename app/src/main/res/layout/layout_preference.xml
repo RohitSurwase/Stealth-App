@@ -10,7 +10,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:padding="@dimen/preference_padding"
-        android:background="@drawable/subscription_background">
+        android:background="@drawable/card_background">
 
         <TextView
             android:id="@android:id/title"
@@ -20,7 +20,8 @@
             app:layout_constraintBottom_toTopOf="@android:id/summary"
             app:layout_constraintStart_toStartOf="parent"
             android:textColor="@null"
-            android:textAppearance="@style/TextAppearancePreference"/>
+            android:textAppearance="@style/TextAppearancePreference"
+            android:scrollbarSize="0dp"/>
 
         <TextView
             android:id="@android:id/summary"
@@ -29,7 +30,7 @@
             app:layout_constraintTop_toBottomOf="@android:id/title"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            android:textColor="?android:attr/textColorSecondary"
+            android:textColor="@color/text_color_secondary"
             android:maxLines="10"
             style="@style/PreferenceSummaryTextStyle"/>
 

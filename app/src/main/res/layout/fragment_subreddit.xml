@@ -24,7 +24,8 @@
             <androidx.cardview.widget.CardView
                 android:id="@+id/container"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent">
+                android:layout_height="match_parent"
+                app:cardBackgroundColor="@color/background">
 
                 <include
                     android:id="@+id/subreddit_content"

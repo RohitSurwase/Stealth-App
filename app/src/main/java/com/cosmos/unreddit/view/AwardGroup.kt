@@ -3,6 +3,7 @@ package com.cosmos.unreddit.view
 import android.content.Context
 import android.util.AttributeSet
 import android.view.View
+import androidx.core.content.ContextCompat
 import coil.Coil
 import coil.request.ImageRequest
 import com.cosmos.unreddit.R
@@ -18,6 +19,7 @@ class AwardGroup
 ) : ChipGroup(context, attrs, defStyleAttr) {
 
     private val awardImageSize = context.resources.getDimension(R.dimen.award_image_size)
+    private val textColor = ContextCompat.getColor(context, R.color.text_color)
 
     fun setAwards(awards: List<Award>) {
         removeAllViews()
@@ -35,6 +37,7 @@ class AwardGroup
                 chipEndPadding = 0F
                 textSize = 12F
                 text = context.getString(R.string.award_count, award.count)
+                setTextColor(textColor)
                 setChipBackgroundColorResource(R.color.chip_background_color)
             }
             addView(chip as View)

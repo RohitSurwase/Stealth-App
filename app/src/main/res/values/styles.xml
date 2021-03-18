@@ -1,14 +1,15 @@
-<resources xmlns:tools="http://schemas.android.com/tools">
-    <!-- Base application theme. -->
-    <style name="AppTheme" parent="Theme.MaterialComponents.DayNight.NoActionBar">
-        <!-- Customize your theme here. -->
+<resources>
+
+    <style name="BaseTheme" parent="Theme.MaterialComponents.DayNight.NoActionBar">
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
         <item name="android:statusBarColor">@color/background</item>
         <item name="android:windowLightStatusBar">true</item>
         <item name="android:fitsSystemWindows">true</item>
-        <item name="android:windowBackground">@color/background</item>
+
+        <item name="android:colorBackground">@color/background</item>
+        <item name="colorSurface">@color/background</item>
 
         <item name="android:textColor">@color/text_color</item>
 
@@ -19,6 +20,8 @@
         <item name="materialAlertDialogTheme">@style/MaterialAlertDialogTheme</item>
     </style>
 
+    <style name="AppTheme" parent="BaseTheme"/>
+
     <style name="CardStyle" parent="Widget.MaterialComponents.CardView">
         <item name="cardElevation">0dp</item>
         <item name="cardCornerRadius">15dp</item>
@@ -26,24 +29,6 @@
         <item name="android:layout_marginEnd">16dp</item>
         <item name="android:layout_marginTop">8dp</item>
         <item name="android:layout_marginBottom">8dp</item>
-    </style>
-
-    <style name="PostCardStyle" parent="Widget.MaterialComponents.CardView">
-        <item name="cardElevation">0dp</item>
-        <item name="cardCornerRadius">15dp</item>
-        <item name="strokeWidth">1dp</item>
-        <item name="strokeColor">@color/colorPrimary</item>
-        <item name="cardBackgroundColor">#FAFAFA</item>
-        <item name="android:layout_margin">4dp</item>
-    </style>
-
-    <style name="CommentCardStyle" parent="Widget.MaterialComponents.CardView">
-        <item name="cardElevation">0dp</item>
-        <item name="cardCornerRadius">15dp</item>
-        <item name="strokeWidth">1dp</item>
-        <item name="strokeColor">@color/colorPrimary</item>
-        <item name="cardBackgroundColor">#FAFAFA</item>
-        <item name="android:layout_margin">4dp</item>
     </style>
 
     <style name="TextAppearanceAppBarLabel" parent="">
@@ -198,6 +183,7 @@
     <style name="ChipChoiceStyle" parent="Widget.MaterialComponents.Chip.Choice">
         <item name="chipIconVisible">true</item>
         <item name="chipBackgroundColor">@color/chip_background_color</item>
+        <item name="android:textColor">@color/chip_text_color</item>
     </style>
 
     <style name="CircularImageViewStyle" parent="">
@@ -263,7 +249,6 @@
 
     <style name="CardButtonStyle" parent="Widget.MaterialComponents.CardView">
         <item name="cardElevation">@dimen/app_bar_button_elevation</item>
-        <item name="cardBackgroundColor">@android:color/white</item>
         <item name="android:focusable">true</item>
         <item name="android:clickable">true</item>
     </style>
@@ -348,12 +333,13 @@
         <item name="chipIconTint">@color/colorPrimary</item>
         <item name="chipStartPadding">16dp</item>
         <item name="chipEndPadding">16dp</item>
+        <item name="android:textColor">@color/text_color</item>
         <item name="android:textAlignment">center</item>
     </style>
 
     <style name="InfoBarStyle" parent="">
         <item name="cardBackgroundColor">@color/colorPrimaryLight</item>
-        <item name="cardElevation">8dp</item>
+        <item name="cardElevation">@dimen/info_bar_elevation</item>
         <item name="cardCornerRadius">8dp</item>
         <item name="android:layout_marginStart">16dp</item>
         <item name="android:layout_marginEnd">16dp</item>

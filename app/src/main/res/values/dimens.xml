@@ -131,4 +131,10 @@
     <dimen name="dialog_menu_button_size">192dp</dimen>
 
     <dimen name="info_bar_margin_top">8dp</dimen>
+    <dimen name="info_bar_elevation">8dp</dimen>
+
+    <dimen name="bottom_navigation_elevation">8dp</dimen>
+    <dimen name="bottom_navigation_radius">16dp</dimen>
+    <dimen name="bottom_navigation_size">256dp</dimen>
+    <dimen name="bottom_navigation_margin">24dp</dimen>
 </resources>

@@ -10,7 +10,6 @@
             type="com.cosmos.unreddit.subreddit.Subscription" />
     </data>
 
-    <!-- TODO: Style -->
     <com.google.android.material.card.MaterialCardView
         android:layout_width="match_parent"
         android:layout_height="@dimen/subscriptions_card_height"
@@ -20,7 +19,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:padding="@dimen/subscriptions_padding"
-            android:background="@drawable/subscription_background">
+            android:background="@drawable/card_background">
 
             <com.google.android.material.imageview.ShapeableImageView
                 android:id="@+id/subscription_image"
