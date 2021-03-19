@@ -8,6 +8,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.cosmos.unreddit.databinding.ItemPostImageBinding
 import com.cosmos.unreddit.databinding.ItemPostLinkBinding
 import com.cosmos.unreddit.databinding.ItemPostTextBinding
+import com.cosmos.unreddit.parser.ClickableMovementMethod
 import com.cosmos.unreddit.post.PostEntity
 import com.cosmos.unreddit.post.PostType
 import com.cosmos.unreddit.preferences.ContentPreferences
@@ -17,7 +18,7 @@ import kotlinx.coroutines.launch
 
 class PostListAdapter(
     private val repository: PostListRepository,
-    private val listener: PostClickListener,
+    private val postClickListener: PostClickListener,
     private val onLinkClickListener: RedditView.OnLinkClickListener? = null
 ) : PagingDataAdapter<PostEntity, RecyclerView.ViewHolder>(POST_COMPARATOR) {
 
@@ -35,11 +36,82 @@ class PostListAdapter(
         fun onLinkClick(post: PostEntity)
     }
 
-    private var contentPreferences: ContentPreferences = ContentPreferences(
+    interface Listener {
+        fun onClick(position: Int, isLong: Boolean = false)
+
+        fun onMediaClick(position: Int)
+
+        fun onMenuClick(position: Int)
+    }
+
+    private val clickableMovementMethod = ClickableMovementMethod(
+        object : ClickableMovementMethod.OnClickListener {
+            override fun onLinkClick(link: String) {
+                onLinkClickListener?.onLinkClick(link)
+            }
+
+            override fun onLinkLongClick(link: String) {
+                onLinkClickListener?.onLinkLongClick(link)
+            }
+
+            override fun onClick() {
+                // ignore
+            }
+
+            override fun onLongClick() {
+                // ignore
+            }
+        }
+    )
+
+    var contentPreferences: ContentPreferences = ContentPreferences(
         showNsfw = false,
         showNsfwPreview = false,
         showSpoilerPreview = false
     )
+        set(value) {
+            if (field.showNsfwPreview != value.showNsfwPreview ||
+                field.showSpoilerPreview != value.showSpoilerPreview
+            ) {
+                field = value
+                notifyDataSetChanged()
+            }
+        }
+
+    private val listener = object : Listener {
+        override fun onClick(position: Int, isLong: Boolean) {
+            getItem(position)?.let {
+                it.seen = true
+                insertPostInHistory(it.id)
+                notifyItemChanged(position, it)
+                if (isLong) {
+                    postClickListener.onLongClick(it)
+                } else {
+                    postClickListener.onClick(it)
+                }
+            }
+        }
+
+        override fun onMediaClick(position: Int) {
+            getItem(position)?.let {
+                when (it.type) {
+                    PostType.IMAGE -> postClickListener.onImageClick(it)
+                    PostType.LINK -> postClickListener.onLinkClick(it)
+                    PostType.VIDEO -> postClickListener.onVideoClick(it)
+                    else -> {
+                        // ignore
+                    }
+                }
+            }
+        }
+
+        override fun onMenuClick(position: Int) {
+            getItem(position)?.let {
+                postClickListener.onMenuClick(it)
+            }
+        }
+
+    }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         val inflater = LayoutInflater.from(parent.context)
@@ -49,7 +121,7 @@ class PostListAdapter(
             PostType.TEXT.value -> PostViewHolder.TextPostViewHolder(
                 ItemPostTextBinding.inflate(inflater, parent, false),
                 listener,
-                onLinkClickListener
+                clickableMovementMethod
             )
             // Image post
             PostType.IMAGE.value -> PostViewHolder.ImagePostViewHolder(
@@ -81,51 +153,43 @@ class PostListAdapter(
             // Text post
             PostType.TEXT.value -> (holder as PostViewHolder.TextPostViewHolder).bind(
                 item,
-                contentPreferences,
-                this::onClick
+                contentPreferences
             )
             // Image post
             PostType.IMAGE.value -> (holder as PostViewHolder.ImagePostViewHolder).bind(
                 item,
-                contentPreferences,
-                this::onClick
+                contentPreferences
             )
             // Video post
             PostType.VIDEO.value -> (holder as PostViewHolder.VideoPostViewHolder).bind(
                 item,
-                contentPreferences,
-                this::onClick
+                contentPreferences
             )
             // Link post
             PostType.LINK.value -> (holder as PostViewHolder.LinkPostViewHolder).bind(
                 item,
-                contentPreferences,
-                this::onClick
+                contentPreferences
             )
             else -> throw IllegalArgumentException("Unknown type")
         }
     }
 
-    private fun onClick(position: Int) {
-        getItem(position)?.let {
-            it.seen = true
-            insertPostInHistory(it.id)
-            notifyItemChanged(position, it) // TODO: Check with history in viewmodels
+    override fun onBindViewHolder(
+        holder: RecyclerView.ViewHolder,
+        position: Int,
+        payloads: MutableList<Any>
+    ) {
+        if (payloads.isEmpty()) {
+            super.onBindViewHolder(holder, position, payloads)
+        } else {
+            val item = getItem(position) ?: return
+            (holder as? PostViewHolder)?.update(item)
         }
     }
 
     private fun insertPostInHistory(id: String) {
         GlobalScope.launch {
             repository.insertPostInHistory(id)
-        }
-    }
-
-    fun setContentPreferences(contentPreferences: ContentPreferences) {
-        if (this.contentPreferences.showNsfwPreview != contentPreferences.showNsfwPreview ||
-            this.contentPreferences.showSpoilerPreview != contentPreferences.showSpoilerPreview
-        ) {
-            this.contentPreferences = contentPreferences
-            notifyDataSetChanged()
         }
     }
 

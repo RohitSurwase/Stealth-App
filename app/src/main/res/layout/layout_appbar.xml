@@ -3,10 +3,8 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="?attr/actionBarSize"
-    xmlns:tools="http://schemas.android.com/tools"
     android:background="@color/background">
 
-    <!-- TODO: App name appearance -->
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -19,7 +17,7 @@
         android:letterSpacing="0.2"
         android:text="@string/app_name"/>
 
-    <com.google.android.material.card.MaterialCardView
+    <com.cosmos.unreddit.view.CardButton
         android:id="@+id/sort_card"
         android:layout_width="@dimen/app_bar_button_size"
         android:layout_height="@dimen/app_bar_button_size"
@@ -27,42 +25,17 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         android:layout_marginEnd="@dimen/app_bar_margin"
-        app:cardElevation="@dimen/app_bar_button_elevation"
-        android:background="@color/background"
-        android:clickable="true"
-        android:focusable="true">
+        app:icon="@drawable/ic_sort"
+        style="@style/CardButtonStyle"/>
 
-        <ImageView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@drawable/ic_sort"
-            android:layout_gravity="center"
-            app:tint="@color/colorPrimary" />
-
-    </com.google.android.material.card.MaterialCardView>
-
-    <ImageView
+    <com.cosmos.unreddit.view.SortIconView
         android:id="@+id/sort_icon"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toTopOf="@id/sort_time_text"
         app:layout_constraintEnd_toStartOf="@id/sort_card"
-        app:layout_constraintVertical_chainStyle="packed"
-        android:layout_marginEnd="@dimen/app_bar_margin"
-        tools:src="@drawable/ic_hot"/>
-
-    <TextView
-        android:id="@+id/sort_time_text"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:layout_constraintStart_toStartOf="@id/sort_icon"
-        app:layout_constraintEnd_toEndOf="@id/sort_icon"
-        app:layout_constraintTop_toBottomOf="@id/sort_icon"
         app:layout_constraintBottom_toBottomOf="parent"
-        android:textAppearance="@style/TextAppearanceSortLabelAppBar"
-        tools:text="@string/sort_time_week_short"
-        tools:ignore="SmallSp"
-        tools:visibility="visible"/>
+        android:paddingHorizontal="@dimen/app_bar_margin"
+        app:sortType="general"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

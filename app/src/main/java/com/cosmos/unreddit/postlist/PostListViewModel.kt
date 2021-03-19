@@ -9,7 +9,9 @@ import com.cosmos.unreddit.post.PostEntity
 import com.cosmos.unreddit.post.Sorting
 import com.cosmos.unreddit.preferences.ContentPreferences
 import com.cosmos.unreddit.repository.PreferencesRepository
+import com.cosmos.unreddit.util.PagerHelper
 import com.cosmos.unreddit.util.PostUtil
+import com.cosmos.unreddit.util.updateValue
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -26,9 +28,7 @@ class PostListViewModel
     preferencesRepository: PreferencesRepository
 ) : ViewModel() {
 
-    private val history: Flow<List<String>> = repository.getHistory()
-        .map { list -> list.map { it.postId } }
-        .distinctUntilChanged()
+    private val history: Flow<List<String>> = repository.getHistoryIds().distinctUntilChanged()
 
     val contentPreferences: Flow<ContentPreferences> =
         preferencesRepository.getContentPreferences()
@@ -47,38 +47,22 @@ class PostListViewModel
         }
         .distinctUntilChanged()
 
-    private var currentSubreddit: String? = null
-    private var currentSorting: Sorting? = null
-
-    private var currentPosts: Flow<PagingData<PostEntity>>? = null
-
-    fun loadAndFilterPosts(subreddit: String, sorting: Sorting): Flow<PagingData<PostEntity>> {
-        return PostUtil.filterPosts(loadPosts(subreddit, sorting), history, contentPreferences)
-            .cachedIn(viewModelScope)
+    private val postPagerHelper = object : PagerHelper<PostEntity>() {
+        override fun getResults(query: String, sorting: Sorting): Flow<PagingData<PostEntity>> {
+            return repository.getPosts(query, sorting).cachedIn(viewModelScope)
+        }
     }
 
-    private fun loadPosts(subreddit: String, sorting: Sorting): Flow<PagingData<PostEntity>> {
-        val lastPosts = currentPosts
-        if (currentSubreddit == subreddit &&
-            currentSorting == sorting &&
-            lastPosts != null
-        ) {
-            return lastPosts
-        }
-
-        currentSubreddit = subreddit
-        currentSorting = sorting
-
-        val newPosts = repository.getPosts(subreddit, sorting).cachedIn(viewModelScope)
-        currentPosts = newPosts
-
-        return newPosts
+    fun loadAndFilterPosts(subreddit: String, sorting: Sorting): Flow<PagingData<PostEntity>> {
+        return PostUtil.filterPosts(
+            postPagerHelper.loadData(subreddit, sorting),
+            history,
+            contentPreferences
+        ).cachedIn(viewModelScope)
     }
 
     fun setSorting(sorting: Sorting) {
-        if (_sorting.value != sorting) {
-            _sorting.value = sorting
-        }
+        _sorting.updateValue(sorting)
     }
 
     companion object {

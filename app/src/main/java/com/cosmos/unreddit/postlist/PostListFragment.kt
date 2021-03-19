@@ -4,23 +4,24 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.animation.AnimationUtils
 import androidx.core.view.isVisible
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.setFragmentResultListener
+import androidx.lifecycle.asLiveData
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.paging.LoadState
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.cosmos.unreddit.R
 import com.cosmos.unreddit.UiViewModel
-import com.cosmos.unreddit.api.RedditApi
 import com.cosmos.unreddit.base.BaseFragment
 import com.cosmos.unreddit.databinding.FragmentPostBinding
 import com.cosmos.unreddit.loadstate.NetworkLoadStateAdapter
 import com.cosmos.unreddit.post.Sorting
 import com.cosmos.unreddit.postdetails.PostDetailsFragment
 import com.cosmos.unreddit.sort.SortFragment
+import com.cosmos.unreddit.util.betterSmoothScrollToPosition
+import com.cosmos.unreddit.util.onRefreshFromNetwork
 import com.cosmos.unreddit.util.setSortingListener
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Job
@@ -41,7 +42,7 @@ class PostListFragment : BaseFragment() {
 
     private var loadPostsJob: Job? = null
 
-    private lateinit var adapter: PostListAdapter
+    private lateinit var postListAdapter: PostListAdapter
 
     @Inject
     lateinit var repository: PostListRepository
@@ -67,7 +68,7 @@ class PostListFragment : BaseFragment() {
         initAppBar()
         initRecyclerView()
         bindViewModel()
-        binding.infoRetry.setActionClickListener { adapter.retry() }
+        binding.infoRetry.setActionClickListener { postListAdapter.retry() }
     }
 
     private fun bindViewModel() {
@@ -78,15 +79,17 @@ class PostListFragment : BaseFragment() {
                 viewModel.contentPreferences
             ) { subreddit, sorting, contentPreferences ->
                 binding.infoRetry.hide()
-                adapter.setContentPreferences(contentPreferences)
+                postListAdapter.contentPreferences = contentPreferences
                 loadPosts(subreddit, sorting)
-                setSortIcon(sorting)
-            }.collect() // TODO: Sometimes does not scroll to top
+            }.collect()
+        }
+        viewModel.sorting.asLiveData().observe(viewLifecycleOwner) {
+            binding.appBar.sortIcon.setSorting(it)
         }
     }
 
     private fun initRecyclerView() {
-        adapter = PostListAdapter(repository, this, this).apply {
+        postListAdapter = PostListAdapter(repository, this, this).apply {
             addLoadStateListener { loadState ->
                 binding.listPost.isVisible = loadState.source.refresh is LoadState.NotLoading
 
@@ -98,11 +101,20 @@ class PostListFragment : BaseFragment() {
                 }
             }
         }
-        binding.listPost.layoutManager = LinearLayoutManager(requireContext())
-        binding.listPost.adapter = adapter.withLoadStateHeaderAndFooter(
-            header = NetworkLoadStateAdapter { adapter.retry() },
-            footer = NetworkLoadStateAdapter { adapter.retry() }
-        )
+
+        binding.listPost.apply {
+            layoutManager = LinearLayoutManager(requireContext())
+            adapter = postListAdapter.withLoadStateHeaderAndFooter(
+                header = NetworkLoadStateAdapter { postListAdapter.retry() },
+                footer = NetworkLoadStateAdapter { postListAdapter.retry() }
+            )
+        }
+
+        lifecycleScope.launchWhenStarted {
+            postListAdapter.onRefreshFromNetwork {
+                scrollToTop()
+            }
+        }
     }
 
     private fun initAppBar() {
@@ -118,71 +130,17 @@ class PostListFragment : BaseFragment() {
         }
     }
 
-    private fun setSortIcon(sorting: Sorting) {
-        val popInAnimation = AnimationUtils.loadAnimation(context, R.anim.pop_in)
-        val popOutAnimation = AnimationUtils.loadAnimation(context, R.anim.pop_out)
-
-        with(binding.appBar.sortIcon) {
-            visibility = if (sorting.generalSorting == RedditApi.Sort.HOT) {
-                View.GONE
-            } else {
-                View.VISIBLE
-            }
-
-            when (sorting.generalSorting) {
-                RedditApi.Sort.NEW -> setImageResource(R.drawable.ic_new)
-                RedditApi.Sort.TOP -> setImageResource(R.drawable.ic_top)
-                RedditApi.Sort.RISING -> setImageResource(R.drawable.ic_rising)
-                RedditApi.Sort.CONTROVERSIAL -> setImageResource(R.drawable.ic_controversial)
-                else -> {
-                    startAnimation(popOutAnimation)
-                    return@with
-                }
-            }
-
-            startAnimation(popInAnimation)
-        }
-
-        with(binding.appBar.sortTimeText) {
-            val showOutAnimation = isVisible
-
-            visibility = if (sorting.generalSorting == RedditApi.Sort.TOP ||
-                sorting.generalSorting == RedditApi.Sort.CONTROVERSIAL
-            ) {
-                View.VISIBLE
-            } else {
-                View.GONE
-            }
-
-            text = when (sorting.timeSorting) {
-                RedditApi.TimeSorting.HOUR -> getString(R.string.sort_time_hour_short)
-                RedditApi.TimeSorting.DAY -> getString(R.string.sort_time_day_short)
-                RedditApi.TimeSorting.WEEK -> getString(R.string.sort_time_week_short)
-                RedditApi.TimeSorting.MONTH -> getString(R.string.sort_time_month_short)
-                RedditApi.TimeSorting.YEAR -> getString(R.string.sort_time_year_short)
-                RedditApi.TimeSorting.ALL -> getString(R.string.sort_time_all_short)
-                null -> {
-                    if (showOutAnimation) startAnimation(popOutAnimation)
-                    return@with
-                }
-            }
-
-            startAnimation(popInAnimation)
-        }
-    }
-
     private fun loadPosts(subreddit: String, sorting: Sorting) {
         loadPostsJob?.cancel()
         loadPostsJob = viewLifecycleOwner.lifecycleScope.launch {
             viewModel.loadAndFilterPosts(subreddit, sorting).collectLatest {
-                adapter.submitData(it)
+                postListAdapter.submitData(it)
             }
         }
     }
 
     fun scrollToTop() {
-        // TODO: Find better method when item is too far
-        binding.listPost.smoothScrollToPosition(0)
+        binding.listPost.betterSmoothScrollToPosition(0)
     }
 
     private fun showSortDialog() {
@@ -196,8 +154,5 @@ class PostListFragment : BaseFragment() {
 
     companion object {
         const val TAG = "PostListFragment"
-
-        @JvmStatic
-        fun newInstance() = PostListFragment()
     }
 }

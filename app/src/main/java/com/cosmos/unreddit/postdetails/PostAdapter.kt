@@ -149,7 +149,7 @@ class PostAdapter(
         private fun bindFlairs(post: PostEntity) {
             with(binding) {
                 when {
-                    post.hasFlairs() -> {
+                    post.hasFlairs -> {
                         includePostFlairs.root.visibility = View.VISIBLE
                         with(includePostFlairs.postFlair) {
                             if (!post.flair.isEmpty()) {

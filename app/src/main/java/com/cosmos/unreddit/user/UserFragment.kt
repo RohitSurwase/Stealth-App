@@ -103,7 +103,7 @@ class UserFragment : BaseFragment() {
                 viewModel.page,
                 viewModel.contentPreferences
             ) { user, sorting, page, contentPreferences ->
-                postListAdapter.setContentPreferences(contentPreferences)
+                postListAdapter.contentPreferences = contentPreferences
                 user?.let {
                     viewModel.loadUserInfo(false)
                     load(page, user, sorting)

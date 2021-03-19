@@ -8,64 +8,66 @@ import com.cosmos.unreddit.api.pojo.list.PostData
 import com.cosmos.unreddit.model.Flair
 import com.cosmos.unreddit.model.PosterType
 import com.cosmos.unreddit.parser.HtmlParser
+import com.cosmos.unreddit.parser.TextBlock
 import com.cosmos.unreddit.post.Award
 import com.cosmos.unreddit.post.PostEntity
 import com.cosmos.unreddit.post.Sorting
+import com.cosmos.unreddit.util.formatNumber
+import com.cosmos.unreddit.util.toMillis
+import kotlin.math.round
 
 object PostMapper {
 
     suspend fun dataToEntity(data: PostData, htmlParser: HtmlParser = HtmlParser()): PostEntity {
         with(data) {
+            val redditText = htmlParser.separateHtmlBlocks(selfTextHtml)
+            val flair = Flair.fromData(linkFlairRichText, flair)
             return PostEntity(
                 name,
                 prefixedSubreddit,
                 title,
-                ratio,
+                round(ratio * 100).toInt(),
                 totalAwards,
                 isOC,
-                Flair.fromData(linkFlairRichText, flair),
+                flair,
                 Flair.fromData(authorFlairRichText, authorFlair),
-                score,
+                isOver18 || isSpoiler || isOC || !flair.isEmpty() || isStickied || isArchived || isLocked,
+                score.formatNumber(),
                 postType,
                 domain,
                 isSelf,
-                selfText,
                 selfTextHtml,
                 Sorting(RedditApi.Sort.fromName(suggestedSort)),
-                htmlParser.separateHtmlBlocks(selfTextHtml),
-                isPinned,
+                redditText,
                 isOver18,
-                getPreviewUrl(),
+                previewUrl,
+                (redditText.blocks.getOrNull(0)?.block as? TextBlock)?.text,
                 awardings.sortedByDescending { it.count }.map { Award(it.count, it.getIcon()) },
                 isSpoiler,
                 isArchived,
                 isLocked,
                 PosterType.fromDistinguished(distinguished),
                 author,
-                commentsNumber,
+                commentsNumber.formatNumber(),
                 permalink,
                 isStickied,
                 url,
-                getTimeInMillis(),
+                created.toMillis(),
                 mediaType,
                 mediaUrl,
-                getGallery(),
+                gallery,
                 false
             )
         }
     }
 
     suspend fun dataToEntities(data: List<Child>?): List<PostEntity> {
-        val postList = mutableListOf<PostEntity>()
-
         val htmlParser = HtmlParser()
 
-        data?.forEach {
-            if (it.kind == ChildType.t3) {
-                postList.add(dataToEntity((it as PostChild).data, htmlParser))
-            }
-        }
-
-        return postList
+        return data?.filter {
+            it.kind == ChildType.t3
+        }?.map {
+            dataToEntity((it as PostChild).data, htmlParser)
+        } ?: emptyList()
     }
 }

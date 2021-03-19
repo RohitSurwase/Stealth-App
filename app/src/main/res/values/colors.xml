@@ -39,9 +39,11 @@
 
     <color name="admin_gradient_start">#D32F2F</color>
     <color name="admin_gradient_end">#EF6C00</color>
+    <color name="admin_color">#F44336</color>
 
     <color name="moderator_gradient_start">#2E7D32</color>
     <color name="moderator_gradient_end">#76D275</color>
+    <color name="moderator_color">#4CAF50</color>
 
     <color name="nsfw_gradient_start">#F06292</color>
     <color name="nsfw_gradient_end">#F8BBD0</color>

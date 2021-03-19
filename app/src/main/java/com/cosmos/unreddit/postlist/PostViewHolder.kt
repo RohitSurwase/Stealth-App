@@ -1,62 +1,61 @@
 package com.cosmos.unreddit.postlist
 
-import android.graphics.LinearGradient
-import android.graphics.Shader
 import android.view.View
-import android.widget.ImageView
 import android.widget.TextView
-import androidx.databinding.DataBindingUtil
+import androidx.core.content.ContextCompat
+import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
-import coil.imageLoader
-import coil.request.ImageRequest
-import coil.size.Precision
-import coil.size.Scale
-import coil.transform.BlurTransformation
 import com.cosmos.unreddit.R
 import com.cosmos.unreddit.databinding.*
 import com.cosmos.unreddit.model.MediaType
-import com.cosmos.unreddit.parser.TextBlock
+import com.cosmos.unreddit.model.PosterType
+import com.cosmos.unreddit.parser.ClickableMovementMethod
 import com.cosmos.unreddit.post.PostEntity
 import com.cosmos.unreddit.preferences.ContentPreferences
+import com.cosmos.unreddit.util.load
 import com.cosmos.unreddit.view.AwardView
-import com.cosmos.unreddit.view.RedditView
-import com.google.android.material.card.MaterialCardView
 
 abstract class PostViewHolder(
     itemView: View,
-    protected val listener: PostListAdapter.PostClickListener
+    private val postInfoBinding: IncludePostInfoBinding,
+    private val postMetricsBinding: IncludePostMetricsBinding,
+    private val postFlairsBinding: IncludePostFlairsBinding,
+    listener: PostListAdapter.Listener
 ) : RecyclerView.ViewHolder(itemView) {
+
+    private val title = itemView.findViewById<TextView>(R.id.text_post_title)
+    private val awards = itemView.findViewById<AwardView>(R.id.awards)
+
+    init {
+        itemView.apply {
+            setOnClickListener {
+                listener.onClick(bindingAdapterPosition)
+            }
+            setOnLongClickListener {
+                listener.onClick(bindingAdapterPosition, true)
+                return@setOnLongClickListener true
+            }
+        }
+
+        postMetricsBinding.buttonMore.setOnClickListener {
+            listener.onMenuClick(bindingAdapterPosition)
+        }
+    }
 
     open fun bind(
         postEntity: PostEntity,
-        contentPreferences: ContentPreferences,
-        onClick: (Int) -> Unit
+        contentPreferences: ContentPreferences
     ) {
-        val postInfo = itemView.findViewById<View>(R.id.include_post_info)
-        val postInfoBinding =
-            DataBindingUtil.bind<IncludePostInfoBinding>(postInfo) ?: return
-
-        val postMetrics = itemView.findViewById<View>(R.id.include_post_metrics)
-        val postMetricsBinding =
-            DataBindingUtil.bind<IncludePostMetricsBinding>(postMetrics) ?: return
-
-        val postFlairs = itemView.findViewById<View>(R.id.include_post_flairs)
-        val postFlairsBinding =
-            DataBindingUtil.bind<IncludePostFlairsBinding>(postFlairs) ?: return
-
-        val title = itemView.findViewById<TextView>(R.id.text_post_title)
-        val awards = itemView.findViewById<AwardView>(R.id.awards)
-
         postInfoBinding.post = postEntity
         postMetricsBinding.post = postEntity
         postFlairsBinding.post = postEntity
 
-        with(title) {
+        title.apply {
             text = postEntity.title
-            setTextColor(postEntity.getSeenColor(title.context))
+            setTextColor(ContextCompat.getColor(context, postEntity.textColor))
         }
 
-        with(awards) {
+        awards.apply {
             if (postEntity.totalAwards > 0) {
                 visibility = View.VISIBLE
                 setAwards(postEntity.awards, postEntity.totalAwards)
@@ -65,17 +64,16 @@ abstract class PostViewHolder(
             }
         }
 
-        with(postInfoBinding.textPostAuthor) {
-            val width = paint.measureText(postEntity.author)
-            val gradientShader = LinearGradient(0F, 0F, width, textSize,
-                postEntity.getAuthorGradientColors(context), null, Shader.TileMode.CLAMP)
-            paint.shader = gradientShader
+        if (postEntity.posterType != PosterType.REGULAR) {
+            postInfoBinding.textPostAuthor.apply {
+                setTextColor(ContextCompat.getColor(context, postEntity.posterType.color))
+            }
         }
 
         when {
-            postEntity.hasFlairs() -> {
-                postFlairs.visibility = View.VISIBLE
-                with(postFlairsBinding.postFlair) {
+            postEntity.hasFlairs -> {
+                postFlairsBinding.root.visibility = View.VISIBLE
+                postFlairsBinding.postFlair.apply {
                     if (!postEntity.flair.isEmpty()) {
                         visibility = View.VISIBLE
 
@@ -86,73 +84,50 @@ abstract class PostViewHolder(
                 }
             }
             postEntity.isSelf -> {
-                postFlairs.visibility = View.GONE
+                postFlairsBinding.root.visibility = View.GONE
             }
             else -> {
                 postFlairsBinding.postFlair.visibility = View.GONE
             }
         }
-
-        with(itemView) {
-            setOnClickListener {
-                onClick(bindingAdapterPosition)
-                listener.onClick(postEntity)
-            }
-            setOnLongClickListener {
-                listener.onLongClick(postEntity)
-                return@setOnLongClickListener true
-            }
-        }
-
-        postMetricsBinding.buttonMore.setOnClickListener { listener.onMenuClick(postEntity) }
     }
 
-    protected fun ImageView.load(
-        post: PostEntity,
-        contentPreferences: ContentPreferences,
-        builder: ImageRequest.Builder.() -> Unit = {}
-    ) {
-        val request = ImageRequest.Builder(context)
-            .data(post.preview)
-            .target(this)
-            .crossfade(true)
-            .scale(Scale.FILL)
-            .precision(Precision.AUTOMATIC)
-            .placeholder(R.drawable.image_placeholder)
-            .apply(builder)
-            .apply {
-                if ((post.isOver18 && !contentPreferences.showNsfwPreview) ||
-                    (post.isSpoiler && !contentPreferences.showSpoilerPreview)
-                ) {
-                    transformations(BlurTransformation(context, BLUR_RADIUS, BLUR_SAMPLING))
-                }
-            }
-            .build()
-        context.imageLoader.enqueue(request)
+    open fun update(post: PostEntity) {
+        title.setTextColor(ContextCompat.getColor(title.context, post.textColor))
     }
 
     class ImagePostViewHolder(
         private val binding: ItemPostImageBinding,
-        listener: PostListAdapter.PostClickListener
-    ) : PostViewHolder(binding.root, listener) {
+        listener: PostListAdapter.Listener
+    ) : PostViewHolder(
+        binding.root,
+        binding.includePostInfo,
+        binding.includePostMetrics,
+        binding.includePostFlairs,
+        listener
+    ) {
+
+        init {
+            binding.imagePostPreview.setOnClickListener {
+                listener.onMediaClick(bindingAdapterPosition)
+            }
+        }
 
         override fun bind(
             postEntity: PostEntity,
-            contentPreferences: ContentPreferences,
-            onClick: (Int) -> Unit
+            contentPreferences: ContentPreferences
         ) {
-            super.bind(postEntity, contentPreferences, onClick)
+            super.bind(postEntity, contentPreferences)
 
-            with(binding.imagePostPreview) {
-                load(postEntity, contentPreferences) {
-                    error(R.drawable.preview_image_fallback)
-                    fallback(R.drawable.preview_image_fallback)
-                }
-
-                setOnClickListener { listener.onImageClick(postEntity) }
+            binding.imagePostPreview.load(
+                postEntity.preview,
+                !postEntity.shouldShowPreview(contentPreferences)
+            ) {
+                error(R.drawable.preview_image_fallback)
+                fallback(R.drawable.preview_image_fallback)
             }
 
-            with(binding.buttonTypeIndicator) {
+            binding.buttonTypeIndicator.apply {
                 when (postEntity.mediaType) {
                     MediaType.REDDIT_GALLERY, MediaType.IMGUR_ALBUM, MediaType.IMGUR_GALLERY -> {
                         visibility = View.VISIBLE
@@ -168,26 +143,36 @@ abstract class PostViewHolder(
 
     class VideoPostViewHolder(
         private val binding: ItemPostImageBinding,
-        listener: PostListAdapter.PostClickListener
-    ) : PostViewHolder(binding.root, listener) {
+        listener: PostListAdapter.Listener
+    ) : PostViewHolder(
+        binding.root,
+        binding.includePostInfo,
+        binding.includePostMetrics,
+        binding.includePostFlairs,
+        listener
+    ) {
+
+        init {
+            binding.imagePostPreview.setOnClickListener {
+                listener.onMediaClick(bindingAdapterPosition)
+            }
+        }
 
         override fun bind(
             postEntity: PostEntity,
-            contentPreferences: ContentPreferences,
-            onClick: (Int) -> Unit
+            contentPreferences: ContentPreferences
         ) {
-            super.bind(postEntity, contentPreferences, onClick)
+            super.bind(postEntity, contentPreferences)
 
-            with(binding.imagePostPreview) {
-                load(postEntity, contentPreferences) {
-                    error(R.drawable.preview_video_fallback)
-                    fallback(R.drawable.preview_video_fallback)
-                }
-
-                setOnClickListener { listener.onVideoClick(postEntity) }
+            binding.imagePostPreview.load(
+                postEntity.preview,
+                !postEntity.shouldShowPreview(contentPreferences)
+            ) {
+                error(R.drawable.preview_video_fallback)
+                fallback(R.drawable.preview_video_fallback)
             }
 
-            with(binding.buttonTypeIndicator) {
+            binding.buttonTypeIndicator.apply {
                 visibility = View.VISIBLE
                 setIcon(R.drawable.ic_play)
             }
@@ -195,73 +180,88 @@ abstract class PostViewHolder(
     }
 
     class TextPostViewHolder(
-        binding: ItemPostTextBinding,
-        listener: PostListAdapter.PostClickListener,
-        private val onLinkClickListener: RedditView.OnLinkClickListener? = null
-    ) : PostViewHolder(binding.root, listener) {
-        private val selfText: RedditView = binding.textPostSelf
-        private val selfTextCard: MaterialCardView = binding.textPostSelfCard
+        private val binding: ItemPostTextBinding,
+        listener: PostListAdapter.Listener,
+        clickableMovementMethod: ClickableMovementMethod
+    ) : PostViewHolder(
+        binding.root,
+        binding.includePostInfo,
+        binding.includePostMetrics,
+        binding.includePostFlairs,
+        listener
+    ) {
+
+        init {
+            binding.textPostSelf.movementMethod = clickableMovementMethod
+            binding.textPostSelf.setOnLongClickListener {
+                listener.onClick(bindingAdapterPosition, true)
+                true
+            }
+        }
 
         override fun bind(
             postEntity: PostEntity,
-            contentPreferences: ContentPreferences,
-            onClick: (Int) -> Unit
+            contentPreferences: ContentPreferences
         ) {
-            super.bind(postEntity, contentPreferences, onClick)
+            super.bind(postEntity, contentPreferences)
 
-            with(selfText) {
-                if (postEntity.selfRedditText.isFirstBlockText() &&
-                    (!postEntity.isOver18 || contentPreferences.showNsfwPreview) &&
-                    (!postEntity.isSpoiler || contentPreferences.showSpoilerPreview)
+            binding.textPostSelf.apply {
+                if (postEntity.shouldShowPreview(contentPreferences) &&
+                    postEntity.previewText != null
                 ) {
-                    selfTextCard.visibility = View.VISIBLE
-                    setPreviewText(
-                        postEntity.selfRedditText.blocks[0].block as TextBlock
-                    )
-                    setOnClickListener { listener.onClick(postEntity) }
-                    setOnLongClickListener {
-                        listener.onLongClick(postEntity)
-                        true
-                    }
-                    setOnLinkClickListener(onLinkClickListener)
-                    setTextColor(postEntity.getSeenColor(context))
+                    binding.textPostSelfCard.visibility = View.VISIBLE
+                    setText(postEntity.previewText, false)
+                    setTextColor(ContextCompat.getColor(context, postEntity.textColor))
                 } else {
-                    selfTextCard.visibility = View.GONE
+                    binding.textPostSelfCard.visibility = View.GONE
+                }
+            }
+        }
+
+        override fun update(post: PostEntity) {
+            super.update(post)
+            if (binding.textPostSelfCard.isVisible) {
+                binding.textPostSelf.apply {
+                    setTextColor(ContextCompat.getColor(context, post.textColor))
                 }
             }
         }
     }
 
     class LinkPostViewHolder(
-        binding: ItemPostLinkBinding,
-        listener: PostListAdapter.PostClickListener
-    ) : PostViewHolder(binding.root, listener) {
-        private val preview: ImageView = binding.imagePostLinkPreview
+        private val binding: ItemPostLinkBinding,
+        listener: PostListAdapter.Listener
+    ) : PostViewHolder(
+        binding.root,
+        binding.includePostInfo,
+        binding.includePostMetrics,
+        binding.includePostFlairs,
+        listener
+    ) {
+
+        init {
+            binding.imagePostLinkPreview.setOnClickListener {
+                listener.onMediaClick(bindingAdapterPosition)
+            }
+        }
 
         override fun bind(
             postEntity: PostEntity,
-            contentPreferences: ContentPreferences,
-            onClick: (Int) -> Unit
+            contentPreferences: ContentPreferences
         ) {
-            super.bind(postEntity, contentPreferences, onClick)
+            super.bind(postEntity, contentPreferences)
 
-            with(preview) {
-                load(postEntity, contentPreferences) {
-                    error(R.drawable.preview_link_fallback)
-                    fallback(R.drawable.preview_link_fallback)
-                }
-
-                setOnClickListener { listener.onLinkClick(postEntity) }
+            binding.imagePostLinkPreview.load(
+                postEntity.preview,
+                !postEntity.shouldShowPreview(contentPreferences)
+            ) {
+                error(R.drawable.preview_link_fallback)
+                fallback(R.drawable.preview_link_fallback)
             }
         }
     }
 
     class PollPostViewHolder() {
 
-    }
-
-    companion object {
-        private const val BLUR_RADIUS = 25F
-        private const val BLUR_SAMPLING = 4F
     }
 }

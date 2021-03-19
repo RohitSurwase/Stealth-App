@@ -126,7 +126,7 @@ class SearchFragment : BaseFragment() {
                 viewModel.page,
                 viewModel.contentPreferences
             ) { query, sorting, page, contentPreferences ->
-                postListAdapter.setContentPreferences(contentPreferences)
+                postListAdapter.contentPreferences = contentPreferences
                 query?.let {
                     search(page, query, sorting)
                 }

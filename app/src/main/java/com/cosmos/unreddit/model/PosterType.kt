@@ -1,11 +1,14 @@
 package com.cosmos.unreddit.model
 
 import android.content.Context
+import androidx.annotation.ColorRes
 import com.cosmos.unreddit.R
 import com.cosmos.unreddit.util.PostUtil
 
-enum class PosterType(val value: Int) {
-    REGULAR(0), ADMIN(1), MODERATOR(2);
+enum class PosterType(val value: Int, @ColorRes val color: Int) {
+    REGULAR(0, R.color.colorPrimary),
+    ADMIN(1, R.color.admin_color),
+    MODERATOR(2, R.color.moderator_color);
 
     companion object {
         fun toType(type: Int): PosterType {

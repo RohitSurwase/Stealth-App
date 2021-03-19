@@ -99,7 +99,7 @@ class SubredditSearchFragment : BaseFragment(), PostListAdapter.PostClickListene
                 viewModel.contentPreferences
             ) { subreddit, query, sorting, contentPreferences ->
                 binding.loadingState.infoRetry.hide()
-                postListAdapter.setContentPreferences(contentPreferences)
+                postListAdapter.contentPreferences = contentPreferences
                 if (subreddit != null && query != null) {
                     searchPost(query, sorting)
                 }

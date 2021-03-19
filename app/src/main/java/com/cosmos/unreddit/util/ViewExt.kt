@@ -12,6 +12,7 @@ import coil.request.ImageRequest
 import coil.size.Precision
 import coil.size.Scale
 import coil.transform.BlurTransformation
+import com.cosmos.unreddit.R
 
 fun TextView.applyGradient(text: String, @ColorInt colors: IntArray) {
     val width = paint.measureText(text)
@@ -51,6 +52,7 @@ fun ImageView.load(
         .crossfade(true)
         .scale(Scale.FILL)
         .precision(Precision.AUTOMATIC)
+        .placeholder(R.drawable.image_placeholder)
         .apply(builder)
         .apply {
             if (blur) {

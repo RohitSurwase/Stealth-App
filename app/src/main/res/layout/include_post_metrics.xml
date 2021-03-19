@@ -33,7 +33,7 @@
             app:layout_constraintBottom_toBottomOf="@id/image_vote_icon"
             app:layout_constraintStart_toEndOf="@id/image_vote_icon"
             android:layout_marginStart="@dimen/post_icon_text_margin"
-            android:text="@{post.getVoteCount()}"
+            android:text="@{post.score}"
             tools:text="12345"/>
 
         <TextView
@@ -44,8 +44,8 @@
             app:layout_constraintBottom_toBottomOf="@id/image_vote_icon"
             app:layout_constraintStart_toEndOf="@id/text_post_vote"
             android:layout_marginStart="@dimen/post_margin_horizontal"
-            android:textColor="@{post.getRatioColor(context)}"
-            android:text="@{@string/post_ratio(Math.round(post.ratio * 100))}"
+            android:textColor="@color/text_color_secondary"
+            android:text="@{@string/post_ratio(post.ratio)}"
             tools:text="50%"/>
 
         <ImageView
@@ -67,7 +67,7 @@
             app:layout_constraintBottom_toBottomOf="@id/image_vote_icon"
             app:layout_constraintStart_toEndOf="@id/image_comments_icon"
             android:layout_marginStart="@dimen/post_icon_text_margin"
-            android:text="@{post.getCommentCount()}"
+            android:text="@{post.commentsNumber}"
             tools:text="1234"/>
 
         <ImageButton

@@ -138,7 +138,7 @@ class SubredditFragment : BaseFragment(), View.OnClickListener {
                 viewModel.contentPreferences
             ) { subreddit, sorting, contentPreferences ->
                 bindingContent.loadingState.infoRetry.hide()
-                postListAdapter.setContentPreferences(contentPreferences)
+                postListAdapter.contentPreferences = contentPreferences
                 subreddit?.let {
                     viewModel.loadSubredditInfo(false)
                     loadPosts(subreddit, sorting)

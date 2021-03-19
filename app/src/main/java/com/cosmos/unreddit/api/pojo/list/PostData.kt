@@ -6,7 +6,6 @@ import com.cosmos.unreddit.model.MediaType
 import com.cosmos.unreddit.post.PostType
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
-import java.util.concurrent.TimeUnit
 
 @JsonClass(generateAdapter = true)
 data class PostData(
@@ -209,36 +208,24 @@ data class PostData(
             else -> PostType.LINK
         }
 
-    fun getPreviewUrl(): String {
-        return mediaPreview?.images?.getOrNull(0)?.imageSource?.url
+    val previewUrl: String
+        get() = mediaPreview?.images?.getOrNull(0)?.imageSource?.url
             ?: mediaMetadata?.items?.getOrNull(0)?.image?.url
             ?: mediaMetadata?.items?.getOrNull(0)?.previews?.last()?.url
             ?: url
-    }
 
-    fun getTimeInMillis(): Long {
-        return TimeUnit.SECONDS.toMillis(created)
-    }
-
-    fun getGallery(): List<GalleryMedia> {
-        val gallery = mutableListOf<GalleryMedia>()
-
-        mediaMetadata?.items?.map { item ->
+    val gallery: List<GalleryMedia>
+        get() = mediaMetadata?.items?.mapNotNull { item ->
             item.image?.let {
                 when {
                     it.url != null -> {
-                        gallery.add(GalleryMedia(GalleryMedia.Type.IMAGE, it.url))
+                        GalleryMedia(GalleryMedia.Type.IMAGE, it.url)
                     }
                     it.mp4 != null -> {
-                        gallery.add(GalleryMedia(GalleryMedia.Type.VIDEO, it.mp4))
+                        GalleryMedia(GalleryMedia.Type.VIDEO, it.mp4)
                     }
-                    else -> {
-                        // ignore
-                    }
+                    else -> null
                 }
             }
-        }
-
-        return gallery
-    }
+        } ?: emptyList()
 }

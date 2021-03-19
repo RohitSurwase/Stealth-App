@@ -9,4 +9,7 @@
     <color name="chip_background_color">#4B3C5A</color>
 
     <color name="card_background_color">#3C3250</color>
+
+    <color name="admin_color">#EF5350</color>
+    <color name="moderator_color">#66BB6A</color>
 </resources>
