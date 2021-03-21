@@ -1,6 +1,11 @@
 package com.cosmos.unreddit.database
 
-import com.cosmos.unreddit.api.pojo.details.*
+import com.cosmos.unreddit.api.pojo.details.Child
+import com.cosmos.unreddit.api.pojo.details.ChildType
+import com.cosmos.unreddit.api.pojo.details.CommentChild
+import com.cosmos.unreddit.api.pojo.details.CommentData
+import com.cosmos.unreddit.api.pojo.details.MoreChild
+import com.cosmos.unreddit.api.pojo.details.MoreData
 import com.cosmos.unreddit.model.Flair
 import com.cosmos.unreddit.model.PosterType
 import com.cosmos.unreddit.parser.HtmlParser
@@ -8,6 +13,7 @@ import com.cosmos.unreddit.post.Award
 import com.cosmos.unreddit.post.Comment
 import com.cosmos.unreddit.post.CommentEntity
 import com.cosmos.unreddit.post.MoreEntity
+import com.cosmos.unreddit.util.toMillis
 
 object CommentMapper {
 
@@ -21,16 +27,16 @@ object CommentMapper {
                 linkId,
                 dataToEntities(replies?.data?.children),
                 author,
-                score,
+                scoreString,
                 awardings.sortedByDescending { it.count }.map { Award(it.count, it.getIcon()) },
                 htmlParser.separateHtmlBlocks(bodyHtml),
-                getEditedTimeInMillis(),
+                editedMillis,
                 isSubmitter,
                 stickied,
                 scoreHidden,
                 permalink,
                 id,
-                getTimeInMillis(),
+                created.toMillis(),
                 controversiality,
                 Flair.fromData(authorFlairRichText, flair),
                 PosterType.fromDistinguished(distinguished),
@@ -38,6 +44,7 @@ object CommentMapper {
                 linkPermalink,
                 linkAuthor,
                 subreddit,
+                commentIndicator,
                 name,
                 depth ?: 0
             )
@@ -58,20 +65,14 @@ object CommentMapper {
     }
 
     suspend fun dataToEntities(data: List<Child>?): MutableList<Comment> {
-        val commentList = mutableListOf<Comment>()
-
         val htmlParser = HtmlParser()
 
-        data?.forEach {
-            commentList.add(
-                when (it.kind) {
-                    ChildType.t1 -> dataToEntity((it as CommentChild).data, htmlParser)
-                    ChildType.more -> dataToEntity((it as MoreChild).data)
-                    else -> return@forEach
-                }
-            )
-        }
-
-        return commentList
+        return data?.mapNotNull {
+            when (it.kind) {
+                ChildType.t1 -> dataToEntity((it as CommentChild).data, htmlParser)
+                ChildType.more -> dataToEntity((it as MoreChild).data)
+                else -> null
+            }
+        } as MutableList<Comment>? ?: mutableListOf()
     }
 }

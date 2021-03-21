@@ -67,16 +67,6 @@
     <color name="comment_indicator_6">#FFF176</color>
     <color name="comment_indicator_7">#FFB74D</color>
     <color name="comment_indicator_8">#E0E0E0</color>
-    <array name="comment_indicator">
-        <item>@color/comment_indicator_1</item>
-        <item>@color/comment_indicator_2</item>
-        <item>@color/comment_indicator_3</item>
-        <item>@color/comment_indicator_4</item>
-        <item>@color/comment_indicator_5</item>
-        <item>@color/comment_indicator_6</item>
-        <item>@color/comment_indicator_7</item>
-        <item>@color/comment_indicator_8</item>
-    </array>
 
     <color name="exoplayer_buffered_color">#809A67EA</color>
     <color name="exoplayer_unplayed_color">#1A9A67EA</color>

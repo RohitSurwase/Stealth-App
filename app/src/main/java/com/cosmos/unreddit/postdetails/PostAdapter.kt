@@ -3,7 +3,9 @@ package com.cosmos.unreddit.postdetails
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
+import coil.request.ImageRequest
 import com.cosmos.unreddit.R
 import com.cosmos.unreddit.databinding.ItemPostHeaderBinding
 import com.cosmos.unreddit.model.MediaType
@@ -12,7 +14,6 @@ import com.cosmos.unreddit.post.PostEntity
 import com.cosmos.unreddit.post.PostType
 import com.cosmos.unreddit.postlist.PostListAdapter
 import com.cosmos.unreddit.preferences.ContentPreferences
-import com.cosmos.unreddit.util.applyGradient
 import com.cosmos.unreddit.util.load
 import com.cosmos.unreddit.view.RedditView
 
@@ -63,79 +64,85 @@ class PostAdapter(
     ) : RecyclerView.ViewHolder(binding.root) {
 
         fun bind(post: PostEntity) {
-            with(binding) {
-                includePostMetrics.post = post
-                includePostFlairs.post = post
-                includePostInfo.post = post
+            binding.includePostMetrics.post = post
+            binding.includePostFlairs.post = post
+            binding.includePostInfo.post = post
 
-                textPostTitle.text = post.title
+            binding.textPostTitle.text = post.title
 
-                includePostInfo.textPostAuthor.applyGradient(
-                    post.author,
-                    PosterType.getGradientColors(itemView.context, post.posterType)
-                )
+            if (post.posterType != PosterType.REGULAR) {
+                binding.includePostInfo.textPostAuthor.apply {
+                    setTextColor(ContextCompat.getColor(context, post.posterType.color))
+                }
+            }
 
-                bindAwards(post)
+            bindAwards(post)
 
-                bindFlairs(post)
+            bindFlairs(post)
 
-                when (post.type) {
-                    PostType.TEXT -> bindText(post)
-                    PostType.IMAGE -> {
-                        bindImage(post)
-                        imagePost.setOnClickListener { postClickListener.onImageClick(post) }
+            when (post.type) {
+                PostType.TEXT -> bindText(post)
+                PostType.IMAGE -> {
+                    bindImage(post) {
+                        error(R.drawable.preview_image_fallback)
+                        fallback(R.drawable.preview_image_fallback)
                     }
-                    PostType.LINK -> {
-                        bindImage(post)
-                        imagePost.setOnClickListener { postClickListener.onLinkClick(post) }
+                    binding.imagePost.setOnClickListener { postClickListener.onImageClick(post) }
+                }
+                PostType.LINK -> {
+                    bindImage(post) {
+                        error(R.drawable.preview_link_fallback)
+                        fallback(R.drawable.preview_link_fallback)
                     }
-                    PostType.VIDEO -> {
-                        bindImage(post)
-                        imagePost.setOnClickListener { postClickListener.onVideoClick(post) }
+                    binding.imagePost.setOnClickListener { postClickListener.onLinkClick(post) }
+                }
+                PostType.VIDEO -> {
+                    bindImage(post) {
+                        error(R.drawable.preview_video_fallback)
+                        fallback(R.drawable.preview_video_fallback)
+                    }
+                    binding.imagePost.setOnClickListener { postClickListener.onVideoClick(post) }
+                }
+            }
+
+            binding.buttonTypeIndicator.apply {
+                when {
+                    post.mediaType == MediaType.REDDIT_GALLERY ||
+                            post.mediaType == MediaType.IMGUR_ALBUM ||
+                            post.mediaType == MediaType.IMGUR_GALLERY -> {
+                        visibility = View.VISIBLE
+                        setIcon(R.drawable.ic_gallery)
+                    }
+                    post.type == PostType.VIDEO -> {
+                        visibility = View.VISIBLE
+                        setIcon(R.drawable.ic_play)
+                    }
+                    else -> {
+                        visibility = View.GONE
                     }
                 }
+            }
 
-                with(buttonTypeIndicator) {
-                    when {
-                        post.mediaType == MediaType.REDDIT_GALLERY ||
-                                post.mediaType == MediaType.IMGUR_ALBUM ||
-                                post.mediaType == MediaType.IMGUR_GALLERY -> {
-                            visibility = View.VISIBLE
-                            setIcon(R.drawable.ic_gallery)
-                        }
-                        post.type == PostType.VIDEO -> {
-                            visibility = View.VISIBLE
-                            setIcon(R.drawable.ic_play)
-                        }
-                        else -> {
-                            visibility = View.GONE
-                        }
-                    }
-                }
-
-                includePostMetrics.buttonMore.setOnClickListener {
-                    postClickListener.onMenuClick(post)
-                }
+            binding.includePostMetrics.buttonMore.setOnClickListener {
+                postClickListener.onMenuClick(post)
             }
         }
 
         fun update(post: PostEntity) {
-            with(binding) {
-                includePostMetrics.post = post
-                includePostFlairs.post = post
+            binding.includePostMetrics.post = post
+            binding.includePostFlairs.post = post
 
-                if (post.type == PostType.TEXT) {
-                    bindText(post)
-                }
-
-                bindAwards(post)
-
-                bindFlairs(post)
+            if (post.type == PostType.TEXT) {
+                bindText(post)
             }
+
+            bindAwards(post)
+
+            bindFlairs(post)
         }
 
         private fun bindText(post: PostEntity) {
-            with(binding.textPost) {
+            binding.textPost.apply {
                 if (post.selfRedditText.isNotEmpty()) {
                     visibility = View.VISIBLE
                     setText(post.selfRedditText)
@@ -147,41 +154,39 @@ class PostAdapter(
         }
 
         private fun bindFlairs(post: PostEntity) {
-            with(binding) {
-                when {
-                    post.hasFlairs -> {
-                        includePostFlairs.root.visibility = View.VISIBLE
-                        with(includePostFlairs.postFlair) {
-                            if (!post.flair.isEmpty()) {
-                                visibility = View.VISIBLE
+            when {
+                post.hasFlairs -> {
+                    binding.includePostFlairs.root.visibility = View.VISIBLE
+                    binding.includePostFlairs.postFlair.apply {
+                        if (!post.flair.isEmpty()) {
+                            visibility = View.VISIBLE
 
-                                setFlair(post.flair)
-                            } else {
-                                visibility = View.GONE
-                            }
+                            setFlair(post.flair)
+                        } else {
+                            visibility = View.GONE
                         }
                     }
-                    post.isSelf -> {
-                        includePostFlairs.root.visibility = View.GONE
-                    }
-                    else -> {
-                        includePostFlairs.postFlair.visibility = View.GONE
-                    }
                 }
-                with(includePostInfo.postFlair) {
-                    if (!post.authorFlair.isEmpty()) {
-                        visibility = View.VISIBLE
+                post.isSelf -> {
+                    binding.includePostFlairs.root.visibility = View.GONE
+                }
+                else -> {
+                    binding.includePostFlairs.postFlair.visibility = View.GONE
+                }
+            }
+            binding.includePostInfo.postFlair.apply {
+                if (!post.authorFlair.isEmpty()) {
+                    visibility = View.VISIBLE
 
-                        setFlair(post.authorFlair)
-                    } else {
-                        visibility = View.GONE
-                    }
+                    setFlair(post.authorFlair)
+                } else {
+                    visibility = View.GONE
                 }
             }
         }
 
         private fun bindAwards(post: PostEntity) {
-            with(binding.awards) {
+            binding.awards.apply {
                 if (post.totalAwards > 0) {
                     visibility = View.VISIBLE
                     setAwards(post.awards)
@@ -191,10 +196,13 @@ class PostAdapter(
             }
         }
 
-        private fun bindImage(post: PostEntity) {
-            with(binding.imagePost) {
+        private fun bindImage(
+            post: PostEntity,
+            requestBuilder: ImageRequest.Builder.() -> Unit = {}
+        ) {
+            binding.imagePost.apply {
                 visibility = View.VISIBLE
-                load(preview, !post.shouldShowPreview(contentPreferences))
+                load(preview, !post.shouldShowPreview(contentPreferences), builder = requestBuilder)
             }
         }
     }

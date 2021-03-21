@@ -1,12 +1,16 @@
 package com.cosmos.unreddit.api.pojo.details
 
+import com.cosmos.unreddit.R
 import com.cosmos.unreddit.api.Edited
 import com.cosmos.unreddit.api.Replies
 import com.cosmos.unreddit.api.pojo.list.Awarding
 import com.cosmos.unreddit.api.pojo.list.RichText
+import com.cosmos.unreddit.util.formatNumber
+import com.cosmos.unreddit.util.toMillis
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
-import java.util.concurrent.TimeUnit
+import kotlin.math.abs
+import kotlin.math.truncate
 
 @JsonClass(generateAdapter = true)
 class CommentData(
@@ -84,14 +88,38 @@ class CommentData(
     @Json(name = "link_author")
     val linkAuthor: String?
 ) {
-    fun getTimeInMillis(): Long {
-        return TimeUnit.SECONDS.toMillis(created)
-    }
+    val scoreString: String
+        get() = if (scoreHidden) "12345" else score.formatNumber()
 
-    fun getEditedTimeInMillis(): Long {
-        if (edited > -1) {
-            return TimeUnit.SECONDS.toMillis(edited)
+    val editedMillis: Long
+        get() = if (edited > -1) edited.toMillis() else edited
+
+    val commentIndicator: Int?
+        get() {
+            if (depth == null || depth <= 0) return null
+
+            val commentDepth = depth - 1
+
+            return if (commentDepth in colorArray.indices) {
+                colorArray[commentDepth]
+            } else {
+                val index = truncate(
+                    abs((colorArray.lastIndex - commentDepth) / colorArray.lastIndex).toDouble()
+                ).toInt()
+                colorArray[index]
+            }
         }
-        return edited
+
+    companion object {
+        private val colorArray = arrayOf(
+            R.color.comment_indicator_1,
+            R.color.comment_indicator_2,
+            R.color.comment_indicator_3,
+            R.color.comment_indicator_4,
+            R.color.comment_indicator_5,
+            R.color.comment_indicator_6,
+            R.color.comment_indicator_7,
+            R.color.comment_indicator_8,
+        )
     }
 }

@@ -5,7 +5,6 @@
 
     <data>
         <import type="android.view.View"/>
-        <import type="com.cosmos.unreddit.util.DateUtil"/>
         <variable
             name="comment"
             type="com.cosmos.unreddit.post.CommentEntity" />
@@ -43,6 +42,7 @@
             app:layout_constraintEnd_toStartOf="@id/comment_op_text"
             android:textAppearance="@style/TextAppearanceCommentAuthor"
             android:text="@{comment.author}"
+            android:textColor="@color/colorPrimary"
             tools:text="author"/>
 
         <TextView
@@ -53,7 +53,7 @@
             app:layout_constraintTop_toBottomOf="@id/comment_author"
             android:textColor="@null"
             android:textAppearance="@style/TextAppearanceCommentInfo"
-            android:text="@{@string/comment_score(comment.getVoteCount())}"
+            android:text="@{@string/comment_score(comment.score)}"
             tools:text="1234 pts"/>
 
         <TextView
@@ -87,6 +87,7 @@
             app:layout_constraintBottom_toBottomOf="@id/comment_score"
             android:textColor="@null"
             android:textAppearance="@style/TextAppearanceCommentInfo"
+            android:text="@{comment.getTimeDifference(context)}"
             tools:text="5h"/>
 
         <TextView

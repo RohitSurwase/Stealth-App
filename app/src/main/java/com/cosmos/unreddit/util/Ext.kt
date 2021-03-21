@@ -178,7 +178,7 @@ fun Int?.formatNumber(): String {
         this == null -> "" // TODO
         this < 1000 -> this.toString()
         this < 1_000_000 -> {
-            val roundedSubscribers = round(this.div(1000f)).toInt()
+            val roundedSubscribers = String.format("%.1f", this.div(1000f))
             "${roundedSubscribers}k"
         }
         else -> {

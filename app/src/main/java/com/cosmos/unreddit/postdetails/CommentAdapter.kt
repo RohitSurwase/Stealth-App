@@ -2,12 +2,12 @@ package com.cosmos.unreddit.postdetails
 
 import android.content.Context
 import android.content.res.ColorStateList
-import android.graphics.BlurMaskFilter
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.AnimationUtils
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
@@ -22,8 +22,7 @@ import com.cosmos.unreddit.post.Comment
 import com.cosmos.unreddit.post.CommentEntity
 import com.cosmos.unreddit.post.MoreEntity
 import com.cosmos.unreddit.postlist.PostListRepository
-import com.cosmos.unreddit.util.DateUtil
-import com.cosmos.unreddit.util.applyGradient
+import com.cosmos.unreddit.util.blurText
 import com.cosmos.unreddit.view.RedditView
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collectLatest
@@ -38,8 +37,13 @@ class CommentAdapter(
     private val onLinkClickListener: RedditView.OnLinkClickListener? = null
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
-    private var linkId: String? = null
     private val visibleComments = mutableListOf<Comment>()
+    var linkId: String? = null
+        set(value) {
+            if (field != value) {
+                field = value
+            }
+        }
 
     private val commentOffset by lazy {
         context.resources.getDimension(R.dimen.comment_offset)
@@ -269,12 +273,6 @@ class CommentAdapter(
         result.dispatchUpdatesTo(this)
     }
 
-    fun setLinkId(linkId: String) {
-        if (this.linkId != linkId) {
-            this.linkId = linkId
-        }
-    }
-
     private inner class CommentViewHolder(
         private val binding: ItemCommentBinding
     ) : RecyclerView.ViewHolder(binding.root) {
@@ -282,91 +280,62 @@ class CommentAdapter(
         fun bind(comment: CommentEntity) {
             binding.comment = comment
 
-            with(comment) {
-                with(binding.commentAuthor) {
-                    applyGradient(
-                        comment.author,
-                        PosterType.getGradientColors(context, comment.posterType)
-                    )
-                }
-
-                with(binding.commentScore) {
-                    // Blur score when hidden
-                    if (scoreHidden) {
-                        val radius = textSize / 3
-                        val blurMaskFilter = BlurMaskFilter(radius, BlurMaskFilter.Blur.NORMAL)
-                        setLayerType(View.LAYER_TYPE_SOFTWARE, null)
-                        paint.maskFilter = blurMaskFilter
-                    } else {
-                        paint.maskFilter = null
-                    }
-                }
-
-                with(binding.commentDate) {
-                    val timeDifference = DateUtil.getTimeDifference(context, created)
-                    text = if (edited > -1) {
-                        val editedTimeDifference = DateUtil.getTimeDifference(
-                            context,
-                            edited,
-                            false
-                        )
-                        context.getString(
-                            R.string.comment_date_edited,
-                            timeDifference,
-                            editedTimeDifference
-                        )
-                    } else {
-                        timeDifference
-                    }
-                }
-
-                with(binding.commentColorIndicator) {
-                    if (depth == 0) {
-                        visibility = View.GONE
-                    } else {
-                        visibility = View.VISIBLE
-                        getIndicatorColor(context)?.let {
-                            backgroundTintList = ColorStateList.valueOf(it)
-                        }
-                        val params = ConstraintLayout.LayoutParams(
-                            layoutParams as ConstraintLayout.LayoutParams
-                        ).apply {
-                            marginStart = (commentOffset * (depth - 1)).toInt()
-                        }
-                        layoutParams = params
-                    }
-                }
-
-                bindCommentHiddenIndicator(comment, false)
-
-                with(binding.commentFlair) {
-                    if (!flair.isEmpty()) {
-                        visibility = View.VISIBLE
-
-                        setFlair(flair)
-                    } else {
-                        visibility = View.GONE
-                    }
-                }
-
-                with(binding.commentAwards) {
-                    if (awards.isNotEmpty()) {
-                        visibility = View.VISIBLE
-
-                        setAwards(awards, totalAwards)
-                    } else {
-                        visibility = View.GONE
-                    }
-                }
-
-                binding.commentOpText.visibility = if (isSubmitter) View.VISIBLE else View.GONE
-
-                itemView.setOnClickListener {
-                    onCommentClick(bindingAdapterPosition)
+            if (comment.posterType != PosterType.REGULAR) {
+                binding.commentAuthor.apply {
+                    setTextColor(ContextCompat.getColor(context, comment.posterType.color))
                 }
             }
 
-            with(binding.commentBody) {
+            binding.commentScore.blurText(comment.scoreHidden)
+
+            binding.commentColorIndicator.apply {
+                if (comment.depth == 0) {
+                    visibility = View.GONE
+                } else {
+                    visibility = View.VISIBLE
+                    comment.commentIndicator?.let {
+                        backgroundTintList = ColorStateList.valueOf(
+                            ContextCompat.getColor(context, it)
+                        )
+                    }
+                    val params = ConstraintLayout.LayoutParams(
+                        layoutParams as ConstraintLayout.LayoutParams
+                    ).apply {
+                        marginStart = (commentOffset * (comment.depth - 1)).toInt()
+                    }
+                    layoutParams = params
+                }
+            }
+
+            bindCommentHiddenIndicator(comment, false)
+
+            binding.commentFlair.apply {
+                if (!comment.flair.isEmpty()) {
+                    visibility = View.VISIBLE
+
+                    setFlair(comment.flair)
+                } else {
+                    visibility = View.GONE
+                }
+            }
+
+            binding.commentAwards.apply {
+                if (comment.awards.isNotEmpty()) {
+                    visibility = View.VISIBLE
+
+                    setAwards(comment.awards, comment.totalAwards)
+                } else {
+                    visibility = View.GONE
+                }
+            }
+
+            binding.commentOpText.visibility = if (comment.isSubmitter) View.VISIBLE else View.GONE
+
+            itemView.setOnClickListener {
+                onCommentClick(bindingAdapterPosition)
+            }
+
+            binding.commentBody.apply {
                 setText(comment.body)
                 setOnLinkClickListener(onLinkClickListener)
                 setOnClickListener {
@@ -376,16 +345,14 @@ class CommentAdapter(
         }
 
         fun bindCommentHiddenIndicator(comment: CommentEntity, showAnimation: Boolean) {
-            with(comment) {
-                with(binding.commentHiddenIndicator) {
-                    if (hasReplies && !isExpanded) {
-                        visibility = View.VISIBLE
-                        text = visibleReplyCount.toString()
-                        if (showAnimation) startAnimation(popInAnimation)
-                    } else {
-                        visibility = View.GONE
-                        if (showAnimation) startAnimation(popOutAnimation)
-                    }
+            binding.commentHiddenIndicator.apply {
+                if (comment.hasReplies && !comment.isExpanded) {
+                    visibility = View.VISIBLE
+                    text = comment.visibleReplyCount.toString()
+                    if (showAnimation) startAnimation(popInAnimation)
+                } else {
+                    visibility = View.GONE
+                    if (showAnimation) startAnimation(popOutAnimation)
                 }
             }
         }
@@ -401,7 +368,7 @@ class CommentAdapter(
             binding.loadingCradle.isVisible = more.isLoading
             binding.textError.isVisible = more.isError
 
-            with(binding.commentBody) {
+            binding.commentBody.apply {
                 val params = ConstraintLayout.LayoutParams(
                     layoutParams as ConstraintLayout.LayoutParams
                 ).apply {

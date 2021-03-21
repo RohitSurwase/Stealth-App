@@ -186,7 +186,7 @@ class PostDetailsFragment :
     private fun bindPost(post: PostEntity, fromCache: Boolean) {
         binding.appBar.label.text = post.title
         postAdapter.setPost(post, fromCache)
-        commentAdapter.setLinkId(post.id)
+        commentAdapter.linkId = post.id
     }
 
     private fun handleArguments() {
