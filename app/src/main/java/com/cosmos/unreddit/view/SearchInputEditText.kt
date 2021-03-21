@@ -65,6 +65,10 @@ class SearchInputEditText @JvmOverloads constructor(
         text?.clear()
     }
 
+    fun isQueryEmpty(): Boolean {
+        return text.isNullOrEmpty()
+    }
+
     fun addTarget(target: View) {
         appBarTransition.addTarget(target)
     }

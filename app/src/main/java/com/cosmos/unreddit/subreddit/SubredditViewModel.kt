@@ -17,6 +17,7 @@ import com.cosmos.unreddit.preferences.ContentPreferences
 import com.cosmos.unreddit.repository.PreferencesRepository
 import com.cosmos.unreddit.util.PagerHelper
 import com.cosmos.unreddit.util.PostUtil
+import com.cosmos.unreddit.util.updateValue
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -68,7 +69,7 @@ class SubredditViewModel @Inject constructor(
                 emit(list.any { it.name.equals(subreddit, ignoreCase = true) })
             }.collect()
         }
-    }.asLiveData(viewModelScope.coroutineContext)
+    }.asLiveData()
 
     fun loadAndFilterPosts(subreddit: String, sorting: Sorting): Flow<PagingData<PostEntity>> {
         return PostUtil.filterPosts(
@@ -107,15 +108,11 @@ class SubredditViewModel @Inject constructor(
     }
 
     fun setSubreddit(subreddit: String) {
-        if (_subreddit.value != subreddit) {
-            _subreddit.value = subreddit
-        }
+        _subreddit.updateValue(subreddit)
     }
 
     fun setSorting(sorting: Sorting) {
-        if (_sorting.value != sorting) {
-            _sorting.value = sorting
-        }
+        _sorting.updateValue(sorting)
     }
 
     fun toggleDescriptionCollapsed() {

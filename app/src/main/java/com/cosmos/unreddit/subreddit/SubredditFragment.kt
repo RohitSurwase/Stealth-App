@@ -11,11 +11,7 @@ import androidx.core.view.isVisible
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.navArgs
-import androidx.paging.LoadState
 import androidx.recyclerview.widget.LinearLayoutManager
-import coil.load
-import coil.size.Precision
-import coil.size.Scale
 import com.cosmos.unreddit.R
 import com.cosmos.unreddit.api.Resource
 import com.cosmos.unreddit.base.BaseFragment
@@ -30,6 +26,10 @@ import com.cosmos.unreddit.postlist.PostListRepository
 import com.cosmos.unreddit.postmenu.PostMenuFragment
 import com.cosmos.unreddit.sort.SortFragment
 import com.cosmos.unreddit.util.addLoadStateListener
+import com.cosmos.unreddit.util.betterSmoothScrollToPosition
+import com.cosmos.unreddit.util.loadSubredditIcon
+import com.cosmos.unreddit.util.onRefreshFromNetwork
+import com.cosmos.unreddit.util.setSortingListener
 import com.cosmos.unreddit.util.toPixels
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dagger.hilt.android.AndroidEntryPoint
@@ -37,13 +37,11 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.distinctUntilChangedBy
-import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class SubredditFragment : BaseFragment(), View.OnClickListener {
+class SubredditFragment : BaseFragment() {
 
     private var _binding: FragmentSubredditBinding? = null
     private val binding get() = _binding!!
@@ -88,7 +86,7 @@ class SubredditFragment : BaseFragment(), View.OnClickListener {
         initRecyclerView()
         initDrawer()
         bindViewModel()
-        bindingAbout.subredditSubscribeButton.setOnClickListener(this)
+        bindingAbout.subredditSubscribeButton.setOnClickListener { viewModel.toggleSubscription() }
         bindingContent.loadingState.infoRetry.setActionClickListener { retry() }
     }
 
@@ -144,7 +142,7 @@ class SubredditFragment : BaseFragment(), View.OnClickListener {
                     loadPosts(subreddit, sorting)
                 }
                 bindingContent.sortIcon.setSorting(sorting)
-            }.collect { scrollToTop() }
+            }.collect()
         }
     }
 
@@ -162,10 +160,10 @@ class SubredditFragment : BaseFragment(), View.OnClickListener {
             )
         }
 
-        lifecycleScope.launch {
-            postListAdapter.loadStateFlow.distinctUntilChangedBy { it.refresh }
-                .filter { it.refresh is LoadState.NotLoading }
-                .collect { scrollToTop() }
+        lifecycleScope.launchWhenStarted {
+            postListAdapter.onRefreshFromNetwork {
+                scrollToTop()
+            }
         }
     }
 
@@ -188,13 +186,7 @@ class SubredditFragment : BaseFragment(), View.OnClickListener {
     }
 
     private fun initResultListener() {
-        childFragmentManager.setFragmentResultListener(
-            SortFragment.REQUEST_KEY_SORTING,
-            viewLifecycleOwner
-        ) { _, bundle ->
-            val sorting = bundle.getParcelable(SortFragment.BUNDLE_KEY_SORTING) as? Sorting
-            sorting?.let { viewModel.setSorting(it) }
-        }
+        setSortingListener { sorting -> sorting?.let { viewModel.setSorting(it) } }
     }
 
     private fun bindInfo(about: SubredditEntity) {
@@ -202,14 +194,7 @@ class SubredditFragment : BaseFragment(), View.OnClickListener {
             bindingContent.subreddit = this
             bindingAbout.subreddit = this
 
-            bindingContent.subredditImage.load(icon) {
-                crossfade(true)
-                scale(Scale.FILL)
-                precision(Precision.AUTOMATIC)
-                placeholder(R.drawable.icon_reddit_placeholder)
-                error(R.drawable.icon_reddit_placeholder)
-                fallback(R.drawable.icon_reddit_placeholder)
-            }
+            bindingContent.subredditImage.loadSubredditIcon(icon)
 
             if (publicDescription.isNotEmpty()) {
                 bindingAbout.subredditPublicDescription.apply {
@@ -262,8 +247,7 @@ class SubredditFragment : BaseFragment(), View.OnClickListener {
     }
 
     private fun scrollToTop() {
-        // TODO: Find better method when item is too far
-        bindingContent.listPost.scrollToPosition(0)
+        bindingContent.listPost.betterSmoothScrollToPosition(0)
     }
 
     private fun showSearchFragment() {
@@ -318,14 +302,6 @@ class SubredditFragment : BaseFragment(), View.OnClickListener {
 
     override fun onMenuClick(post: PostEntity) {
         PostMenuFragment.show(parentFragmentManager, post, PostMenuFragment.MenuType.SUBREDDIT)
-    }
-
-    override fun onClick(v: View?) {
-        when (v?.id) {
-            bindingAbout.subredditSubscribeButton.id -> {
-                viewModel.toggleSubscription()
-            }
-        }
     }
 
     companion object {

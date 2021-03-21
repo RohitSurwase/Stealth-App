@@ -9,28 +9,27 @@ import androidx.core.view.isVisible
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.navArgs
-import androidx.paging.LoadState
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.cosmos.unreddit.R
 import com.cosmos.unreddit.base.BaseFragment
 import com.cosmos.unreddit.databinding.FragmentSubredditSearchBinding
 import com.cosmos.unreddit.loadstate.NetworkLoadStateAdapter
-import com.cosmos.unreddit.post.PostEntity
 import com.cosmos.unreddit.post.Sorting
 import com.cosmos.unreddit.postlist.PostListAdapter
 import com.cosmos.unreddit.postlist.PostListRepository
 import com.cosmos.unreddit.sort.SortFragment
 import com.cosmos.unreddit.util.SearchUtil
 import com.cosmos.unreddit.util.addLoadStateListener
+import com.cosmos.unreddit.util.betterSmoothScrollToPosition
 import com.cosmos.unreddit.util.hideSoftKeyboard
 import com.cosmos.unreddit.util.loadSubredditIcon
+import com.cosmos.unreddit.util.onRefreshFromNetwork
+import com.cosmos.unreddit.util.setSortingListener
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.distinctUntilChangedBy
-import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -71,9 +70,19 @@ class SubredditSearchFragment : BaseFragment(), PostListAdapter.PostClickListene
         initAppBar()
         initRecyclerView()
         bindViewModel()
-        // TODO: Animation
-        showSearchInput(true)
         binding.loadingState.infoRetry.setActionClickListener { postListAdapter.retry() }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        if (binding.appBar.searchInput.isQueryEmpty()) {
+            showSearchInput(true)
+        } else {
+            binding.appBar.apply {
+                searchInput.isVisible = false
+                cancelCard.isVisible = false
+            }
+        }
     }
 
     private fun bindViewModel() {
@@ -104,7 +113,7 @@ class SubredditSearchFragment : BaseFragment(), PostListAdapter.PostClickListene
                     searchPost(query, sorting)
                 }
                 binding.appBar.sortIcon.setSorting(sorting)
-            }.collect { scrollToTop() }
+            }.collect()
         }
     }
 
@@ -123,10 +132,10 @@ class SubredditSearchFragment : BaseFragment(), PostListAdapter.PostClickListene
             )
         }
 
-        lifecycleScope.launch {
-            postListAdapter.loadStateFlow.distinctUntilChangedBy { it.refresh }
-                .filter { it.refresh is LoadState.NotLoading }
-                .collect { scrollToTop() }
+        lifecycleScope.launchWhenStarted {
+            postListAdapter.onRefreshFromNetwork {
+                scrollToTop()
+            }
         }
     }
 
@@ -162,17 +171,11 @@ class SubredditSearchFragment : BaseFragment(), PostListAdapter.PostClickListene
     }
 
     private fun initResultListener() {
-        childFragmentManager.setFragmentResultListener(
-            SortFragment.REQUEST_KEY_SORTING,
-            viewLifecycleOwner
-        ) { _, bundle ->
-            val sorting = bundle.getParcelable(SortFragment.BUNDLE_KEY_SORTING) as? Sorting
-            sorting?.let { viewModel.setSorting(it) }
-        }
+        setSortingListener { sorting -> sorting?.let { viewModel.setSorting(it) } }
     }
 
     private fun scrollToTop() {
-        binding.listPost.scrollToPosition(0)
+        binding.listPost.betterSmoothScrollToPosition(0)
     }
 
     private fun searchPost(query: String, sorting: Sorting) {
@@ -187,12 +190,12 @@ class SubredditSearchFragment : BaseFragment(), PostListAdapter.PostClickListene
     private fun showSearchInput(show: Boolean) {
         binding.appBar.searchInput.show(binding.appBar.root, show) {
             with(binding.appBar) {
-                backCard.visibility = if (show) View.GONE else View.VISIBLE
-                label.visibility = if (show) View.GONE else View.VISIBLE
-                sortCard.visibility = if (show) View.GONE else View.VISIBLE
-                sortIcon.visibility = if (show) View.GONE else View.VISIBLE
-                subredditImage.visibility = if (show) View.GONE else View.VISIBLE
-                cancelCard.visibility = if (show) View.VISIBLE else View.GONE
+                backCard.isVisible = !show
+                label.isVisible = !show
+                sortCard.isVisible = !show
+                sortIcon.isVisible = !show
+                subredditImage.isVisible = !show
+                cancelCard.isVisible = show
             }
         }
     }
@@ -226,34 +229,6 @@ class SubredditSearchFragment : BaseFragment(), PostListAdapter.PostClickListene
         } else {
             super.onBackPressed()
         }
-    }
-
-    override fun onClick(post: PostEntity) {
-        TODO("Not yet implemented")
-    }
-
-    override fun onLongClick(post: PostEntity) {
-        TODO("Not yet implemented")
-    }
-
-    override fun onImageClick(post: PostEntity) {
-        TODO("Not yet implemented")
-    }
-
-    override fun onVideoClick(post: PostEntity) {
-        TODO("Not yet implemented")
-    }
-
-    override fun onLinkClick(post: PostEntity) {
-        TODO("Not yet implemented")
-    }
-
-    override fun onLinkClick(link: String) {
-        TODO("Not yet implemented")
-    }
-
-    override fun onLinkLongClick(link: String) {
-        TODO("Not yet implemented")
     }
 
     override fun onDestroyView() {
