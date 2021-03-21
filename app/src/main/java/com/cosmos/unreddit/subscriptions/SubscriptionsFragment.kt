@@ -1,31 +1,21 @@
 package com.cosmos.unreddit.subscriptions
 
-import android.content.Context
 import android.os.Bundle
-import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
-import androidx.activity.OnBackPressedCallback
 import androidx.core.view.isVisible
 import androidx.core.widget.doOnTextChanged
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.transition.Fade
-import androidx.transition.Slide
-import androidx.transition.Transition
-import androidx.transition.TransitionManager
-import androidx.transition.TransitionSet
 import com.cosmos.unreddit.R
 import com.cosmos.unreddit.UiViewModel
 import com.cosmos.unreddit.base.BaseFragment
 import com.cosmos.unreddit.databinding.FragmentSubscriptionsBinding
 import com.cosmos.unreddit.search.SearchFragment
 import com.cosmos.unreddit.util.hideSoftKeyboard
-import com.cosmos.unreddit.util.showSoftKeyboard
-import com.google.android.material.transition.MaterialFadeThrough
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -38,8 +28,6 @@ class SubscriptionsFragment : BaseFragment() {
     private val uiViewModel: UiViewModel by activityViewModels()
 
     private lateinit var adapter: SubscriptionsAdapter
-
-    private lateinit var onBackPressedCallback: OnBackPressedCallback
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -63,20 +51,11 @@ class SubscriptionsFragment : BaseFragment() {
         bindViewModel()
     }
 
-    override fun onAttach(context: Context) {
-        super.onAttach(context)
-        onBackPressedCallback = object : OnBackPressedCallback(false) {
-            override fun handleOnBackPressed() {
-                showSearchInput(false)
-            }
-        }
-        requireActivity().onBackPressedDispatcher
-            .addCallback(this, onBackPressedCallback)
-    }
-
     override fun onResume() {
         super.onResume()
-        onBackPressedCallback.isEnabled = binding.appBar.searchInput.isVisible
+        binding.appBar.searchInput.text?.firstOrNull()?.let {
+            showSearchInput(true)
+        }
     }
 
     private fun bindViewModel() {
@@ -91,10 +70,15 @@ class SubscriptionsFragment : BaseFragment() {
 
     private fun initAppBar() {
         with(binding.appBar) {
-            searchCard.setOnClickListener {
-                showSearchInput(true)
+            searchCard.setOnClickListener { showSearchInput(true) }
+            cancelCard.setOnClickListener {
+                showSearchInput(false)
+                binding.appBar.searchInput.clear()
             }
             searchInput.apply {
+                addTarget(label)
+                addTarget(searchCard)
+                addTarget(cancelCard)
                 doOnTextChanged { text, _, _, _ ->
                     viewModel.setSearchQuery(text.toString())
                 }
@@ -114,69 +98,11 @@ class SubscriptionsFragment : BaseFragment() {
     }
 
     private fun showSearchInput(show: Boolean) {
-        onBackPressedCallback.isEnabled = show
-
-        with(binding.appBar) {
-            val searchInputTransition = TransitionSet().apply {
-                addTransition(Fade(Fade.OUT))
-                addTransition(Slide(Gravity.END))
-                addTransition(Fade(Fade.IN))
-                duration = 250
-                addTarget(searchInput)
-            }
-
-            val appBarTransition = MaterialFadeThrough().apply {
-                duration = 500
-                addTarget(label)
-                addTarget(searchCard)
-                addListener(object : Transition.TransitionListener {
-                    override fun onTransitionStart(transition: Transition) {
-                        // ignore
-                    }
-
-                    override fun onTransitionEnd(transition: Transition) {
-                        if (!show) {
-                            searchInput.text?.clear()
-                        }
-                    }
-
-                    override fun onTransitionCancel(transition: Transition) {
-                        // ignore
-                    }
-
-                    override fun onTransitionPause(transition: Transition) {
-                        // ignore
-                    }
-
-                    override fun onTransitionResume(transition: Transition) {
-                        // ignore
-                    }
-                })
-            }
-
-            val transitionSet = TransitionSet().apply {
-                addTransition(searchInputTransition)
-                addTransition(appBarTransition)
-            }
-
-            TransitionManager.beginDelayedTransition(root, transitionSet)
-            label.visibility = if (show) View.GONE else View.VISIBLE
-            searchCard.visibility = if (show) View.GONE else View.VISIBLE
-            searchInput.visibility = if (show) View.VISIBLE else View.GONE
-
-            if (show) {
-                searchInput.apply {
-                    isFocusable = true
-                    isFocusableInTouchMode = true
-                    requestFocus()
-                    showSoftKeyboard()
-                }
-            } else {
-                searchInput.apply {
-                    isFocusable = false
-                    isFocusableInTouchMode = false
-                    hideSoftKeyboard()
-                }
+        binding.appBar.searchInput.show(binding.appBar.root, show) {
+            with(binding.appBar) {
+                label.isVisible = !show
+                searchCard.isVisible = !show
+                cancelCard.isVisible = show
             }
         }
     }
@@ -186,17 +112,18 @@ class SubscriptionsFragment : BaseFragment() {
 
         navigate(SubscriptionsFragmentDirections.search(query))
 
-        binding.appBar.searchInput.text?.clear()
+        binding.appBar.searchInput.clear()
     }
 
     private fun onClick(subreddit: String) {
         navigate(SubscriptionsFragmentDirections.openSubreddit(subreddit))
     }
 
-    override fun onHiddenChanged(hidden: Boolean) {
-        super.onHiddenChanged(hidden)
-        if (hidden) {
+    override fun onBackPressed() {
+        if (binding.appBar.searchInput.isVisible) {
             showSearchInput(false)
+        } else {
+            super.onBackPressed()
         }
     }
 

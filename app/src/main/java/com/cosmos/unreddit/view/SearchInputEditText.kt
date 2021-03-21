@@ -61,6 +61,10 @@ class SearchInputEditText @JvmOverloads constructor(
         }
     }
 
+    fun clear() {
+        text?.clear()
+    }
+
     fun addTarget(target: View) {
         appBarTransition.addTarget(target)
     }
