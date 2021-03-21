@@ -9,7 +9,6 @@ import coil.request.ImageRequest
 import com.cosmos.unreddit.R
 import com.cosmos.unreddit.databinding.ItemPostHeaderBinding
 import com.cosmos.unreddit.model.MediaType
-import com.cosmos.unreddit.model.PosterType
 import com.cosmos.unreddit.post.PostEntity
 import com.cosmos.unreddit.post.PostType
 import com.cosmos.unreddit.postlist.PostListAdapter
@@ -70,10 +69,8 @@ class PostAdapter(
 
             binding.textPostTitle.text = post.title
 
-            if (post.posterType != PosterType.REGULAR) {
-                binding.includePostInfo.textPostAuthor.apply {
-                    setTextColor(ContextCompat.getColor(context, post.posterType.color))
-                }
+            binding.includePostInfo.textPostAuthor.apply {
+                setTextColor(ContextCompat.getColor(context, post.posterType.color))
             }
 
             bindAwards(post)

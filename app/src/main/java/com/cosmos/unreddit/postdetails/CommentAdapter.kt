@@ -17,7 +17,6 @@ import com.cosmos.unreddit.R
 import com.cosmos.unreddit.database.CommentMapper
 import com.cosmos.unreddit.databinding.ItemCommentBinding
 import com.cosmos.unreddit.databinding.ItemMoreBinding
-import com.cosmos.unreddit.model.PosterType
 import com.cosmos.unreddit.post.Comment
 import com.cosmos.unreddit.post.CommentEntity
 import com.cosmos.unreddit.post.MoreEntity
@@ -280,10 +279,8 @@ class CommentAdapter(
         fun bind(comment: CommentEntity) {
             binding.comment = comment
 
-            if (comment.posterType != PosterType.REGULAR) {
-                binding.commentAuthor.apply {
-                    setTextColor(ContextCompat.getColor(context, comment.posterType.color))
-                }
+            binding.commentAuthor.apply {
+                setTextColor(ContextCompat.getColor(context, comment.posterType.color))
             }
 
             binding.commentScore.blurText(comment.scoreHidden)

@@ -8,7 +8,6 @@ import androidx.recyclerview.widget.RecyclerView
 import com.cosmos.unreddit.R
 import com.cosmos.unreddit.databinding.*
 import com.cosmos.unreddit.model.MediaType
-import com.cosmos.unreddit.model.PosterType
 import com.cosmos.unreddit.parser.ClickableMovementMethod
 import com.cosmos.unreddit.post.PostEntity
 import com.cosmos.unreddit.preferences.ContentPreferences
@@ -64,10 +63,8 @@ abstract class PostViewHolder(
             }
         }
 
-        if (postEntity.posterType != PosterType.REGULAR) {
-            postInfoBinding.textPostAuthor.apply {
-                setTextColor(ContextCompat.getColor(context, postEntity.posterType.color))
-            }
+        postInfoBinding.textPostAuthor.apply {
+            setTextColor(ContextCompat.getColor(context, postEntity.posterType.color))
         }
 
         when {
