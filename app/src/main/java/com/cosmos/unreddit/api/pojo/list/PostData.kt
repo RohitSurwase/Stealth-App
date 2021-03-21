@@ -211,7 +211,7 @@ data class PostData(
     val previewUrl: String
         get() = mediaPreview?.images?.getOrNull(0)?.imageSource?.url
             ?: mediaMetadata?.items?.getOrNull(0)?.image?.url
-            ?: mediaMetadata?.items?.getOrNull(0)?.previews?.last()?.url
+            ?: mediaMetadata?.items?.getOrNull(0)?.previews?.lastOrNull()?.url
             ?: url
 
     val gallery: List<GalleryMedia>
