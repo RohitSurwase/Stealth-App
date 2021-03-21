@@ -10,7 +10,6 @@ import coil.size.Precision
 import coil.size.Scale
 import com.cosmos.unreddit.R
 import com.cosmos.unreddit.model.Flair
-import com.cosmos.unreddit.util.toPixels
 
 class RedditFlairView @JvmOverloads constructor(
     context: Context,
@@ -19,6 +18,10 @@ class RedditFlairView @JvmOverloads constructor(
 ) : LinearLayoutCompat(context, attrs, defStyleAttr) {
 
     private val childParams = LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.MATCH_PARENT)
+
+    private val flairImageSize: Int by lazy {
+        context.resources.getDimension(R.dimen.flair_image_size).toInt()
+    }
 
     init {
         orientation = HORIZONTAL
@@ -48,7 +51,7 @@ class RedditFlairView @JvmOverloads constructor(
                     val imageView = ImageView(context).apply {
                         layoutParams = LayoutParams(
                             LayoutParams.WRAP_CONTENT,
-                            context.toPixels(IMAGE_HEIGHT).toInt()
+                            flairImageSize
                         )
                     }
                     imageView.load(data.first) {
@@ -60,9 +63,5 @@ class RedditFlairView @JvmOverloads constructor(
                 }
             }
         }
-    }
-
-    companion object {
-        private const val IMAGE_HEIGHT = 16F
     }
 }

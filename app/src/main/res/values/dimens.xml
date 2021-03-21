@@ -101,6 +101,7 @@
     <item name="user_name_scale_expanded" type="dimen" format="float">@dimen/subreddit_name_scale_expanded</item>
 
     <dimen name="flair_background_radius">4dp</dimen>
+    <dimen name="flair_image_size">16dp</dimen>
 
     <dimen name="comment_offset">8dp</dimen>
     <dimen name="comment_padding_horizontal">16dp</dimen>
