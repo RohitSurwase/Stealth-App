@@ -17,6 +17,7 @@ import com.cosmos.unreddit.preferences.ContentPreferences
 import com.cosmos.unreddit.repository.PreferencesRepository
 import com.cosmos.unreddit.util.PagerHelper
 import com.cosmos.unreddit.util.PostUtil
+import com.cosmos.unreddit.util.updateValue
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -108,21 +109,15 @@ class UserViewModel @Inject constructor(
     }
 
     fun setSorting(sorting: Sorting) {
-        if (_sorting.value != sorting) {
-            _sorting.value = sorting
-        }
+        _sorting.updateValue(sorting)
     }
 
     fun setUser(user: String) {
-        if (_user.value != user) {
-            _user.value = user
-        }
+        _user.updateValue(user)
     }
 
     fun setPage(position: Int) {
-        if (_page.value != position) {
-            _page.value = position
-        }
+        _page.updateValue(position)
     }
 
     companion object {

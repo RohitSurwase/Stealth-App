@@ -18,7 +18,6 @@ import com.cosmos.unreddit.R
 import com.cosmos.unreddit.api.Resource
 import com.cosmos.unreddit.base.BaseFragment
 import com.cosmos.unreddit.databinding.FragmentUserBinding
-import com.cosmos.unreddit.databinding.ItemListContentBinding
 import com.cosmos.unreddit.post.CommentEntity
 import com.cosmos.unreddit.post.PostEntity
 import com.cosmos.unreddit.post.Sorting
@@ -28,10 +27,9 @@ import com.cosmos.unreddit.postlist.PostListRepository
 import com.cosmos.unreddit.postmenu.PostMenuFragment
 import com.cosmos.unreddit.sort.SortFragment
 import com.cosmos.unreddit.util.RecyclerViewStateAdapter
-import com.cosmos.unreddit.util.betterSmoothScrollToPosition
-import com.cosmos.unreddit.util.getItemView
 import com.cosmos.unreddit.util.getRecyclerView
 import com.cosmos.unreddit.util.onRefreshFromNetwork
+import com.cosmos.unreddit.util.scrollToTop
 import com.cosmos.unreddit.util.setSortingListener
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.tabs.TabLayout
@@ -149,7 +147,7 @@ class UserFragment : BaseFragment() {
             }
 
             override fun onTabReselected(tab: TabLayout.Tab?) {
-                tab?.let { scrollToTop(it.position) }
+                tab?.let { binding.viewPager.scrollToTop(it.position) }
             }
         })
 
@@ -157,14 +155,14 @@ class UserFragment : BaseFragment() {
             tab.setText(tabs[position].title)
         }.attach()
 
-        lifecycleScope.launch {
+        lifecycleScope.launchWhenStarted {
             postListAdapter.onRefreshFromNetwork {
-                scrollToTop(0)
+                binding.viewPager.scrollToTop(0)
             }
         }
-        lifecycleScope.launch {
+        lifecycleScope.launchWhenStarted {
             commentListAdapter.onRefreshFromNetwork {
-                scrollToTop(1)
+                binding.viewPager.scrollToTop(1)
             }
         }
     }
@@ -281,15 +279,6 @@ class UserFragment : BaseFragment() {
             .setPositiveButton(R.string.dialog_ok) { _, _ -> onBackPressed() }
             .setCancelable(false)
             .show()
-    }
-
-    private fun scrollToTop(page: Int) {
-        val itemView = binding.viewPager.getItemView(page)
-        itemView?.let {
-            ItemListContentBinding.bind(it).apply {
-                listContent.betterSmoothScrollToPosition(0)
-            }
-        }
     }
 
     override fun onLongClick(post: PostEntity) {
