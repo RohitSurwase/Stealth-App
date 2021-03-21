@@ -25,7 +25,7 @@ class AwardView @JvmOverloads constructor(
     private val countMargin = context.resources.getDimension(R.dimen.award_count_margin).toInt()
 
     private val overlapMargin by lazy {
-        context.resources.getDimension(R.dimen.award_overlap_margin).toInt()
+        (awardImageSize / 2).times(-1)
     }
 
     private val countImageMargin by lazy {
@@ -117,6 +117,7 @@ class AwardView @JvmOverloads constructor(
             0,
             textStyleRes
         ).apply {
+            scrollBarSize = 0
             layoutParams = LayoutParams(
                 LayoutParams.WRAP_CONTENT,
                 LayoutParams.MATCH_PARENT
