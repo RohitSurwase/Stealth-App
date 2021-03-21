@@ -6,7 +6,6 @@
     android:layout_height="?attr/actionBarSize"
     android:background="@color/background">
 
-    <!-- TODO: Appearance -->
     <TextView
         android:id="@+id/label"
         android:layout_width="wrap_content"
@@ -15,8 +14,7 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
         android:layout_marginStart="@dimen/app_bar_margin"
-        android:textAppearance="@style/TextAppearance.AppCompat.Title"
-        android:textAllCaps="true"
+        android:textAppearance="@style/TextAppearanceAppBarLabel"
         android:text="@string/fragment_preferences_label"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -115,7 +115,7 @@
     <string name="empty_data">Nothing to see here…</string>
 
     <string name="preference_category_ui">UI</string>
-    <string name="preference_category_content">Content</string>
+    <string name="preference_category_content">CONTENT</string>
 
     <string name="preference_night_mode">Theme</string>
     <string name="preference_night_mode_light">Light Theme</string>
