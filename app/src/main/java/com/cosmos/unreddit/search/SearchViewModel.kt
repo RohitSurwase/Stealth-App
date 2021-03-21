@@ -13,14 +13,15 @@ import com.cosmos.unreddit.preferences.ContentPreferences
 import com.cosmos.unreddit.repository.PreferencesRepository
 import com.cosmos.unreddit.subreddit.SubredditEntity
 import com.cosmos.unreddit.user.User
+import com.cosmos.unreddit.util.PagerHelper
 import com.cosmos.unreddit.util.PostUtil
+import com.cosmos.unreddit.util.updateValue
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
 @HiltViewModel
@@ -29,9 +30,7 @@ class SearchViewModel @Inject constructor(
     preferencesRepository: PreferencesRepository
 ) : ViewModel() {
 
-    private val history: Flow<List<String>> = repository.getHistory()
-        .map { list -> list.map { it.postId } }
-        .distinctUntilChanged()
+    private val history: Flow<List<String>> = repository.getHistoryIds().distinctUntilChanged()
 
     val contentPreferences: Flow<ContentPreferences> =
         preferencesRepository.getContentPreferences()
@@ -45,39 +44,33 @@ class SearchViewModel @Inject constructor(
     private val _page: MutableStateFlow<Int> = MutableStateFlow(0)
     val page: StateFlow<Int> get() = _page
 
-    private var currentPostQuery: String? = null
-    private var currentPostSorting: Sorting? = null
-    private var currentPosts: Flow<PagingData<PostEntity>>? = null
-
-    private var currentSubredditQuery: String? = null
-    private var currentSubredditSorting: Sorting? = null
-    private var currentSubreddits: Flow<PagingData<SubredditEntity>>? = null
-
-    private var currentUserQuery: String? = null
-    private var currentUserSorting: Sorting? = null
-    private var currentUsers: Flow<PagingData<User>>? = null
-
-    fun searchAndFilterPosts(query: String, sorting: Sorting): Flow<PagingData<PostEntity>> {
-        return PostUtil.filterPosts(searchPost(query, sorting), history, contentPreferences)
-            .cachedIn(viewModelScope)
+    private val postPagerHelper = object : PagerHelper<PostEntity>() {
+        override fun getResults(query: String, sorting: Sorting): Flow<PagingData<PostEntity>> {
+            return repository.searchPost(query, sorting).cachedIn(viewModelScope)
+        }
     }
 
-    private fun searchPost(query: String, sorting: Sorting): Flow<PagingData<PostEntity>> {
-        val lastPosts = currentPosts
-        if (currentPostQuery == query &&
-            currentPostSorting == sorting &&
-            lastPosts != null
-        ) {
-            return lastPosts
+    private val subredditPagerHelper = object : PagerHelper<SubredditEntity>() {
+        override fun getResults(
+            query: String,
+            sorting: Sorting
+        ): Flow<PagingData<SubredditEntity>> {
+            return repository.searchSubreddit(query, sorting).cachedIn(viewModelScope)
         }
+    }
 
-        currentPostQuery = query
-        currentPostSorting = sorting
+    private val userPagerHelper = object : PagerHelper<User>() {
+        override fun getResults(query: String, sorting: Sorting): Flow<PagingData<User>> {
+            return repository.searchUser(query, sorting).cachedIn(viewModelScope)
+        }
+    }
 
-        val newPosts = repository.searchPost(query, sorting).cachedIn(viewModelScope)
-        currentPosts = newPosts
-
-        return newPosts
+    fun searchAndFilterPosts(query: String, sorting: Sorting): Flow<PagingData<PostEntity>> {
+        return PostUtil.filterPosts(
+            postPagerHelper.loadData(query, sorting),
+            history,
+            contentPreferences
+        ).cachedIn(viewModelScope)
     }
 
     fun searchAndFilterSubreddits(
@@ -85,7 +78,7 @@ class SearchViewModel @Inject constructor(
         sorting: Sorting
     ): Flow<PagingData<SubredditEntity>> {
         return combine(
-            searchSubreddit(query, sorting),
+            subredditPagerHelper.loadData(query, sorting),
             contentPreferences
         ) { _subreddits, _contentPreferences ->
             _subreddits.filter { subreddit ->
@@ -94,33 +87,12 @@ class SearchViewModel @Inject constructor(
         }.cachedIn(viewModelScope)
     }
 
-    private fun searchSubreddit(
-        query: String,
-        sorting: Sorting
-    ): Flow<PagingData<SubredditEntity>> {
-        val lastSubreddits = currentSubreddits
-        if (currentSubredditQuery == query &&
-            currentSubredditSorting == sorting &&
-            lastSubreddits != null
-        ) {
-            return lastSubreddits
-        }
-
-        currentSubredditQuery = query
-        currentSubredditSorting = sorting
-
-        val newSubreddits = repository.searchSubreddit(query, sorting).cachedIn(viewModelScope)
-        currentSubreddits = newSubreddits
-
-        return newSubreddits
-    }
-
     fun searchAndFilterUsers(
         query: String,
         sorting: Sorting
     ): Flow<PagingData<User>> {
         return combine(
-            searchUser(query, sorting),
+            userPagerHelper.loadData(query, sorting),
             contentPreferences
         ) { _users, _contentPreferences ->
             _users.filter { user ->
@@ -129,40 +101,16 @@ class SearchViewModel @Inject constructor(
         }.cachedIn(viewModelScope)
     }
 
-    private fun searchUser(query: String, sorting: Sorting): Flow<PagingData<User>> {
-        val lastUsers = currentUsers
-        if (currentUserQuery == query &&
-            currentUserSorting == sorting &&
-            lastUsers != null
-        ) {
-            return lastUsers
-        }
-
-        currentUserQuery = query
-        currentUserSorting = sorting
-
-        val newUsers = repository.searchUser(query, sorting).cachedIn(viewModelScope)
-        currentUsers = newUsers
-
-        return newUsers
-    }
-
     fun setSorting(sorting: Sorting) {
-        if (_sorting.value != sorting) {
-            _sorting.value = sorting
-        }
+        _sorting.updateValue(sorting)
     }
 
     fun setQuery(query: String) {
-        if (_query.value != query) {
-            _query.value = query
-        }
+        _query.updateValue(query)
     }
 
     fun setPage(position: Int) {
-        if (_page.value != position) {
-            _page.value = position
-        }
+        _page.updateValue(position)
     }
 
     companion object {

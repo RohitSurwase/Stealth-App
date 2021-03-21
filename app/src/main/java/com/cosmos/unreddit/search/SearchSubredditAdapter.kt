@@ -5,12 +5,9 @@ import android.view.ViewGroup
 import androidx.paging.PagingDataAdapter
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
-import coil.load
-import coil.size.Precision
-import coil.size.Scale
-import com.cosmos.unreddit.R
 import com.cosmos.unreddit.databinding.ItemSearchSubredditBinding
 import com.cosmos.unreddit.subreddit.SubredditEntity
+import com.cosmos.unreddit.util.loadSubredditIcon
 
 class SearchSubredditAdapter(
     private val listener: (String) -> Unit
@@ -36,14 +33,7 @@ class SearchSubredditAdapter(
             // TODO: Add NSFW flair next to name when needed
             binding.subreddit = subreddit
 
-            binding.subredditImage.load(subreddit.icon) {
-                crossfade(true)
-                scale(Scale.FILL)
-                precision(Precision.AUTOMATIC)
-                placeholder(R.drawable.icon_reddit_placeholder)
-                error(R.drawable.icon_reddit_placeholder)
-                fallback(R.drawable.icon_reddit_placeholder)
-            }
+            binding.subredditImage.loadSubredditIcon(subreddit.icon)
 
             itemView.setOnClickListener { listener(subreddit.displayName) }
         }

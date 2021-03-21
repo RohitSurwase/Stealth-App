@@ -21,6 +21,7 @@ import coil.size.Precision
 import coil.size.Scale
 import com.cosmos.unreddit.R
 import com.cosmos.unreddit.databinding.IncludeLoadingStateBinding
+import com.cosmos.unreddit.databinding.ItemListContentBinding
 import com.cosmos.unreddit.post.Sorting
 import com.cosmos.unreddit.sort.SortFragment
 import kotlinx.coroutines.flow.collect
@@ -149,6 +150,14 @@ fun ViewPager2.getRecyclerView(): RecyclerView? {
 
 fun ViewPager2.getItemView(position: Int): View? {
     return getRecyclerView()?.findViewHolderForAdapterPosition(position)?.itemView
+}
+
+fun ViewPager2.scrollToTop(position: Int) {
+    getItemView(position)?.let {
+        ItemListContentBinding.bind(it).apply {
+            listContent.betterSmoothScrollToPosition(0)
+        }
+    }
 }
 
 // https://carlrice.io/blog/better-smoothscrollto

@@ -1,26 +1,18 @@
 package com.cosmos.unreddit.search
 
-import android.content.Context
 import android.os.Bundle
-import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.animation.AnimationUtils
 import android.view.inputmethod.EditorInfo
-import androidx.activity.OnBackPressedCallback
 import androidx.core.view.isVisible
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.navArgs
-import androidx.transition.Fade
-import androidx.transition.Slide
-import androidx.transition.TransitionManager
-import androidx.transition.TransitionSet
+import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager2.widget.ViewPager2
 import com.cosmos.unreddit.R
 import com.cosmos.unreddit.SubscriptionsDirections
-import com.cosmos.unreddit.api.RedditApi
 import com.cosmos.unreddit.base.BaseFragment
 import com.cosmos.unreddit.databinding.FragmentSearchBinding
 import com.cosmos.unreddit.post.Sorting
@@ -28,11 +20,12 @@ import com.cosmos.unreddit.postlist.PostListAdapter
 import com.cosmos.unreddit.postlist.PostListRepository
 import com.cosmos.unreddit.sort.SortFragment
 import com.cosmos.unreddit.util.RecyclerViewStateAdapter
-import com.cosmos.unreddit.util.hideSoftKeyboard
+import com.cosmos.unreddit.util.getRecyclerView
+import com.cosmos.unreddit.util.onRefreshFromNetwork
+import com.cosmos.unreddit.util.scrollToTop
 import com.cosmos.unreddit.util.setSortingListener
-import com.cosmos.unreddit.util.showSoftKeyboard
+import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
-import com.google.android.material.transition.MaterialFadeThrough
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -59,8 +52,6 @@ class SearchFragment : BaseFragment() {
     private lateinit var postListAdapter: PostListAdapter
     private lateinit var subredditAdapter: SearchSubredditAdapter
     private lateinit var userAdapter: SearchUserAdapter
-
-    private lateinit var onBackPressedCallback: OnBackPressedCallback
 
     @Inject
     lateinit var repository: PostListRepository
@@ -94,22 +85,6 @@ class SearchFragment : BaseFragment() {
         }
     }
 
-    override fun onAttach(context: Context) {
-        super.onAttach(context)
-        onBackPressedCallback = object : OnBackPressedCallback(true) {
-            override fun handleOnBackPressed() {
-                if (binding.appBar.searchInput.isVisible) {
-                    showSearchInput(false)
-                } else {
-                    isEnabled = false
-                    requireActivity().onBackPressed()
-                }
-            }
-        }
-        requireActivity().onBackPressedDispatcher
-            .addCallback(this, onBackPressedCallback)
-    }
-
     private fun bindViewModel() {
         viewLifecycleOwner.lifecycleScope.launchWhenStarted {
             viewModel.query.collectLatest { query ->
@@ -119,7 +94,6 @@ class SearchFragment : BaseFragment() {
             }
         }
         viewLifecycleOwner.lifecycleScope.launchWhenStarted {
-            // TODO: Back to top when query changed
             combine(
                 viewModel.query,
                 viewModel.sorting,
@@ -130,7 +104,7 @@ class SearchFragment : BaseFragment() {
                 query?.let {
                     search(page, query, sorting)
                 }
-                setSortIcon(sorting)
+                binding.appBar.sortIcon.setSorting(sorting)
             }.collect()
         }
     }
@@ -154,6 +128,7 @@ class SearchFragment : BaseFragment() {
 
         binding.viewPager.apply {
             adapter = searchStateAdapter
+            getRecyclerView()?.overScrollMode = RecyclerView.OVER_SCROLL_NEVER
             registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
                 override fun onPageSelected(position: Int) {
                     super.onPageSelected(position)
@@ -163,20 +138,51 @@ class SearchFragment : BaseFragment() {
             })
         }
 
+        binding.tabs.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
+            override fun onTabSelected(tab: TabLayout.Tab?) {
+                // ignore
+            }
+
+            override fun onTabUnselected(tab: TabLayout.Tab?) {
+                // ignore
+            }
+
+            override fun onTabReselected(tab: TabLayout.Tab?) {
+                tab?.let { binding.viewPager.scrollToTop(it.position) }
+            }
+        })
+
         TabLayoutMediator(binding.tabs, binding.viewPager) { tab, position ->
             tab.setText(tabs[position].title)
         }.attach()
+
+        lifecycleScope.launchWhenStarted {
+            postListAdapter.onRefreshFromNetwork {
+                binding.viewPager.scrollToTop(0)
+            }
+        }
+        lifecycleScope.launchWhenStarted {
+            subredditAdapter.onRefreshFromNetwork {
+                binding.viewPager.scrollToTop(1)
+            }
+        }
+        lifecycleScope.launchWhenStarted {
+            userAdapter.onRefreshFromNetwork {
+                binding.viewPager.scrollToTop(2)
+            }
+        }
     }
 
     private fun initAppBar() {
         with(binding.appBar) {
-            label.setOnClickListener {
-                showSearchInput(true)
-            }
-            root.setOnClickListener {
-                showSearchInput(true)
-            }
+            label.setOnClickListener { showSearchInput(true) }
+            root.setOnClickListener { showSearchInput(true) }
             searchInput.apply {
+                addTarget(backCard)
+                addTarget(label)
+                addTarget(sortCard)
+                addTarget(sortIcon)
+                addTarget(cancelCard)
                 setOnEditorActionListener { _, actionId, _ ->
                     when (actionId) {
                         EditorInfo.IME_ACTION_SEARCH -> {
@@ -191,7 +197,8 @@ class SearchFragment : BaseFragment() {
                 }
             }
             sortCard.setOnClickListener { showSortDialog() }
-            backCard.setOnClickListener { requireActivity().onBackPressed() }
+            backCard.setOnClickListener { onBackPressed() }
+            cancelCard.setOnClickListener { showSearchInput(false) }
         }
     }
 
@@ -199,108 +206,18 @@ class SearchFragment : BaseFragment() {
         setSortingListener { sorting -> sorting?.let { viewModel.setSorting(it) } }
     }
 
-    private fun setSortIcon(sorting: Sorting) {
-        val popInAnimation = AnimationUtils.loadAnimation(context, R.anim.pop_in)
-        val popOutAnimation = AnimationUtils.loadAnimation(context, R.anim.pop_out)
-
-        with(binding.appBar.sortIcon) {
-            when (sorting.generalSorting) {
-                RedditApi.Sort.HOT -> setImageResource(R.drawable.ic_hot)
-                RedditApi.Sort.NEW -> setImageResource(R.drawable.ic_new)
-                RedditApi.Sort.TOP -> setImageResource(R.drawable.ic_top)
-                RedditApi.Sort.RELEVANCE -> setImageResource(R.drawable.ic_relevance)
-                RedditApi.Sort.COMMENTS -> setImageResource(R.drawable.ic_comments)
-                else -> {
-                    startAnimation(popOutAnimation)
-                    return@with
-                }
-            }
-
-            startAnimation(popInAnimation)
-        }
-
-        with(binding.appBar.sortTimeText) {
-            val showOutAnimation = isVisible
-
-            visibility = if (!binding.appBar.searchInput.isVisible && (
-                sorting.generalSorting == RedditApi.Sort.TOP ||
-                    sorting.generalSorting == RedditApi.Sort.RELEVANCE ||
-                    sorting.generalSorting == RedditApi.Sort.COMMENTS
-                )
-            ) {
-                View.VISIBLE
-            } else {
-                View.GONE
-            }
-
-            text = when (sorting.timeSorting) {
-                RedditApi.TimeSorting.HOUR -> getString(R.string.sort_time_hour_short)
-                RedditApi.TimeSorting.DAY -> getString(R.string.sort_time_day_short)
-                RedditApi.TimeSorting.WEEK -> getString(R.string.sort_time_week_short)
-                RedditApi.TimeSorting.MONTH -> getString(R.string.sort_time_month_short)
-                RedditApi.TimeSorting.YEAR -> getString(R.string.sort_time_year_short)
-                RedditApi.TimeSorting.ALL -> getString(R.string.sort_time_all_short)
-                null -> {
-                    if (showOutAnimation) startAnimation(popOutAnimation)
-                    return@with
-                }
-            }
-
-            startAnimation(popInAnimation)
-        }
-    }
-
     private fun showSearchInput(show: Boolean) {
-        with(binding.appBar) {
-            val searchInputTransition = TransitionSet().apply {
-                addTransition(Fade(Fade.OUT))
-                addTransition(Slide(Gravity.END))
-                addTransition(Fade(Fade.IN))
-                duration = 250
-                addTarget(searchInput)
-            }
-
-            val appBarTransition = MaterialFadeThrough().apply {
-                duration = 500
-                addTarget(backCard)
-                addTarget(label)
-                addTarget(sortCard)
-                addTarget(sortIcon)
-                addTarget(sortTimeText)
-                addTarget(searchInput)
-            }
-
-            val transitionSet = TransitionSet().apply {
-                addTransition(searchInputTransition)
-                addTransition(appBarTransition)
-            }
-
-            TransitionManager.beginDelayedTransition(root, transitionSet)
-            backCard.visibility = if (show) View.GONE else View.VISIBLE
-            label.visibility = if (show) View.GONE else View.VISIBLE
-            sortCard.visibility = if (show) View.GONE else View.VISIBLE
-            sortIcon.visibility = if (show) View.GONE else View.VISIBLE
-            sortTimeText.visibility = if (show || viewModel.sorting.value.timeSorting == null) {
-                View.GONE
-            } else {
-                View.VISIBLE
-            }
-            searchInput.visibility = if (show) View.VISIBLE else View.GONE
-
-            if (show) {
-                searchInput.apply {
-                    isFocusable = true
-                    isFocusableInTouchMode = true
-                    requestFocus()
-                    showSoftKeyboard()
-                }
-            } else {
-                searchInput.apply {
-                    isFocusable = false
-                    isFocusableInTouchMode = false
-                    hideSoftKeyboard()
+        binding.appBar.searchInput.apply {
+            show(binding.appBar.root, show) {
+                with(binding.appBar) {
+                    backCard.isVisible = !show
+                    label.isVisible = !show
+                    sortCard.isVisible = !show
+                    sortIcon.isVisible = !show
+                    cancelCard.isVisible = show
                 }
             }
+            setSelection(text?.length ?: 0)
         }
     }
 
