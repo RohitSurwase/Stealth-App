@@ -25,8 +25,8 @@ import com.cosmos.unreddit.post.Sorting
 import com.cosmos.unreddit.sort.SortFragment
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.distinctUntilChangedBy
+import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.filter
-import kotlin.math.round
 
 fun Double.getPercentageValue(start: Int, end: Int) = end * this + start * (1 - this)
 
@@ -108,6 +108,7 @@ suspend fun PagingDataAdapter<out Any, out RecyclerView.ViewHolder>.onRefreshFro
 ) {
     loadStateFlow.distinctUntilChangedBy { it.refresh }
         .filter { it.refresh is LoadState.NotLoading }
+        .drop(1)
         .collect { onRefresh() }
 }
 
