@@ -15,6 +15,7 @@ import com.cosmos.unreddit.util.openExternalLink
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import kotlin.coroutines.CoroutineContext
 
 @ExperimentalStdlibApi
@@ -43,12 +44,14 @@ class AboutFragment : BaseFragment() {
     }
 
     private fun initCredits(coroutinesContext: CoroutineContext = Dispatchers.Default) {
-        lifecycleScope.launch(coroutinesContext) {
-            val items = buildList {
-                add(CreditItem.Section(R.string.about_section_credits))
-                addAll(CREDITS.sortedBy { it.title })
-                add(CreditItem.Section(R.string.about_section_libraries))
-                addAll(LIBRARIES.sortedBy { it.title })
+        lifecycleScope.launch {
+            val items = withContext(coroutinesContext) {
+                buildList {
+                    add(CreditItem.Section(R.string.about_section_credits))
+                    addAll(CREDITS.sortedBy { it.title })
+                    add(CreditItem.Section(R.string.about_section_libraries))
+                    addAll(LIBRARIES.sortedBy { it.title })
+                }
             }
             creditAdapter.submitList(items)
         }
