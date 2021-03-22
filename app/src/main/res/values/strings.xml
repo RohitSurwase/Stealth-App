@@ -137,4 +137,8 @@
 
     <string name="about_section_credits">Credits</string>
     <string name="about_section_libraries">Libraries</string>
+
+    <string name="navigation_label_home">Home</string>
+    <string name="navigation_label_subscriptions">Subscriptions</string>
+    <string name="navigation_label_settings">Preferences</string>
 </resources>

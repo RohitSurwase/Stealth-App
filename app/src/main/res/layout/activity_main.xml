@@ -23,7 +23,7 @@
             android:layout_marginBottom="@dimen/bottom_navigation_margin"
             app:elevation="@dimen/bottom_navigation_elevation"
             app:itemIconTint="@drawable/navigation_color_selector"
-            app:labelVisibilityMode="unlabeled"
+            app:labelVisibilityMode="selected"
             android:layout_gravity="bottom|center"
             app:menu="@menu/navigation_menu"
             app:layout_behavior="@string/hide_bottom_view_on_scroll_behavior"/>

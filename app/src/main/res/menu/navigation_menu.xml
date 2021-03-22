@@ -3,12 +3,12 @@
     <item
         android:id="@+id/home"
         android:icon="@drawable/ic_home_selector"
-        android:title="Home" />
+        android:title="@string/navigation_label_home" />
 
     <item
         android:id="@+id/subscriptions"
         android:icon="@drawable/ic_subscriptions"
-        android:title="Subscriptions" />
+        android:title="@string/navigation_label_subscriptions" />
 
     <!-- TODO: Profile -->
 <!--    <item-->
@@ -19,5 +19,5 @@
     <item
         android:id="@+id/settings"
         android:icon="@drawable/ic_settings_selector"
-        android:title="Settings" />
+        android:title="@string/navigation_label_settings" />
 </menu>
