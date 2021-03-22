@@ -1,5 +1,6 @@
 <resources>
     <string name="app_name">unReddit</string>
+    <string name="app_description">An account-free, privacy-oriented, feature-rich Reddit client</string>
 
     <string name="post_ratio">%1$d%%</string>
 
@@ -112,10 +113,14 @@
 
     <string name="dialog_night_mode_title">Theme</string>
 
+    <string name="dialog_credit_show_website">Show Website</string>
+    <string name="dialog_credit_show_license">Show License</string>
+
     <string name="empty_data">Nothing to see here…</string>
 
     <string name="preference_category_ui">UI</string>
     <string name="preference_category_content">CONTENT</string>
+    <string name="preference_category_misc">MISC.</string>
 
     <string name="preference_night_mode">Theme</string>
     <string name="preference_night_mode_light">Light Theme</string>
@@ -125,4 +130,11 @@
     <string name="preference_show_nsfw">Show NSFW content</string>
     <string name="preference_show_nsfw_preview">Show NSFW preview</string>
     <string name="preference_show_spoiler_preview">Show Spoiler preview</string>
+
+    <string name="preference_about">About</string>
+
+    <string name="fragment_about_label">About</string>
+
+    <string name="about_section_credits">Credits</string>
+    <string name="about_section_libraries">Libraries</string>
 </resources>

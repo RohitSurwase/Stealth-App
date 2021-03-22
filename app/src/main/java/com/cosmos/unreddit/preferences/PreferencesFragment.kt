@@ -4,11 +4,15 @@ import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.fragment.app.activityViewModels
+import androidx.navigation.NavOptions
+import androidx.navigation.fragment.findNavController
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.SwitchPreferenceCompat
 import com.cosmos.unreddit.R
+import com.cosmos.unreddit.UiViewModel
 import com.cosmos.unreddit.preferences.ContentPreferences.PreferencesKeys
+import com.cosmos.unreddit.util.getNavOptions
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -16,11 +20,15 @@ import dagger.hilt.android.AndroidEntryPoint
 class PreferencesFragment : PreferenceFragmentCompat() {
 
     private val viewModel: PreferencesViewModel by activityViewModels()
+    private val uiViewModel: UiViewModel by activityViewModels()
 
     private var nightModePreference: Preference? = null
     private var showNsfwPreference: SwitchPreferenceCompat? = null
     private var showNsfwPreviewPreference: SwitchPreferenceCompat? = null
     private var showSpoilerPreviewPreference: SwitchPreferenceCompat? = null
+    private var aboutPreference: Preference? = null
+
+    private val navOptions: NavOptions by lazy { getNavOptions() }
 
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         setPreferencesFromResource(R.xml.preferences, rootKey)
@@ -29,6 +37,12 @@ class PreferencesFragment : PreferenceFragmentCompat() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        findNavController().addOnDestinationChangedListener { _, destination, _ ->
+            when (destination.id) {
+                R.id.preferencesFragment -> uiViewModel.setNavigationVisibility(true)
+                else -> uiViewModel.setNavigationVisibility(false)
+            }
+        }
         bindViewModel()
     }
 
@@ -72,6 +86,13 @@ class PreferencesFragment : PreferenceFragmentCompat() {
                 true
             }
         }
+
+        aboutPreference = findPreference<Preference>("about")?.apply {
+            setOnPreferenceClickListener {
+                openAbout()
+                true
+            }
+        }
     }
 
     private fun bindViewModel() {
@@ -108,6 +129,10 @@ class PreferencesFragment : PreferenceFragmentCompat() {
     private fun updateNightMode(mode: Int) {
         AppCompatDelegate.setDefaultNightMode(mode)
         viewModel.setNightMode(mode)
+    }
+
+    private fun openAbout() {
+        findNavController().navigate(PreferencesFragmentDirections.openAbout(), navOptions)
     }
 
     companion object {

@@ -379,4 +379,28 @@
         <item name="android:textColor">@color/text_color_secondary</item>
     </style>
 
+    <!-- Credits -->
+
+    <style name="CreditCardStyle" parent="CardStyle"/>
+
+    <style name="TextAppearanceCreditTitle" parent="">
+        <item name="android:textSize">18sp</item>
+    </style>
+
+    <style name="TextAppearanceCreditDescription" parent="">
+        <item name="android:textSize">15sp</item>
+        <item name="android:textColor">@color/text_color_secondary</item>
+    </style>
+
+    <style name="TextAppearanceCreditAuthor" parent="">
+        <item name="android:textSize">14sp</item>
+        <item name="android:textColor">@color/text_color_post_info</item>
+    </style>
+
+    <style name="TextAppearanceCreditLicense" parent="">
+        <item name="android:textSize">14sp</item>
+    </style>
+
+    <style name="TextAppearanceCreditSection" parent="TextAppearanceCategory"/>
+
 </resources>

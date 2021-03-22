@@ -11,6 +11,7 @@ import android.widget.ImageView
 import androidx.core.view.isVisible
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.Fragment
+import androidx.navigation.NavOptions
 import androidx.paging.LoadState
 import androidx.paging.PagingDataAdapter
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -97,6 +98,15 @@ fun Fragment.shareExternalLink(url: String, title: String? = null) {
         null
     )
     startActivity(share)
+}
+
+fun Fragment.getNavOptions(): NavOptions {
+    return NavOptions.Builder()
+        .setEnterAnim(R.anim.nav_enter_anim)
+        .setExitAnim(R.anim.nav_exit_anim)
+        .setPopEnterAnim(R.anim.nav_enter_anim)
+        .setPopExitAnim(R.anim.nav_exit_anim)
+        .build()
 }
 
 fun DialogFragment.doAndDismiss(block: () -> Unit) {
