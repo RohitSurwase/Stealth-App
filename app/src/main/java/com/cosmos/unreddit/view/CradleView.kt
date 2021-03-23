@@ -34,21 +34,31 @@ class CradleView @JvmOverloads constructor(
         R.drawable.cradle_anim
     )
 
+    private val callback = object : Animatable2Compat.AnimationCallback() {
+        override fun onAnimationEnd(drawable: Drawable?) {
+            post { cradleDrawable?.start() }
+        }
+    }
+
     init {
         setImageDrawable(cradleDrawable)
-
-        cradleDrawable?.registerAnimationCallback(object : Animatable2Compat.AnimationCallback() {
-            override fun onAnimationEnd(drawable: Drawable?) {
-                cradleDrawable.start()
-            }
-        })
     }
 
     fun start() {
+        registerCallback()
         cradleDrawable?.start()
     }
 
     fun stop() {
         cradleDrawable?.stop()
+        unregisterCallback()
+    }
+
+    private fun registerCallback() {
+        cradleDrawable?.registerAnimationCallback(callback)
+    }
+
+    private fun unregisterCallback() {
+        cradleDrawable?.unregisterAnimationCallback(callback)
     }
 }

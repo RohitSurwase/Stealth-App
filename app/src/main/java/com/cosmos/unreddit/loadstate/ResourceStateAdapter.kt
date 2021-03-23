@@ -38,6 +38,11 @@ class ResourceStateAdapter(
         holder.bind(resource)
     }
 
+    override fun onViewRecycled(holder: ViewHolder) {
+        super.onViewRecycled(holder)
+        holder.unbind()
+    }
+
     override fun getItemCount(): Int = if (displayResourceStateAsItem(resource)) 1 else 0
 
     private fun displayResourceStateAsItem(resource: Resource<Any>?): Boolean {
@@ -64,6 +69,10 @@ class ResourceStateAdapter(
             val isEmpty = isEmpty(resource)
             binding.emptyData.isVisible = isEmpty
             binding.textEmptyData.isVisible = isEmpty
+        }
+
+        fun unbind() {
+            binding.loadingCradle.isVisible = false
         }
     }
 }

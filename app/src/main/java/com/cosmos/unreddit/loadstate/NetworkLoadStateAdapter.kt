@@ -21,6 +21,11 @@ class NetworkLoadStateAdapter(
         holder.bind(loadState)
     }
 
+    override fun onViewRecycled(holder: ViewHolder) {
+        super.onViewRecycled(holder)
+        holder.unbind()
+    }
+
     inner class ViewHolder(
         private val binding: ItemLoadStateBinding
     ) : RecyclerView.ViewHolder(binding.root) {
@@ -33,6 +38,10 @@ class NetworkLoadStateAdapter(
             binding.loadingCradle.isVisible = loadState is LoadState.Loading
             binding.buttonRetry.isVisible = loadState !is LoadState.Loading
             binding.textError.isVisible = loadState !is LoadState.Loading
+        }
+
+        fun unbind() {
+            binding.loadingCradle.isVisible = false
         }
     }
 }

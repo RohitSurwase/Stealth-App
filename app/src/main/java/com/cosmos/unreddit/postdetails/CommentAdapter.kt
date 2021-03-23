@@ -362,7 +362,7 @@ class CommentAdapter(
         fun bind(more: MoreEntity) {
             binding.more = more
 
-            binding.loadingCradle.isVisible = more.isLoading
+            binding.progress.isVisible = more.isLoading
             binding.textError.isVisible = more.isError
 
             binding.commentBody.apply {
