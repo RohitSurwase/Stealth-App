@@ -1,24 +1,12 @@
-<vector android:height="200dp" android:viewportHeight="1000"
-    android:viewportWidth="1000" android:width="200dp" xmlns:android="http://schemas.android.com/apk/res/android">
-    <path android:fillColor="@color/background" android:pathData="M0,0h1000v1000H0z"/>
-    <path android:fillColor="#f2f2f2" android:pathData="M718,520L360,673a10,10 0,0 1,-13 -5l-95,-221a7,7 0,0 1,4 -9l363,-156a7,7 0,0 1,10 4l94,221a10,10 0,0 1,-5 13z"/>
-    <path android:fillColor="#fff" android:pathData="M701,513L368,656c-5,2 -11,0 -13,-4l-82,-193c-1,-3 0,-7 4,-9l338,-144c4,-2 8,0 9,3l83,192c2,5 -1,10 -6,12z"/>
-    <path android:fillColor="#9a67ea" android:pathData="M629,287L253,448l-2,-4a10,10 0,0 1,5 -13l358,-154a10,10 0,0 1,13 6z"/>
-    <path android:fillColor="#fff" android:pathData="M266.6,434.3m-2.6,0a2.6,2.6 0,1 1,5.2 0a2.6,2.6 0,1 1,-5.2 0"/>
-    <path android:fillColor="#fff" android:pathData="M275.7,430.4m-2.6,0a2.6,2.6 0,1 1,5.2 0a2.6,2.6 0,1 1,-5.2 0"/>
-    <path android:fillColor="#fff" android:pathData="M284.8,426.5m-2.6,0a2.6,2.6 0,1 1,5.2 0a2.6,2.6 0,1 1,-5.2 0"/>
-    <path android:fillColor="#f2f2f2" android:pathData="M435,498l-45,19a10,10 0,0 1,-13 -6l-25,-57a10,10 0,0 1,6 -13l44,-19a10,10 0,0 1,13 5l25,57a10,10 0,0 1,-5 14zM510,465l-45,19a10,10 0,0 1,-13 -5l-24,-57a10,10 0,0 1,5 -13l44,-19a10,10 0,0 1,14 5l24,57a10,10 0,0 1,-5 13zM585,433l-44,19a10,10 0,0 1,-14 -5l-24,-57a10,10 0,0 1,5 -14l45,-19a10,10 0,0 1,13 6l24,57a10,10 0,0 1,-5 13zM473,586l-45,19a10,10 0,0 1,-13 -5l-25,-57a10,10 0,0 1,6 -13l44,-19a10,10 0,0 1,13 5l25,57a10,10 0,0 1,-5 13zM548,554l-45,19a10,10 0,0 1,-13 -5l-24,-57a10,10 0,0 1,5 -14l44,-19a10,10 0,0 1,14 6l24,57a10,10 0,0 1,-5 13zM623,522l-44,19a10,10 0,0 1,-14 -5l-24,-58a10,10 0,0 1,5 -13l45,-19a10,10 0,0 1,13 5l24,58a10,10 0,0 1,-5 13z"/>
-    <path android:fillColor="#e6e6e6" android:pathData="M740,723H351a10,10 0,0 1,-10 -10V473a7,7 0,0 1,7 -7h395a7,7 0,0 1,7 7v240a10,10 0,0 1,-10 10z"/>
-    <path android:fillColor="#fff" android:pathData="M727,711H365c-6,0 -10,-4 -10,-9V493c0,-4 3,-7 7,-7h368c4,0 7,3 7,7v209c0,5 -4,9 -10,9z"/>
-    <path android:fillColor="#9a67ea" android:pathData="M750,475H341v-6a10,10 0,0 1,10 -10h389a10,10 0,0 1,10 10z"/>
-    <path android:fillColor="#fff" android:pathData="M358.9,467m-2.6,0a2.6,2.6 0,1 1,5.2 0a2.6,2.6 0,1 1,-5.2 0"/>
-    <path android:fillColor="#fff" android:pathData="M368.7,467m-2.6,0a2.6,2.6 0,1 1,5.2 0a2.6,2.6 0,1 1,-5.2 0"/>
-    <path android:fillColor="#fff" android:pathData="M378.6,467m-2.6,0a2.6,2.6 0,1 1,5.2 0a2.6,2.6 0,1 1,-5.2 0"/>
-    <path android:fillColor="#e6e6e6" android:pathData="M535.9,544.7L707.7,544.7A12.5,12.45 0,0 1,720.2 557.15L720.2,557.15A12.5,12.45 0,0 1,707.7 569.6L535.9,569.6A12.5,12.45 0,0 1,523.4 557.15L523.4,557.15A12.5,12.45 0,0 1,535.9 544.7z"/>
-    <path android:fillColor="#e6e6e6" android:pathData="M535.9,585.9L707.7,585.9A12.5,12.45 0,0 1,720.2 598.35L720.2,598.35A12.5,12.45 0,0 1,707.7 610.8L535.9,610.8A12.5,12.45 0,0 1,523.4 598.35L523.4,598.35A12.5,12.45 0,0 1,535.9 585.9z"/>
-    <path android:fillColor="#e6e6e6" android:pathData="M535.9,627.1L707.7,627.1A12.5,12.45 0,0 1,720.2 639.55L720.2,639.55A12.5,12.45 0,0 1,707.7 652L535.9,652A12.5,12.45 0,0 1,523.4 639.55L523.4,639.55A12.5,12.45 0,0 1,535.9 627.1z"/>
-    <path android:fillColor="#fff" android:pathData="M507,598a67,67 0,1 1,-67 -66,67 67,0 0,1 67,66z"/>
-    <path android:fillColor="#9a67ea" android:pathData="M471,610c0,43 -64,43 -65,0 1,-43 65,-43 65,0z"/>
-    <path android:fillColor="#2f2e41" android:pathData="M438,623v-1c8,1 10,-9 1,-6l2,-14 1,1 -1,12c9,-2 5,9 -3,8zM448,604h7v1h-7zM428,604h6v1h-6zM449,655c2,-8 -8,-7 -14,-7a6,6 0,0 0,-5 7,32 32,0 0,0 -12,6 67,67 0,0 0,43 1,31 31,0 0,0 -12,-7zM424,594c6,-3 13,0 19,1 12,4 28,-1 30,-15 1,-13 -16,-20 -22,-7h1c-18,-28 -50,-27 -50,11h2c-1,-22 14,-38 35,-23l12,12c2,3 3,-8 13,-5 11,5 8,21 -3,25 -12,6 -26,-6 -38,0a1,1 0,0 0,1 1z"/>
-    <path android:fillColor="#3f3d56" android:pathData="M440,667a69,69 0,1 1,22 -3,68 68,0 0,1 -22,3zM440,533a65,65 0,1 0,65 65,65 65,0 0,0 -65,-65z"/>
-</vector>
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android" android:opacity="opaque">
+
+    <item android:drawable="@drawable/image_placeholder"/>
+
+    <item android:gravity="center">
+        <bitmap
+            android:gravity="center"
+            android:src="@drawable/link_fallback"/>
+    </item>
+
+</layer-list>
