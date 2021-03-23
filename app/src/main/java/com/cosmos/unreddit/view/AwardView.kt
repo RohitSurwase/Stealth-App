@@ -117,7 +117,6 @@ class AwardView @JvmOverloads constructor(
             0,
             textStyleRes
         ).apply {
-            scrollBarSize = 0
             layoutParams = LayoutParams(
                 LayoutParams.WRAP_CONTENT,
                 LayoutParams.MATCH_PARENT

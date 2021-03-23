@@ -21,7 +21,7 @@
             app:layout_constraintStart_toStartOf="parent"
             android:textColor="@null"
             android:textAppearance="@style/TextAppearancePreference"
-            android:scrollbarSize="0dp"/>
+            android:scrollbars="none"/>
 
         <TextView
             android:id="@android:id/summary"

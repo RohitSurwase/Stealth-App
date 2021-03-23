@@ -105,7 +105,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         android:layout_marginTop="@dimen/post_margin_top_small"
         android:layout_marginHorizontal="@dimen/post_margin_horizontal"
-        android:scrollbarSize="0dp"
+        android:scrollbars="none"
         android:overScrollMode="never">
 
         <com.cosmos.unreddit.view.AwardGroup

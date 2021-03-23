@@ -82,6 +82,11 @@
     <target android:name="right_sphere">
         <aapt:attr name="android:animation">
             <set>
+                <!-- Placeholder animator to make the animation run smoothly on older APIs -->
+                <objectAnimator
+                    android:duration="200"
+                    android:valueFrom="0"
+                    android:valueTo="0" />
                 <objectAnimator
                     android:propertyName="translateX"
                     android:startOffset="200"

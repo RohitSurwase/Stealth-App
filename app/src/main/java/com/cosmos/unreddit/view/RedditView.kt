@@ -92,7 +92,8 @@ class RedditView @JvmOverloads constructor(
         return HorizontalScrollView(context).apply {
             layoutParams = childParams
             overScrollMode = OVER_SCROLL_NEVER
-            scrollBarSize = 0
+            isVerticalScrollBarEnabled = false
+            isHorizontalScrollBarEnabled = false
             addView(view)
         }
     }

@@ -79,7 +79,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             android:layout_marginEnd="@dimen/post_padding_horizontal"
             android:background="?attr/selectableItemBackgroundBorderless"
-            android:src="@drawable/ic_more"/>
+            app:srcCompat="@drawable/ic_more"/>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

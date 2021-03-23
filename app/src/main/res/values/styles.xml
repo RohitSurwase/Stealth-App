@@ -4,8 +4,7 @@
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
-        <item name="android:statusBarColor">@color/background</item>
-        <item name="android:windowLightStatusBar">true</item>
+        <item name="android:statusBarColor">@color/colorPrimaryLight</item>
         <item name="android:fitsSystemWindows">true</item>
 
         <item name="android:colorBackground">@color/background</item>
@@ -158,6 +157,7 @@
     <style name="TextAppearancePostFlair" parent="">
         <item name="android:textSize">12sp</item>
         <item name="android:textColor">@android:color/white</item>
+        <item name="android:scrollbars">none</item>
     </style>
 
     <style name="TextAppearancePostDomain" parent="">
@@ -311,6 +311,7 @@
     <style name="TextAppearanceAward" parent="">
         <item name="android:textSize">10sp</item>
         <item name="android:textColor">@color/text_color</item>
+        <item name="android:scrollbars">none</item>
     </style>
 
     <style name="TextAppearanceAwardPost" parent="TextAppearanceAward">

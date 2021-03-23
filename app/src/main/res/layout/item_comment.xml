@@ -16,7 +16,7 @@
         android:paddingHorizontal="@dimen/comment_padding_horizontal"
         android:paddingVertical="@dimen/comment_padding_vertical">
 
-        <View
+        <ImageView
             android:id="@+id/comment_color_indicator"
             android:layout_width="2dp"
             android:layout_height="0dp"
@@ -127,7 +127,7 @@
             app:layout_constraintTop_toTopOf="@id/comment_author"
             app:layout_constraintBottom_toBottomOf="@id/comment_author"
             android:layout_marginStart="4dp"
-            android:src="@drawable/ic_pin"
+            app:srcCompat="@drawable/ic_pin"
             android:visibility="@{comment.stickied ? View.VISIBLE : View.GONE}"/>
 
         <TextView

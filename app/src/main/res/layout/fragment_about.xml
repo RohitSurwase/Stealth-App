@@ -23,7 +23,7 @@
         android:cropToPadding="true"
         app:shapeAppearanceOverlay="@style/CircularImageViewStyle"
         android:contentDescription="@null"
-        android:src="@mipmap/ic_launcher"/>
+        android:src="@mipmap/ic_launcher_round"/>
 
     <TextView
         android:id="@+id/app_name"
