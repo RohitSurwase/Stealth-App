@@ -1,8 +1,10 @@
 package com.cosmos.unreddit.model
 
 import android.os.Parcelable
+import androidx.annotation.Keep
 import kotlinx.parcelize.Parcelize
 
+@Keep
 @Parcelize
 data class GalleryMedia(
     val type: Type,
