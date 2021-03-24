@@ -42,6 +42,10 @@
         <item name="android:fontFamily">@font/lato_light</item>
     </style>
 
+    <style name="TextAppearanceAppName" parent="TextAppearanceAppBarLabel">
+        <item name="android:fontFamily">@font/stealth_medium</item>
+    </style>
+
     <!-- Post Details -->
     <style name="PostDetailsSheetTheme" parent="Theme.MaterialComponents.Light.BottomSheetDialog">
         <item name="bottomSheetStyle">@style/PostDetailsBottomSheet</item>

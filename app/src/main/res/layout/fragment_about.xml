@@ -34,7 +34,7 @@
         app:layout_constraintTop_toBottomOf="@id/app_icon"
         android:layout_marginTop="8dp"
         android:text="@string/app_name"
-        android:textAppearance="@style/TextAppearanceAppBarLabel"/>
+        android:textAppearance="@style/TextAppearanceAppName"/>
 
     <TextView
         android:id="@+id/app_version"
