@@ -17,7 +17,8 @@ class RedditTextView @JvmOverloads constructor(
         highlightColor = Color.TRANSPARENT
         isClickable = false
         isFocusable = false
-        scrollBarSize = 0
+        isVerticalScrollBarEnabled = false
+        isHorizontalScrollBarEnabled = false
     }
 
     fun setText(text: CharSequence, enableScroll: Boolean) {
