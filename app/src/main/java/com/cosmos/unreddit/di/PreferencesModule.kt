@@ -3,7 +3,7 @@ package com.cosmos.unreddit.di
 import android.content.Context
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
-import androidx.datastore.preferences.createDataStore
+import androidx.datastore.preferences.preferencesDataStore
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -17,11 +17,13 @@ object PreferencesModule {
 
     private const val PREFERENCES_NAME = "preferences"
 
+    private val Context.preferencesDataStore by preferencesDataStore(name = PREFERENCES_NAME)
+
     @Provides
     @Singleton
     fun providePreferencesDataStore(
         @ApplicationContext context: Context
     ): DataStore<Preferences> {
-        return context.createDataStore(name = PREFERENCES_NAME)
+        return context.preferencesDataStore
     }
 }
