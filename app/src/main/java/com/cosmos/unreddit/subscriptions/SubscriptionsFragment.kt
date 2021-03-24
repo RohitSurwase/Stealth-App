@@ -59,7 +59,11 @@ class SubscriptionsFragment : BaseFragment() {
     }
 
     private fun bindViewModel() {
-        viewModel.subscriptions.observe(viewLifecycleOwner, adapter::submitList)
+        viewModel.subscriptions.observe(viewLifecycleOwner) {
+            adapter.submitList(it)
+            binding.emptyData.isVisible = it.isEmpty()
+            binding.textEmptyData.isVisible = it.isEmpty()
+        }
     }
 
     private fun initRecyclerView() {

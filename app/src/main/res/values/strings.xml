@@ -117,6 +117,7 @@
     <string name="dialog_credit_show_license">Show License</string>
 
     <string name="empty_data">Nothing to see here…</string>
+    <string name="empty_data_subscriptions">You have no subscriptions yet.\nUse the search feature to look for Subreddits.</string>
 
     <string name="preference_category_ui">UI</string>
     <string name="preference_category_content">CONTENT</string>
