@@ -21,6 +21,12 @@
 
     <style name="AppTheme" parent="BaseTheme"/>
 
+    <style name="AppTheme.Launcher">
+        <item name="android:windowTranslucentNavigation">true</item>
+        <item name="android:windowTranslucentStatus">true</item>
+        <item name="android:windowBackground">@drawable/launch_screen</item>
+    </style>
+
     <style name="CardStyle" parent="Widget.MaterialComponents.CardView">
         <item name="cardElevation">0dp</item>
         <item name="cardCornerRadius">15dp</item>

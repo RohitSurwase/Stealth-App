@@ -13,7 +13,9 @@
         android:supportsRtl="true"
         android:networkSecurityConfig="@xml/network_security_config"
         android:theme="@style/AppTheme">
-        <activity android:name=".MainActivity">
+        <activity
+            android:name=".MainActivity"
+            android:theme="@style/AppTheme.Launcher">
             <nav-graph android:value="@navigation/home"/>
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
