@@ -153,6 +153,22 @@ class AboutFragment : BaseFragment() {
                     "https://undraw.co/",
                     CreditItem.Credit.LicenseType.OTHER,
                     "https://undraw.co/license"
+                ),
+                CreditItem.Credit(
+                    "Rubik",
+                    "Hubert and Fischer",
+                    "Rubik is a sans serif font family with slightly rounded corners designed by Philipp Hubert and Sebastian Fischer at Hubert & Fischer as part of the Chrome Cube Lab project.",
+                    "https://hubertfischer.com/work/type-rubik",
+                    CreditItem.Credit.LicenseType.OPEN_FONT_V1_1,
+                    "https://www.fontsquirrel.com/license/rubik"
+                ),
+                CreditItem.Credit(
+                    "Lato",
+                    "Łukasz Dziedzic",
+                    "Lato is a sans serif typeface family started in the summer of 2010 by Warsaw-based designer Łukasz Dziedzic (\"Lato\" means \"Summer\" in Polish).",
+                    "www.latofonts.com",
+                    CreditItem.Credit.LicenseType.OPEN_FONT_V1_1,
+                    "https://www.fontsquirrel.com/license/lato"
                 )
             )
         }

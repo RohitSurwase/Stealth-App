@@ -20,7 +20,10 @@ sealed class CreditItem {
         val licenseLink: String
     ) : CreditItem() {
         enum class LicenseType(val license: String) {
-            APACHE_V2("Apache License 2.0"), MIT("MIT License"), OTHER("")
+            APACHE_V2("Apache License 2.0"),
+            MIT("MIT License"),
+            OPEN_FONT_V1_1("SIL Open Font License v1.10"),
+            OTHER("")
         }
     }
 }
