@@ -9,7 +9,7 @@ import androidx.lifecycle.viewModelScope
 import com.cosmos.unreddit.data.local.mapper.CommentMapper
 import com.cosmos.unreddit.data.local.mapper.PostMapper
 import com.cosmos.unreddit.data.model.Comment
-import com.cosmos.unreddit.data.model.CommentEntity
+import com.cosmos.unreddit.data.model.Comment.CommentEntity
 import com.cosmos.unreddit.data.model.Resource
 import com.cosmos.unreddit.data.model.Sorting
 import com.cosmos.unreddit.data.model.db.PostEntity

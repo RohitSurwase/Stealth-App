@@ -11,7 +11,7 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.cosmos.unreddit.R
 import com.cosmos.unreddit.data.model.Comment
-import com.cosmos.unreddit.data.model.CommentEntity
+import com.cosmos.unreddit.data.model.Comment.CommentEntity
 import com.cosmos.unreddit.databinding.ItemUserCommentBinding
 import com.cosmos.unreddit.ui.common.widget.RedditView
 import com.cosmos.unreddit.util.DateUtil

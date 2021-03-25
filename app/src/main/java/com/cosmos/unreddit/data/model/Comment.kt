@@ -4,98 +4,93 @@ import android.content.Context
 import com.cosmos.unreddit.R
 import com.cosmos.unreddit.util.DateUtil
 
-interface Comment {
-    val name: String
-    val depth: Int
-}
+sealed class Comment {
 
-data class CommentEntity(
-    val totalAwards: Int,
+    abstract val name: String
+    abstract val depth: Int
 
-    val linkId: String,
+    data class CommentEntity(
+        val totalAwards: Int,
 
-    val replies: MutableList<Comment>,
+        val linkId: String,
 
-    val author: String,
+        val replies: MutableList<Comment>,
 
-    val score: String,
+        val author: String,
 
-    val awards: List<Award>,
+        val score: String,
 
-    val body: RedditText,
+        val awards: List<Award>,
 
-    val edited: Long,
+        val body: RedditText,
 
-    val isSubmitter: Boolean,
+        val edited: Long,
 
-    val stickied: Boolean,
+        val isSubmitter: Boolean,
 
-    val scoreHidden: Boolean,
+        val stickied: Boolean,
 
-    val permalink: String,
+        val scoreHidden: Boolean,
 
-    val id: String,
+        val permalink: String,
 
-    val created: Long,
+        val id: String,
 
-    val controversiality: Int,
+        val created: Long,
 
-    val flair: Flair,
+        val controversiality: Int,
 
-    val posterType: PosterType,
+        val flair: Flair,
 
-    val linkTitle: String?,
+        val posterType: PosterType,
 
-    val linkPermalink: String?,
+        val linkTitle: String?,
 
-    val linkAuthor: String?,
+        val linkPermalink: String?,
 
-    val subreddit: String,
+        val linkAuthor: String?,
 
-    val commentIndicator: Int?,
+        val subreddit: String,
 
-    override val name: String,
+        val commentIndicator: Int?,
 
-    override val depth: Int
-) : Comment {
-    var isExpanded: Boolean = false
+        override val name: String,
 
-    var visibleReplyCount: Int = replies.size
+        override val depth: Int
+    ) : Comment() {
+        var isExpanded: Boolean = false
 
-    val hasReplies: Boolean
-        get() = replies.isNotEmpty()
+        var visibleReplyCount: Int = replies.size
 
-    fun getTimeDifference(context: Context): String {
-        val timeDifference = DateUtil.getTimeDifference(context, created)
-        return if (edited > -1) {
-            val editedTimeDifference = DateUtil.getTimeDifference(context, edited, false)
-            context.getString(R.string.comment_date_edited, timeDifference, editedTimeDifference)
-        } else {
-            timeDifference
+        val hasReplies: Boolean
+            get() = replies.isNotEmpty()
+
+        fun getTimeDifference(context: Context): String {
+            val timeDifference = DateUtil.getTimeDifference(context, created)
+            return if (edited > -1) {
+                val editedTimeDifference = DateUtil.getTimeDifference(context, edited, false)
+                context.getString(R.string.comment_date_edited, timeDifference, editedTimeDifference)
+            } else {
+                timeDifference
+            }
         }
     }
-}
 
-data class MoreEntity(
-    var count: Int,
+    data class MoreEntity(
+        var count: Int,
 
-    val more: MutableList<String>,
+        val more: MutableList<String>,
 
-    val id: String,
+        val id: String,
 
-    val parent: String,
+        val parent: String,
 
-    override val name: String,
+        override val name: String,
 
-    override val depth: Int
-) : Comment {
-    var isLoading: Boolean = false
+        override val depth: Int
+    ) : Comment() {
+        var isLoading: Boolean = false
 
-    var isError: Boolean = false
-}
-
-fun Comment.getType(): CommentType = when (this) {
-    is CommentEntity -> CommentType.COMMENT
-    is MoreEntity -> CommentType.MORE
-    else -> throw IllegalArgumentException("Unknown type ${javaClass.simpleName}")
+        var isError: Boolean = false
+    }
 }

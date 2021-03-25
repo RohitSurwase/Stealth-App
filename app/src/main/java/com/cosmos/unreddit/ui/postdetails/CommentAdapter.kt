@@ -16,8 +16,8 @@ import androidx.recyclerview.widget.RecyclerView
 import com.cosmos.unreddit.R
 import com.cosmos.unreddit.data.local.mapper.CommentMapper
 import com.cosmos.unreddit.data.model.Comment
-import com.cosmos.unreddit.data.model.CommentEntity
-import com.cosmos.unreddit.data.model.MoreEntity
+import com.cosmos.unreddit.data.model.Comment.CommentEntity
+import com.cosmos.unreddit.data.model.Comment.MoreEntity
 import com.cosmos.unreddit.data.repository.PostListRepository
 import com.cosmos.unreddit.databinding.ItemCommentBinding
 import com.cosmos.unreddit.databinding.ItemMoreBinding

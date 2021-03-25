@@ -2,9 +2,9 @@ package com.cosmos.unreddit.data.local.mapper
 
 import com.cosmos.unreddit.data.model.Award
 import com.cosmos.unreddit.data.model.Comment
-import com.cosmos.unreddit.data.model.CommentEntity
+import com.cosmos.unreddit.data.model.Comment.CommentEntity
+import com.cosmos.unreddit.data.model.Comment.MoreEntity
 import com.cosmos.unreddit.data.model.Flair
-import com.cosmos.unreddit.data.model.MoreEntity
 import com.cosmos.unreddit.data.model.PosterType
 import com.cosmos.unreddit.data.remote.api.reddit.model.Child
 import com.cosmos.unreddit.data.remote.api.reddit.model.ChildType
