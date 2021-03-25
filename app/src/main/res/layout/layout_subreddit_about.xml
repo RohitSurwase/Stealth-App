@@ -6,7 +6,7 @@
     <data>
         <variable
             name="subreddit"
-            type="com.cosmos.unreddit.subreddit.SubredditEntity" />
+            type="com.cosmos.unreddit.data.model.db.SubredditEntity" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -29,7 +29,7 @@
             android:textAppearance="@style/TextAppearanceSubredditName"
             tools:text="Reddit"/>
 
-        <com.cosmos.unreddit.view.RedditView
+        <com.cosmos.unreddit.ui.common.widget.RedditView
             android:id="@+id/subreddit_public_description"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -112,7 +112,7 @@
             android:overScrollMode="never"
             android:scrollbars="none">
 
-            <com.cosmos.unreddit.view.RedditView
+            <com.cosmos.unreddit.ui.common.widget.RedditView
                 android:id="@+id/subreddit_description"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

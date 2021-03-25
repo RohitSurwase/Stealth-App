@@ -7,7 +7,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:background="@color/background">
 
-    <com.cosmos.unreddit.view.CardButton
+    <com.cosmos.unreddit.ui.common.widget.CardButton
         android:id="@+id/back_card"
         android:layout_width="@dimen/app_bar_button_size"
         android:layout_height="@dimen/app_bar_button_size"
@@ -33,7 +33,7 @@
         tools:visibility="visible"
         tools:text="query"/>
 
-    <com.cosmos.unreddit.view.SearchInputEditText
+    <com.cosmos.unreddit.ui.common.widget.SearchInputEditText
         android:id="@+id/search_input"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -48,7 +48,7 @@
         android:imeOptions="actionSearch"
         tools:visibility="gone"/>
 
-    <com.cosmos.unreddit.view.CardButton
+    <com.cosmos.unreddit.ui.common.widget.CardButton
         android:id="@+id/sort_card"
         android:layout_width="@dimen/app_bar_button_size"
         android:layout_height="@dimen/app_bar_button_size"
@@ -61,7 +61,7 @@
         android:visibility="gone"
         tools:visibility="visible"/>
 
-    <com.cosmos.unreddit.view.SortIconView
+    <com.cosmos.unreddit.ui.common.widget.SortIconView
         android:id="@+id/sort_icon"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -73,7 +73,7 @@
         android:visibility="gone"
         tools:visibility="visible"/>
 
-    <com.cosmos.unreddit.view.CardButton
+    <com.cosmos.unreddit.ui.common.widget.CardButton
         android:id="@+id/cancel_card"
         android:layout_width="@dimen/app_bar_button_size"
         android:layout_height="@dimen/app_bar_button_size"

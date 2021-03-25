@@ -8,7 +8,7 @@ import coil.ImageLoaderFactory
 import coil.decode.GifDecoder
 import coil.decode.ImageDecoderDecoder
 import coil.util.CoilUtils
-import com.cosmos.unreddit.repository.PreferencesRepository
+import com.cosmos.unreddit.data.repository.PreferencesRepository
 import dagger.hilt.android.HiltAndroidApp
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking

@@ -1,7 +1,7 @@
 package com.cosmos.unreddit.util
 
 import androidx.paging.PagingData
-import com.cosmos.unreddit.post.Sorting
+import com.cosmos.unreddit.data.model.Sorting
 import kotlinx.coroutines.flow.Flow
 
 abstract class PagerHelper<T : Any> {

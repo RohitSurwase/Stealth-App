@@ -8,7 +8,7 @@
         <import type="android.view.View"/>
         <variable
             name="post"
-            type="com.cosmos.unreddit.post.PostEntity" />
+            type="com.cosmos.unreddit.data.model.db.PostEntity" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -65,7 +65,7 @@
             android:text="@string/flair_oc"
             android:visibility="@{post.isOC ? View.VISIBLE : View.GONE}" />
 
-        <com.cosmos.unreddit.view.RedditFlairView
+        <com.cosmos.unreddit.ui.common.widget.RedditFlairView
             android:id="@+id/post_flair"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

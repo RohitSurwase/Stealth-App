@@ -9,7 +9,8 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.cosmos.unreddit.databinding.ItemListContentBinding
-import com.cosmos.unreddit.loadstate.NetworkLoadStateAdapter
+import com.cosmos.unreddit.ui.loadstate.NetworkLoadStateAdapter
+import com.cosmos.unreddit.util.extension.addLoadStateListener
 
 class RecyclerViewStateAdapter(val onError: () -> Unit) :
     ListAdapter<RecyclerViewStateAdapter.Page, RecyclerViewStateAdapter.ViewHolder>(COMPARATOR) {

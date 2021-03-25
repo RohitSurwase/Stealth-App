@@ -6,7 +6,7 @@
     <data>
         <variable
             name="user"
-            type="com.cosmos.unreddit.user.User" />
+            type="com.cosmos.unreddit.data.model.User" />
     </data>
 
     <com.google.android.material.card.MaterialCardView

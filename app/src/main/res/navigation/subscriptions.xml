@@ -11,7 +11,7 @@
 
     <fragment
         android:id="@+id/subscriptionsFragment"
-        android:name="com.cosmos.unreddit.subscriptions.SubscriptionsFragment"
+        android:name="com.cosmos.unreddit.ui.subscriptions.SubscriptionsFragment"
         tools:layout="@layout/fragment_subscriptions">
         <action
             android:id="@+id/search"
@@ -24,7 +24,7 @@
 
     <fragment
         android:id="@+id/searchFragment"
-        android:name="com.cosmos.unreddit.search.SearchFragment"
+        android:name="com.cosmos.unreddit.ui.search.SearchFragment"
         tools:layout="@layout/fragment_search">
         <argument
             android:name="query"
@@ -35,7 +35,7 @@
             app:destination="@id/viewer">
             <argument
                 android:name="images"
-                app:argType="com.cosmos.unreddit.model.GalleryMedia[]"/>
+                app:argType="com.cosmos.unreddit.data.model.GalleryMedia[]"/>
         </action>
 
         <action
@@ -46,7 +46,7 @@
                 app:argType="string"/>
             <argument
                 android:name="type"
-                app:argType="com.cosmos.unreddit.model.MediaType"/>
+                app:argType="com.cosmos.unreddit.data.model.MediaType"/>
         </action>
 
         <action

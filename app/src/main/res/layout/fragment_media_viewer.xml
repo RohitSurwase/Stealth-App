@@ -61,7 +61,7 @@
         android:visibility="invisible"
         tools:visibility="visible"/>
 
-    <com.cosmos.unreddit.view.InfoBarView
+    <com.cosmos.unreddit.ui.common.widget.InfoBarView
         android:id="@+id/info_retry"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -75,7 +75,7 @@
         android:visibility="gone"
         tools:visibility="visible"/>
 
-    <com.cosmos.unreddit.view.CradleView
+    <com.cosmos.unreddit.ui.common.widget.CradleView
         android:id="@+id/loading_cradle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

@@ -7,7 +7,7 @@
     <data>
         <variable
             name="post"
-            type="com.cosmos.unreddit.post.PostEntity" />
+            type="com.cosmos.unreddit.data.model.db.PostEntity" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout

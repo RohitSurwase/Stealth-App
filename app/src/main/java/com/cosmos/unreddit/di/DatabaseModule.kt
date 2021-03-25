@@ -2,7 +2,7 @@ package com.cosmos.unreddit.di
 
 import android.content.Context
 import androidx.room.Room
-import com.cosmos.unreddit.database.RedditDatabase
+import com.cosmos.unreddit.data.local.RedditDatabase
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

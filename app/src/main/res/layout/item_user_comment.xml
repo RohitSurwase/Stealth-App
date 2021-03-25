@@ -6,7 +6,7 @@
     <data>
         <variable
             name="comment"
-            type="com.cosmos.unreddit.post.CommentEntity" />
+            type="com.cosmos.unreddit.data.model.CommentEntity" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout

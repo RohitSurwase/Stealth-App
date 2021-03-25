@@ -12,7 +12,7 @@
         app:shutter_background_color="@color/background"
         app:controller_layout_id="@layout/layout_exoplayer_controls"/>
 
-    <com.cosmos.unreddit.view.InfoBarView
+    <com.cosmos.unreddit.ui.common.widget.InfoBarView
         android:id="@+id/info_retry"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

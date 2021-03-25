@@ -10,7 +10,7 @@ import androidx.navigation.NavController
 import androidx.transition.Slide
 import androidx.transition.TransitionManager
 import com.cosmos.unreddit.databinding.ActivityMainBinding
-import com.cosmos.unreddit.util.setupWithNavController
+import com.cosmos.unreddit.util.extension.setupWithNavController
 import com.google.android.material.shape.CornerFamily
 import com.google.android.material.shape.MaterialShapeDrawable
 import dagger.hilt.android.AndroidEntryPoint

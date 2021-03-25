@@ -7,7 +7,7 @@
     <data>
         <variable
             name="subreddit"
-            type="com.cosmos.unreddit.subreddit.SubredditEntity" />
+            type="com.cosmos.unreddit.data.model.db.SubredditEntity" />
     </data>
 
     <androidx.constraintlayout.motion.widget.MotionLayout
@@ -65,7 +65,7 @@
             app:layout_constrainedWidth="true"
             tools:text="Title"/>
 
-        <com.cosmos.unreddit.view.CardButton
+        <com.cosmos.unreddit.ui.common.widget.CardButton
             android:id="@+id/back_card"
             android:layout_width="@dimen/app_bar_button_size"
             android:layout_height="@dimen/app_bar_button_size"
@@ -76,7 +76,7 @@
             app:icon="@drawable/ic_arrow_back"
             style="@style/CardButtonStyle"/>
 
-        <com.cosmos.unreddit.view.CardButton
+        <com.cosmos.unreddit.ui.common.widget.CardButton
             android:id="@+id/search_card"
             android:layout_width="@dimen/app_bar_button_size"
             android:layout_height="@dimen/app_bar_button_size"
@@ -87,7 +87,7 @@
             app:icon="@drawable/ic_search"
             style="@style/CardButtonStyle"/>
 
-        <com.cosmos.unreddit.view.CardButton
+        <com.cosmos.unreddit.ui.common.widget.CardButton
             android:id="@+id/sort_card"
             android:layout_width="@dimen/app_bar_button_size"
             android:layout_height="@dimen/app_bar_button_size"
@@ -98,7 +98,7 @@
             app:icon="@drawable/ic_sort"
             style="@style/CardButtonStyle"/>
 
-        <com.cosmos.unreddit.view.SortIconView
+        <com.cosmos.unreddit.ui.common.widget.SortIconView
             android:id="@+id/sort_icon"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

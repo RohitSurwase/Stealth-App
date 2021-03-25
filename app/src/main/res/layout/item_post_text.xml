@@ -56,7 +56,7 @@
         app:cardCornerRadius="@dimen/post_text_card_radius"
         app:cardElevation="@dimen/post_elevation">
 
-        <com.cosmos.unreddit.view.RedditTextView
+        <com.cosmos.unreddit.ui.common.widget.RedditTextView
             android:id="@+id/text_post_self"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
@@ -64,7 +64,7 @@
 
     </com.google.android.material.card.MaterialCardView>
 
-    <com.cosmos.unreddit.view.AwardView
+    <com.cosmos.unreddit.ui.common.widget.AwardView
         android:id="@+id/awards"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

@@ -16,7 +16,7 @@
         android:textAppearance="@style/TextAppearanceAppBarLabel"
         android:text="@string/fragment_subscriptions_label"/>
 
-    <com.cosmos.unreddit.view.SearchInputEditText
+    <com.cosmos.unreddit.ui.common.widget.SearchInputEditText
         android:id="@+id/search_input"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -31,7 +31,7 @@
         android:imeOptions="actionSearch"
         android:visibility="gone"/>
 
-    <com.cosmos.unreddit.view.CardButton
+    <com.cosmos.unreddit.ui.common.widget.CardButton
         android:id="@+id/search_card"
         android:layout_width="@dimen/app_bar_button_size"
         android:layout_height="@dimen/app_bar_button_size"
@@ -42,7 +42,7 @@
         app:icon="@drawable/ic_search"
         style="@style/CardButtonStyle" />
 
-    <com.cosmos.unreddit.view.CardButton
+    <com.cosmos.unreddit.ui.common.widget.CardButton
         android:id="@+id/cancel_card"
         android:layout_width="@dimen/app_bar_button_size"
         android:layout_height="@dimen/app_bar_button_size"

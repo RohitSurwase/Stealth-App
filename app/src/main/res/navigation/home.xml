@@ -12,14 +12,14 @@
 
     <fragment
         android:id="@+id/postListFragment"
-        android:name="com.cosmos.unreddit.postlist.PostListFragment"
+        android:name="com.cosmos.unreddit.ui.postlist.PostListFragment"
         tools:layout="@layout/fragment_post">
         <action
             android:id="@+id/openGallery"
             app:destination="@id/viewer">
             <argument
                 android:name="images"
-                app:argType="com.cosmos.unreddit.model.GalleryMedia[]"/>
+                app:argType="com.cosmos.unreddit.data.model.GalleryMedia[]"/>
         </action>
 
         <action
@@ -30,7 +30,7 @@
                 app:argType="string"/>
             <argument
                 android:name="type"
-                app:argType="com.cosmos.unreddit.model.MediaType"/>
+                app:argType="com.cosmos.unreddit.data.model.MediaType"/>
         </action>
 
         <action

@@ -1,7 +1,7 @@
 package com.cosmos.unreddit.util
 
-import com.cosmos.unreddit.api.imgur.pojo.Image
-import com.cosmos.unreddit.model.MediaType
+import com.cosmos.unreddit.data.model.MediaType
+import com.cosmos.unreddit.data.remote.api.imgur.model.Image
 import okhttp3.HttpUrl
 
 object LinkUtil {

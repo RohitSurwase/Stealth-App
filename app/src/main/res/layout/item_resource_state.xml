@@ -24,7 +24,7 @@
         style="@style/ButtonStyle"
         android:text="@string/network_retry_action"/>
 
-    <com.cosmos.unreddit.view.CradleView
+    <com.cosmos.unreddit.ui.common.widget.CradleView
         android:id="@+id/loading_cradle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

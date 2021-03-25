@@ -6,7 +6,7 @@
     <data>
         <variable
             name="more"
-            type="com.cosmos.unreddit.post.MoreEntity" />
+            type="com.cosmos.unreddit.data.model.MoreEntity" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout

@@ -6,7 +6,7 @@
     <data>
         <variable
             name="credit"
-            type="com.cosmos.unreddit.model.CreditItem.Credit" />
+            type="com.cosmos.unreddit.data.model.CreditItem.Credit" />
     </data>
 
     <com.google.android.material.card.MaterialCardView

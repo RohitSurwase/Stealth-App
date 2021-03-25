@@ -6,10 +6,10 @@
 
     <data>
         <import type="android.view.View"/>
-        <import type="com.cosmos.unreddit.sort.SortFragment.SortType"/>
+        <import type="com.cosmos.unreddit.ui.sort.SortFragment.SortType"/>
         <variable
             name="type"
-            type="com.cosmos.unreddit.sort.SortFragment.SortType" />
+            type="com.cosmos.unreddit.ui.sort.SortFragment.SortType" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout

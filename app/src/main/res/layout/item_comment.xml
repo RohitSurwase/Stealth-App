@@ -7,7 +7,7 @@
         <import type="android.view.View"/>
         <variable
             name="comment"
-            type="com.cosmos.unreddit.post.CommentEntity" />
+            type="com.cosmos.unreddit.data.model.CommentEntity" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -68,7 +68,7 @@
             android:textAppearance="@style/TextAppearanceCommentControversiality"
             android:visibility="@{comment.controversiality > 0 ? View.VISIBLE : View.GONE}"/>
 
-        <com.cosmos.unreddit.view.AwardView
+        <com.cosmos.unreddit.ui.common.widget.AwardView
             android:id="@+id/comment_awards"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -105,7 +105,7 @@
             android:visibility="gone"
             tools:visibility="visible"/>
 
-        <com.cosmos.unreddit.view.RedditFlairView
+        <com.cosmos.unreddit.ui.common.widget.RedditFlairView
             android:id="@+id/comment_flair"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -146,7 +146,7 @@
             tools:text="5"
             tools:ignore="RtlSymmetry" />
 
-        <com.cosmos.unreddit.view.RedditView
+        <com.cosmos.unreddit.ui.common.widget.RedditView
             android:id="@+id/comment_body"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

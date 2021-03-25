@@ -5,7 +5,7 @@
     android:layout_height="?attr/actionBarSize"
     android:background="@color/background">
 
-    <com.cosmos.unreddit.view.CardButton
+    <com.cosmos.unreddit.ui.common.widget.CardButton
         android:id="@+id/back_card"
         android:layout_width="@dimen/app_bar_button_size"
         android:layout_height="@dimen/app_bar_button_size"

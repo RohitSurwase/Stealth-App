@@ -73,7 +73,7 @@
         android:layout_marginTop="@dimen/post_margin_top_large"
         layout="@layout/include_post_flairs"/>
 
-    <com.cosmos.unreddit.view.AwardView
+    <com.cosmos.unreddit.ui.common.widget.AwardView
         android:id="@+id/awards"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

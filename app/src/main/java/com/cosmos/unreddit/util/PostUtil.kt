@@ -6,8 +6,8 @@ import androidx.core.content.ContextCompat
 import androidx.paging.PagingData
 import androidx.paging.filter
 import androidx.paging.map
-import com.cosmos.unreddit.post.PostEntity
-import com.cosmos.unreddit.preferences.ContentPreferences
+import com.cosmos.unreddit.data.model.db.PostEntity
+import com.cosmos.unreddit.data.model.preferences.ContentPreferences
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 

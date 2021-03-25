@@ -7,11 +7,11 @@
 
     <fragment
         android:id="@+id/mediaViewerFragment"
-        android:name="com.cosmos.unreddit.mediaviewer.MediaViewerFragment"
+        android:name="com.cosmos.unreddit.ui.mediaviewer.MediaViewerFragment"
         tools:layout="@layout/fragment_media_viewer">
         <argument
             android:name="images"
-            app:argType="com.cosmos.unreddit.model.GalleryMedia[]"
+            app:argType="com.cosmos.unreddit.data.model.GalleryMedia[]"
             app:nullable="true"
             android:defaultValue="@null"/>
         <argument
@@ -21,7 +21,7 @@
             android:defaultValue="@null"/>
         <argument
             android:name="type"
-            app:argType="com.cosmos.unreddit.model.MediaType"
+            app:argType="com.cosmos.unreddit.data.model.MediaType"
             android:defaultValue="NO_MEDIA"/>
     </fragment>
 
@@ -30,7 +30,7 @@
         app:destination="@id/viewer">
         <argument
             android:name="images"
-            app:argType="com.cosmos.unreddit.model.GalleryMedia[]"/>
+            app:argType="com.cosmos.unreddit.data.model.GalleryMedia[]"/>
     </action>
 
     <action
@@ -41,7 +41,7 @@
             app:argType="string"/>
         <argument
             android:name="type"
-            app:argType="com.cosmos.unreddit.model.MediaType"/>
+            app:argType="com.cosmos.unreddit.data.model.MediaType"/>
     </action>
 
 </navigation>

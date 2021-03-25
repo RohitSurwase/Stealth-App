@@ -7,7 +7,7 @@
 
     <fragment
         android:id="@+id/preferencesFragment"
-        android:name="com.cosmos.unreddit.preferences.PreferencesFragment">
+        android:name="com.cosmos.unreddit.ui.preferences.PreferencesFragment">
         <action
             android:id="@+id/openAbout"
             app:destination="@id/aboutFragment"/>
@@ -15,7 +15,7 @@
 
     <fragment
         android:id="@+id/aboutFragment"
-        android:name="com.cosmos.unreddit.about.AboutFragment"
+        android:name="com.cosmos.unreddit.ui.about.AboutFragment"
         tools:layout="@layout/fragment_about"/>
 
 </navigation>
