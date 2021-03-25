@@ -7,10 +7,9 @@ import android.widget.HorizontalScrollView
 import androidx.annotation.ColorInt
 import androidx.appcompat.widget.LinearLayoutCompat
 import androidx.core.view.children
+import com.cosmos.unreddit.data.model.Block.*
 import com.cosmos.unreddit.data.model.HtmlBlock
 import com.cosmos.unreddit.data.model.RedditText
-import com.cosmos.unreddit.data.model.TableBlock
-import com.cosmos.unreddit.data.model.TextBlock
 import com.cosmos.unreddit.util.ClickableMovementMethod
 
 class RedditView @JvmOverloads constructor(

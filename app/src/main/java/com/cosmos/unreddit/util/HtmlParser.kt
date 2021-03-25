@@ -2,10 +2,9 @@ package com.cosmos.unreddit.util
 
 import android.view.Gravity
 import androidx.core.text.HtmlCompat
+import com.cosmos.unreddit.data.model.Block.*
 import com.cosmos.unreddit.data.model.HtmlBlock
 import com.cosmos.unreddit.data.model.RedditText
-import com.cosmos.unreddit.data.model.TableBlock
-import com.cosmos.unreddit.data.model.TextBlock
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.jsoup.Jsoup

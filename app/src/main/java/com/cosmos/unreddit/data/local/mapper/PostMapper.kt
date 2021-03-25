@@ -1,10 +1,10 @@
 package com.cosmos.unreddit.data.local.mapper
 
 import com.cosmos.unreddit.data.model.Award
+import com.cosmos.unreddit.data.model.Block.TextBlock
 import com.cosmos.unreddit.data.model.Flair
 import com.cosmos.unreddit.data.model.PosterType
 import com.cosmos.unreddit.data.model.Sorting
-import com.cosmos.unreddit.data.model.TextBlock
 import com.cosmos.unreddit.data.model.db.PostEntity
 import com.cosmos.unreddit.data.remote.api.reddit.RedditApi
 import com.cosmos.unreddit.data.remote.api.reddit.model.Child
