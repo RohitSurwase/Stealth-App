@@ -1,3 +1,145 @@
 <resources>
-    <string name="app_name">unReddit</string>
+    <string name="app_name">Stealth</string>
+    <string name="app_description">An account-free, privacy-oriented, feature-rich Reddit client</string>
+
+    <string name="post_ratio">%1$d%%</string>
+
+    <string name="time_difference_now">now</string>
+    <string name="time_difference_minute">%1$dm ago</string>
+    <string name="time_difference_hour">%1$dh ago</string>
+    <string name="time_difference_day">%1$dd ago</string>
+    <string name="time_difference_year">%1$dy ago</string>
+
+    <string name="time_difference_minute_short">%1$dm</string>
+    <string name="time_difference_hour_short">%1$dh</string>
+    <string name="time_difference_day_short">%1$dd</string>
+    <string name="time_difference_year_short">%1$dy</string>
+
+    <string name="award_count">x%1$d</string>
+
+    <string name="tab_user_comments">Comments</string>
+    <string name="tab_user_submitted">Submitted</string>
+    <string name="tab_user_gilded">Gilded</string>
+
+    <string name="sort_time_hour">Now</string>
+    <string name="sort_time_day">Today</string>
+    <string name="sort_time_week">This Week</string>
+    <string name="sort_time_month">This Month</string>
+    <string name="sort_time_year">This Year</string>
+    <string name="sort_time_all">All Time</string>
+
+    <string name="sort_time_hour_short">Now</string>
+    <string name="sort_time_day_short">Day</string>
+    <string name="sort_time_week_short">Week</string>
+    <string name="sort_time_month_short">Month</string>
+    <string name="sort_time_year_short">Year</string>
+    <string name="sort_time_all_short">All</string>
+
+    <string name="sort_title">Sort</string>
+    <string name="sort_time_title">Time</string>
+
+    <string name="sort_hot">Hot</string>
+    <string name="sort_new">New</string>
+    <string name="sort_top">Top</string>
+    <string name="sort_rising">Rising</string>
+    <string name="sort_controversial">Controversial</string>
+    <string name="sort_relevance">Relevance</string>
+    <string name="sort_comments">Comments</string>
+    <string name="sort_best">Best</string>
+    <string name="sort_old">Old</string>
+    <string name="sort_qa">Q&amp;A</string>
+
+    <string name="fragment_subscriptions_label">Subscriptions</string>
+    <string name="subscriptions_search_hint">Search through Reddit</string>
+
+    <string name="search_hint">Search through Reddit</string>
+    <string name="search_hint_subreddit">Search in %1$s</string>
+
+    <string name="fragment_preferences_label">Preferences</string>
+
+    <string name="tab_search_post">Posts</string>
+    <string name="tab_search_subreddit">Subreddits</string>
+    <string name="tab_search_user">Users</string>
+
+    <string name="subreddit_button_unsubscribe">Unsubscribe</string>
+    <string name="subreddit_button_subscribe">Subscribe</string>
+    <string name="subreddit_subscribers">Subscribers</string>
+    <string name="subreddit_active_users">Online</string>
+
+    <string name="user_post_karma">Post Karma</string>
+    <string name="user_comment_karma">Comment Karma</string>
+    <string name="user_cake_day">Cake Day</string>
+
+    <string name="flair_nsfw">NSFW</string>
+    <string name="flair_spoiler">Spoiler</string>
+    <string name="flair_oc">OC</string>
+
+    <string name="comment_score">%1$s pts</string>
+    <string name="comment_more">More (%1$d)</string>
+    <string name="comment_more_error">Error loading more comments. Tap to retry.</string>
+    <string name="comment_date_edited">%1$s* (%2$s)</string>
+    <string name="comment_controversiality">✝</string>
+    <string name="comment_op">OP</string>
+
+    <string name="comment_link_info">%1$s - u/%2$s</string>
+
+    <string name="media_page_counter_label">of</string>
+
+    <string name="reddit_user_prefixed">u/%1$s</string>
+
+    <string name="menu_open_link">Open Externally</string>
+    <string name="menu_share_link">Share Link</string>
+    <string name="menu_copy_link">Copy Link</string>
+    <string name="menu_share_post">Share Post</string>
+
+    <string name="post_load_discussion">View Entire Discussion</string>
+
+    <string name="network_retry_message">Something went wrong</string>
+    <string name="network_retry_action">Retry</string>
+
+    <string name="dialog_subreddit_not_found_title">Subreddit not found</string>
+    <string name="dialog_subreddit_not_found_body">This subreddit does not exist or may have been banned.</string>
+    <string name="dialog_ok">OK</string>
+    <string name="dialog_subreddit_unauthorized_title">Subreddit is private</string>
+    <string name="dialog_subreddit_unauthorized_body">You do not have access to this subreddit.</string>
+
+    <string name="dialog_user_not_found_title">User not found</string>
+    <string name="dialog_user_not_found_body">This user does not exist.</string>
+    <string name="dialog_user_unauthorized_title">User is suspended</string>
+    <string name="dialog_user_unauthorized_body">This user has been suspended.</string>
+
+    <string name="dialog_media_not_found_title">Media not found</string>
+    <string name="dialog_media_not_found_body">This image or video you are looking for does not exist or may have been removed.</string>
+
+    <string name="dialog_night_mode_title">Theme</string>
+
+    <string name="dialog_credit_show_website">Show Website</string>
+    <string name="dialog_credit_show_license">Show License</string>
+
+    <string name="empty_data">Nothing to see here…</string>
+    <string name="empty_data_subscriptions">You have no subscriptions yet.\nUse the search feature to look for Subreddits.</string>
+
+    <string name="preference_category_ui">UI</string>
+    <string name="preference_category_content">CONTENT</string>
+    <string name="preference_category_misc">MISC.</string>
+
+    <string name="preference_night_mode">Theme</string>
+    <string name="preference_night_mode_light">Light Theme</string>
+    <string name="preference_night_mode_dark">Dark Theme</string>
+    <string name="preference_night_mode_system">Follow System</string>
+
+    <string name="preference_show_nsfw">Show NSFW content</string>
+    <string name="preference_show_nsfw_preview">Show NSFW preview</string>
+    <string name="preference_show_spoiler_preview">Show Spoiler preview</string>
+
+    <string name="preference_about">About</string>
+
+    <string name="fragment_about_label">About</string>
+
+    <string name="about_section_credits">Credits</string>
+    <string name="about_section_libraries">Libraries</string>
+
+    <string name="navigation_label_home">Home</string>
+    <string name="navigation_label_subscriptions">Subscriptions</string>
+    <string name="navigation_label_settings">Preferences</string>
 </resources>

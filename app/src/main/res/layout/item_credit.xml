@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <data>
+        <variable
+            name="credit"
+            type="com.cosmos.unreddit.data.model.CreditItem.Credit" />
+    </data>
+
+    <com.google.android.material.card.MaterialCardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        style="@style/CreditCardStyle">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:padding="@dimen/subscriptions_padding"
+            android:background="@drawable/card_background">
+
+            <TextView
+                android:id="@+id/credit_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                android:textAppearance="@style/TextAppearanceCreditTitle"
+                android:text="@{credit.title}"
+                tools:text="Title"/>
+
+            <TextView
+                android:id="@+id/credit_author"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="@id/credit_title"
+                app:layout_constraintBottom_toBottomOf="@id/credit_title"
+                android:textColor="@null"
+                android:textAppearance="@style/TextAppearanceCreditAuthor"
+                android:text="@{credit.author}"
+                tools:text="Author"/>
+
+            <TextView
+                android:id="@+id/credit_description"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/credit_title"
+                android:layout_marginTop="4dp"
+                android:textColor="@null"
+                android:textAppearance="@style/TextAppearanceCreditDescription"
+                android:text="@{credit.description}"
+                tools:text="A description"/>
+
+            <TextView
+                android:id="@+id/credit_license"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/credit_description"
+                android:layout_marginTop="8dp"
+                android:textAppearance="@style/TextAppearanceCreditLicense"
+                android:text="@{credit.license.license}"
+                tools:text="Apache License 2.0"/>
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </com.google.android.material.card.MaterialCardView>
+
+</layout>

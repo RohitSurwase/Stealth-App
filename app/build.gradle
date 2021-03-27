@@ -1,6 +1,14 @@
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-parcelize'
 apply plugin: 'kotlin-kapt'
+apply plugin: 'dagger.hilt.android.plugin'
+apply plugin: "androidx.navigation.safeargs.kotlin"
+
+def keystorePropertiesFile = rootProject.file("keystore.properties")
+def keystoreProperties = new Properties()
+
+keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
 
 android {
     compileSdkVersion 29
@@ -10,17 +18,28 @@ android {
         minSdkVersion 21
         targetSdkVersion 29
         versionCode 1
-        versionName "1.0"
+        versionName "0.1.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
         vectorDrawables.useSupportLibrary = true
     }
 
+    signingConfigs {
+        release {
+            keyAlias keystoreProperties['keyAlias']
+            keyPassword keystoreProperties['keyPassword']
+            storeFile file(keystoreProperties['storeFile'])
+            storePassword keystoreProperties['storePassword']
+        }
+    }
+
     buildTypes {
         release {
-            minifyEnabled false
+            minifyEnabled true
+            shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.release
         }
     }
 
@@ -44,9 +63,50 @@ dependencies {
 
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$rootProject.kotlin"
 
+    implementation "com.google.dagger:hilt-android:$rootProject.hiltGradlePlugin"
+    kapt "com.google.dagger:hilt-android-compiler:$rootProject.hiltGradlePlugin"
+    kapt "androidx.hilt:hilt-compiler:$rootProject.hilt"
+
+    implementation "androidx.hilt:hilt-navigation-fragment:$rootProject.hilt"
+
     implementation "androidx.core:core-ktx:$rootProject.core"
     implementation "androidx.appcompat:appcompat:$rootProject.appCompat"
     implementation "androidx.constraintlayout:constraintlayout:$rootProject.constraintLayout"
+    implementation "androidx.recyclerview:recyclerview:$rootProject.recyclerview"
+    implementation "androidx.fragment:fragment-ktx:$rootProject.fragment"
+    implementation "androidx.lifecycle:lifecycle-livedata-ktx:$rootProject.lifecycle"
+    implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$rootProject.lifecycle"
+    implementation "androidx.coordinatorlayout:coordinatorlayout:$rootProject.coordinatorlayout"
+    implementation "androidx.viewpager2:viewpager2:$rootProject.viewpager2"
+    implementation "androidx.preference:preference-ktx:$rootProject.preference"
+
+    implementation "androidx.navigation:navigation-fragment-ktx:$rootProject.navigation"
+    implementation "androidx.navigation:navigation-ui-ktx:$rootProject.navigation"
+
+    implementation "androidx.room:room-runtime:$rootProject.room"
+    kapt "androidx.room:room-compiler:$rootProject.room"
+    implementation "androidx.room:room-ktx:$rootProject.room"
+    implementation "androidx.datastore:datastore-preferences:$rootProject.datastore"
+
+    implementation "androidx.paging:paging-runtime-ktx:$rootProject.paging"
+
+    implementation "com.google.android.material:material:$rootProject.material"
+
+    implementation "com.squareup.retrofit2:retrofit:$rootProject.retrofit"
+    implementation "com.squareup.retrofit2:converter-moshi:$rootProject.retrofit"
+
+    implementation "com.squareup.moshi:moshi:$rootProject.moshi"
+    kapt "com.squareup.moshi:moshi-kotlin-codegen:$rootProject.moshi"
+    implementation("com.squareup.moshi:moshi-adapters:$rootProject.moshi")
+
+    implementation "io.coil-kt:coil:$rootProject.coil"
+    implementation "io.coil-kt:coil-gif:$rootProject.coil"
+
+    implementation "com.github.MikeOrtiz:TouchImageView:$rootProject.touchImageView"
+
+    implementation "com.google.android.exoplayer:exoplayer:$rootProject.exoPlayer"
+
+    implementation "org.jsoup:jsoup:$rootProject.jsoup"
 
     testImplementation "junit:junit:$rootProject.jUnit"
 

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_enabled="false">
+        <shape>
+            <solid android:color="@color/switch_track_disabled_color"/>
+            <corners android:radius="@dimen/switch_track_radius"/>
+        </shape>
+    </item>
+    <item android:state_checked="true">
+        <shape>
+            <solid android:color="@color/switch_track_checked_color"/>
+            <corners android:radius="@dimen/switch_track_radius"/>
+        </shape>
+    </item>
+    <item android:state_checked="false">
+        <shape>
+            <solid android:color="@color/switch_track_unchecked_color"/>
+            <corners android:radius="@dimen/switch_track_radius"/>
+        </shape>
+    </item>
+</selector>

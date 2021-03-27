@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <data>
+        <variable
+            name="more"
+            type="com.cosmos.unreddit.data.model.Comment.MoreEntity" />
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingHorizontal="@dimen/comment_padding_horizontal"
+        android:paddingVertical="@dimen/comment_padding_vertical">
+
+        <TextView
+            android:id="@+id/comment_body"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/progress"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintHorizontal_bias="0"
+            app:layout_constraintHorizontal_chainStyle="packed"
+            android:textColor="@null"
+            android:textAppearance="@style/TextAppearanceCommentMore"
+            android:text="@{@string/comment_more(more.count)}"
+            tools:text="More (256)"/>
+
+        <ProgressBar
+            android:id="@+id/progress"
+            style="?android:attr/progressBarStyle"
+            android:layout_width="24dp"
+            android:layout_height="0dp"
+            app:layout_constraintStart_toEndOf="@id/comment_body"
+            app:layout_constraintTop_toTopOf="@id/comment_body"
+            app:layout_constraintBottom_toBottomOf="@id/comment_body"
+            android:layout_marginStart="4dp"
+            android:indeterminate="true"/>
+
+        <TextView
+            android:id="@+id/text_error"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toEndOf="@id/progress"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@id/comment_body"
+            app:layout_constraintBottom_toBottomOf="@id/comment_body"
+            android:layout_marginStart="4dp"
+            android:textColor="@null"
+            android:textAppearance="@style/TextAppearanceCommentMore"
+            android:text="@string/comment_more_error"/>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</layout>

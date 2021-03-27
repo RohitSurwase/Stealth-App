@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginHorizontal="@dimen/post_margin_horizontal"
+    android:layout_marginVertical="@dimen/post_margin_vertical">
+
+    <include
+        android:id="@id/include_post_info"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/text_post_title"
+        layout="@layout/include_post_info"/>
+
+    <TextView
+        android:id="@+id/text_post_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textAppearance="@style/TextAppearancePostTitle"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/include_post_info"
+        app:layout_constraintBottom_toTopOf="@id/include_post_flairs"
+        android:layout_marginHorizontal="@dimen/post_title_margin"
+        android:layout_marginTop="@dimen/post_margin_top_small"
+        tools:text="This is a post" />
+
+    <include
+        android:id="@+id/include_post_flairs"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/text_post_title"
+        app:layout_constraintBottom_toTopOf="@id/text_post_self_card"
+        android:layout_marginTop="@dimen/post_margin_top_small"
+        layout="@layout/include_post_flairs"/>
+
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/text_post_self_card"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/include_post_flairs"
+        app:layout_constraintBottom_toTopOf="@id/awards"
+        app:layout_constraintHeight_max="@dimen/post_text_max_height"
+        android:layout_marginHorizontal="@dimen/post_content_margin_horizontal"
+        android:layout_marginTop="@dimen/post_margin_top_large"
+        app:cardCornerRadius="@dimen/post_text_card_radius"
+        app:cardElevation="@dimen/post_elevation">
+
+        <com.cosmos.unreddit.ui.common.widget.RedditTextView
+            android:id="@+id/text_post_self"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:padding="@dimen/post_text_padding" />
+
+    </com.google.android.material.card.MaterialCardView>
+
+    <com.cosmos.unreddit.ui.common.widget.AwardView
+        android:id="@+id/awards"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@id/text_post_self_card"
+        app:layout_constraintBottom_toTopOf="@id/include_post_metrics"
+        app:layout_constraintStart_toStartOf="parent"
+        android:layout_marginStart="@dimen/post_margin_top_small"
+        android:layout_marginTop="@dimen/post_margin_top_large"
+        android:paddingVertical="@dimen/award_chip_padding_vertical_post"
+        android:paddingHorizontal="@dimen/award_chip_padding_horizontal_post"
+        app:textStyle="@style/TextAppearanceAwardPost"/>
+
+    <include
+        android:id="@+id/include_post_metrics"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        layout="@layout/include_post_metrics"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/awards"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_marginTop="@dimen/post_margin_top_small"/>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

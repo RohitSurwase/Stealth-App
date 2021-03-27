@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.cosmos.unreddit.ui.common.ElasticDragDismissFrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    app:dragDismissDistance="@dimen/post_details_dismiss_distance"
+    app:dragDismissScale="@dimen/post_details_dismiss_scale"
+    app:cardCornerRadius="0dp"
+    app:cardElevation="0dp"
+    app:cardBackgroundColor="@color/background">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <FrameLayout
+            android:id="@+id/single_thread_layout"
+            android:layout_width="match_parent"
+            android:layout_height="32dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/app_bar"
+            android:background="@color/colorPrimaryLight">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:textColor="@android:color/white"
+                android:text="@string/post_load_discussion"/>
+
+        </FrameLayout>
+
+        <include
+            android:id="@+id/app_bar"
+            layout="@layout/layout_appbar_post"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"/>
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/list_comments"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/single_thread_layout"
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:overScrollMode="never"
+            android:scrollbars="none"/>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</com.cosmos.unreddit.ui.common.ElasticDragDismissFrameLayout>

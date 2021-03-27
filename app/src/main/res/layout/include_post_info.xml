@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <data>
+        <import type="com.cosmos.unreddit.util.DateUtil"/>
+        <import type="android.graphics.Color"/>
+        <variable
+            name="post"
+            type="com.cosmos.unreddit.data.model.db.PostEntity" />
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingHorizontal="@dimen/post_padding_horizontal">
+
+        <TextView
+            android:id="@+id/text_post_author"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            android:textAppearance="@style/TextAppearancePostAuthor"
+            android:text="@{post.author}"
+            android:textColor="@color/colorPrimary"
+            tools:text="author"/>
+
+        <com.cosmos.unreddit.ui.common.widget.RedditFlairView
+            android:id="@+id/post_flair"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toEndOf="@id/text_post_author"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@id/text_post_author"
+            app:layout_constraintBottom_toBottomOf="@id/text_post_author"
+            app:layout_constrainedWidth="true"
+            app:layout_constraintHorizontal_bias="0"
+            android:layout_marginStart="4dp"
+            android:paddingHorizontal="@dimen/post_flair_padding"
+            android:background="@drawable/post_flair_background"
+            android:visibility="gone"/>
+
+        <TextView
+            android:id="@+id/text_subreddit"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/text_post_author"
+            android:textColor="@null"
+            android:textAppearance="@style/TextAppearancePostInfo"
+            android:text="@{post.subreddit}"
+            tools:text="/r/reddit" />
+
+        <TextView
+            android:id="@+id/text_post_date"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toBottomOf="@id/text_subreddit"
+            android:textColor="@null"
+            android:textAppearance="@style/TextAppearancePostInfo"
+            android:text="@{DateUtil.getTimeDifference(context, post.created)}"
+            tools:text="5h"/>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>

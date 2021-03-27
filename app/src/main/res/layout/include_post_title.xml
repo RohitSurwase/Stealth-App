@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <data>
+        <import type="com.cosmos.unreddit.util.DateUtil"/>
+        <import type="android.graphics.Color"/>
+        <variable
+            name="post"
+            type="com.cosmos.unreddit.data.model.db.PostEntity" />
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingHorizontal="16dp">
+
+        <!-- TODO: Color for seen posts -->
+        <TextView
+            android:id="@+id/text_post_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@{post.title}"
+            android:textAppearance="@style/TextAppearance.AppCompat.Title"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            android:textColor='@{post.seen ? Color.parseColor("#7F7F7F") : Color.parseColor("#000000")}'
+            tools:text="This is a post" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>

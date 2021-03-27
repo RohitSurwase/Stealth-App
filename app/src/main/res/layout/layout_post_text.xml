@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <include
+        android:id="@+id/include_post_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        layout="@layout/include_post_title"
+        android:layout_margin="8dp"/>
+
+    <TextView
+        android:id="@+id/text_post_self"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/include_post_title"
+        android:layout_margin="8dp"
+        android:maxHeight="200dp"
+        android:ellipsize="end"
+        tools:text="@tools:sample/lorem/random"/>
+
+    <include
+        android:id="@+id/include_post_info"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        layout="@layout/include_post_metrics"
+        android:layout_below="@id/text_post_self"
+        android:layout_margin="8dp"/>
+</RelativeLayout>

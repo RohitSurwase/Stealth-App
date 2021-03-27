@@ -6,13 +6,28 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Hello World!"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+    <androidx.coordinatorlayout.widget.CoordinatorLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <androidx.fragment.app.FragmentContainerView
+            android:id="@+id/fragment_container"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            tools:layout="@layout/fragment_post"/>
+
+        <com.google.android.material.bottomnavigation.BottomNavigationView
+            android:id="@+id/bottom_navigation"
+            android:layout_width="@dimen/bottom_navigation_size"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="@dimen/bottom_navigation_margin"
+            app:elevation="@dimen/bottom_navigation_elevation"
+            app:itemIconTint="@drawable/navigation_color_selector"
+            app:labelVisibilityMode="selected"
+            android:layout_gravity="bottom|center"
+            app:menu="@menu/navigation_menu"
+            app:layout_behavior="@string/hide_bottom_view_on_scroll_behavior"/>
+
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

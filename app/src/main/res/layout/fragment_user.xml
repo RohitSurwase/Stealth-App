@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+        <variable
+            name="user"
+            type="com.cosmos.unreddit.data.model.User" />
+    </data>
+
+    <androidx.constraintlayout.motion.widget.MotionLayout
+        android:id="@+id/layout_root"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:context=".MainActivity"
+        app:layoutDescription="@xml/scene_user"
+        tools:showPaths="true">
+
+        <ImageView
+            android:id="@+id/user_metrics_header"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/user_metrics_header_height"
+            app:layout_constraintTop_toTopOf="parent"
+            android:fitsSystemWindows="true"
+            android:contentDescription="@null"
+            android:scaleType="centerCrop"
+            android:src="@color/colorPrimaryLight"/>
+
+        <View
+            android:id="@+id/user_header"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/user_header_height"
+            android:background="@drawable/header_background"/>
+
+        <com.cosmos.unreddit.ui.common.widget.CardButton
+            android:id="@+id/back_card"
+            android:layout_width="@dimen/app_bar_button_size"
+            android:layout_height="@dimen/app_bar_button_size"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintBottom_toBottomOf="@id/guideline_app_bar"
+            android:layout_marginStart="@dimen/app_bar_margin"
+            app:icon="@drawable/ic_arrow_back"
+            style="@style/CardButtonStyle"/>
+
+        <com.cosmos.unreddit.ui.common.widget.CardButton
+            android:id="@+id/sort_card"
+            android:layout_width="@dimen/app_bar_button_size"
+            android:layout_height="@dimen/app_bar_button_size"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toBottomOf="@id/guideline_app_bar"
+            android:layout_marginEnd="@dimen/app_bar_margin"
+            app:icon="@drawable/ic_sort"
+            style="@style/CardButtonStyle"/>
+
+        <com.cosmos.unreddit.ui.common.widget.SortIconView
+            android:id="@+id/sort_icon"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/sort_card"
+            app:layout_constraintBottom_toBottomOf="@id/guideline_app_bar"
+            android:paddingHorizontal="@dimen/app_bar_margin"
+            app:sortType="user"/>
+
+        <com.google.android.material.imageview.ShapeableImageView
+            android:id="@+id/user_image"
+            android:layout_width="@dimen/user_image_size_expanded"
+            android:layout_height="@dimen/user_image_size_expanded"
+            android:cropToPadding="true"
+            app:shapeAppearanceOverlay="@style/CircularImageViewStyle"
+            android:contentDescription="@null"
+            tools:src="@tools:sample/avatars"/>
+
+        <TextView
+            android:id="@+id/user_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@{user.displayName}"
+            android:textAppearance="@style/TextAppearanceAppBarLabel"
+            android:ellipsize="none"
+            android:singleLine="true"
+            android:requiresFadingEdge="horizontal"
+            tools:text="User"/>
+
+        <TextView
+            android:id="@+id/user_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@{user.title}"
+            android:textColor="@null"
+            android:textAppearance="@style/TextAppearanceUserTitle"
+            android:textAlignment="center"
+            app:layout_constrainedWidth="true"
+            tools:text="Title"/>
+
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/guideline_app_bar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            app:layout_constraintGuide_begin="?attr/actionBarSize" />
+
+        <com.google.android.material.tabs.TabLayout
+            android:id="@+id/tabs"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toBottomOf="@id/user_metrics_header"
+            app:layout_constraintStart_toStartOf="parent"
+            style="@style/TabLayoutStyle"/>
+
+        <androidx.viewpager2.widget.ViewPager2
+            android:id="@+id/view_pager"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tabs"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"/>
+
+        <TextView
+            android:id="@+id/user_link_karma"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@{user.getPostKarmaCount()}"
+            android:textColor="@null"
+            android:textAppearance="@style/TextAppearanceUserMetrics"
+            tools:text="10k"/>
+
+        <TextView
+            android:id="@+id/user_comment_karma"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@{user.getCommentKarmaCount()}"
+            android:textColor="@null"
+            android:textAppearance="@style/TextAppearanceUserMetrics"
+            tools:text="950"/>
+
+        <TextView
+            android:id="@+id/user_cake_day"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@{user.getCakeDay()}"
+            android:textColor="@null"
+            android:textAppearance="@style/TextAppearanceUserMetrics"
+            tools:text="01/01/01"/>
+
+        <TextView
+            android:id="@+id/user_link_karma_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/user_post_karma"
+            android:textColor="@null"
+            android:textAppearance="@style/TextAppearanceUserMetricsLabel"/>
+
+        <TextView
+            android:id="@+id/user_comment_karma_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/user_comment_karma"
+            android:textColor="@null"
+            android:textAppearance="@style/TextAppearanceUserMetricsLabel"/>
+
+        <TextView
+            android:id="@+id/user_cake_day_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/user_cake_day"
+            android:textColor="@null"
+            android:textAppearance="@style/TextAppearanceUserMetricsLabel"/>
+
+        <com.cosmos.unreddit.ui.common.widget.InfoBarView
+            android:id="@+id/info_retry"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tabs"
+            android:layout_marginTop="@dimen/info_bar_margin_top"
+            style="@style/InfoBarStyle"
+            app:textMessage="@string/network_retry_message"
+            app:textAction="@string/network_retry_action"
+            android:visibility="gone"
+            tools:visibility="visible"/>
+
+    </androidx.constraintlayout.motion.widget.MotionLayout>
+</layout>

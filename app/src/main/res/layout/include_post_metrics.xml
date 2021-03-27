@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+        <variable
+            name="post"
+            type="com.cosmos.unreddit.data.model.db.PostEntity" />
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <ImageView
+            android:id="@+id/image_vote_icon"
+            android:layout_width="@dimen/post_icon_size"
+            android:layout_height="@dimen/post_icon_size"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            android:layout_marginStart="@dimen/post_padding_horizontal"
+            android:layout_marginTop="@dimen/post_margin_top_small"
+            android:contentDescription="Upvote icon"
+            app:srcCompat = "@drawable/ic_votes"/>
+
+        <TextView
+            android:id="@+id/text_post_vote"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toTopOf="@id/image_vote_icon"
+            app:layout_constraintBottom_toBottomOf="@id/image_vote_icon"
+            app:layout_constraintStart_toEndOf="@id/image_vote_icon"
+            android:layout_marginStart="@dimen/post_icon_text_margin"
+            android:text="@{post.score}"
+            tools:text="12345"/>
+
+        <TextView
+            android:id="@+id/text_post_ratio"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toTopOf="@id/image_vote_icon"
+            app:layout_constraintBottom_toBottomOf="@id/image_vote_icon"
+            app:layout_constraintStart_toEndOf="@id/text_post_vote"
+            android:layout_marginStart="@dimen/post_margin_horizontal"
+            android:textColor="@color/text_color_secondary"
+            android:text="@{@string/post_ratio(post.ratio)}"
+            tools:text="50%"/>
+
+        <ImageView
+            android:id="@+id/image_comments_icon"
+            android:layout_width="@dimen/post_icon_size"
+            android:layout_height="@dimen/post_icon_size"
+            app:layout_constraintTop_toTopOf="@id/image_vote_icon"
+            app:layout_constraintBottom_toBottomOf="@id/image_vote_icon"
+            app:layout_constraintStart_toEndOf="@id/text_post_ratio"
+            android:layout_marginStart="24dp"
+            android:contentDescription="Comments icon"
+            app:srcCompat="@drawable/ic_comments"/>
+
+        <TextView
+            android:id="@+id/text_post_comments"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toTopOf="@id/image_vote_icon"
+            app:layout_constraintBottom_toBottomOf="@id/image_vote_icon"
+            app:layout_constraintStart_toEndOf="@id/image_comments_icon"
+            android:layout_marginStart="@dimen/post_icon_text_margin"
+            android:text="@{post.commentsNumber}"
+            tools:text="1234"/>
+
+        <ImageButton
+            android:id="@+id/button_more"
+            android:layout_width="@dimen/post_icon_size"
+            android:layout_height="@dimen/post_icon_size"
+            app:layout_constraintTop_toTopOf="@id/image_vote_icon"
+            app:layout_constraintBottom_toBottomOf="@id/image_vote_icon"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginEnd="@dimen/post_padding_horizontal"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            app:srcCompat="@drawable/ic_more"/>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>

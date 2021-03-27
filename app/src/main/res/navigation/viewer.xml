@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/viewer"
+    app:startDestination="@id/mediaViewerFragment">
+
+    <fragment
+        android:id="@+id/mediaViewerFragment"
+        android:name="com.cosmos.unreddit.ui.mediaviewer.MediaViewerFragment"
+        tools:layout="@layout/fragment_media_viewer">
+        <argument
+            android:name="images"
+            app:argType="com.cosmos.unreddit.data.model.GalleryMedia[]"
+            app:nullable="true"
+            android:defaultValue="@null"/>
+        <argument
+            android:name="link"
+            app:argType="string"
+            app:nullable="true"
+            android:defaultValue="@null"/>
+        <argument
+            android:name="type"
+            app:argType="com.cosmos.unreddit.data.model.MediaType"
+            android:defaultValue="NO_MEDIA"/>
+    </fragment>
+
+    <action
+        android:id="@+id/openGallery"
+        app:destination="@id/viewer">
+        <argument
+            android:name="images"
+            app:argType="com.cosmos.unreddit.data.model.GalleryMedia[]"/>
+    </action>
+
+    <action
+        android:id="@+id/openMedia"
+        app:destination="@id/viewer">
+        <argument
+            android:name="link"
+            app:argType="string"/>
+        <argument
+            android:name="type"
+            app:argType="com.cosmos.unreddit.data.model.MediaType"/>
+    </action>
+
+</navigation>

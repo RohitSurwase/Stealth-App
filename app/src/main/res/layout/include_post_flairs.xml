@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+        <import type="android.view.View"/>
+        <variable
+            name="post"
+            type="com.cosmos.unreddit.data.model.db.PostEntity" />
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingHorizontal="@dimen/post_padding_horizontal">
+
+        <androidx.constraintlayout.helper.widget.Flow
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/text_domain"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:constraint_referenced_ids="nsfw_flair,spoiler_flair,oc_flair,post_flair,pinned_icon,archived_icon,locked_icon"
+            android:layout_marginEnd="@dimen/post_margin_horizontal"
+            app:flow_wrapMode="chain"
+            app:flow_horizontalStyle="packed"
+            app:flow_horizontalAlign="start"
+            app:flow_horizontalGap="@dimen/post_flair_gap"
+            app:flow_verticalGap="@dimen/post_flair_gap"
+            app:flow_horizontalBias="0"/>
+
+        <TextView
+            android:id="@+id/nsfw_flair"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/nsfw_flair_background"
+            android:padding="@dimen/post_flair_padding"
+            android:textAppearance="@style/TextAppearancePostFlair"
+            android:textColor="@null"
+            android:text="@string/flair_nsfw"
+            android:visibility="@{post.isOver18 ? View.VISIBLE : View.GONE}" />
+
+        <TextView
+            android:id="@+id/spoiler_flair"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/spoiler_flair_background"
+            android:padding="@dimen/post_flair_padding"
+            android:textAppearance="@style/TextAppearancePostFlair"
+            android:textColor="@null"
+            android:text="@string/flair_spoiler"
+            android:visibility="@{post.isSpoiler ? View.VISIBLE : View.GONE}" />
+
+        <TextView
+            android:id="@+id/oc_flair"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/oc_flair_background"
+            android:padding="@dimen/post_flair_padding"
+            android:textAppearance="@style/TextAppearancePostFlair"
+            android:textColor="@null"
+            android:text="@string/flair_oc"
+            android:visibility="@{post.isOC ? View.VISIBLE : View.GONE}" />
+
+        <com.cosmos.unreddit.ui.common.widget.RedditFlairView
+            android:id="@+id/post_flair"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/post_flair_background"
+            android:padding="@dimen/post_flair_padding"
+            android:textColor="@null"
+            android:visibility="gone"
+            tools:visibility="visible"
+            tools:text="A flair" />
+
+        <ImageView
+            android:id="@+id/pinned_icon"
+            android:layout_width="@dimen/post_icon_size"
+            android:layout_height="@dimen/post_icon_size"
+            android:visibility="@{post.isStickied ? View.VISIBLE : View.GONE}"
+            app:srcCompat="@drawable/ic_pin" />
+
+        <ImageView
+            android:id="@+id/archived_icon"
+            android:layout_width="@dimen/post_icon_size"
+            android:layout_height="@dimen/post_icon_size"
+            android:visibility="@{post.isArchived ? View.VISIBLE : View.GONE}"
+            app:srcCompat="@drawable/ic_archive" />
+
+        <ImageView
+            android:id="@+id/locked_icon"
+            android:layout_width="@dimen/post_icon_size"
+            android:layout_height="@dimen/post_icon_size"
+            android:visibility="@{post.isLocked ? View.VISIBLE : View.GONE}"
+            app:srcCompat="@drawable/ic_lock" />
+
+        <TextView
+            android:id="@+id/text_domain"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:textColor="@null"
+            android:textAppearance="@style/TextAppearancePostDomain"
+            android:text="@{post.domain}"
+            android:visibility="@{!post.isSelf ? View.VISIBLE : View.GONE}"
+            tools:text="reddit.com"/>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>

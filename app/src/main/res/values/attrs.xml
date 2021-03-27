@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="CardButton">
+        <attr name="icon" format="reference"/>
+    </declare-styleable>
+
+    <declare-styleable name="SortIconView">
+        <attr name="sortType" format="enum">
+            <enum name="general" value="0"/>
+            <enum name="search" value="1"/>
+            <enum name="user" value="2"/>
+            <enum name="post" value="3"/>
+        </attr>
+    </declare-styleable>
+
+    <declare-styleable name="ElasticDragDismissFrameLayout">
+        <attr name="dragDismissDistance" format="dimension" />
+        <attr name="dragDismissFraction" format="float" />
+        <attr name="dragDismissScale" format="float" />
+        <attr name="dragElasticity" format="float" />
+    </declare-styleable>
+
+    <declare-styleable name="AwardView">
+        <attr name="textStyle" format="reference"/>
+    </declare-styleable>
+
+    <declare-styleable name="InfoBarView">
+        <attr name="textMessage" format="reference"/>
+        <attr name="textMessageColor" format="reference"/>
+        <attr name="textAction" format="reference"/>
+        <attr name="textActionColor" format="reference"/>
+        <attr name="slideEdge" format="enum">
+            <enum name="start" value="0"/>
+            <enum name="end" value="1"/>
+            <enum name="top" value="2"/>
+            <enum name="bottom" value="3"/>
+        </attr>
+    </declare-styleable>
+</resources>

@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+        <variable
+            name="subreddit"
+            type="com.cosmos.unreddit.data.model.db.SubredditEntity" />
+    </data>
+
+    <androidx.constraintlayout.motion.widget.MotionLayout
+        android:id="@+id/layout_root"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:context=".MainActivity"
+        app:layoutDescription="@xml/collapsing_toolbar"
+        tools:showPaths="true">
+
+        <ImageView
+            android:id="@+id/subreddit_metrics_header"
+            android:layout_width="match_parent"
+            android:layout_height="275dp"
+            app:layout_constraintTop_toTopOf="parent"
+            android:fitsSystemWindows="true"
+            android:contentDescription="@null"
+            android:scaleType="centerCrop"
+            android:src="@color/colorPrimaryLight"/>
+
+        <View
+            android:id="@+id/subreddit_header"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/subreddit_header_height"
+            android:background="@drawable/header_background"/>
+
+        <com.google.android.material.imageview.ShapeableImageView
+            android:id="@+id/subreddit_image"
+            android:layout_width="@dimen/subreddit_image_size_expanded"
+            android:layout_height="@dimen/subreddit_image_size_expanded"
+            android:cropToPadding="true"
+            app:shapeAppearanceOverlay="@style/CircularImageViewStyle"
+            android:contentDescription="@null"
+            tools:src="@tools:sample/avatars"/>
+
+        <TextView
+            android:id="@+id/subreddit_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@{subreddit.displayName}"
+            android:textAppearance="@style/TextAppearanceAppBarLabel"
+            android:ellipsize="none"
+            android:singleLine="true"
+            android:requiresFadingEdge="horizontal"
+            tools:text="Reddit"/>
+
+        <TextView
+            android:id="@+id/subreddit_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@{subreddit.title}"
+            android:textColor="@null"
+            android:textAppearance="@style/TextAppearanceSubredditTitle"
+            android:textAlignment="center"
+            app:layout_constrainedWidth="true"
+            tools:text="Title"/>
+
+        <com.cosmos.unreddit.ui.common.widget.CardButton
+            android:id="@+id/back_card"
+            android:layout_width="@dimen/app_bar_button_size"
+            android:layout_height="@dimen/app_bar_button_size"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintBottom_toBottomOf="@id/guideline_app_bar"
+            android:layout_marginStart="@dimen/app_bar_margin"
+            app:icon="@drawable/ic_arrow_back"
+            style="@style/CardButtonStyle"/>
+
+        <com.cosmos.unreddit.ui.common.widget.CardButton
+            android:id="@+id/search_card"
+            android:layout_width="@dimen/app_bar_button_size"
+            android:layout_height="@dimen/app_bar_button_size"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toBottomOf="@id/guideline_app_bar"
+            android:layout_marginEnd="@dimen/app_bar_margin"
+            app:icon="@drawable/ic_search"
+            style="@style/CardButtonStyle"/>
+
+        <com.cosmos.unreddit.ui.common.widget.CardButton
+            android:id="@+id/sort_card"
+            android:layout_width="@dimen/app_bar_button_size"
+            android:layout_height="@dimen/app_bar_button_size"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/search_card"
+            app:layout_constraintBottom_toBottomOf="@id/guideline_app_bar"
+            android:layout_marginEnd="@dimen/app_bar_margin"
+            app:icon="@drawable/ic_sort"
+            style="@style/CardButtonStyle"/>
+
+        <com.cosmos.unreddit.ui.common.widget.SortIconView
+            android:id="@+id/sort_icon"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/sort_card"
+            app:layout_constraintBottom_toBottomOf="@id/guideline_app_bar"
+            android:paddingHorizontal="@dimen/app_bar_margin"
+            app:sortType="general"/>
+
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/guideline_app_bar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            app:layout_constraintGuide_begin="?attr/actionBarSize" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/list_post"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/subreddit_metrics_header"
+            android:overScrollMode="never"/>
+
+        <TextView
+            android:id="@+id/subreddit_subscribers"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@{subreddit.getSubscribersCount()}"
+            android:textColor="@null"
+            android:textAppearance="@style/TextAppearanceSubredditMetricsMain"
+            tools:text="12.5m"/>
+
+        <TextView
+            android:id="@+id/subreddit_subscribers_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/subreddit_subscribers"
+            android:textColor="@null"
+            android:textAppearance="@style/TextAppearanceSubredditMetricsMainLabel"/>
+
+        <TextView
+            android:id="@+id/subreddit_active_users"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@{subreddit.getActiveUsers()}"
+            android:textColor="@null"
+            android:textAppearance="@style/TextAppearanceSubredditMetricsMain"
+            tools:text="14.6k"/>
+
+        <TextView
+            android:id="@+id/subreddit_active_users_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/subreddit_active_users"
+            android:textColor="@null"
+            android:textAppearance="@style/TextAppearanceSubredditMetricsMainLabel"/>
+
+        <include
+            android:id="@+id/loading_state"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/subreddit_metrics_header"
+            app:layout_constraintBottom_toBottomOf="parent"
+            layout="@layout/include_loading_state"/>
+
+    </androidx.constraintlayout.motion.widget.MotionLayout>
+
+</layout>

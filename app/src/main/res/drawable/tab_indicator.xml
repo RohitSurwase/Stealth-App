@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:gravity="start">
+        <shape>
+            <size
+                android:width="@dimen/tab_indicator_width"
+                android:height="@dimen/tab_indicator_height"/>
+            <corners android:radius="@dimen/tab_indicator_radius"/>
+            <solid android:color="@color/colorPrimary"/>
+        </shape>
+    </item>
+</layer-list>

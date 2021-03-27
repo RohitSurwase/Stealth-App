@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/subscriptions"
+    app:startDestination="@id/subscriptionsFragment">
+
+    <include app:graph="@navigation/subreddit" />
+    <include app:graph="@navigation/user" />
+    <include app:graph="@navigation/viewer" />
+
+    <fragment
+        android:id="@+id/subscriptionsFragment"
+        android:name="com.cosmos.unreddit.ui.subscriptions.SubscriptionsFragment"
+        tools:layout="@layout/fragment_subscriptions">
+        <action
+            android:id="@+id/search"
+            app:destination="@id/searchFragment">
+            <argument
+                android:name="query"
+                app:argType="string"/>
+        </action>
+    </fragment>
+
+    <fragment
+        android:id="@+id/searchFragment"
+        android:name="com.cosmos.unreddit.ui.search.SearchFragment"
+        tools:layout="@layout/fragment_search">
+        <argument
+            android:name="query"
+            app:argType="string"/>
+
+        <action
+            android:id="@+id/openGallery"
+            app:destination="@id/viewer">
+            <argument
+                android:name="images"
+                app:argType="com.cosmos.unreddit.data.model.GalleryMedia[]"/>
+        </action>
+
+        <action
+            android:id="@+id/openMedia"
+            app:destination="@id/viewer">
+            <argument
+                android:name="link"
+                app:argType="string"/>
+            <argument
+                android:name="type"
+                app:argType="com.cosmos.unreddit.data.model.MediaType"/>
+        </action>
+
+        <action
+            android:id="@+id/openUser"
+            app:destination="@id/user">
+            <argument
+                android:name="user"
+                app:argType="string" />
+        </action>
+    </fragment>
+
+    <action
+        android:id="@+id/openSubreddit"
+        app:destination="@id/subreddit">
+        <argument
+            android:name="subreddit"
+            app:argType="string" />
+    </action>
+
+</navigation>

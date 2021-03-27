@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <dimen name="post_margin_horizontal">8dp</dimen>
+    <dimen name="post_margin_vertical">16dp</dimen>
+
+    <dimen name="post_padding_horizontal">16dp</dimen>
+
+    <dimen name="post_content_margin_horizontal">25dp</dimen>
+
+    <dimen name="post_elevation">8dp</dimen>
+
+    <dimen name="post_title_margin">16dp</dimen>
+
+    <dimen name="post_text_padding">16dp</dimen>
+    <dimen name="post_text_max_height">200dp</dimen>
+    <dimen name="post_text_card_radius">15dp</dimen>
+
+    <dimen name="post_image_height">250dp</dimen>
+
+    <dimen name="post_link_image_size">100dp</dimen>
+    <dimen name="post_link_image_margin_horizontal">8dp</dimen>
+
+    <dimen name="post_margin_top_small">8dp</dimen>
+    <dimen name="post_margin_top_large">16dp</dimen>
+
+    <dimen name="post_icon_size">24dp</dimen>
+    <dimen name="post_icon_text_margin">5dp</dimen>
+
+    <dimen name="post_awards_height">38dp</dimen>
+
+    <dimen name="post_flair_padding">4dp</dimen>
+    <dimen name="post_flair_gap">8dp</dimen>
+
+    <dimen name="post_type_indicator_margin">16dp</dimen>
+
+    <dimen name="sort_padding">16dp</dimen>
+    <dimen name="sort_margin">16dp</dimen>
+
+    <dimen name="app_bar_margin">16dp</dimen>
+    <dimen name="app_bar_button_size">32dp</dimen>
+    <dimen name="app_bar_button_elevation">8dp</dimen>
+
+    <dimen name="card_height">84dp</dimen>
+    <dimen name="card_image_size">42dp</dimen>
+    <dimen name="card_margin_horizontal">16dp</dimen>
+    <dimen name="card_margin_vertical">8dp</dimen>
+    <dimen name="card_padding">12dp</dimen>
+
+    <dimen name="subscriptions_card_height">@dimen/card_height</dimen>
+    <dimen name="subscriptions_image_size">@dimen/card_image_size</dimen>
+    <dimen name="subscriptions_margin_horizontal">@dimen/card_margin_horizontal</dimen>
+    <dimen name="subscriptions_margin_vertical">@dimen/card_margin_vertical</dimen>
+    <dimen name="subscriptions_padding">@dimen/card_padding</dimen>
+
+    <dimen name="preference_card_height">64dp</dimen>
+    <dimen name="preference_padding">12dp</dimen>
+    <dimen name="preference_category_margin_horizontal">16dp</dimen>
+    <dimen name="preference_category_margin_vertical">16dp</dimen>
+
+    <dimen name="switch_thumb_size">20dp</dimen>
+    <dimen name="switch_track_radius">16dp</dimen>
+
+    <dimen name="search_subreddit_card_height">@dimen/card_height</dimen>
+    <dimen name="search_subreddit_image_size">@dimen/card_image_size</dimen>
+    <dimen name="search_subreddit_margin_horizontal">@dimen/card_margin_horizontal</dimen>
+    <dimen name="search_subreddit_margin_vertical">@dimen/card_margin_vertical</dimen>
+    <dimen name="search_subreddit_padding">@dimen/card_padding</dimen>
+
+    <dimen name="search_user_card_height">@dimen/card_height</dimen>
+    <dimen name="search_user_image_size">@dimen/card_image_size</dimen>
+    <dimen name="search_user_margin_horizontal">@dimen/card_margin_horizontal</dimen>
+    <dimen name="search_user_margin_vertical">@dimen/card_margin_vertical</dimen>
+    <dimen name="search_user_padding">@dimen/card_padding</dimen>
+
+    <dimen name="tab_indicator_width">32dp</dimen>
+    <dimen name="tab_indicator_height">4dp</dimen>
+    <dimen name="tab_indicator_radius">4dp</dimen>
+
+    <dimen name="subreddit_drawer_width">275dp</dimen>
+    <dimen name="subreddit_drawer_margin_vertical">16dp</dimen>
+    <dimen name="subreddit_drawer_margin_horizontal">8dp</dimen>
+
+    <dimen name="subreddit_header_height">200dp</dimen>
+    <dimen name="subreddit_metrics_header_height">275dp</dimen>
+    <dimen name="subreddit_header_margin_bottom">12dp</dimen>
+    <dimen name="subreddit_image_size_expanded">75dp</dimen>
+    <dimen name="subreddit_image_size_collapsed">42dp</dimen>
+    <item name="subreddit_name_scale_expanded" type="dimen" format="float">1.50</item>
+
+    <dimen name="subreddit_content_radius">15dp</dimen>
+    <dimen name="subreddit_content_elevation">8dp</dimen>
+    <item name="subreddit_content_scale" type="dimen" format="float">0.8</item>
+
+    <dimen name="user_header_height">@dimen/subreddit_header_height</dimen>
+    <dimen name="user_metrics_header_height">@dimen/subreddit_metrics_header_height</dimen>
+    <dimen name="user_metrics_margin_horizontal">16dp</dimen>
+    <dimen name="user_header_margin_bottom">@dimen/subreddit_header_margin_bottom</dimen>
+    <dimen name="user_image_size_expanded">@dimen/subreddit_image_size_expanded</dimen>
+    <dimen name="user_image_size_collapsed">@dimen/subreddit_image_size_collapsed</dimen>
+    <item name="user_name_scale_expanded" type="dimen" format="float">@dimen/subreddit_name_scale_expanded</item>
+
+    <dimen name="flair_background_radius">4dp</dimen>
+    <dimen name="flair_image_size">16dp</dimen>
+
+    <dimen name="comment_offset">8dp</dimen>
+    <dimen name="comment_padding_horizontal">16dp</dimen>
+    <dimen name="comment_padding_vertical">8dp</dimen>
+    <dimen name="comment_icon_size">16dp</dimen>
+
+    <dimen name="award_image_size">16dp</dimen>
+    <dimen name="award_overlap_margin">-8dp</dimen>
+    <dimen name="award_chip_padding_vertical">2dp</dimen>
+    <dimen name="award_chip_padding_vertical_post">4dp</dimen>
+    <dimen name="award_chip_padding_horizontal">4dp</dimen>
+    <dimen name="award_chip_padding_horizontal_post">6dp</dimen>
+    <dimen name="award_count_margin">4dp</dimen>
+    <dimen name="award_count_image_margin">2dp</dimen>
+    <dimen name="award_text_size">12sp</dimen>
+
+    <dimen name="post_details_dismiss_distance">112dp</dimen>
+    <item name="post_details_dismiss_scale" type="dimen" format="float">0.95</item>
+
+    <dimen name="media_thumbnail_size">64dp</dimen>
+
+    <dimen name="exoplayer_margin_horizontal">8dp</dimen>
+    <dimen name="exoplayer_button_size">56dp</dimen>
+
+    <dimen name="dialog_menu_padding">16dp</dimen>
+    <dimen name="dialog_menu_margin">16dp</dimen>
+    <dimen name="dialog_menu_icon_padding">16dp</dimen>
+    <dimen name="dialog_menu_button_size">192dp</dimen>
+
+    <dimen name="info_bar_margin_top">8dp</dimen>
+    <dimen name="info_bar_elevation">8dp</dimen>
+
+    <dimen name="bottom_navigation_elevation">8dp</dimen>
+    <dimen name="bottom_navigation_radius">16dp</dimen>
+    <dimen name="bottom_navigation_size">256dp</dimen>
+    <dimen name="bottom_navigation_margin">24dp</dimen>
+</resources>

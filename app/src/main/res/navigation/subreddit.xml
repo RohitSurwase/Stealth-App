@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/subreddit"
+    app:startDestination="@id/subredditFragment">
+
+    <include app:graph="@navigation/viewer" />
+
+    <fragment
+        android:id="@+id/subredditFragment"
+        android:name="com.cosmos.unreddit.ui.subreddit.SubredditFragment"
+        android:label="SubredditFragment"
+        tools:layout="@layout/fragment_subreddit">
+        <deepLink
+            android:id="@+id/deepLinkSubredditInternal"
+            app:uri="content://reddit/subreddit/{subreddit}" />
+        <deepLink
+            android:id="@+id/deepLinkSubredditExternal"
+            app:uri=".*.reddit.com/r/{subreddit}" />
+
+        <argument
+            android:name="subreddit"
+            app:argType="string" />
+
+        <action
+            android:id="@+id/openSearch"
+            app:destination="@id/subredditSearchFragment">
+            <argument
+                android:name="subreddit"
+                app:argType="string" />
+            <argument
+                android:name="icon"
+                app:argType="string"
+                app:nullable="true"/>
+        </action>
+    </fragment>
+
+    <fragment
+        android:id="@+id/subredditSearchFragment"
+        android:name="com.cosmos.unreddit.ui.subreddit.SubredditSearchFragment"
+        android:label="SubredditSearchFragment"
+        tools:layout="@layout/fragment_subreddit_search">
+        <argument
+            android:name="subreddit"
+            app:argType="string"/>
+        <argument
+            android:name="icon"
+            app:argType="string"
+            app:nullable="true"
+            android:defaultValue="@null"/>
+    </fragment>
+
+    <action
+        android:id="@+id/openSubreddit"
+        app:destination="@id/subredditFragment">
+        <argument
+            android:name="subreddit"
+            app:argType="string" />
+    </action>
+
+    <action
+        android:id="@+id/openUser"
+        app:destination="@id/user">
+        <argument
+            android:name="user"
+            app:argType="string"/>
+    </action>
+
+    <action
+        android:id="@+id/openGallery"
+        app:destination="@id/viewer">
+        <argument
+            android:name="images"
+            app:argType="com.cosmos.unreddit.data.model.GalleryMedia[]" />
+    </action>
+
+    <action
+        android:id="@+id/openMedia"
+        app:destination="@id/viewer">
+        <argument
+            android:name="link"
+            app:argType="string" />
+        <argument
+            android:name="type"
+            app:argType="com.cosmos.unreddit.data.model.MediaType" />
+    </action>
+
+</navigation>

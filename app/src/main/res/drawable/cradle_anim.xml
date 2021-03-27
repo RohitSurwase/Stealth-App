@@ -1,0 +1,125 @@
+<animated-vector
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt">
+    <aapt:attr name="android:drawable">
+        <vector
+            android:name="vector"
+            android:width="67dp"
+            android:height="67dp"
+            android:viewportWidth="67"
+            android:viewportHeight="67">
+            <group android:name="center_spheres">
+                <path
+                    android:name="sphere_2"
+                    android:pathData="M 25.174 50.286 C 24.051 50.286 22.974 50.732 22.18 51.526 C 21.387 52.319 20.94 53.397 20.94 54.519 C 20.94 55.641 21.387 56.719 22.18 57.513 C 22.974 58.306 24.051 58.753 25.174 58.753 C 26.296 58.753 27.373 58.306 28.167 57.513 C 28.961 56.719 29.407 55.641 29.407 54.519 C 29.407 53.397 28.961 52.319 28.167 51.526 C 27.373 50.732 26.296 50.286 25.174 50.286 Z"
+                    android:fillColor="@color/colorPrimaryLight"
+                    android:strokeWidth="1"/>
+                <path
+                    android:name="sphere_3"
+                    android:pathData="M 33.867 50.286 C 32.744 50.286 31.667 50.732 30.873 51.526 C 30.08 52.319 29.633 53.397 29.633 54.519 C 29.633 55.641 30.08 56.719 30.873 57.513 C 31.667 58.306 32.744 58.753 33.867 58.753 C 34.989 58.753 36.066 58.306 36.86 57.513 C 37.654 56.719 38.1 55.641 38.1 54.519 C 38.1 53.397 37.654 52.319 36.86 51.526 C 36.066 50.732 34.989 50.286 33.867 50.286 Z"
+                    android:fillColor="@color/colorPrimaryLight"
+                    android:strokeWidth="1"/>
+                <path
+                    android:name="sphere_4"
+                    android:pathData="M 42.56 50.286 C 41.437 50.286 40.36 50.732 39.566 51.526 C 38.773 52.319 38.326 53.397 38.326 54.519 C 38.326 55.641 38.773 56.719 39.566 57.513 C 40.36 58.306 41.437 58.753 42.56 58.753 C 43.682 58.753 44.76 58.306 45.553 57.513 C 46.347 56.719 46.793 55.641 46.793 54.519 C 46.793 53.397 46.347 52.319 45.553 51.526 C 44.76 50.732 43.682 50.286 42.56 50.286 Z"
+                    android:fillColor="@color/colorPrimaryLight"
+                    android:strokeWidth="1"/>
+            </group>
+            <group android:name="left_sphere">
+                <path
+                    android:name="sphere_1"
+                    android:pathData="M 16.481 50.286 C 15.358 50.286 14.281 50.732 13.487 51.526 C 12.693 52.319 12.247 53.397 12.247 54.519 C 12.247 55.641 12.693 56.719 13.487 57.513 C 14.281 58.306 15.358 58.753 16.481 58.753 C 17.603 58.753 18.68 58.306 19.474 57.513 C 20.268 56.719 20.714 55.641 20.714 54.519 C 20.714 53.397 20.268 52.319 19.474 51.526 C 18.68 50.732 17.603 50.286 16.481 50.286 Z"
+                    android:fillColor="@color/colorPrimary"
+                    android:strokeWidth="1"
+                    android:fillType="evenOdd"/>
+            </group>
+            <group android:name="right_sphere">
+                <path
+                    android:name="sphere_5"
+                    android:pathData="M 51.253 50.286 C 50.13 50.286 49.053 50.732 48.259 51.526 C 47.466 52.319 47.019 53.397 47.019 54.519 C 47.019 55.641 47.466 56.719 48.259 57.513 C 49.053 58.306 50.13 58.753 51.253 58.753 C 52.375 58.753 53.453 58.306 54.246 57.513 C 55.04 56.719 55.486 55.641 55.486 54.519 C 55.486 53.397 55.04 52.319 54.246 51.526 C 53.453 50.732 52.375 50.286 51.253 50.286 Z"
+                    android:fillColor="@color/colorPrimary"
+                    android:strokeWidth="1"
+                    android:fillType="evenOdd"/>
+            </group>
+        </vector>
+    </aapt:attr>
+    <target android:name="left_sphere">
+        <aapt:attr name="android:animation">
+            <set>
+                <objectAnimator
+                    android:propertyName="translateX"
+                    android:duration="200"
+                    android:valueFrom="-10"
+                    android:valueTo="0"
+                    android:valueType="floatType"
+                    android:interpolator="@android:anim/accelerate_interpolator"/>
+                <objectAnimator
+                    android:propertyName="translateY"
+                    android:duration="200"
+                    android:valueFrom="-6"
+                    android:valueTo="0"
+                    android:valueType="floatType"
+                    android:interpolator="@android:anim/accelerate_decelerate_interpolator"/>
+                <objectAnimator
+                    android:propertyName="translateX"
+                    android:startOffset="600"
+                    android:duration="200"
+                    android:valueFrom="0"
+                    android:valueTo="-10"
+                    android:valueType="floatType"
+                    android:interpolator="@android:anim/accelerate_decelerate_interpolator"/>
+                <objectAnimator
+                    android:propertyName="translateY"
+                    android:startOffset="600"
+                    android:duration="200"
+                    android:valueFrom="0"
+                    android:valueTo="-6"
+                    android:valueType="floatType"
+                    android:interpolator="@android:anim/accelerate_interpolator"/>
+            </set>
+        </aapt:attr>
+    </target>
+    <target android:name="right_sphere">
+        <aapt:attr name="android:animation">
+            <set>
+                <!-- Placeholder animator to make the animation run smoothly on older APIs -->
+                <objectAnimator
+                    android:duration="200"
+                    android:valueFrom="0"
+                    android:valueTo="0" />
+                <objectAnimator
+                    android:propertyName="translateX"
+                    android:startOffset="200"
+                    android:duration="200"
+                    android:valueFrom="0"
+                    android:valueTo="10"
+                    android:valueType="floatType"
+                    android:interpolator="@android:anim/accelerate_decelerate_interpolator" />
+                <objectAnimator
+                    android:propertyName="translateY"
+                    android:startOffset="200"
+                    android:duration="200"
+                    android:valueFrom="0"
+                    android:valueTo="-6"
+                    android:valueType="floatType"
+                    android:interpolator="@android:anim/accelerate_interpolator"/>
+                <objectAnimator
+                    android:propertyName="translateX"
+                    android:startOffset="400"
+                    android:duration="200"
+                    android:valueFrom="10"
+                    android:valueTo="0"
+                    android:valueType="floatType"
+                    android:interpolator="@android:anim/accelerate_interpolator"/>
+                <objectAnimator
+                    android:propertyName="translateY"
+                    android:startOffset="400"
+                    android:duration="200"
+                    android:valueFrom="-6"
+                    android:valueTo="0"
+                    android:valueType="floatType"
+                    android:interpolator="@android:anim/accelerate_decelerate_interpolator"/>
+            </set>
+        </aapt:attr>
+    </target>
+</animated-vector>

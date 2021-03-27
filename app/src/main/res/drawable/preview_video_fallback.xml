@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android" android:opacity="opaque">
+
+    <item android:drawable="@drawable/image_placeholder"/>
+
+    <item android:gravity="center">
+        <bitmap
+            android:gravity="center"
+            android:src="@drawable/video_fallback"/>
+    </item>
+
+</layer-list>
