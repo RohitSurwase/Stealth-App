@@ -1,0 +1,9 @@
+### Added
+- Subscriptions
+- Search
+- Sort
+- History
+- NSFW filter
+- Flairs
+- Awards
+- Light/Dark theme
