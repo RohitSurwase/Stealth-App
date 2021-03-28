@@ -1,0 +1,1 @@
+Stealth provides features from Reddit, without the need for an account. In fact, the app doesn't even let you log in with a Reddit account.
