@@ -89,6 +89,7 @@ fun Fragment.shareExternalLink(url: String, title: String? = null) {
     val share = Intent.createChooser(
         Intent().apply {
             action = Intent.ACTION_SEND
+            type = "text/plain"
             putExtra(Intent.EXTRA_TEXT, url)
 
             title?.let {
