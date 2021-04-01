@@ -1,0 +1,6 @@
+### Fixed
+- Fix Reddit videos not playing when audio is not found
+- Fix crash when opening Subreddit from user page
+- Fix share feature
+- Fix wrong search query being displayed in search page
+- Fix for some Gfycat videos not playing
