@@ -12,6 +12,8 @@ object LinkUtil {
     private val SUBREDDIT_REGEX = Regex("/r/[A-Za-z0-9_-]{3,21}")
     private val USER_REGEX = Regex("/u/[A-Za-z0-9_-]{3,20}")
 
+    private const val REDDIT_SOUNDTRACK_NAME: String = "DASH_audio"
+
     fun getAlbumIdFromImgurLink(link: String): String {
         return HttpUrl.parse(link)?.pathSegments()?.getOrNull(1) ?: ""
     }
@@ -30,7 +32,11 @@ object LinkUtil {
     }
 
     fun getRedditSoundTrack(link: String): String {
-        return link.replace(REDDIT_VIDEO_REGEX, "DASH_audio")
+        return link.replace(REDDIT_VIDEO_REGEX, REDDIT_SOUNDTRACK_NAME)
+    }
+
+    fun isRedditSoundTrack(link: String): Boolean {
+        return link.contains(REDDIT_SOUNDTRACK_NAME)
     }
 
     fun getGfycatVideo(link: String): String {

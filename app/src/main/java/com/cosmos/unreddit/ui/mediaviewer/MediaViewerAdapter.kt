@@ -16,10 +16,13 @@ import com.cosmos.unreddit.data.model.GalleryMedia
 import com.cosmos.unreddit.databinding.ItemImageBinding
 import com.cosmos.unreddit.databinding.ItemVideoBinding
 import com.cosmos.unreddit.util.ExoPlayerHelper
+import com.cosmos.unreddit.util.LinkUtil
 import com.google.android.exoplayer2.ExoPlaybackException
 import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.SimpleExoPlayer
 import com.google.android.exoplayer2.source.MergingMediaSource
+import com.google.android.exoplayer2.upstream.HttpDataSource
+import java.net.HttpURLConnection
 
 class MediaViewerAdapter(context: Context) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
@@ -163,14 +166,28 @@ class MediaViewerAdapter(context: Context) : RecyclerView.Adapter<RecyclerView.V
                 val videoSource = exoPlayerHelper.getMediaSource(videoItem)
                 val audioSource = exoPlayerHelper.getMediaSource(video.sound)
                 val mergedSource = MergingMediaSource(videoSource, audioSource)
+
                 player.setMediaSource(mergedSource)
+
+                // Add special listener for Reddit videos with audio
+                player.addListener(object : Player.EventListener {
+                    override fun onPlayerError(error: ExoPlaybackException) {
+                        if (isErrorFromAudio(error)) {
+                            // Retry without audio if an error is thrown
+                            player.setMediaItem(videoItem)
+                            player.prepare()
+                        } else {
+                            binding.infoRetry.show()
+                        }
+                    }
+                })
             } else {
                 player.setMediaItem(videoItem)
+                player.addListener(this)
             }
 
             player.apply {
                 repeatMode = Player.REPEAT_MODE_ALL
-                addListener(this@VideoViewHolder)
                 prepare()
                 play()
             }
@@ -180,6 +197,18 @@ class MediaViewerAdapter(context: Context) : RecyclerView.Adapter<RecyclerView.V
             binding.video.player = player
 
             binding.infoRetry.setActionClickListener { player.prepare() }
+        }
+
+        private fun isErrorFromAudio(error: ExoPlaybackException): Boolean {
+            if (error.type == ExoPlaybackException.TYPE_SOURCE) {
+                val cause = error.cause as? HttpDataSource.InvalidResponseCodeException
+                cause?.dataSpec?.key?.let { link ->
+                    return (cause.responseCode == HttpURLConnection.HTTP_FORBIDDEN ||
+                            cause.responseCode == HttpURLConnection.HTTP_NOT_FOUND) &&
+                            LinkUtil.isRedditSoundTrack(link)
+                }
+            }
+            return false
         }
 
         override fun onPlayerError(error: ExoPlaybackException) {
