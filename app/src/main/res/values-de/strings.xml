@@ -1,0 +1,145 @@
+<resources>
+    <string name="app_name">Stealth</string>
+    <string name="app_description">Ein auf die Privatsphäre orientierter, funktionsreicher Reddit-Client, der kein Benutzerkonto erfordert</string>
+
+    <string name="post_ratio">%1$d%%</string>
+
+    <string name="time_difference_now">jetzt</string>
+    <string name="time_difference_minute">%1$d Minute(n) zuvor</string>
+    <string name="time_difference_hour">%1$d Stunde(n) zuvor</string>
+    <string name="time_difference_day">%1$d Tag(e) zuvor</string>
+    <string name="time_difference_year">%1$d Jahr(e) zuvor</string>
+
+    <string name="time_difference_minute_short">%1$dM</string>
+    <string name="time_difference_hour_short">%1$dS</string>
+    <string name="time_difference_day_short">%1$dT</string>
+    <string name="time_difference_year_short">%1$dJ</string>
+
+    <string name="award_count">x%1$d</string>
+
+    <string name="tab_user_comments">Kommentare</string>
+    <string name="tab_user_submitted">Eingereicht</string>
+    <string name="tab_user_gilded">Vergoldet</string>
+
+    <string name="sort_time_hour">Jetzt</string>
+    <string name="sort_time_day">Heute</string>
+    <string name="sort_time_week">Diese Woche</string>
+    <string name="sort_time_month">Diesen Monat</string>
+    <string name="sort_time_year">Dieses Jahr</string>
+    <string name="sort_time_all">Alle Zeiten</string>
+
+    <string name="sort_time_hour_short">Jetzt</string>
+    <string name="sort_time_day_short">Tag</string>
+    <string name="sort_time_week_short">Woche</string>
+    <string name="sort_time_month_short">Monat</string>
+    <string name="sort_time_year_short">Jahr</string>
+    <string name="sort_time_all_short">Alle</string>
+
+    <string name="sort_title">Sortieren</string>
+    <string name="sort_time_title">Zeit</string>
+
+    <string name="sort_hot">Empfohlen</string>
+    <string name="sort_new">Neu</string>
+    <string name="sort_top">Top</string>
+    <string name="sort_rising">Aufstrebend</string>
+    <string name="sort_controversial">Umstritten</string>
+    <string name="sort_relevance">Relevanz</string>
+    <string name="sort_comments">Kommentare</string>
+    <string name="sort_best">Beste</string>
+    <string name="sort_old">Älteste</string>
+    <string name="sort_qa">Q&amp;A</string>
+
+    <string name="fragment_subscriptions_label">Abonnements</string>
+    <string name="subscriptions_search_hint">In Reddit suchen</string>
+
+    <string name="search_hint">In Reddit suchen</string>
+    <string name="search_hint_subreddit">In %1$s suchen</string>
+
+    <string name="fragment_preferences_label">Einstellungen</string>
+
+    <string name="tab_search_post">Beiträge</string>
+    <string name="tab_search_subreddit">Subreddits</string>
+    <string name="tab_search_user">Benutzer</string>
+
+    <string name="subreddit_button_unsubscribe">Abmelden</string>
+    <string name="subreddit_button_subscribe">Anmelden</string>
+    <string name="subreddit_subscribers">Abonnenten</string>
+    <string name="subreddit_active_users">Online</string>
+
+    <string name="user_post_karma">Beitragswertung</string>
+    <string name="user_comment_karma">Kommentarwertung</string>
+    <string name="user_cake_day">Kuchentag</string>
+
+    <string name="flair_nsfw">NSFW</string>
+    <string name="flair_spoiler">Spoiler</string>
+    <string name="flair_oc">OC</string>
+
+    <string name="comment_score">%1$s Punkte</string>
+    <string name="comment_more">Mehr (%1$d)</string>
+    <string name="comment_more_error">Fehler beim Laden der Kommentare. Tippen um erneut zu versuchen.</string>
+    <string name="comment_date_edited">%1$s* (%2$s)</string>
+    <string name="comment_controversiality">✝</string>
+    <string name="comment_op">OP</string>
+
+    <string name="comment_link_info">%1$s - u/%2$s</string>
+
+    <string name="media_page_counter_label">von</string>
+
+    <string name="reddit_user_prefixed">u/%1$s</string>
+
+    <string name="menu_open_link">Extern öffnen</string>
+    <string name="menu_share_link">Link teilen</string>
+    <string name="menu_copy_link">Link kopieren</string>
+    <string name="menu_share_post">Beitrag teilen</string>
+
+    <string name="post_load_discussion">Komplette Diskussion anzeigen</string>
+
+    <string name="network_retry_message">Etwas ist schief gelaufen</string>
+    <string name="network_retry_action">Erneut versuchen</string>
+
+    <string name="dialog_subreddit_not_found_title">Subreddit nicht gefunden</string>
+    <string name="dialog_subreddit_not_found_body">Dieser Subreddit existiert nicht oder wurde möglicherweise gesperrt.</string>
+    <string name="dialog_ok">OK</string>
+    <string name="dialog_subreddit_unauthorized_title">Subreddit ist privat</string>
+    <string name="dialog_subreddit_unauthorized_body">Sie haben keinen Zugriff zu diesem Subreddit.</string>
+
+    <string name="dialog_user_not_found_title">Benutzer nicht gefunden</string>
+    <string name="dialog_user_not_found_body">Dieser Benutzer existiert nicht.</string>
+    <string name="dialog_user_unauthorized_title">Benutzer suspendiert</string>
+    <string name="dialog_user_unauthorized_body">Dieser Benutzer wurde suspendiert.</string>
+
+    <string name="dialog_media_not_found_title">Medium nicht gefunden</string>
+    <string name="dialog_media_not_found_body">Dieses Bild oder Video nach dem Sie suchen, existiert nicht oder wurde entfernt.</string>
+
+    <string name="dialog_night_mode_title">Thema</string>
+
+    <string name="dialog_credit_show_website">Webseite anzeigen</string>
+    <string name="dialog_credit_show_license">Lizenz anzeigen</string>
+
+    <string name="empty_data">Nichts zu sehen hier…</string>
+    <string name="empty_data_subscriptions">Sie haben derzeit keine Abonnements.\nVerwenden Sie die Suchfunktion um nach Subreddits zu suchen.</string>
+
+    <string name="preference_category_ui">OBERFLÄCHE</string>
+    <string name="preference_category_content">INHALT</string>
+    <string name="preference_category_misc">SONSTIGES</string>
+
+    <string name="preference_night_mode">Thema</string>
+    <string name="preference_night_mode_light">Hell</string>
+    <string name="preference_night_mode_dark">Dunkel</string>
+    <string name="preference_night_mode_system">System</string>
+
+    <string name="preference_show_nsfw">NSFW-Inhalt anzeigent</string>
+    <string name="preference_show_nsfw_preview">NSFW-Vorschau anzeigen</string>
+    <string name="preference_show_spoiler_preview">Spoiler-Vorschau anzeigen</string>
+
+    <string name="preference_about">Über</string>
+
+    <string name="fragment_about_label">Über</string>
+
+    <string name="about_section_credits">Danksagungen</string>
+    <string name="about_section_libraries">Bibliotheken</string>
+
+    <string name="navigation_label_home">Startseite</string>
+    <string name="navigation_label_subscriptions">Abonnements</string>
+    <string name="navigation_label_settings">Einstellungen</string>
+</resources>
