@@ -6,6 +6,7 @@
     app:startDestination="@id/userFragment">
 
     <include app:graph="@navigation/viewer" />
+    <include app:graph="@navigation/subreddit" />
 
     <fragment
         android:id="@+id/userFragment"
@@ -49,6 +50,14 @@
         <argument
             android:name="user"
             app:argType="string"/>
+    </action>
+
+    <action
+        android:id="@+id/openSubreddit"
+        app:destination="@id/subreddit">
+        <argument
+            android:name="subreddit"
+            app:argType="string" />
     </action>
 
 </navigation>
