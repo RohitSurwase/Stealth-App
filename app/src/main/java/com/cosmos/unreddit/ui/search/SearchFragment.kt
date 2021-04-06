@@ -56,6 +56,15 @@ class SearchFragment : BaseFragment() {
     @Inject
     lateinit var repository: PostListRepository
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        if (savedInstanceState == null) {
+            val query = args.query
+
+            viewModel.setQuery(query)
+        }
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -67,10 +76,9 @@ class SearchFragment : BaseFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        val query = args.query
+        val query = viewModel.query.value ?: args.query
 
         binding.appBar.searchInput.setText(query)
-        viewModel.setQuery(query)
 
         initResultListener()
         initAppBar()
