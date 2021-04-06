@@ -40,6 +40,18 @@ object LinkUtil {
     }
 
     fun getGfycatVideo(link: String): String {
+        val httpUrl = HttpUrl.parse(link) ?: return link
+        return when (httpUrl.host()) {
+            "thumbs.gfycat.com" -> transformGfycatLink(link)
+            "i.embed.ly" -> {
+                val url = httpUrl.queryParameter("url")
+                url?.let { transformGfycatLink(it) } ?: link
+            }
+            else -> link
+        }
+    }
+
+    private fun transformGfycatLink(link: String): String {
         return link.replace("size_restricted.gif", "mobile.mp4")
     }
 
