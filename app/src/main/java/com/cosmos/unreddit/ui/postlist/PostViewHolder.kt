@@ -87,6 +87,14 @@ abstract class PostViewHolder(
                 postFlairsBinding.postFlair.visibility = View.GONE
             }
         }
+
+        postEntity.crosspost?.let {
+            postInfoBinding.groupCrosspost.isVisible = true
+            postInfoBinding.textCrosspostSubreddit.text = it.subreddit
+            postInfoBinding.textCrosspostAuthor.text = it.author
+        } ?: run {
+            postInfoBinding.groupCrosspost.isVisible = false
+        }
     }
 
     open fun update(post: PostEntity) {

@@ -36,6 +36,7 @@ object PostMapper {
                 postType,
                 domain,
                 isSelf,
+                crossposts?.firstOrNull()?.let { dataToEntity(it) },
                 selfTextHtml,
                 Sorting(RedditApi.Sort.fromName(suggestedSort)),
                 redditText,

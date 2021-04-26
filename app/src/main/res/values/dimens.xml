@@ -138,4 +138,7 @@
     <dimen name="bottom_navigation_radius">16dp</dimen>
     <dimen name="bottom_navigation_size">256dp</dimen>
     <dimen name="bottom_navigation_margin">24dp</dimen>
+
+    <dimen name="card_elevation">8dp</dimen>
+    <dimen name="card_radius">15dp</dimen>
 </resources>

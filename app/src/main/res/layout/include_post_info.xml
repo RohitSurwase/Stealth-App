@@ -64,5 +64,48 @@
             android:text="@{DateUtil.getTimeDifference(context, post.created)}"
             tools:text="5h"/>
 
+        <androidx.constraintlayout.widget.Group
+            android:id="@+id/group_crosspost"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:constraint_referenced_ids="text_crosspost,text_crosspost_subreddit,text_crosspost_author"/>
+
+        <TextView
+            android:id="@+id/text_crosspost"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/text_crosspost_subreddit"
+            app:layout_constraintTop_toBottomOf="@id/text_subreddit"
+            app:layout_constraintHorizontal_chainStyle="packed"
+            app:layout_constraintHorizontal_bias="0"
+            android:textColor="@color/colorPrimary"
+            android:textAppearance="@style/TextAppearancePostInfo"
+            android:text="@string/post_crosspost"/>
+
+        <TextView
+            android:id="@+id/text_crosspost_subreddit"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toEndOf="@id/text_crosspost"
+            app:layout_constraintEnd_toStartOf="@id/text_crosspost_author"
+            app:layout_constraintBottom_toBottomOf="@id/text_crosspost"
+            android:layout_marginStart="@dimen/post_padding_horizontal"
+            android:textColor="@null"
+            android:textAppearance="@style/TextAppearancePostInfo"
+            tools:text="/r/reddit"/>
+
+        <TextView
+            android:id="@+id/text_crosspost_author"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toEndOf="@id/text_crosspost_subreddit"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toBottomOf="@id/text_crosspost"
+            android:layout_marginStart="@dimen/post_padding_horizontal"
+            android:textColor="@null"
+            android:textAppearance="@style/TextAppearancePostInfo"
+            tools:text="/u/user"/>
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

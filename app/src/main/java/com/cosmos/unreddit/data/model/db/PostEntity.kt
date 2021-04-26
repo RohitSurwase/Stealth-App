@@ -41,6 +41,8 @@ data class PostEntity(
 
     val isSelf: Boolean,
 
+    val crosspost: PostEntity?,
+
     val selfTextHtml: String?,
 
     val suggestedSorting: Sorting,
