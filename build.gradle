@@ -38,6 +38,8 @@ buildscript {
 
         jsoup = '1.13.1'
 
+        drawer = '1.0.3'
+
         coroutines = '1.4.1'
 
         jUnit = '4.13.2'

@@ -108,6 +108,8 @@ dependencies {
 
     implementation "org.jsoup:jsoup:$rootProject.jsoup"
 
+    implementation "com.drakeet.drawer:drawer:$rootProject.drawer"
+
     testImplementation "junit:junit:$rootProject.jUnit"
 
     androidTestImplementation "androidx.test:runner:$rootProject.testRunner"
