@@ -10,4 +10,7 @@ abstract class HistoryDao : BaseDao<History> {
 
     @Query("SELECT * FROM history")
     abstract fun getHistory(): Flow<List<History>>
+
+    @Query("SELECT post_id FROM history WHERE profile_id = :profileId")
+    abstract fun getHistoryIdsFromProfile(profileId: Int): Flow<List<String>>
 }

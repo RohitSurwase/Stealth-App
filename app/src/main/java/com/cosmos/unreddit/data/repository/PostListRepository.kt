@@ -9,6 +9,7 @@ import com.cosmos.unreddit.data.model.Sorting
 import com.cosmos.unreddit.data.model.User
 import com.cosmos.unreddit.data.model.db.History
 import com.cosmos.unreddit.data.model.db.PostEntity
+import com.cosmos.unreddit.data.model.db.Profile
 import com.cosmos.unreddit.data.model.db.SubredditEntity
 import com.cosmos.unreddit.data.model.db.Subscription
 import com.cosmos.unreddit.data.remote.api.reddit.RedditApi
@@ -64,8 +65,13 @@ class PostListRepository @Inject constructor(
 
     //region Subscriptions
 
+    @Deprecated("Use per profile subscriptions")
     fun getSubscriptions(): Flow<List<Subscription>> = redditDatabase.subscriptionDao()
         .getSubscriptions().distinctUntilChanged()
+
+    fun getSubscriptionsNames(profileId: Int): Flow<List<String>> {
+        return redditDatabase.subscriptionDao().getSubscriptionsNamesFromProfile(profileId)
+    }
 
     suspend fun subscribe(name: String, icon: String? = null) {
         redditDatabase.subscriptionDao().insert(Subscription(name, System.currentTimeMillis(), icon, 0)) // TODO
@@ -154,13 +160,23 @@ class PostListRepository @Inject constructor(
         return redditDatabase.historyDao().getHistory()
     }
 
+    @Deprecated("Use per profile history")
     fun getHistoryIds(): Flow<List<String>> {
         return redditDatabase.historyDao().getHistory()
             .map { list -> list.map { it.postId } }
     }
 
+    fun getHistoryIds(profileId: Int): Flow<List<String>> {
+        return redditDatabase.historyDao().getHistoryIdsFromProfile(profileId)
+    }
+
     suspend fun insertPostInHistory(id: String) {
         redditDatabase.historyDao().upsert(History(id, System.currentTimeMillis(), 1)) // TODO
+    }
+
+    suspend fun getProfile(id: Int): Profile {
+        return redditDatabase.profileDao().getProfileFromId(id)
+            ?: redditDatabase.profileDao().getFirstProfile()
     }
 
     companion object {

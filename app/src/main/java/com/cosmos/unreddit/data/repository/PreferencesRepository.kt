@@ -5,6 +5,7 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.emptyPreferences
 import com.cosmos.unreddit.data.model.preferences.ContentPreferences
+import com.cosmos.unreddit.data.model.preferences.ProfilePreferences
 import com.cosmos.unreddit.data.model.preferences.UiPreferences
 import com.cosmos.unreddit.util.extension.getValue
 import com.cosmos.unreddit.util.extension.setValue
@@ -88,6 +89,21 @@ class PreferencesRepository @Inject constructor(
                 preferences[ContentPreferences.PreferencesKeys.SHOW_SPOILER_PREVIEW] ?: false
             ContentPreferences(showNsfw, showNsfwPreview, showSpoilerPreview)
         }
+    }
+
+    //endregion
+
+    //region Profile
+
+    fun getCurrentProfile(): Flow<Int> {
+        return preferencesDatastore.getValue(
+            ProfilePreferences.PreferencesKeys.CURRENT_PROFILE,
+            -1
+        )
+    }
+
+    suspend fun setCurrentProfile(profileId: Int) {
+        preferencesDatastore.setValue(ProfilePreferences.PreferencesKeys.CURRENT_PROFILE, profileId)
     }
 
     //endregion
