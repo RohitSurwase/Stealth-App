@@ -108,19 +108,7 @@ interface RedditApi {
 
         companion object {
             fun fromName(value: String?, default: Sort = BEST): Sort {
-                return when (value) {
-                    HOT.name -> HOT
-                    NEW.name -> NEW
-                    TOP.name -> TOP
-                    RISING.name -> RISING
-                    CONTROVERSIAL.name -> CONTROVERSIAL
-                    RELEVANCE.name -> RELEVANCE
-                    COMMENTS.name -> COMMENTS
-                    BEST.name -> BEST
-                    OLD.name -> OLD
-                    QA.name -> QA
-                    else -> default
-                }
+                return values().find { it.type == value } ?: default
             }
         }
     }
