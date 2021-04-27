@@ -68,7 +68,7 @@ class PostListRepository @Inject constructor(
         .getSubscriptions().distinctUntilChanged()
 
     suspend fun subscribe(name: String, icon: String? = null) {
-        redditDatabase.subscriptionDao().insert(Subscription(name, System.currentTimeMillis(), icon))
+        redditDatabase.subscriptionDao().insert(Subscription(name, System.currentTimeMillis(), icon, 0)) // TODO
     }
 
     suspend fun unsubscribe(name: String) {
@@ -160,7 +160,7 @@ class PostListRepository @Inject constructor(
     }
 
     suspend fun insertPostInHistory(id: String) {
-        redditDatabase.historyDao().upsert(History(id, System.currentTimeMillis()))
+        redditDatabase.historyDao().upsert(History(id, System.currentTimeMillis(), 1)) // TODO
     }
 
     companion object {
