@@ -2,7 +2,6 @@ package com.cosmos.unreddit.ui.user
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
@@ -16,6 +15,7 @@ import com.cosmos.unreddit.data.model.preferences.ContentPreferences
 import com.cosmos.unreddit.data.remote.api.reddit.RedditApi
 import com.cosmos.unreddit.data.repository.PostListRepository
 import com.cosmos.unreddit.data.repository.PreferencesRepository
+import com.cosmos.unreddit.ui.base.BaseViewModel
 import com.cosmos.unreddit.util.PagerHelper
 import com.cosmos.unreddit.util.PostUtil
 import com.cosmos.unreddit.util.extension.updateValue
@@ -25,7 +25,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
@@ -37,10 +36,7 @@ import javax.inject.Inject
 class UserViewModel @Inject constructor(
     private val repository: PostListRepository,
     preferencesRepository: PreferencesRepository
-) : ViewModel() {
-
-    private val history: Flow<List<String>> = repository.getHistoryIds()
-        .distinctUntilChanged()
+) : BaseViewModel(preferencesRepository, repository) {
 
     val contentPreferences: Flow<ContentPreferences> =
         preferencesRepository.getContentPreferences()
@@ -72,7 +68,7 @@ class UserViewModel @Inject constructor(
     fun loadAndFilterPosts(user: String, sorting: Sorting): Flow<PagingData<PostEntity>> {
         return PostUtil.filterPosts(
             postPagerHelper.loadData(user, sorting),
-            history,
+            historyIds,
             contentPreferences
         ).cachedIn(viewModelScope)
     }

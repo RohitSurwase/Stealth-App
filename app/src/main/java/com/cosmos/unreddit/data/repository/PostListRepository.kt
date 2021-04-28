@@ -27,7 +27,6 @@ import com.cosmos.unreddit.data.remote.datasource.UserPostsDataSource
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -64,10 +63,6 @@ class PostListRepository @Inject constructor(
     //endregion
 
     //region Subscriptions
-
-    @Deprecated("Use per profile subscriptions")
-    fun getSubscriptions(): Flow<List<Subscription>> = redditDatabase.subscriptionDao()
-        .getSubscriptions().distinctUntilChanged()
 
     fun getSubscriptions(profileId: Int): Flow<List<Subscription>> = redditDatabase
         .subscriptionDao().getSubscriptionsFromProfile(profileId).distinctUntilChanged()
@@ -161,15 +156,7 @@ class PostListRepository @Inject constructor(
 
     //endregion
 
-    fun getHistory(): Flow<List<History>> {
-        return redditDatabase.historyDao().getHistory()
-    }
-
-    @Deprecated("Use per profile history")
-    fun getHistoryIds(): Flow<List<String>> {
-        return redditDatabase.historyDao().getHistory()
-            .map { list -> list.map { it.postId } }
-    }
+    //region History
 
     fun getHistoryIds(profileId: Int): Flow<List<String>> {
         return redditDatabase.historyDao().getHistoryIdsFromProfile(profileId)
@@ -179,10 +166,16 @@ class PostListRepository @Inject constructor(
         redditDatabase.historyDao().upsert(History(postId, System.currentTimeMillis(), profileId))
     }
 
+    //endregion
+
+    //region Profile
+
     suspend fun getProfile(id: Int): Profile {
         return redditDatabase.profileDao().getProfileFromId(id)
             ?: redditDatabase.profileDao().getFirstProfile()
     }
+
+    //endregion
 
     companion object {
         private const val DEFAULT_LIMIT = 25
