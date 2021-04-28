@@ -14,8 +14,6 @@ import com.cosmos.unreddit.databinding.ItemPostLinkBinding
 import com.cosmos.unreddit.databinding.ItemPostTextBinding
 import com.cosmos.unreddit.ui.common.widget.RedditView
 import com.cosmos.unreddit.util.ClickableMovementMethod
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 
 class PostListAdapter(
     private val repository: PostListRepository,
@@ -82,12 +80,11 @@ class PostListAdapter(
     private val listener = object : Listener {
         override fun onClick(position: Int, isLong: Boolean) {
             getItem(position)?.let {
-                it.seen = true
-                insertPostInHistory(it.id)
-                notifyItemChanged(position, it)
                 if (isLong) {
                     postClickListener.onLongClick(it)
                 } else {
+                    it.seen = true
+                    notifyItemChanged(position, it)
                     postClickListener.onClick(it)
                 }
             }
@@ -185,12 +182,6 @@ class PostListAdapter(
         } else {
             val item = getItem(position) ?: return
             (holder as? PostViewHolder)?.update(item)
-        }
-    }
-
-    private fun insertPostInHistory(id: String) {
-        GlobalScope.launch {
-            repository.insertPostInHistory(id)
         }
     }
 

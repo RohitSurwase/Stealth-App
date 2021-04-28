@@ -2,7 +2,6 @@ package com.cosmos.unreddit.ui.postdetails
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.liveData
 import androidx.lifecycle.switchMap
 import androidx.lifecycle.viewModelScope
@@ -17,6 +16,8 @@ import com.cosmos.unreddit.data.remote.api.reddit.RedditApi
 import com.cosmos.unreddit.data.remote.api.reddit.model.Listing
 import com.cosmos.unreddit.data.remote.api.reddit.model.PostChild
 import com.cosmos.unreddit.data.repository.PostListRepository
+import com.cosmos.unreddit.data.repository.PreferencesRepository
+import com.cosmos.unreddit.ui.base.BaseViewModel
 import com.cosmos.unreddit.util.extension.updateValue
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -24,6 +25,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -33,7 +35,12 @@ import javax.inject.Inject
 
 @HiltViewModel
 class PostDetailsViewModel
-@Inject constructor(private val repository: PostListRepository) : ViewModel() {
+@Inject constructor(
+    preferencesRepository: PreferencesRepository,
+    private val repository: PostListRepository
+) : BaseViewModel(preferencesRepository, repository) {
+
+    private val _coroutineContext = viewModelScope.coroutineContext + Dispatchers.IO
 
     private val _sorting: MutableStateFlow<Sorting> = MutableStateFlow(DEFAULT_SORTING)
     val sorting: StateFlow<Sorting> = _sorting
@@ -123,6 +130,12 @@ class PostDetailsViewModel
             }.collect {
                 _listings.value = Resource.Success(it)
             }
+        }
+    }
+
+    fun insertPostInHistory(postId: String) {
+        viewModelScope.launch(_coroutineContext) {
+            currentProfile.first().let { repository.insertPostInHistory(postId, it.id) }
         }
     }
 

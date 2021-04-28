@@ -173,8 +173,8 @@ class PostListRepository @Inject constructor(
         return redditDatabase.historyDao().getHistoryIdsFromProfile(profileId)
     }
 
-    suspend fun insertPostInHistory(id: String) {
-        redditDatabase.historyDao().upsert(History(id, System.currentTimeMillis(), 1)) // TODO
+    suspend fun insertPostInHistory(postId: String, profileId: Int) {
+        redditDatabase.historyDao().upsert(History(postId, System.currentTimeMillis(), profileId))
     }
 
     suspend fun getProfile(id: Int): Profile {

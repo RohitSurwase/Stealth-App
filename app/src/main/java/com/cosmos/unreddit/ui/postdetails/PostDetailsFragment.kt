@@ -187,6 +187,7 @@ class PostDetailsFragment :
         binding.appBar.label.text = post.title
         postAdapter.setPost(post, fromCache)
         commentAdapter.linkId = post.id
+        viewModel.insertPostInHistory(post.id)
     }
 
     private fun handleArguments() {
