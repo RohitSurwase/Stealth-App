@@ -59,7 +59,7 @@ class SubscriptionsFragment : BaseFragment() {
     }
 
     private fun bindViewModel() {
-        viewModel.subscriptions.observe(viewLifecycleOwner) {
+        viewModel.filteredSubscriptions.observe(viewLifecycleOwner) {
             adapter.submitList(it)
             if (binding.appBar.searchInput.isQueryEmpty()) {
                 binding.emptyData.isVisible = it.isEmpty()

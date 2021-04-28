@@ -9,7 +9,6 @@ import com.cosmos.unreddit.ui.base.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.flatMapConcat
 import javax.inject.Inject
 
 @HiltViewModel
@@ -20,13 +19,14 @@ class SubscriptionsViewModel @Inject constructor(
 
     private val _searchQuery: MutableStateFlow<String?> = MutableStateFlow(null)
 
-    val subscriptions: LiveData<List<Subscription>> = currentProfile.flatMapConcat {
-        combine(repository.getSubscriptions(it.id), _searchQuery) { subscriptions, searchQuery ->
-            subscriptions.filter { subscription ->
-                searchQuery?.let { query ->
-                    subscription.name.contains(query, ignoreCase = true)
-                } ?: true
-            }
+    val filteredSubscriptions: LiveData<List<Subscription>> = combine(
+        subscriptions,
+        _searchQuery
+    ) { subscriptions, searchQuery ->
+        subscriptions.filter { subscription ->
+            searchQuery?.let { query ->
+                subscription.name.contains(query, ignoreCase = true)
+            } ?: true
         }
     }.asLiveData()
 
