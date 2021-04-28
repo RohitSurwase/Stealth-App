@@ -76,12 +76,14 @@ class PostListRepository @Inject constructor(
         return redditDatabase.subscriptionDao().getSubscriptionsNamesFromProfile(profileId)
     }
 
-    suspend fun subscribe(name: String, icon: String? = null) {
-        redditDatabase.subscriptionDao().insert(Subscription(name, System.currentTimeMillis(), icon, 0)) // TODO
+    suspend fun subscribe(name: String, profileId: Int, icon: String? = null) {
+        redditDatabase.subscriptionDao().insert(
+            Subscription(name, System.currentTimeMillis(), icon, profileId)
+        )
     }
 
-    suspend fun unsubscribe(name: String) {
-        redditDatabase.subscriptionDao().deleteFromName(name)
+    suspend fun unsubscribe(name: String, profileId: Int) {
+        redditDatabase.subscriptionDao().deleteFromNameAndProfile(name, profileId)
     }
 
     //endregion

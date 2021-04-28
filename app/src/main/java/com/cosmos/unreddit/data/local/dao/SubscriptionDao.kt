@@ -11,6 +11,9 @@ abstract class SubscriptionDao : BaseDao<Subscription> {
     @Query("DELETE FROM subscription WHERE name = :name")
     abstract suspend fun deleteFromName(name: String)
 
+    @Query("DELETE FROM subscription WHERE name = :name AND profile_id = :profileId")
+    abstract suspend fun deleteFromNameAndProfile(name: String, profileId: Int)
+
     @Query("SELECT * FROM subscription")
     abstract fun getSubscriptions(): Flow<List<Subscription>>
 

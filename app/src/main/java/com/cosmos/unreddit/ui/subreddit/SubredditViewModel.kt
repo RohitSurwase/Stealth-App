@@ -2,7 +2,6 @@ package com.cosmos.unreddit.ui.subreddit
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
@@ -16,19 +15,21 @@ import com.cosmos.unreddit.data.model.preferences.ContentPreferences
 import com.cosmos.unreddit.data.remote.api.reddit.RedditApi
 import com.cosmos.unreddit.data.repository.PostListRepository
 import com.cosmos.unreddit.data.repository.PreferencesRepository
+import com.cosmos.unreddit.ui.base.BaseViewModel
 import com.cosmos.unreddit.util.PagerHelper
 import com.cosmos.unreddit.util.PostUtil
 import com.cosmos.unreddit.util.extension.updateValue
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
-import kotlinx.coroutines.flow.transform
 import kotlinx.coroutines.launch
 import retrofit2.HttpException
 import java.io.IOException
@@ -38,10 +39,9 @@ import javax.inject.Inject
 class SubredditViewModel @Inject constructor(
     private val repository: PostListRepository,
     preferencesRepository: PreferencesRepository
-) : ViewModel() {
+) : BaseViewModel(preferencesRepository, repository) {
 
-    private val history: Flow<List<String>> = repository.getHistoryIds()
-        .distinctUntilChanged()
+    private val _coroutineContext = viewModelScope.coroutineContext + Dispatchers.IO
 
     val contentPreferences: Flow<ContentPreferences> =
         preferencesRepository.getContentPreferences()
@@ -64,18 +64,25 @@ class SubredditViewModel @Inject constructor(
         }
     }
 
-    val isSubscribed: LiveData<Boolean> = _subreddit.transform { _subreddit ->
+    val isSubscribed: LiveData<Boolean> = combine(
+        _subreddit,
+        subscriptionsNames
+    ) { _subreddit, names ->
         _subreddit?.let { subreddit ->
-            repository.getSubscriptions().map { list ->
-                emit(list.any { it.name.equals(subreddit, ignoreCase = true) })
-            }.collect()
-        }
+            names.any { it.equals(subreddit, ignoreCase = true) }
+        } ?: false
     }.asLiveData()
+
+    private val subredditName: String
+        get() = about.value?.dataValue?.displayName ?: subreddit.value!!
+
+    private val icon: String?
+        get() = about.value?.dataValue?.icon
 
     fun loadAndFilterPosts(subreddit: String, sorting: Sorting): Flow<PagingData<PostEntity>> {
         return PostUtil.filterPosts(
             postPagerHelper.loadData(subreddit, sorting),
-            history,
+            historyIds,
             contentPreferences
         ).cachedIn(viewModelScope)
     }
@@ -121,17 +128,15 @@ class SubredditViewModel @Inject constructor(
     }
 
     fun toggleSubscription() {
-        viewModelScope.launch {
-            if (isSubscribed.value == true) {
-                repository.unsubscribe(getSubredditName())
-            } else {
-                repository.subscribe(getSubredditName(), about.value?.dataValue?.icon)
+        viewModelScope.launch(_coroutineContext) {
+            currentProfile.first().let {
+                if (isSubscribed.value == true) {
+                    repository.unsubscribe(subredditName, it.id)
+                } else {
+                    repository.subscribe(subredditName, it.id, icon)
+                }
             }
         }
-    }
-
-    private fun getSubredditName(): String {
-        return about.value?.dataValue?.displayName ?: subreddit.value!!
     }
 
     companion object {
