@@ -69,6 +69,9 @@ class PostListRepository @Inject constructor(
     fun getSubscriptions(): Flow<List<Subscription>> = redditDatabase.subscriptionDao()
         .getSubscriptions().distinctUntilChanged()
 
+    fun getSubscriptions(profileId: Int): Flow<List<Subscription>> = redditDatabase
+        .subscriptionDao().getSubscriptionsFromProfile(profileId).distinctUntilChanged()
+
     fun getSubscriptionsNames(profileId: Int): Flow<List<String>> {
         return redditDatabase.subscriptionDao().getSubscriptionsNamesFromProfile(profileId)
     }

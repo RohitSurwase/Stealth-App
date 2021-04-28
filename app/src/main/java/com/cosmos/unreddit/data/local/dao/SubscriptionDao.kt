@@ -14,6 +14,9 @@ abstract class SubscriptionDao : BaseDao<Subscription> {
     @Query("SELECT * FROM subscription")
     abstract fun getSubscriptions(): Flow<List<Subscription>>
 
+    @Query("SELECT * FROM subscription WHERE profile_id = :profileId")
+    abstract fun getSubscriptionsFromProfile(profileId: Int): Flow<List<Subscription>>
+
     @Query("SELECT name FROM subscription WHERE profile_id = :profileId")
     abstract fun getSubscriptionsNamesFromProfile(profileId: Int): Flow<List<String>>
 }
