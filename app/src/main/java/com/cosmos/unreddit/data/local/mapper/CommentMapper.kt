@@ -29,6 +29,7 @@ object CommentMapper {
                 author,
                 scoreString,
                 awardings.sortedByDescending { it.count }.map { Award(it.count, it.getIcon()) },
+                bodyHtml,
                 htmlParser.separateHtmlBlocks(bodyHtml),
                 editedMillis,
                 isSubmitter,

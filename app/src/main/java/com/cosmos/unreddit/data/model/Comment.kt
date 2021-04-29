@@ -1,7 +1,12 @@
 package com.cosmos.unreddit.data.model
 
 import android.content.Context
+import androidx.room.ColumnInfo
+import androidx.room.Entity
+import androidx.room.ForeignKey
+import androidx.room.Ignore
 import com.cosmos.unreddit.R
+import com.cosmos.unreddit.data.model.db.Profile
 import com.cosmos.unreddit.util.DateUtil
 
 sealed class Comment {
@@ -9,27 +14,49 @@ sealed class Comment {
     abstract val name: String
     abstract val depth: Int
 
-    data class CommentEntity(
+    @Entity(
+        tableName = "comment",
+        primaryKeys = ["name", "profile_id"],
+        foreignKeys = [
+            ForeignKey(
+                entity = Profile::class,
+                parentColumns = ["id"],
+                childColumns = ["profile_id"],
+                onDelete = ForeignKey.CASCADE
+            )
+        ]
+    )
+    data class CommentEntity @JvmOverloads constructor(
+        @ColumnInfo(name = "total_awards")
         val totalAwards: Int,
 
+        @ColumnInfo(name = "link_id")
         val linkId: String,
 
-        val replies: MutableList<Comment>,
+        @Ignore
+        val replies: MutableList<Comment> = mutableListOf(),
 
         val author: String,
 
         val score: String,
 
-        val awards: List<Award>,
+        @Ignore
+        val awards: List<Award> = listOf(),
 
-        val body: RedditText,
+        @ColumnInfo(name = "body_html")
+        val bodyHtml: String,
+
+        @Ignore
+        var body: RedditText = RedditText(),
 
         val edited: Long,
 
+        @ColumnInfo(name = "submitter")
         val isSubmitter: Boolean,
 
         val stickied: Boolean,
 
+        @ColumnInfo(name = "score_hidden")
         val scoreHidden: Boolean,
 
         val permalink: String,
@@ -40,23 +67,34 @@ sealed class Comment {
 
         val controversiality: Int,
 
-        val flair: Flair,
+        @Ignore
+        val flair: Flair = Flair(),
 
+        @ColumnInfo(name = "poster_type")
         val posterType: PosterType,
 
+        @ColumnInfo(name = "link_title")
         val linkTitle: String?,
 
+        @ColumnInfo(name = "link_permalink")
         val linkPermalink: String?,
 
+        @ColumnInfo(name = "link_author")
         val linkAuthor: String?,
 
         val subreddit: String,
 
-        val commentIndicator: Int?,
+        @Ignore
+        val commentIndicator: Int? = null,
 
+        @ColumnInfo(name = "name")
         override val name: String,
 
-        override val depth: Int
+        @Ignore
+        override val depth: Int = 0,
+
+        @ColumnInfo(name = "profile_id")
+        var profileId: Int = -1,
     ) : Comment() {
         var isExpanded: Boolean = false
 
