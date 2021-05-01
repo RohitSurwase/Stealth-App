@@ -33,6 +33,8 @@ class PostListAdapter(
         fun onVideoClick(post: PostEntity)
 
         fun onLinkClick(post: PostEntity)
+
+        fun onSaveClick(post: PostEntity)
     }
 
     interface Listener {

@@ -46,7 +46,7 @@ class PostDetailsFragment :
     private var _binding: FragmentPostDetailsBinding? = null
     private val binding get() = _binding!!
 
-    private val viewModel: PostDetailsViewModel by viewModels()
+    override val viewModel: PostDetailsViewModel by viewModels()
 
     private val args: PostDetailsFragmentArgs by navArgs()
 

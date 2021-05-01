@@ -28,7 +28,7 @@ class MediaViewerFragment : BaseFragment() {
     private var _binding: FragmentMediaViewerBinding? = null
     private val binding get() = _binding!!
 
-    private val viewModel: MediaViewerViewModel by viewModels()
+    private val viewerViewModel: MediaViewerViewModel by viewModels()
 
     private val args: MediaViewerFragmentArgs by navArgs()
 
@@ -61,7 +61,7 @@ class MediaViewerFragment : BaseFragment() {
     }
 
     private fun bindViewModel() {
-        viewModel.media.observe(viewLifecycleOwner) {
+        viewerViewModel.media.observe(viewLifecycleOwner) {
             binding.loadingCradle.isVisible = it is Resource.Loading
             when (it) {
                 is Resource.Success -> bindMedia(it.data)
@@ -71,7 +71,7 @@ class MediaViewerFragment : BaseFragment() {
                 }
             }
         }
-        viewModel.selectedPage.observe(viewLifecycleOwner) {
+        viewerViewModel.selectedPage.observe(viewLifecycleOwner) {
             binding.listThumbnails.betterSmoothScrollToPosition(it)
             thumbnailAdapter.selectItem(it)
             binding.textPageCurrent.text = it.plus(1).toString()
@@ -94,7 +94,7 @@ class MediaViewerFragment : BaseFragment() {
             registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
                 override fun onPageSelected(position: Int) {
                     super.onPageSelected(position)
-                    viewModel.setSelectedPage(position)
+                    viewerViewModel.setSelectedPage(position)
                 }
             })
         }
@@ -106,21 +106,21 @@ class MediaViewerFragment : BaseFragment() {
 
     private fun handleArguments() {
         if (args.images != null) {
-            viewModel.setMedia(args.images!!.toList())
+            viewerViewModel.setMedia(args.images!!.toList())
         } else if (args.link != null && args.type != MediaType.NO_MEDIA) {
-            viewModel.loadMedia(args.link!!, args.type)
+            viewerViewModel.loadMedia(args.link!!, args.type)
         } else {
             arguments?.let { bundle ->
                 if (bundle.containsKey(BUNDLE_KEY_IMAGES)) {
                     val images = bundle.getParcelableArrayList<GalleryMedia>(BUNDLE_KEY_IMAGES)
                     if (images != null) {
-                        viewModel.setMedia(images.toList())
+                        viewerViewModel.setMedia(images.toList())
                     }
                 } else if (bundle.containsKey(BUNDLE_KEY_LINK)) {
                     val link = bundle.getString(BUNDLE_KEY_LINK, "")
                     val type = bundle.getSerializable(BUNDLE_KEY_TYPE) as? MediaType
                         ?: MediaType.LINK
-                    viewModel.loadMedia(link, type)
+                    viewerViewModel.loadMedia(link, type)
                 }
                 isLegacyNavigation = true
             }
@@ -149,12 +149,12 @@ class MediaViewerFragment : BaseFragment() {
 
     private fun retry() {
         if (args.link != null) {
-            viewModel.loadMedia(args.link!!, args.type, true)
+            viewerViewModel.loadMedia(args.link!!, args.type, true)
         } else {
             val link = arguments?.getString(BUNDLE_KEY_LINK)
             val type = arguments?.getSerializable(BUNDLE_KEY_TYPE) as? MediaType
             if (link != null && type != null) {
-                viewModel.loadMedia(link, type, true)
+                viewerViewModel.loadMedia(link, type, true)
             }
         }
     }

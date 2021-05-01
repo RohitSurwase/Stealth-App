@@ -57,7 +57,8 @@ object PostMapper {
                 mediaType,
                 mediaUrl,
                 gallery,
-                false
+                seen = false,
+                saved = false
             )
         }
     }

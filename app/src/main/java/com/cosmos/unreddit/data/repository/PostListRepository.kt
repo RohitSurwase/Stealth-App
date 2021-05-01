@@ -177,6 +177,21 @@ class PostListRepository @Inject constructor(
 
     //endregion
 
+    //region Save
+
+    suspend fun savePost(post: PostEntity, profileId: Int) {
+        post.run {
+            this.profileId = profileId
+            redditDatabase.postDao().upsert(this)
+        }
+    }
+
+    suspend fun unsavePost(post: PostEntity, profileId: Int) {
+        redditDatabase.postDao().deleteFromIdAndProfile(post.id, profileId)
+    }
+
+    //endregion
+
     companion object {
         private const val DEFAULT_LIMIT = 25
     }

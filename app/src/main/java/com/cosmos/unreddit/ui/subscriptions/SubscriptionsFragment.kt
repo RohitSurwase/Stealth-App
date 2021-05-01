@@ -24,7 +24,7 @@ class SubscriptionsFragment : BaseFragment() {
     private var _binding: FragmentSubscriptionsBinding? = null
     private val binding get() = _binding!!
 
-    private val viewModel: SubscriptionsViewModel by activityViewModels()
+    override val viewModel: SubscriptionsViewModel by activityViewModels()
     private val uiViewModel: UiViewModel by activityViewModels()
 
     private lateinit var adapter: SubscriptionsAdapter

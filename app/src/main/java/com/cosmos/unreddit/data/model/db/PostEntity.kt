@@ -125,6 +125,9 @@ data class PostEntity @JvmOverloads constructor(
     @Ignore
     var seen: Boolean = true,
 
+    @Ignore
+    var saved: Boolean = true,
+
     @ColumnInfo(name = "profile_id")
     var profileId: Int = -1,
 ) : Parcelable {

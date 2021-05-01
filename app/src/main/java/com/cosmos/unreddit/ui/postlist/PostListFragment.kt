@@ -38,7 +38,7 @@ class PostListFragment : BaseFragment() {
     private var _binding: FragmentPostBinding? = null
     private val binding get() = _binding!!
 
-    private val viewModel: PostListViewModel by activityViewModels()
+    override val viewModel: PostListViewModel by activityViewModels()
     private val uiViewModel: UiViewModel by activityViewModels()
 
     private var loadPostsJob: Job? = null

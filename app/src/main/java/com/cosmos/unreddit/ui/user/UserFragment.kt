@@ -49,7 +49,7 @@ class UserFragment : BaseFragment() {
     private var _binding: FragmentUserBinding? = null
     private val binding get() = _binding!!
 
-    private val viewModel: UserViewModel by viewModels()
+    override val viewModel: UserViewModel by viewModels()
 
     private val args: UserFragmentArgs by navArgs()
 
