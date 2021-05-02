@@ -37,8 +37,12 @@ class CheckableImageView @JvmOverloads constructor(
     }
 
     override fun setChecked(checked: Boolean) {
-        this.checked = checked
-        onCheckedChangeListener?.onCheckedChanged(this, checked)
+        if (this.checked != checked) {
+            this.checked = checked
+            refreshDrawableState()
+
+            onCheckedChangeListener?.onCheckedChanged(this, checked)
+        }
     }
 
     override fun isChecked(): Boolean {
