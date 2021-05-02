@@ -18,20 +18,22 @@ object PostUtil {
     fun filterPosts(
         posts: Flow<PagingData<PostEntity>>,
         history: Flow<List<String>>,
+        saved: Flow<List<String>>,
         contentPreferences: Flow<ContentPreferences>
     ): Flow<PagingData<PostEntity>> {
         return combine(
             posts,
             history,
+            saved,
             contentPreferences
-        ) { _posts, _history, _contentPreferences ->
+        ) { _posts, _history, _saved, _contentPreferences ->
             _posts.filter { post ->
                 _contentPreferences.showNsfw || !post.isOver18
             }.map { post ->
-                if (_history.contains(post.id)) {
-                    post.seen = true
+                post.apply {
+                    this.seen = _history.contains(post.id)
+                    this.saved = _saved.contains(post.id)
                 }
-                post
             }
         }
     }

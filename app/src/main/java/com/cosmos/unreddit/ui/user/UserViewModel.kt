@@ -69,6 +69,7 @@ class UserViewModel @Inject constructor(
         return PostUtil.filterPosts(
             postPagerHelper.loadData(user, sorting),
             historyIds,
+            savedPostIds,
             contentPreferences
         ).cachedIn(viewModelScope)
     }

@@ -83,6 +83,7 @@ class SubredditViewModel @Inject constructor(
         return PostUtil.filterPosts(
             postPagerHelper.loadData(subreddit, sorting),
             historyIds,
+            savedPostIds,
             contentPreferences
         ).cachedIn(viewModelScope)
     }

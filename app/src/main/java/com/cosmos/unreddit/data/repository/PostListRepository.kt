@@ -190,6 +190,10 @@ class PostListRepository @Inject constructor(
         redditDatabase.postDao().deleteFromIdAndProfile(post.id, profileId)
     }
 
+    fun getSavedPostIds(profileId: Int): Flow<List<String>> {
+        return redditDatabase.postDao().getSavedPostsFromProfile(profileId)
+    }
+
     //endregion
 
     companion object {

@@ -126,6 +126,10 @@ class PostAdapter(
                 postClickListener.onMenuClick(post)
             }
 
+            binding.includePostMetrics.buttonSave.setOnClickListener {
+                postClickListener.onSaveClick(post)
+            }
+
             post.crosspost?.let { crosspost ->
                 binding.includeCrosspost.run {
                     root.isVisible = true
@@ -137,11 +141,15 @@ class PostAdapter(
             } ?: run {
                 binding.includeCrosspost.root.isVisible = false
             }
+
+            binding.includePostMetrics.buttonSave.isChecked = post.saved
         }
 
         fun update(post: PostEntity) {
             binding.includePostMetrics.post = post
             binding.includePostFlairs.post = post
+
+            binding.includePostMetrics.buttonSave.isChecked = post.saved
 
             if (post.type == PostType.TEXT) {
                 bindText(post)

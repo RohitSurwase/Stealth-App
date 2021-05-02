@@ -43,6 +43,8 @@ class PostListAdapter(
         fun onMediaClick(position: Int)
 
         fun onMenuClick(position: Int)
+
+        fun onSaveClick(position: Int)
     }
 
     private val clickableMovementMethod = ClickableMovementMethod(
@@ -111,6 +113,13 @@ class PostListAdapter(
             }
         }
 
+        override fun onSaveClick(position: Int) {
+            getItem(position)?.let {
+                postClickListener.onSaveClick(it)
+                it.saved = !it.saved
+                notifyItemChanged(position, it)
+            }
+        }
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
@@ -195,6 +204,10 @@ class PostListAdapter(
 
             override fun areContentsTheSame(oldItem: PostEntity, newItem: PostEntity): Boolean {
                 return oldItem == newItem
+            }
+
+            override fun getChangePayload(oldItem: PostEntity, newItem: PostEntity): Any {
+                return newItem
             }
         }
     }

@@ -39,6 +39,10 @@ abstract class PostViewHolder(
         postMetricsBinding.buttonMore.setOnClickListener {
             listener.onMenuClick(bindingAdapterPosition)
         }
+
+        postMetricsBinding.buttonSave.setOnClickListener {
+            listener.onSaveClick(bindingAdapterPosition)
+        }
     }
 
     open fun bind(
@@ -95,10 +99,13 @@ abstract class PostViewHolder(
         } ?: run {
             postInfoBinding.groupCrosspost.isVisible = false
         }
+
+        postMetricsBinding.buttonSave.isChecked = postEntity.saved
     }
 
     open fun update(post: PostEntity) {
         title.setTextColor(ContextCompat.getColor(title.context, post.textColor))
+        postMetricsBinding.buttonSave.isChecked = post.saved
     }
 
     class ImagePostViewHolder(

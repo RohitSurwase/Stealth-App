@@ -37,6 +37,10 @@ open class BaseViewModel(
         postListRepository.getSubscriptionsNames(it.id).distinctUntilChanged()
     }.shareIn(viewModelScope, SharingStarted.WhileSubscribed(), 1)
 
+    protected val savedPostIds: Flow<List<String>> = currentProfile.flatMapConcat {
+        postListRepository.getSavedPostIds(it.id).distinctUntilChanged()
+    }.shareIn(viewModelScope, SharingStarted.WhileSubscribed(), 1)
+
     fun toggleSavePost(post: PostEntity) {
         viewModelScope.launch {
             currentProfile.first().let {

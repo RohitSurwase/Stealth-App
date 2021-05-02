@@ -2,8 +2,6 @@ package com.cosmos.unreddit.ui.postdetails
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.liveData
-import androidx.lifecycle.switchMap
 import androidx.lifecycle.viewModelScope
 import com.cosmos.unreddit.data.local.mapper.CommentMapper
 import com.cosmos.unreddit.data.local.mapper.PostMapper
@@ -21,12 +19,17 @@ import com.cosmos.unreddit.ui.base.BaseViewModel
 import com.cosmos.unreddit.util.extension.updateValue
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import retrofit2.HttpException
@@ -51,38 +54,41 @@ class PostDetailsViewModel
     private val _singleThread: MutableLiveData<Boolean> = MutableLiveData(false)
     val singleThread: LiveData<Boolean> = _singleThread
 
-    private val _listings: MutableLiveData<Resource<List<Listing>>> = MutableLiveData()
+    private val _listings: MutableStateFlow<Resource<List<Listing>>> =
+        MutableStateFlow(Resource.Loading())
 
-    val post: LiveData<Resource<PostEntity>> = _listings.switchMap {
-        liveData {
-            val resource = when (it) {
-                is Resource.Success -> {
-                    val data = PostMapper.dataToEntity(
-                        (it.data[0].data.children[0] as PostChild).data
-                    )
-                    Resource.Success(data)
-                }
-                is Resource.Loading -> Resource.Loading()
-                is Resource.Error -> Resource.Error(it.code, it.message)
+    private val _post: Flow<Resource<PostEntity>> = _listings.map {
+        when (it) {
+            is Resource.Success -> {
+                val data = PostMapper.dataToEntity(
+                    (it.data[0].data.children[0] as PostChild).data
+                )
+                Resource.Success(data)
             }
-            emit(resource)
+            is Resource.Loading -> Resource.Loading()
+            is Resource.Error -> Resource.Error(it.code, it.message)
         }
     }
 
-    val comments: LiveData<Resource<List<Comment>>> = _listings.switchMap {
-        liveData {
-            val resource = when (it) {
-                is Resource.Success -> {
-                    val list = CommentMapper.dataToEntities(it.data[1].data.children)
-                    val data = getComments(list, DEPTH_LIMIT)
-                    Resource.Success(data)
-                }
-                is Resource.Loading -> Resource.Loading()
-                is Resource.Error -> Resource.Error(it.code, it.message)
+    val post: Flow<Resource<PostEntity>> = combine(_post, savedPostIds) { post, savedIds ->
+        post.apply {
+            if (this is Resource.Success) {
+                data.saved = savedIds.contains(data.id)
             }
-            emit(resource)
         }
-    }
+    }.shareIn(viewModelScope, SharingStarted.WhileSubscribed(), 1)
+
+    val comments: Flow<Resource<List<Comment>>> = _listings.map {
+        when (it) {
+            is Resource.Success -> {
+                val list = CommentMapper.dataToEntities(it.data[1].data.children)
+                val data = getComments(list, DEPTH_LIMIT)
+                Resource.Success(data)
+            }
+            is Resource.Loading -> Resource.Loading()
+            is Resource.Error -> Resource.Error(it.code, it.message)
+        }
+    }.shareIn(viewModelScope, SharingStarted.WhileSubscribed(), 1)
 
     private suspend fun getComments(list: List<Comment>, depthLimit: Int): List<Comment> {
         return withContext(Dispatchers.Default) {

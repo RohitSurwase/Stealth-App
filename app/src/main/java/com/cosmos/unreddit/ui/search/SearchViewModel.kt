@@ -66,6 +66,7 @@ class SearchViewModel @Inject constructor(
         return PostUtil.filterPosts(
             postPagerHelper.loadData(query, sorting),
             historyIds,
+            savedPostIds,
             contentPreferences
         ).cachedIn(viewModelScope)
     }

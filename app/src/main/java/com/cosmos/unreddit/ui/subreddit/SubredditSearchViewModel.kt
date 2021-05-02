@@ -51,6 +51,7 @@ class SubredditSearchViewModel @Inject constructor(
         return PostUtil.filterPosts(
             searchPagerHelper.loadData(query, sorting),
             historyIds,
+            savedPostIds,
             contentPreferences
         ).cachedIn(viewModelScope)
     }

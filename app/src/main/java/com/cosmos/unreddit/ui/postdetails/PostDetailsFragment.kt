@@ -134,7 +134,7 @@ class PostDetailsFragment :
                 }
             }.collect()
         }
-        viewModel.post.observe(viewLifecycleOwner) {
+        viewModel.post.asLiveData().observe(viewLifecycleOwner) {
             when (it) {
                 is Resource.Success -> bindPost(it.data, false)
                 else -> {
@@ -142,7 +142,7 @@ class PostDetailsFragment :
                 }
             }
         }
-        viewModel.comments.observe(viewLifecycleOwner) {
+        viewModel.comments.asLiveData().observe(viewLifecycleOwner) {
             resourceStateAdapter.resource = it
             when (it) {
                 is Resource.Success -> commentAdapter.submitData(it.data)
