@@ -194,6 +194,21 @@ class PostListRepository @Inject constructor(
         return redditDatabase.postDao().getSavedPostsFromProfile(profileId)
     }
 
+    suspend fun saveComment(comment: Comment.CommentEntity, profileId: Int) {
+        comment.run {
+            this.profileId = profileId
+            redditDatabase.commentDao().upsert(comment)
+        }
+    }
+
+    suspend fun unsaveComment(comment: Comment.CommentEntity, profileId: Int) {
+        redditDatabase.commentDao().deleteFromIdAndProfile(comment.name, profileId)
+    }
+
+    fun getSavedCommentIds(profileId: Int): Flow<List<String>> {
+        return redditDatabase.commentDao().getSavedCommentsFromProfile(profileId)
+    }
+
     //endregion
 
     companion object {

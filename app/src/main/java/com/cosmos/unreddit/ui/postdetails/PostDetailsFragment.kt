@@ -25,11 +25,13 @@ import com.cosmos.unreddit.data.repository.PostListRepository
 import com.cosmos.unreddit.data.repository.PreferencesRepository
 import com.cosmos.unreddit.databinding.FragmentPostDetailsBinding
 import com.cosmos.unreddit.ui.base.BaseFragment
+import com.cosmos.unreddit.ui.commentmenu.CommentMenuFragment
 import com.cosmos.unreddit.ui.common.ElasticDragDismissFrameLayout
 import com.cosmos.unreddit.ui.loadstate.ResourceStateAdapter
 import com.cosmos.unreddit.ui.mediaviewer.MediaViewerFragment
 import com.cosmos.unreddit.ui.sort.SortFragment
 import com.cosmos.unreddit.util.extension.betterSmoothScrollToPosition
+import com.cosmos.unreddit.util.extension.setCommentListener
 import com.cosmos.unreddit.util.extension.setSortingListener
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collect
@@ -116,7 +118,9 @@ class PostDetailsFragment :
         }
 
         postAdapter = PostAdapter(contentPreferences, this, this)
-        commentAdapter = CommentAdapter(requireContext(), repository, viewLifecycleOwner, this)
+        commentAdapter = CommentAdapter(requireContext(), repository, viewLifecycleOwner, this) {
+            CommentMenuFragment.show(childFragmentManager, it, CommentMenuFragment.MenuType.DETAILS)
+        }
         resourceStateAdapter = ResourceStateAdapter { retry() }
 
         val concatAdapter = ConcatAdapter(postAdapter, resourceStateAdapter, commentAdapter)
@@ -181,6 +185,7 @@ class PostDetailsFragment :
                 binding.listComments.betterSmoothScrollToPosition(0)
             }
         }
+        setCommentListener { comment -> comment?.let { viewModel.toggleSaveComment(it) } }
     }
 
     private fun bindPost(post: PostEntity, fromCache: Boolean) {

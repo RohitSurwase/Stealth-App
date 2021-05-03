@@ -1,6 +1,7 @@
 package com.cosmos.unreddit.data.model
 
 import android.content.Context
+import android.os.Parcelable
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.ForeignKey
@@ -8,12 +9,16 @@ import androidx.room.Ignore
 import com.cosmos.unreddit.R
 import com.cosmos.unreddit.data.model.db.Profile
 import com.cosmos.unreddit.util.DateUtil
+import kotlinx.parcelize.IgnoredOnParcel
+import kotlinx.parcelize.Parcelize
+import kotlinx.parcelize.RawValue
 
 sealed class Comment {
 
     abstract val name: String
     abstract val depth: Int
 
+    @Parcelize
     @Entity(
         tableName = "comment",
         primaryKeys = ["name", "profile_id"],
@@ -34,7 +39,7 @@ sealed class Comment {
         val linkId: String,
 
         @Ignore
-        val replies: MutableList<Comment> = mutableListOf(),
+        val replies: @RawValue MutableList<Comment> = mutableListOf(),
 
         val author: String,
 
@@ -93,11 +98,19 @@ sealed class Comment {
         @Ignore
         override val depth: Int = 0,
 
+        @Ignore
+        var saved: Boolean = true,
+
         @ColumnInfo(name = "profile_id")
         var profileId: Int = -1,
-    ) : Comment() {
+    ) : Comment(), Parcelable {
+
+        @Ignore
+        @IgnoredOnParcel
         var isExpanded: Boolean = false
 
+        @Ignore
+        @IgnoredOnParcel
         var visibleReplyCount: Int = replies.size
 
         val hasReplies: Boolean

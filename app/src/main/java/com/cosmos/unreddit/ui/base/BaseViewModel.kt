@@ -2,6 +2,7 @@ package com.cosmos.unreddit.ui.base
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.cosmos.unreddit.data.model.Comment
 import com.cosmos.unreddit.data.model.db.PostEntity
 import com.cosmos.unreddit.data.model.db.Profile
 import com.cosmos.unreddit.data.model.db.Subscription
@@ -48,6 +49,18 @@ open class BaseViewModel(
                     postListRepository.unsavePost(post, it.id)
                 } else {
                     postListRepository.savePost(post, it.id)
+                }
+            }
+        }
+    }
+
+    fun toggleSaveComment(comment: Comment.CommentEntity) {
+        viewModelScope.launch {
+            currentProfile.first().let {
+                if (comment.saved) {
+                    postListRepository.unsaveComment(comment, it.id)
+                } else {
+                    postListRepository.saveComment(comment, it.id)
                 }
             }
         }

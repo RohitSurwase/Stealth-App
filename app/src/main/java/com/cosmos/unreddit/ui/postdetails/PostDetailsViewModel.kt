@@ -26,7 +26,9 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flatMapConcat
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.shareIn
@@ -54,6 +56,10 @@ class PostDetailsViewModel
     private val _singleThread: MutableLiveData<Boolean> = MutableLiveData(false)
     val singleThread: LiveData<Boolean> = _singleThread
 
+    private val savedCommentIds: Flow<List<String>> = currentProfile.flatMapConcat {
+        repository.getSavedCommentIds(it.id).distinctUntilChanged()
+    }.shareIn(viewModelScope, SharingStarted.WhileSubscribed(), 1)
+
     private val _listings: MutableStateFlow<Resource<List<Listing>>> =
         MutableStateFlow(Resource.Loading())
 
@@ -78,7 +84,7 @@ class PostDetailsViewModel
         }
     }.shareIn(viewModelScope, SharingStarted.WhileSubscribed(), 1)
 
-    val comments: Flow<Resource<List<Comment>>> = _listings.map {
+    private val _comments: Flow<Resource<List<Comment>>> = _listings.map {
         when (it) {
             is Resource.Success -> {
                 val list = CommentMapper.dataToEntities(it.data[1].data.children)
@@ -89,6 +95,14 @@ class PostDetailsViewModel
             is Resource.Error -> Resource.Error(it.code, it.message)
         }
     }.shareIn(viewModelScope, SharingStarted.WhileSubscribed(), 1)
+
+    val comments: Flow<Resource<List<Comment>>> = combine(_comments, savedCommentIds) { comments, savedIds ->
+        comments.apply {
+            if (this is Resource.Success) {
+                data.map { (it as? CommentEntity)?.saved = savedIds.contains(it.name) }
+            }
+        }
+    }
 
     private suspend fun getComments(list: List<Comment>, depthLimit: Int): List<Comment> {
         return withContext(Dispatchers.Default) {

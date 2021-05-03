@@ -5,6 +5,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
+import androidx.paging.map
 import com.cosmos.unreddit.data.local.mapper.UserMapper
 import com.cosmos.unreddit.data.model.Comment
 import com.cosmos.unreddit.data.model.Resource
@@ -22,11 +23,16 @@ import com.cosmos.unreddit.util.extension.updateValue
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flatMapConcat
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.launch
 import retrofit2.HttpException
 import java.io.IOException
@@ -53,6 +59,10 @@ class UserViewModel @Inject constructor(
     private val _about: MutableLiveData<Resource<User>> = MutableLiveData()
     val about: LiveData<Resource<User>> = _about
 
+    private val savedCommentIds: Flow<List<String>> = currentProfile.flatMapConcat {
+        repository.getSavedCommentIds(it.id).distinctUntilChanged()
+    }.shareIn(viewModelScope, SharingStarted.WhileSubscribed(), 1)
+
     private val postPagerHelper = object : PagerHelper<PostEntity>() {
         override fun getResults(query: String, sorting: Sorting): Flow<PagingData<PostEntity>> {
             return repository.getUserPosts(query, sorting).cachedIn(viewModelScope)
@@ -75,7 +85,16 @@ class UserViewModel @Inject constructor(
     }
 
     fun loadAndFilterComments(user: String, sorting: Sorting): Flow<PagingData<Comment>> {
-        return commentPagerHelper.loadData(user, sorting).cachedIn(viewModelScope)
+        return combine(
+            commentPagerHelper.loadData(user, sorting),
+            savedCommentIds
+        ) { _comments, _savedIds ->
+            _comments.map { comment ->
+                comment.apply {
+                    (this as? Comment.CommentEntity)?.saved = _savedIds.contains(this.name)
+                }
+            }
+        }
     }
 
     fun loadUserInfo(forceUpdate: Boolean) {

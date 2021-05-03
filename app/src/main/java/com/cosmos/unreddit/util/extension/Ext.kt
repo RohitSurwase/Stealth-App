@@ -21,9 +21,11 @@ import coil.load
 import coil.size.Precision
 import coil.size.Scale
 import com.cosmos.unreddit.R
+import com.cosmos.unreddit.data.model.Comment
 import com.cosmos.unreddit.data.model.Sorting
 import com.cosmos.unreddit.databinding.IncludeLoadingStateBinding
 import com.cosmos.unreddit.databinding.ItemListContentBinding
+import com.cosmos.unreddit.ui.commentmenu.CommentMenuFragment
 import com.cosmos.unreddit.ui.sort.SortFragment
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.distinctUntilChangedBy
@@ -72,6 +74,17 @@ fun Fragment.setSortingListener(result: (Sorting?) -> Unit) {
     ) { _, bundle ->
         val sorting = bundle.getParcelable(SortFragment.BUNDLE_KEY_SORTING) as? Sorting
         result(sorting)
+    }
+}
+
+fun Fragment.setCommentListener(result: (Comment.CommentEntity?) -> Unit) {
+    childFragmentManager.setFragmentResultListener(
+        CommentMenuFragment.REQUEST_KEY_COMMENT,
+        viewLifecycleOwner
+    ) { _, bundle ->
+        val comment = bundle.getParcelable(CommentMenuFragment.BUNDLE_KEY_COMMENT)
+                as? Comment.CommentEntity
+        result(comment)
     }
 }
 

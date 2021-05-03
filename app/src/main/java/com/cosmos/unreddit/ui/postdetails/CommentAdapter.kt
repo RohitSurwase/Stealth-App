@@ -33,7 +33,8 @@ class CommentAdapter(
     context: Context,
     private val repository: PostListRepository,
     private val viewLifecycleOwner: LifecycleOwner,
-    private val onLinkClickListener: RedditView.OnLinkClickListener? = null
+    private val onLinkClickListener: RedditView.OnLinkClickListener? = null,
+    private val onCommentLongClick: (CommentEntity) -> Unit
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     private val visibleComments = mutableListOf<Comment>()
@@ -204,6 +205,13 @@ class CommentAdapter(
         }
     }
 
+    private fun onCommentLongClick(position: Int) {
+        val comment = visibleComments[position]
+        if (comment is CommentEntity) {
+            onCommentLongClick.invoke(comment)
+        }
+    }
+
     private fun getExpandedReplies(comments: List<Comment>): List<Comment> {
         val replies = mutableListOf<Comment>()
 
@@ -332,11 +340,20 @@ class CommentAdapter(
                 onCommentClick(bindingAdapterPosition)
             }
 
+            itemView.setOnLongClickListener {
+                onCommentLongClick(bindingAdapterPosition)
+                true
+            }
+
             binding.commentBody.apply {
                 setText(comment.body)
                 setOnLinkClickListener(onLinkClickListener)
                 setOnClickListener {
                     onCommentClick(bindingAdapterPosition)
+                }
+                setOnLongClickListener {
+                    onCommentLongClick(bindingAdapterPosition)
+                    true
                 }
             }
         }
