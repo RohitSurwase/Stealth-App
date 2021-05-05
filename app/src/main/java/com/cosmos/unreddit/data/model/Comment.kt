@@ -101,6 +101,9 @@ sealed class Comment {
         @Ignore
         var saved: Boolean = true,
 
+        @ColumnInfo(name = "time")
+        var time: Long = -1,
+
         @ColumnInfo(name = "profile_id")
         var profileId: Int = -1,
     ) : Comment(), Parcelable {

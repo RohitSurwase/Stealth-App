@@ -22,7 +22,7 @@ open class BaseViewModel(
     private val postListRepository: PostListRepository
 ) : ViewModel() {
 
-    protected val currentProfile: Flow<Profile> = preferencesRepository.getCurrentProfile().map {
+    val currentProfile: Flow<Profile> = preferencesRepository.getCurrentProfile().map {
         postListRepository.getProfile(it)
     }.shareIn(viewModelScope, SharingStarted.WhileSubscribed(), 1)
 

@@ -182,6 +182,7 @@ class PostListRepository @Inject constructor(
     suspend fun savePost(post: PostEntity, profileId: Int) {
         post.run {
             this.profileId = profileId
+            this.time = System.currentTimeMillis()
             redditDatabase.postDao().upsert(this)
         }
     }
@@ -190,13 +191,18 @@ class PostListRepository @Inject constructor(
         redditDatabase.postDao().deleteFromIdAndProfile(post.id, profileId)
     }
 
-    fun getSavedPostIds(profileId: Int): Flow<List<String>> {
+    fun getSavedPosts(profileId: Int): Flow<List<PostEntity>> {
         return redditDatabase.postDao().getSavedPostsFromProfile(profileId)
+    }
+
+    fun getSavedPostIds(profileId: Int): Flow<List<String>> {
+        return redditDatabase.postDao().getSavedPostIdsFromProfile(profileId)
     }
 
     suspend fun saveComment(comment: Comment.CommentEntity, profileId: Int) {
         comment.run {
             this.profileId = profileId
+            this.time = System.currentTimeMillis()
             redditDatabase.commentDao().upsert(comment)
         }
     }
@@ -205,8 +211,12 @@ class PostListRepository @Inject constructor(
         redditDatabase.commentDao().deleteFromIdAndProfile(comment.name, profileId)
     }
 
-    fun getSavedCommentIds(profileId: Int): Flow<List<String>> {
+    fun getSavedComments(profileId: Int): Flow<List<Comment.CommentEntity>> {
         return redditDatabase.commentDao().getSavedCommentsFromProfile(profileId)
+    }
+
+    fun getSavedCommentIds(profileId: Int): Flow<List<String>> {
+        return redditDatabase.commentDao().getSavedCommentIdsFromProfile(profileId)
     }
 
     //endregion

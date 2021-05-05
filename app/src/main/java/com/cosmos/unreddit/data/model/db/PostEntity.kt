@@ -53,7 +53,7 @@ data class PostEntity @JvmOverloads constructor(
     val authorFlair: Flair = Flair(), // TODO: Handle flairs
 
     @Ignore
-    val hasFlairs: Boolean = false,
+    var hasFlairs: Boolean = false,
 
     val score: String,
 
@@ -127,6 +127,9 @@ data class PostEntity @JvmOverloads constructor(
 
     @Ignore
     var saved: Boolean = true,
+
+    @ColumnInfo(name = "time")
+    var time: Long = -1,
 
     @ColumnInfo(name = "profile_id")
     var profileId: Int = -1,

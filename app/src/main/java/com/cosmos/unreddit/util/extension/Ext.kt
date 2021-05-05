@@ -11,6 +11,7 @@ import android.widget.ImageView
 import androidx.core.view.isVisible
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.setFragmentResultListener
 import androidx.navigation.NavOptions
 import androidx.paging.LoadState
 import androidx.paging.PagingDataAdapter
@@ -26,6 +27,7 @@ import com.cosmos.unreddit.data.model.Sorting
 import com.cosmos.unreddit.databinding.IncludeLoadingStateBinding
 import com.cosmos.unreddit.databinding.ItemListContentBinding
 import com.cosmos.unreddit.ui.commentmenu.CommentMenuFragment
+import com.cosmos.unreddit.ui.postdetails.PostDetailsFragment
 import com.cosmos.unreddit.ui.sort.SortFragment
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.distinctUntilChangedBy
@@ -85,6 +87,13 @@ fun Fragment.setCommentListener(result: (Comment.CommentEntity?) -> Unit) {
         val comment = bundle.getParcelable(CommentMenuFragment.BUNDLE_KEY_COMMENT)
                 as? Comment.CommentEntity
         result(comment)
+    }
+}
+
+fun Fragment.setNavigationListener(result: (Boolean) -> Unit) {
+    setFragmentResultListener(PostDetailsFragment.REQUEST_KEY_NAVIGATION) { _, bundle ->
+        val showNavigation = bundle.getBoolean(PostDetailsFragment.BUNDLE_KEY_NAVIGATION)
+        result(showNavigation)
     }
 }
 

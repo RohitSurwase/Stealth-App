@@ -12,10 +12,10 @@ import com.cosmos.unreddit.data.model.Sorting
 import com.cosmos.unreddit.data.model.db.PostEntity
 import com.cosmos.unreddit.data.remote.api.reddit.RedditApi
 import com.cosmos.unreddit.data.remote.api.reddit.model.Listing
-import com.cosmos.unreddit.data.remote.api.reddit.model.PostChild
 import com.cosmos.unreddit.data.repository.PostListRepository
 import com.cosmos.unreddit.data.repository.PreferencesRepository
 import com.cosmos.unreddit.ui.base.BaseViewModel
+import com.cosmos.unreddit.util.PostUtil
 import com.cosmos.unreddit.util.extension.updateValue
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -66,9 +66,7 @@ class PostDetailsViewModel
     private val _post: Flow<Resource<PostEntity>> = _listings.map {
         when (it) {
             is Resource.Success -> {
-                val data = PostMapper.dataToEntity(
-                    (it.data[0].data.children[0] as PostChild).data
-                )
+                val data = PostMapper.dataToEntity(PostUtil.getPostData(it.data))
                 Resource.Success(data)
             }
             is Resource.Loading -> Resource.Loading()
@@ -87,7 +85,10 @@ class PostDetailsViewModel
     private val _comments: Flow<Resource<List<Comment>>> = _listings.map {
         when (it) {
             is Resource.Success -> {
-                val list = CommentMapper.dataToEntities(it.data[1].data.children)
+                val list = CommentMapper.dataToEntities(
+                    PostUtil.getCommentsData(it.data),
+                    PostUtil.getPostData(it.data)
+                )
                 val data = getComments(list, DEPTH_LIMIT)
                 Resource.Success(data)
             }

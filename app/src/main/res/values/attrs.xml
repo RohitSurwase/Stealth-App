@@ -36,4 +36,8 @@
             <enum name="bottom" value="3"/>
         </attr>
     </declare-styleable>
+
+    <declare-styleable name="AvatarView">
+        <attr name="text" format="string"/>
+    </declare-styleable>
 </resources>

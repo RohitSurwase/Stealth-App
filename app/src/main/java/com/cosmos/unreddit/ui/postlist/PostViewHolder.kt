@@ -59,7 +59,7 @@ abstract class PostViewHolder(
         }
 
         awards.apply {
-            if (postEntity.totalAwards > 0) {
+            if (postEntity.awards.isNotEmpty()) {
                 visibility = View.VISIBLE
                 setAwards(postEntity.awards, postEntity.totalAwards)
             } else {
