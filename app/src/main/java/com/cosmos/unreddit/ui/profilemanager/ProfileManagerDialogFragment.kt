@@ -105,10 +105,18 @@ class ProfileManagerDialogFragment : DialogFragment(), ProfileManagerAdapter.Pro
     }
 
     private fun validateProfile(text: String?): String? {
-        return if (text?.length !in PROFILE_NAME_MIN..PROFILE_NAME_MAX) {
-            getString(R.string.profile_name_length_error)
-        } else {
-            null
+        return when {
+            text?.length !in PROFILE_NAME_MIN..PROFILE_NAME_MAX -> {
+                getString(R.string.profile_name_length_error)
+            }
+            profileAdapter.currentList.any {
+                it is ProfileItem.UserProfile && it.profile.name.equals(text, true)
+            } -> {
+                getString(R.string.profile_already_exists_error)
+            }
+            else -> {
+                null
+            }
         }
     }
 

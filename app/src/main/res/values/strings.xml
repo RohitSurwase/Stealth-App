@@ -162,6 +162,7 @@
     <string name="dialog_no">No</string>
 
     <string name="profile_name_length_error">Profile name must be between 3 and 20 characters</string>
+    <string name="profile_already_exists_error">Profile already exists</string>
 
     <string name="profile_manager_add_profile">Add Profile</string>
 </resources>
