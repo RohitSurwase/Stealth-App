@@ -217,12 +217,12 @@ abstract class PostViewHolder(
         ) {
             super.bind(postEntity, contentPreferences)
 
+            val previewText = postEntity.previewText
+
             binding.textPostSelf.apply {
-                if (postEntity.shouldShowPreview(contentPreferences) &&
-                    postEntity.previewText != null
-                ) {
+                if (postEntity.shouldShowPreview(contentPreferences) && previewText != null) {
                     binding.textPostSelfCard.visibility = View.VISIBLE
-                    setText(postEntity.previewText, false)
+                    setText(previewText, false)
                     setTextColor(ContextCompat.getColor(context, postEntity.textColor))
                 } else {
                     binding.textPostSelfCard.visibility = View.GONE

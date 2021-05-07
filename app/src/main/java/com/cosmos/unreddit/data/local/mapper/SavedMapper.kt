@@ -1,5 +1,6 @@
 package com.cosmos.unreddit.data.local.mapper
 
+import com.cosmos.unreddit.data.model.Block
 import com.cosmos.unreddit.data.model.Comment
 import com.cosmos.unreddit.data.model.SavedItem
 import com.cosmos.unreddit.data.model.db.PostEntity
@@ -8,10 +9,12 @@ import com.cosmos.unreddit.util.HtmlParser
 object SavedMapper {
 
     suspend fun dataToEntity(data: PostEntity, htmlParser: HtmlParser = HtmlParser()): SavedItem {
+        val redditText = htmlParser.separateHtmlBlocks(data.selfTextHtml)
         return SavedItem.Post(
             data.apply {
                 hasFlairs = isOver18 || isSpoiler || isOC || isStickied || isArchived || isLocked
-                selfRedditText = htmlParser.separateHtmlBlocks(selfTextHtml)
+                selfRedditText = redditText
+                previewText = (redditText.blocks.firstOrNull()?.block as? Block.TextBlock)?.text
             }
         )
     }

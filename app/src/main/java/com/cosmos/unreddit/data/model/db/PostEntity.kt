@@ -82,7 +82,7 @@ data class PostEntity @JvmOverloads constructor(
     val preview: String?,
 
     @Ignore
-    val previewText: CharSequence? = null,
+    var previewText: CharSequence? = null,
 
     @Ignore
     val awards: List<Award> = listOf(),
