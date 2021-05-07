@@ -149,4 +149,19 @@
     <string name="unsave">Unsave</string>
 
     <string name="tab_profile_saved">Saved</string>
+
+    <string name="dialog_create_profile_title">Create Profile</string>
+    <string name="dialog_create_profile_button">Create</string>
+    <string name="dialog_create_profile_hint">Name</string>
+
+    <string name="dialog_delete_profile_title">Delete Profile</string>
+    <string name="dialog_delete_profile_message">Are you sure you want to delete this profile?\nSubscriptions, history and saved items for this profile will be lost.</string>
+
+    <string name="dialog_cancel">Cancel</string>
+    <string name="dialog_yes">Yes</string>
+    <string name="dialog_no">No</string>
+
+    <string name="profile_name_length_error">Profile name must be between 3 and 20 characters</string>
+
+    <string name="profile_manager_add_profile">Add Profile</string>
 </resources>

@@ -11,6 +11,9 @@ abstract class PostDao : BaseDao<PostEntity> {
     @Query("DELETE FROM post WHERE id = :id AND profile_id = :profileId")
     abstract suspend fun deleteFromIdAndProfile(id: String, profileId: Int)
 
+    @Query("DELETE FROM post WHERE profile_id = :profileId")
+    abstract suspend fun deleteFromProfile(profileId: Int)
+
     @Query("SELECT id FROM post WHERE profile_id = :profileId")
     abstract fun getSavedPostIdsFromProfile(profileId: Int): Flow<List<String>>
 

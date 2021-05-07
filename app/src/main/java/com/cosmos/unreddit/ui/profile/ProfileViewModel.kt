@@ -16,7 +16,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combineTransform
-import kotlinx.coroutines.flow.flatMapConcat
+import kotlinx.coroutines.flow.flatMapMerge
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
@@ -31,11 +31,11 @@ class ProfileViewModel @Inject constructor(
     private val _page: MutableStateFlow<Int> = MutableStateFlow(0)
     val page: StateFlow<Int> get() = _page
 
-    private val _savedPosts: Flow<List<PostEntity>> = currentProfile.flatMapConcat {
+    private val _savedPosts: Flow<List<PostEntity>> = currentProfile.flatMapMerge {
         repository.getSavedPosts(it.id)
     }
 
-    private val _savedComments: Flow<List<Comment.CommentEntity>> = currentProfile.flatMapConcat {
+    private val _savedComments: Flow<List<Comment.CommentEntity>> = currentProfile.flatMapMerge {
         repository.getSavedComments(it.id)
     }
 

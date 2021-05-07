@@ -170,9 +170,21 @@ class PostListRepository @Inject constructor(
 
     //region Profile
 
+    suspend fun addProfile(name: String) {
+        redditDatabase.profileDao().insert(Profile(name = name))
+    }
+
     suspend fun getProfile(id: Int): Profile {
         return redditDatabase.profileDao().getProfileFromId(id)
             ?: redditDatabase.profileDao().getFirstProfile()
+    }
+
+    fun getAllProfiles(): Flow<List<Profile>> {
+        return redditDatabase.profileDao().getAllProfiles()
+    }
+
+    suspend fun deleteProfile(profileId: Int) {
+        redditDatabase.profileDao().deleteFromId(profileId)
     }
 
     //endregion

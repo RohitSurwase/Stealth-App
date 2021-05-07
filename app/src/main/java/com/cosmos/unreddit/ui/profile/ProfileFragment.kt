@@ -18,6 +18,7 @@ import com.cosmos.unreddit.databinding.FragmentProfileBinding
 import com.cosmos.unreddit.ui.base.BaseFragment
 import com.cosmos.unreddit.ui.commentmenu.CommentMenuFragment
 import com.cosmos.unreddit.ui.postdetails.PostDetailsFragment
+import com.cosmos.unreddit.ui.profilemanager.ProfileManagerDialogFragment
 import com.cosmos.unreddit.ui.user.UserCommentsAdapter
 import com.cosmos.unreddit.util.RecyclerViewStateAdapter
 import com.cosmos.unreddit.util.extension.getRecyclerView
@@ -29,6 +30,8 @@ import com.google.android.material.tabs.TabLayoutMediator
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class ProfileFragment : BaseFragment(), UserCommentsAdapter.CommentClickListener {
@@ -53,6 +56,7 @@ class ProfileFragment : BaseFragment(), UserCommentsAdapter.CommentClickListener
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         initResultListener()
+        initAppBar()
         initViewPager()
         bindViewModel()
     }
@@ -62,6 +66,16 @@ class ProfileFragment : BaseFragment(), UserCommentsAdapter.CommentClickListener
 
         setNavigationListener { showNavigation ->
             uiViewModel.setNavigationVisibility(showNavigation)
+        }
+    }
+
+    private fun initAppBar() {
+        binding.usersCard.setOnClickListener {
+            lifecycleScope.launch {
+                viewModel.currentProfile.first().let {
+                    ProfileManagerDialogFragment.show(parentFragmentManager, it)
+                }
+            }
         }
     }
 

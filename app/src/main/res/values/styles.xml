@@ -414,4 +414,22 @@
 
     <style name="TextAppearanceCreditSection" parent="TextAppearanceCategory"/>
 
+    <!-- Profile Manager -->
+
+    <style name="ProfileManagerDialogStyle" parent="Theme.AppCompat.Dialog">
+        <item name="android:windowTranslucentStatus">true</item>
+        <item name="android:windowTranslucentNavigation">true</item>
+        <item name="android:windowDrawsSystemBarBackgrounds">true</item>
+        <item name="android:windowBackground">@color/profile_dialog_background</item>
+        <item name="android:windowIsFloating">false</item>
+        <item name="android:backgroundDimEnabled">true</item>
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowNoTitle">true</item>
+    </style>
+
+    <style name="Widget.TextView.ProfileName" parent="Widget.MaterialComponents.TextView">
+        <item name="android:textSize">24sp</item>
+        <item name="android:textColor">@android:color/white</item>
+    </style>
+
 </resources>

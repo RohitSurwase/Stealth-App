@@ -11,6 +11,9 @@ abstract class CommentDao : BaseDao<CommentEntity> {
     @Query("DELETE FROM comment WHERE name = :name AND profile_id = :profileId")
     abstract suspend fun deleteFromIdAndProfile(name: String, profileId: Int)
 
+    @Query("DELETE FROM comment WHERE profile_id = :profileId")
+    abstract suspend fun deleteFromProfile(profileId: Int)
+
     @Query("SELECT name FROM comment WHERE profile_id = :profileId")
     abstract fun getSavedCommentIdsFromProfile(profileId: Int): Flow<List<String>>
 
