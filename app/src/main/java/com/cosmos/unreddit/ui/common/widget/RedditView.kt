@@ -84,7 +84,7 @@ class RedditView @JvmOverloads constructor(
     }
 
     private fun addTable(tableBlock: TableBlock) {
-        addView(wrapWithScrollView(tableBlock.getTableLayout(context)))
+        addView(wrapWithScrollView(tableBlock.getTableLayout(context, clickableMovementMethod)))
     }
 
     private fun wrapWithScrollView(view: View): View {

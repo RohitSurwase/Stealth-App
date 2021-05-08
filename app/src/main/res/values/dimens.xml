@@ -146,4 +146,6 @@
     <dimen name="profile_manager_carousel_height">175dp</dimen>
     <dimen name="profile_name_margin">8dp</dimen>
     <dimen name="profile_delete_icon_size">20dp</dimen>
+
+    <dimen name="table_padding">8dp</dimen>
 </resources>
