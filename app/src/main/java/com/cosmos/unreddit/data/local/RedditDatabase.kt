@@ -56,21 +56,105 @@ abstract class RedditDatabase : RoomDatabase() {
 
         val MIGRATION_1_2 = object : Migration(1, 2) {
             override fun migrate(database: SupportSQLiteDatabase) {
-                database.execSQL("CREATE TABLE IF NOT EXISTS `profile` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `name` TEXT NOT NULL)")
+                database.execSQL("""
+                    CREATE TABLE IF NOT EXISTS `profile` (
+                        `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, 
+                        `name` TEXT NOT NULL
+                    )
+                    """.trimIndent())
                 insertDefaultProfile(database)
 
-                database.execSQL("CREATE TABLE IF NOT EXISTS `new_subscription` (`name` TEXT NOT NULL COLLATE NOCASE, `time` INTEGER NOT NULL, `icon` TEXT, `profile_id` INTEGER DEFAULT $DEFAULT_PROFILE_ID NOT NULL, PRIMARY KEY(`name`, `profile_id`), FOREIGN KEY(`profile_id`) REFERENCES `profile`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )")
-                database.execSQL("INSERT INTO new_subscription (name, time, icon) SELECT name, time, icon FROM subscription")
+                database.execSQL("""
+                    CREATE TABLE IF NOT EXISTS `new_subscription` (
+                        `name` TEXT NOT NULL COLLATE NOCASE, 
+                        `time` INTEGER NOT NULL, 
+                        `icon` TEXT, 
+                        `profile_id` INTEGER DEFAULT $DEFAULT_PROFILE_ID NOT NULL, 
+                    PRIMARY KEY(`name`, `profile_id`), 
+                    FOREIGN KEY(`profile_id`) REFERENCES `profile`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE 
+                    )
+                    """.trimIndent())
+                database.execSQL("""
+                    INSERT INTO new_subscription (name, time, icon) 
+                    SELECT name, time, icon FROM subscription
+                    """.trimIndent())
                 database.execSQL("DROP TABLE subscription")
                 database.execSQL("ALTER TABLE new_subscription RENAME TO subscription")
 
-                database.execSQL("CREATE TABLE IF NOT EXISTS `new_history` (`post_id` TEXT NOT NULL, `time` INTEGER NOT NULL, `profile_id` INTEGER DEFAULT $DEFAULT_PROFILE_ID NOT NULL, PRIMARY KEY(`post_id`, `profile_id`), FOREIGN KEY(`profile_id`) REFERENCES `profile`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )")
+                database.execSQL("""
+                    CREATE TABLE IF NOT EXISTS `new_history` (
+                        `post_id` TEXT NOT NULL, 
+                        `time` INTEGER NOT NULL, 
+                        `profile_id` INTEGER DEFAULT $DEFAULT_PROFILE_ID NOT NULL, 
+                    PRIMARY KEY(`post_id`, `profile_id`), 
+                    FOREIGN KEY(`profile_id`) REFERENCES `profile`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE 
+                    )
+                    """.trimIndent())
                 database.execSQL("INSERT INTO new_history (post_id, time) SELECT post_id, time FROM history")
                 database.execSQL("DROP TABLE history")
                 database.execSQL("ALTER TABLE new_history RENAME TO history")
 
-                database.execSQL("CREATE TABLE IF NOT EXISTS `post` (`id` TEXT NOT NULL, `subreddit` TEXT NOT NULL, `title` TEXT NOT NULL, `ratio` INTEGER NOT NULL, `total_awards` INTEGER NOT NULL, `oc` INTEGER NOT NULL, `score` TEXT NOT NULL, `type` INTEGER NOT NULL, `domain` TEXT NOT NULL, `self` INTEGER NOT NULL, `self_text_html` TEXT, `suggested_sorting` TEXT NOT NULL, `nsfw` INTEGER NOT NULL, `preview` TEXT, `spoiler` INTEGER NOT NULL, `archived` INTEGER NOT NULL, `locked` INTEGER NOT NULL, `poster_type` INTEGER NOT NULL, `author` TEXT NOT NULL, `comments_number` TEXT NOT NULL, `permalink` TEXT NOT NULL, `stickied` INTEGER NOT NULL, `url` TEXT NOT NULL, `created` INTEGER NOT NULL, `media_type` TEXT NOT NULL, `media_url` TEXT NOT NULL, `time` INTEGER NOT NULL, `profile_id` INTEGER NOT NULL, PRIMARY KEY(`id`, `profile_id`), FOREIGN KEY(`profile_id`) REFERENCES `profile`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )")
-                database.execSQL("CREATE TABLE IF NOT EXISTS `comment` (`total_awards` INTEGER NOT NULL, `link_id` TEXT NOT NULL, `author` TEXT NOT NULL, `score` TEXT NOT NULL, `body_html` TEXT NOT NULL, `edited` INTEGER NOT NULL, `submitter` INTEGER NOT NULL, `stickied` INTEGER NOT NULL, `score_hidden` INTEGER NOT NULL, `permalink` TEXT NOT NULL, `id` TEXT NOT NULL, `created` INTEGER NOT NULL, `controversiality` INTEGER NOT NULL, `poster_type` INTEGER NOT NULL, `link_title` TEXT, `link_permalink` TEXT, `link_author` TEXT, `subreddit` TEXT NOT NULL, `name` TEXT NOT NULL, `time` INTEGER NOT NULL, `profile_id` INTEGER NOT NULL, PRIMARY KEY(`name`, `profile_id`), FOREIGN KEY(`profile_id`) REFERENCES `profile`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )")
+                database.execSQL("""
+                    CREATE TABLE IF NOT EXISTS `post` (
+                        `id` TEXT NOT NULL, 
+                        `subreddit` TEXT NOT NULL, 
+                        `title` TEXT NOT NULL, 
+                        `ratio` INTEGER NOT NULL, 
+                        `total_awards` INTEGER NOT NULL, 
+                        `oc` INTEGER NOT NULL, 
+                        `score` TEXT NOT NULL, 
+                        `type` INTEGER NOT NULL, 
+                        `domain` TEXT NOT NULL, 
+                        `self` INTEGER NOT NULL, 
+                        `self_text_html` TEXT, 
+                        `suggested_sorting` TEXT NOT NULL, 
+                        `nsfw` INTEGER NOT NULL, 
+                        `preview` TEXT, 
+                        `spoiler` INTEGER NOT NULL, 
+                        `archived` INTEGER NOT NULL, 
+                        `locked` INTEGER NOT NULL, 
+                        `poster_type` INTEGER NOT NULL, 
+                        `author` TEXT NOT NULL, 
+                        `comments_number` TEXT NOT NULL, 
+                        `permalink` TEXT NOT NULL, 
+                        `stickied` INTEGER NOT NULL, 
+                        `url` TEXT NOT NULL, 
+                        `created` INTEGER NOT NULL, 
+                        `media_type` TEXT NOT NULL, 
+                        `media_url` TEXT NOT NULL, 
+                        `time` INTEGER NOT NULL, 
+                        `profile_id` INTEGER NOT NULL, 
+                    PRIMARY KEY(`id`, `profile_id`), 
+                    FOREIGN KEY(`profile_id`) REFERENCES `profile`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE 
+                    )
+                    """.trimIndent())
+                database.execSQL("""
+                    CREATE TABLE IF NOT EXISTS `comment` (
+                        `total_awards` INTEGER NOT NULL, 
+                        `link_id` TEXT NOT NULL, 
+                        `author` TEXT NOT NULL, 
+                        `score` TEXT NOT NULL, 
+                        `body_html` TEXT NOT NULL, 
+                        `edited` INTEGER NOT NULL, 
+                        `submitter` INTEGER NOT NULL, 
+                        `stickied` INTEGER NOT NULL, 
+                        `score_hidden` INTEGER NOT NULL, 
+                        `permalink` TEXT NOT NULL, 
+                        `id` TEXT NOT NULL, 
+                        `created` INTEGER NOT NULL, 
+                        `controversiality` INTEGER NOT NULL, 
+                        `poster_type` INTEGER NOT NULL, 
+                        `link_title` TEXT, 
+                        `link_permalink` TEXT, 
+                        `link_author` TEXT, 
+                        `subreddit` TEXT NOT NULL, 
+                        `name` TEXT NOT NULL, 
+                        `time` INTEGER NOT NULL, 
+                        `profile_id` INTEGER NOT NULL, 
+                    PRIMARY KEY(`name`, `profile_id`), 
+                    FOREIGN KEY(`profile_id`) REFERENCES `profile`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE 
+                    )
+                    """.trimIndent())
             }
         }
     }
