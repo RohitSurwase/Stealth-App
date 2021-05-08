@@ -7,6 +7,7 @@ import android.view.ViewGroup
 import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -15,12 +16,17 @@ import com.cosmos.unreddit.R
 import com.cosmos.unreddit.data.model.GalleryMedia
 import com.cosmos.unreddit.data.model.MediaType
 import com.cosmos.unreddit.data.model.Resource
+import com.cosmos.unreddit.data.repository.PreferencesRepository
 import com.cosmos.unreddit.databinding.FragmentMediaViewerBinding
 import com.cosmos.unreddit.ui.base.BaseFragment
 import com.cosmos.unreddit.util.extension.betterSmoothScrollToPosition
 import com.cosmos.unreddit.util.extension.getRecyclerView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class MediaViewerFragment : BaseFragment() {
@@ -38,8 +44,12 @@ class MediaViewerFragment : BaseFragment() {
     private lateinit var mediaAdapter: MediaViewerAdapter
     private lateinit var thumbnailAdapter: MediaViewerThumbnailAdapter
 
+    @Inject
+    lateinit var preferencesRepository: PreferencesRepository
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        lifecycleScope.launch { preferencesRepository.getMuteVideo(false).first() }
         handleArguments()
     }
 
@@ -87,7 +97,12 @@ class MediaViewerFragment : BaseFragment() {
     }
 
     private fun initViewPager() {
-        mediaAdapter = MediaViewerAdapter(requireContext())
+        val muteVideo = runBlocking { preferencesRepository.getMuteVideo(false).first() }
+
+        mediaAdapter = MediaViewerAdapter(requireContext(), muteVideo) {
+            lifecycleScope.launch { preferencesRepository.setMuteVideo(it) }
+        }
+
         binding.viewPager.apply {
             adapter = mediaAdapter
             getRecyclerView()?.overScrollMode = RecyclerView.OVER_SCROLL_NEVER

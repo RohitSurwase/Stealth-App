@@ -21,10 +21,16 @@ import com.google.android.exoplayer2.ExoPlaybackException
 import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.SimpleExoPlayer
 import com.google.android.exoplayer2.source.MergingMediaSource
+import com.google.android.exoplayer2.source.TrackGroupArray
+import com.google.android.exoplayer2.trackselection.TrackSelectionArray
 import com.google.android.exoplayer2.upstream.HttpDataSource
 import java.net.HttpURLConnection
 
-class MediaViewerAdapter(context: Context) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+class MediaViewerAdapter(
+    context: Context,
+    private val muteVideo: Boolean,
+    private val onMuteClick: (Boolean) -> Unit
+) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     private val media: MutableList<GalleryMedia> = mutableListOf()
 
@@ -180,6 +186,13 @@ class MediaViewerAdapter(context: Context) : RecyclerView.Adapter<RecyclerView.V
                             binding.infoRetry.show()
                         }
                     }
+
+                    override fun onTracksChanged(
+                        trackGroups: TrackGroupArray,
+                        trackSelections: TrackSelectionArray
+                    ) {
+                        initAudioVolume(trackGroups)
+                    }
                 })
             } else {
                 player.setMediaItem(videoItem)
@@ -211,8 +224,52 @@ class MediaViewerAdapter(context: Context) : RecyclerView.Adapter<RecyclerView.V
             return false
         }
 
+        private fun initAudioVolume(trackGroups: TrackGroupArray) {
+            if (hasAudio(trackGroups)) {
+                muteAudio(muteVideo)
+
+                binding.video.setControllerVisibilityListener { controllerVisibility ->
+                    binding.mute.visibility = controllerVisibility
+                }
+
+                binding.mute.run {
+                    isChecked = muteVideo
+                    setOnCheckedChangeListener { _, isMuted ->
+                        muteAudio(isMuted)
+                        onMuteClick.invoke(isMuted)
+                    }
+                }
+            }
+        }
+
+        private fun muteAudio(shouldMute: Boolean) {
+            (binding.video.player as? SimpleExoPlayer)?.volume = if (shouldMute) 0F else 1F
+        }
+
+        private fun hasAudio(trackGroups: TrackGroupArray): Boolean {
+            if (!trackGroups.isEmpty) {
+                for (arrayIndex in 0 until trackGroups.length) {
+                    for (groupIndex in 0 until trackGroups[arrayIndex].length) {
+                        val sampleMimeType = trackGroups[arrayIndex].getFormat(groupIndex)
+                            .sampleMimeType
+                        if (sampleMimeType != null && sampleMimeType.contains("audio")) {
+                            return true
+                        }
+                    }
+                }
+            }
+            return false
+        }
+
         override fun onPlayerError(error: ExoPlaybackException) {
             binding.infoRetry.show()
+        }
+
+        override fun onTracksChanged(
+            trackGroups: TrackGroupArray,
+            trackSelections: TrackSelectionArray
+        ) {
+            initAudioVolume(trackGroups)
         }
     }
 }
