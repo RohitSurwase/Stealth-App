@@ -1,0 +1,2 @@
+### Fixed
+- Fix external links on Android 11+
