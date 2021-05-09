@@ -2,10 +2,10 @@ buildscript {
 
     ext {
         kotlin = '1.4.32'
-        androidGradlePlugin = '4.2.0-beta06'
-        hiltGradlePlugin = '2.33-beta'
+        androidGradlePlugin = '4.2.0'
+        hiltGradlePlugin = '2.35.1'
 
-        hilt = '1.0.0-beta01'
+        hilt = '1.0.0'
 
         core = '1.3.2'
         appCompat = '1.2.0'
@@ -22,7 +22,7 @@ buildscript {
         room = '2.3.0'
         datastore = '1.0.0-beta01'
 
-        paging = '3.0.0-rc01'
+        paging = '3.0.0'
 
         material = '1.3.0'
 
