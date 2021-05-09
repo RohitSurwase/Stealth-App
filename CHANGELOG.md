@@ -1,3 +1,8 @@
+# 1.0.1 - 2021/05/09
+
+### Fixed
+- Fix external links on Android 11+
+
 # 1.0.0 - 2021/05/09
 
 ### Added
