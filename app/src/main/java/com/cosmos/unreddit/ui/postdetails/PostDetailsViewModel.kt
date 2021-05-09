@@ -2,9 +2,6 @@ package com.cosmos.unreddit.ui.postdetails
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.liveData
-import androidx.lifecycle.switchMap
 import androidx.lifecycle.viewModelScope
 import com.cosmos.unreddit.data.local.mapper.CommentMapper
 import com.cosmos.unreddit.data.local.mapper.PostMapper
@@ -15,16 +12,26 @@ import com.cosmos.unreddit.data.model.Sorting
 import com.cosmos.unreddit.data.model.db.PostEntity
 import com.cosmos.unreddit.data.remote.api.reddit.RedditApi
 import com.cosmos.unreddit.data.remote.api.reddit.model.Listing
-import com.cosmos.unreddit.data.remote.api.reddit.model.PostChild
 import com.cosmos.unreddit.data.repository.PostListRepository
+import com.cosmos.unreddit.data.repository.PreferencesRepository
+import com.cosmos.unreddit.ui.base.BaseViewModel
+import com.cosmos.unreddit.util.PostUtil
 import com.cosmos.unreddit.util.extension.updateValue
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flatMapConcat
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import retrofit2.HttpException
@@ -33,7 +40,12 @@ import javax.inject.Inject
 
 @HiltViewModel
 class PostDetailsViewModel
-@Inject constructor(private val repository: PostListRepository) : ViewModel() {
+@Inject constructor(
+    preferencesRepository: PreferencesRepository,
+    private val repository: PostListRepository
+) : BaseViewModel(preferencesRepository, repository) {
+
+    private val _coroutineContext = viewModelScope.coroutineContext + Dispatchers.IO
 
     private val _sorting: MutableStateFlow<Sorting> = MutableStateFlow(DEFAULT_SORTING)
     val sorting: StateFlow<Sorting> = _sorting
@@ -44,36 +56,52 @@ class PostDetailsViewModel
     private val _singleThread: MutableLiveData<Boolean> = MutableLiveData(false)
     val singleThread: LiveData<Boolean> = _singleThread
 
-    private val _listings: MutableLiveData<Resource<List<Listing>>> = MutableLiveData()
+    private val savedCommentIds: Flow<List<String>> = currentProfile.flatMapConcat {
+        repository.getSavedCommentIds(it.id).distinctUntilChanged()
+    }.shareIn(viewModelScope, SharingStarted.WhileSubscribed(), 1)
 
-    val post: LiveData<Resource<PostEntity>> = _listings.switchMap {
-        liveData {
-            val resource = when (it) {
-                is Resource.Success -> {
-                    val data = PostMapper.dataToEntity(
-                        (it.data[0].data.children[0] as PostChild).data
-                    )
-                    Resource.Success(data)
-                }
-                is Resource.Loading -> Resource.Loading()
-                is Resource.Error -> Resource.Error(it.code, it.message)
+    private val _listings: MutableStateFlow<Resource<List<Listing>>> =
+        MutableStateFlow(Resource.Loading())
+
+    private val _post: Flow<Resource<PostEntity>> = _listings.map {
+        when (it) {
+            is Resource.Success -> {
+                val data = PostMapper.dataToEntity(PostUtil.getPostData(it.data))
+                Resource.Success(data)
             }
-            emit(resource)
+            is Resource.Loading -> Resource.Loading()
+            is Resource.Error -> Resource.Error(it.code, it.message)
         }
     }
 
-    val comments: LiveData<Resource<List<Comment>>> = _listings.switchMap {
-        liveData {
-            val resource = when (it) {
-                is Resource.Success -> {
-                    val list = CommentMapper.dataToEntities(it.data[1].data.children)
-                    val data = getComments(list, DEPTH_LIMIT)
-                    Resource.Success(data)
-                }
-                is Resource.Loading -> Resource.Loading()
-                is Resource.Error -> Resource.Error(it.code, it.message)
+    val post: Flow<Resource<PostEntity>> = combine(_post, savedPostIds) { post, savedIds ->
+        post.apply {
+            if (this is Resource.Success) {
+                data.saved = savedIds.contains(data.id)
             }
-            emit(resource)
+        }
+    }.shareIn(viewModelScope, SharingStarted.WhileSubscribed(), 1)
+
+    private val _comments: Flow<Resource<List<Comment>>> = _listings.map {
+        when (it) {
+            is Resource.Success -> {
+                val list = CommentMapper.dataToEntities(
+                    PostUtil.getCommentsData(it.data),
+                    PostUtil.getPostData(it.data)
+                )
+                val data = getComments(list, DEPTH_LIMIT)
+                Resource.Success(data)
+            }
+            is Resource.Loading -> Resource.Loading()
+            is Resource.Error -> Resource.Error(it.code, it.message)
+        }
+    }.shareIn(viewModelScope, SharingStarted.WhileSubscribed(), 1)
+
+    val comments: Flow<Resource<List<Comment>>> = combine(_comments, savedCommentIds) { comments, savedIds ->
+        comments.apply {
+            if (this is Resource.Success) {
+                data.map { (it as? CommentEntity)?.saved = savedIds.contains(it.name) }
+            }
         }
     }
 
@@ -123,6 +151,12 @@ class PostDetailsViewModel
             }.collect {
                 _listings.value = Resource.Success(it)
             }
+        }
+    }
+
+    fun insertPostInHistory(postId: String) {
+        viewModelScope.launch(_coroutineContext) {
+            currentProfile.first().let { repository.insertPostInHistory(postId, it.id) }
         }
     }
 

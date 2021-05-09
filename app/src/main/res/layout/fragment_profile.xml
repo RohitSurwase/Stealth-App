@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+        <variable
+            name="profile"
+            type="com.cosmos.unreddit.data.model.db.Profile" />
+    </data>
+
+    <androidx.constraintlayout.motion.widget.MotionLayout
+        android:id="@+id/layout_root"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:context=".MainActivity"
+        app:layoutDescription="@xml/scene_profile"
+        tools:showPaths="true">
+
+        <View
+            android:id="@+id/profile_header"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/user_header_height" />
+
+        <com.cosmos.unreddit.ui.common.widget.AvatarView
+            android:id="@+id/profile_image"
+            android:layout_width="@dimen/user_image_size_expanded"
+            android:layout_height="@dimen/user_image_size_expanded"
+            android:contentDescription="@null"
+            app:text="@{profile.name}"
+            tools:text="ST"/>
+
+        <TextView
+            android:id="@+id/profile_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@{profile.name}"
+            android:textAppearance="@style/TextAppearanceAppBarLabel"
+            android:ellipsize="none"
+            android:singleLine="true"
+            android:requiresFadingEdge="horizontal"
+            tools:text="User"/>
+
+        <com.cosmos.unreddit.ui.common.widget.CardButton
+            android:id="@+id/users_card"
+            android:layout_width="@dimen/app_bar_button_size"
+            android:layout_height="@dimen/app_bar_button_size"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toBottomOf="@id/guideline_app_bar"
+            android:layout_marginEnd="@dimen/app_bar_margin"
+            app:icon="@drawable/ic_users"
+            style="@style/CardButtonStyle"/>
+
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/guideline_app_bar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            app:layout_constraintGuide_begin="?attr/actionBarSize" />
+
+        <com.google.android.material.tabs.TabLayout
+            android:id="@+id/tabs"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toBottomOf="@id/profile_header"
+            app:layout_constraintStart_toStartOf="parent"
+            style="@style/TabLayoutStyle"/>
+
+        <androidx.viewpager2.widget.ViewPager2
+            android:id="@+id/view_pager"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tabs" />
+
+    </androidx.constraintlayout.motion.widget.MotionLayout>
+</layout>

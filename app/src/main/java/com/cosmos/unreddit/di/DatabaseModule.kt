@@ -17,6 +17,9 @@ object DatabaseModule {
     @Provides
     @Singleton
     fun provideRedditDatabase(@ApplicationContext context: Context): RedditDatabase {
-        return Room.databaseBuilder(context, RedditDatabase::class.java, "reddit_db").build()
+        return Room.databaseBuilder(context, RedditDatabase::class.java, "reddit_db")
+            .addCallback(RedditDatabase.Callback())
+            .addMigrations(RedditDatabase.MIGRATION_1_2)
+            .build()
     }
 }

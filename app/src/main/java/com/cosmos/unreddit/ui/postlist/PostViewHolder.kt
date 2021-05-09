@@ -39,6 +39,10 @@ abstract class PostViewHolder(
         postMetricsBinding.buttonMore.setOnClickListener {
             listener.onMenuClick(bindingAdapterPosition)
         }
+
+        postMetricsBinding.buttonSave.setOnClickListener {
+            listener.onSaveClick(bindingAdapterPosition)
+        }
     }
 
     open fun bind(
@@ -55,7 +59,7 @@ abstract class PostViewHolder(
         }
 
         awards.apply {
-            if (postEntity.totalAwards > 0) {
+            if (postEntity.awards.isNotEmpty()) {
                 visibility = View.VISIBLE
                 setAwards(postEntity.awards, postEntity.totalAwards)
             } else {
@@ -87,10 +91,21 @@ abstract class PostViewHolder(
                 postFlairsBinding.postFlair.visibility = View.GONE
             }
         }
+
+        postEntity.crosspost?.let {
+            postInfoBinding.groupCrosspost.isVisible = true
+            postInfoBinding.textCrosspostSubreddit.text = it.subreddit
+            postInfoBinding.textCrosspostAuthor.text = it.author
+        } ?: run {
+            postInfoBinding.groupCrosspost.isVisible = false
+        }
+
+        postMetricsBinding.buttonSave.isChecked = postEntity.saved
     }
 
     open fun update(post: PostEntity) {
         title.setTextColor(ContextCompat.getColor(title.context, post.textColor))
+        postMetricsBinding.buttonSave.isChecked = post.saved
     }
 
     class ImagePostViewHolder(
@@ -202,12 +217,12 @@ abstract class PostViewHolder(
         ) {
             super.bind(postEntity, contentPreferences)
 
+            val previewText = postEntity.previewText
+
             binding.textPostSelf.apply {
-                if (postEntity.shouldShowPreview(contentPreferences) &&
-                    postEntity.previewText != null
-                ) {
+                if (postEntity.shouldShowPreview(contentPreferences) && previewText != null) {
                     binding.textPostSelfCard.visibility = View.VISIBLE
-                    setText(postEntity.previewText, false)
+                    setText(previewText, false)
                     setTextColor(ContextCompat.getColor(context, postEntity.textColor))
                 } else {
                     binding.textPostSelfCard.visibility = View.GONE

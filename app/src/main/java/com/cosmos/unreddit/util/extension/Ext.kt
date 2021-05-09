@@ -11,6 +11,7 @@ import android.widget.ImageView
 import androidx.core.view.isVisible
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.setFragmentResultListener
 import androidx.navigation.NavOptions
 import androidx.paging.LoadState
 import androidx.paging.PagingDataAdapter
@@ -21,9 +22,12 @@ import coil.load
 import coil.size.Precision
 import coil.size.Scale
 import com.cosmos.unreddit.R
+import com.cosmos.unreddit.data.model.Comment
 import com.cosmos.unreddit.data.model.Sorting
 import com.cosmos.unreddit.databinding.IncludeLoadingStateBinding
 import com.cosmos.unreddit.databinding.ItemListContentBinding
+import com.cosmos.unreddit.ui.commentmenu.CommentMenuFragment
+import com.cosmos.unreddit.ui.postdetails.PostDetailsFragment
 import com.cosmos.unreddit.ui.sort.SortFragment
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.distinctUntilChangedBy
@@ -72,6 +76,24 @@ fun Fragment.setSortingListener(result: (Sorting?) -> Unit) {
     ) { _, bundle ->
         val sorting = bundle.getParcelable(SortFragment.BUNDLE_KEY_SORTING) as? Sorting
         result(sorting)
+    }
+}
+
+fun Fragment.setCommentListener(result: (Comment.CommentEntity?) -> Unit) {
+    childFragmentManager.setFragmentResultListener(
+        CommentMenuFragment.REQUEST_KEY_COMMENT,
+        viewLifecycleOwner
+    ) { _, bundle ->
+        val comment = bundle.getParcelable(CommentMenuFragment.BUNDLE_KEY_COMMENT)
+                as? Comment.CommentEntity
+        result(comment)
+    }
+}
+
+fun Fragment.setNavigationListener(result: (Boolean) -> Unit) {
+    setFragmentResultListener(PostDetailsFragment.REQUEST_KEY_NAVIGATION) { _, bundle ->
+        val showNavigation = bundle.getBoolean(PostDetailsFragment.BUNDLE_KEY_NAVIGATION)
+        result(showNavigation)
     }
 }
 
@@ -161,6 +183,10 @@ fun ViewPager2.getRecyclerView(): RecyclerView? {
 
 fun ViewPager2.getItemView(position: Int): View? {
     return getRecyclerView()?.findViewHolderForAdapterPosition(position)?.itemView
+}
+
+fun ViewPager2.getListContent(position: Int): ItemListContentBinding? {
+    return getItemView(position)?.let { ItemListContentBinding.bind(it) }
 }
 
 fun ViewPager2.scrollToTop(position: Int) {

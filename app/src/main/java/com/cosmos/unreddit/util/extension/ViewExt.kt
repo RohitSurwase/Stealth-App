@@ -13,6 +13,7 @@ import coil.size.Precision
 import coil.size.Scale
 import coil.transform.BlurTransformation
 import com.cosmos.unreddit.R
+import com.google.android.material.textfield.TextInputLayout
 
 fun TextView.applyGradient(text: String, @ColorInt colors: IntArray) {
     val width = paint.measureText(text)
@@ -61,4 +62,8 @@ fun ImageView.load(
         }
         .build()
     context.imageLoader.enqueue(request)
+}
+
+fun TextInputLayout.text(): String? {
+    return editText?.text?.toString()
 }

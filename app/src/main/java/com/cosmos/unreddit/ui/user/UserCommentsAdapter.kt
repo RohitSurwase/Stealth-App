@@ -15,15 +15,19 @@ import com.cosmos.unreddit.data.model.Comment.CommentEntity
 import com.cosmos.unreddit.databinding.ItemUserCommentBinding
 import com.cosmos.unreddit.ui.common.widget.RedditView
 import com.cosmos.unreddit.util.DateUtil
-import com.cosmos.unreddit.util.PostUtil
-import com.cosmos.unreddit.util.extension.applyGradient
 import com.cosmos.unreddit.util.extension.blurText
 
 class UserCommentsAdapter(
     context: Context,
     private val onLinkClickListener: RedditView.OnLinkClickListener? = null,
-    private val onCommentClick: (CommentEntity) -> Unit
+    private val commentClickListener: CommentClickListener
 ) : PagingDataAdapter<Comment, UserCommentsAdapter.CommentViewHolder>(COMMENT_COMPARATOR) {
+
+    interface CommentClickListener {
+        fun onClick(comment: CommentEntity)
+
+        fun onLongClick(comment: CommentEntity)
+    }
 
     private val colorPrimary by lazy {
         ColorStateList.valueOf(ContextCompat.getColor(context, R.color.colorPrimary))
@@ -48,17 +52,6 @@ class UserCommentsAdapter(
             binding.includeItemComment.comment = comment
 
             with(comment) {
-                with(binding.includeItemComment.commentAuthor) {
-                    applyGradient(
-                        comment.author,
-                        PostUtil.getAuthorGradientColor(
-                            context,
-                            R.color.regular_gradient_start,
-                            R.color.regular_gradient_end
-                        )
-                    )
-                }
-
                 binding.includeItemComment.commentScore.blurText(scoreHidden)
 
                 with(binding.includeItemComment.commentDate) {
@@ -109,10 +102,20 @@ class UserCommentsAdapter(
             with(binding.includeItemComment.commentBody) {
                 setText(comment.body)
                 setOnLinkClickListener(onLinkClickListener)
-                setOnClickListener { onCommentClick(comment) }
+                setOnClickListener { commentClickListener.onClick(comment) }
+                setOnLongClickListener {
+                    commentClickListener.onLongClick(comment)
+                    true
+                }
             }
 
-            itemView.setOnClickListener { onCommentClick(comment) }
+            itemView.run {
+                setOnClickListener { commentClickListener.onClick(comment) }
+                setOnLongClickListener {
+                    commentClickListener.onLongClick(comment)
+                    true
+                }
+            }
         }
     }
 

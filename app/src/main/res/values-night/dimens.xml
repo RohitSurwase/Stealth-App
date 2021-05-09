@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
+    <dimen name="card_elevation">2dp</dimen>
+
     <dimen name="post_elevation">2dp</dimen>
     <dimen name="app_bar_button_elevation">2dp</dimen>
     <dimen name="subreddit_content_elevation">2dp</dimen>

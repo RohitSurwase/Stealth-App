@@ -53,7 +53,7 @@ class SubredditFragment : BaseFragment() {
     private var _bindingAbout: LayoutSubredditAboutBinding? = null
     private val bindingAbout get() = _bindingAbout!!
 
-    private val viewModel: SubredditViewModel by viewModels()
+    override val viewModel: SubredditViewModel by viewModels()
 
     private val args: SubredditFragmentArgs by navArgs()
 

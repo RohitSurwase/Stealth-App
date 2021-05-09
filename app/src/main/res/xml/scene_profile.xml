@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<MotionScene xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <Transition
+        app:constraintSetEnd="@id/collapsed"
+        app:constraintSetStart="@id/expanded">
+
+        <OnSwipe
+            app:dragDirection="dragUp"
+            app:touchAnchorId="@id/view_pager"
+            app:touchAnchorSide="top" />
+
+    </Transition>
+
+    <ConstraintSet android:id="@+id/expanded">
+        <Constraint
+            android:id="@id/profile_header"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/user_header_height"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+        </Constraint>
+        <Constraint
+            android:id="@id/profile_image"
+            android:layout_width="@dimen/user_image_size_expanded"
+            android:layout_height="@dimen/user_image_size_expanded"
+            android:layout_marginBottom="@dimen/user_header_margin_bottom"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toTopOf="@id/profile_name"
+            app:layout_constraintVertical_chainStyle="packed">
+        </Constraint>
+        <Constraint
+            android:id="@id/profile_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:scaleX="@dimen/user_name_scale_expanded"
+            android:scaleY="@dimen/user_name_scale_expanded"
+            app:layout_constraintTop_toBottomOf="@id/profile_image"
+            app:layout_constraintBottom_toBottomOf="@id/profile_header"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
+        </Constraint>
+    </ConstraintSet>
+
+    <ConstraintSet android:id="@+id/collapsed">
+        <Constraint
+            android:id="@id/profile_header"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+        </Constraint>
+        <Constraint
+            android:id="@id/profile_image"
+            android:layout_width="@dimen/user_image_size_collapsed"
+            android:layout_height="@dimen/user_image_size_collapsed"
+            android:layout_marginStart="@dimen/app_bar_margin"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@id/profile_header"
+            app:layout_constraintBottom_toBottomOf="@id/profile_header">
+        </Constraint>
+        <Constraint
+            android:id="@id/profile_name"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:scaleX="1.0"
+            android:scaleY="1.0"
+            android:layout_marginStart="@dimen/app_bar_margin"
+            app:layout_constraintStart_toEndOf="@id/profile_image"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toBottomOf="@id/profile_header"
+            app:layout_constraintTop_toTopOf="@id/profile_header">
+        </Constraint>
+    </ConstraintSet>
+
+</MotionScene>

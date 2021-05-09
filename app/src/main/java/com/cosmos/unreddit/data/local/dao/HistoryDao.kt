@@ -8,6 +8,12 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 abstract class HistoryDao : BaseDao<History> {
 
-    @Query("SELECT * FROM history")
-    abstract fun getHistory(): Flow<List<History>>
+    @Query("DELETE FROM history WHERE profile_id = :profileId")
+    abstract suspend fun deleteFromProfile(profileId: Int)
+
+    @Query("SELECT * FROM history WHERE profile_id = :profileId")
+    abstract fun getHistoryFromProfile(profileId: Int): Flow<List<History>>
+
+    @Query("SELECT post_id FROM history WHERE profile_id = :profileId")
+    abstract fun getHistoryIdsFromProfile(profileId: Int): Flow<List<String>>
 }

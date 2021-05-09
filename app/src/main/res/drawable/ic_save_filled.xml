@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <path
+        android:name="filled_heart"
+        android:fillColor="@color/icon_post_color"
+        android:pathData="m19.9045,5.3722a4.8895,4.8895 0,0 0,-6.9164 0L12.0458,6.3145 11.1035,5.3722A4.8906,4.8906 0,0 0,4.1871 12.2886l0.9423,0.9423 6.9164,6.9164 6.9164,-6.9164 0.9423,-0.9423a4.8895,4.8895 0,0 0,0 -6.9164z" />
+</vector>

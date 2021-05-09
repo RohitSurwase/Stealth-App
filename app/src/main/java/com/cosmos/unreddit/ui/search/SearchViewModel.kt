@@ -1,6 +1,5 @@
 package com.cosmos.unreddit.ui.search
 
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
@@ -13,6 +12,7 @@ import com.cosmos.unreddit.data.model.preferences.ContentPreferences
 import com.cosmos.unreddit.data.remote.api.reddit.RedditApi
 import com.cosmos.unreddit.data.repository.PostListRepository
 import com.cosmos.unreddit.data.repository.PreferencesRepository
+import com.cosmos.unreddit.ui.base.BaseViewModel
 import com.cosmos.unreddit.util.PagerHelper
 import com.cosmos.unreddit.util.PostUtil
 import com.cosmos.unreddit.util.extension.updateValue
@@ -21,16 +21,13 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.distinctUntilChanged
 import javax.inject.Inject
 
 @HiltViewModel
 class SearchViewModel @Inject constructor(
     private val repository: PostListRepository,
     preferencesRepository: PreferencesRepository
-) : ViewModel() {
-
-    private val history: Flow<List<String>> = repository.getHistoryIds().distinctUntilChanged()
+) : BaseViewModel(preferencesRepository, repository) {
 
     val contentPreferences: Flow<ContentPreferences> =
         preferencesRepository.getContentPreferences()
@@ -68,7 +65,8 @@ class SearchViewModel @Inject constructor(
     fun searchAndFilterPosts(query: String, sorting: Sorting): Flow<PagingData<PostEntity>> {
         return PostUtil.filterPosts(
             postPagerHelper.loadData(query, sorting),
-            history,
+            historyIds,
+            savedPostIds,
             contentPreferences
         ).cachedIn(viewModelScope)
     }

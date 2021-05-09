@@ -4,6 +4,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.content.ContextCompat
+import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import coil.request.ImageRequest
 import com.cosmos.unreddit.R
@@ -69,6 +70,7 @@ class PostAdapter(
 
             binding.textPostTitle.text = post.title
 
+            binding.includePostInfo.groupCrosspost.isVisible = false
             binding.includePostInfo.textPostAuthor.apply {
                 setTextColor(ContextCompat.getColor(context, post.posterType.color))
             }
@@ -123,11 +125,31 @@ class PostAdapter(
             binding.includePostMetrics.buttonMore.setOnClickListener {
                 postClickListener.onMenuClick(post)
             }
+
+            binding.includePostMetrics.buttonSave.setOnClickListener {
+                postClickListener.onSaveClick(post)
+            }
+
+            post.crosspost?.let { crosspost ->
+                binding.includeCrosspost.run {
+                    root.isVisible = true
+                    root.setOnClickListener { postClickListener.onClick(crosspost) }
+                    title.text = crosspost.title
+                    includePostInfo.post = crosspost
+                    includePostInfo.groupCrosspost.isVisible = false
+                }
+            } ?: run {
+                binding.includeCrosspost.root.isVisible = false
+            }
+
+            binding.includePostMetrics.buttonSave.isChecked = post.saved
         }
 
         fun update(post: PostEntity) {
             binding.includePostMetrics.post = post
             binding.includePostFlairs.post = post
+
+            binding.includePostMetrics.buttonSave.isChecked = post.saved
 
             if (post.type == PostType.TEXT) {
                 bindText(post)

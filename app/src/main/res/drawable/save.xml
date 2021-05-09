@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- https://blog.stylingandroid.com/animatedicons-heart/ -->
+<animated-selector xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/checked"
+        android:drawable="@drawable/ic_save_filled"
+        android:state_checked="true" />
+
+    <item
+        android:id="@+id/unchecked"
+        android:drawable="@drawable/ic_save_outline"
+        android:state_checked="false" />
+
+    <transition
+        android:fromId="@id/checked"
+        android:toId="@id/unchecked"
+        android:drawable="@drawable/save_checked_to_unchecked" />
+
+    <transition
+        android:fromId="@id/unchecked"
+        android:toId="@id/checked"
+        android:drawable="@drawable/save_unchecked_to_checked" />
+
+</animated-selector>

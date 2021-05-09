@@ -26,6 +26,8 @@ import com.cosmos.unreddit.util.extension.openExternalLink
 open class BaseFragment : Fragment(), PostListAdapter.PostClickListener,
     RedditView.OnLinkClickListener {
 
+    protected open val viewModel: BaseViewModel? = null
+
     private lateinit var onBackPressedCallback: OnBackPressedCallback
 
     private val navOptions: NavOptions by lazy {
@@ -128,6 +130,10 @@ open class BaseFragment : Fragment(), PostListAdapter.PostClickListener,
 
     override fun onLinkLongClick(link: String) {
         LinkMenuFragment.show(parentFragmentManager, link)
+    }
+
+    override fun onSaveClick(post: PostEntity) {
+        viewModel?.toggleSavePost(post)
     }
 
     open fun openGallery(images: List<GalleryMedia>) {

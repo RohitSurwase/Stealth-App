@@ -39,7 +39,7 @@ class SubredditSearchFragment : BaseFragment(), PostListAdapter.PostClickListene
     private var _binding: FragmentSubredditSearchBinding? = null
     private val binding get() = _binding!!
 
-    private val viewModel: SubredditSearchViewModel by viewModels()
+    override val viewModel: SubredditSearchViewModel by viewModels()
 
     private val args: SubredditSearchFragmentArgs by navArgs()
 

@@ -14,8 +14,6 @@ import com.cosmos.unreddit.databinding.ItemPostLinkBinding
 import com.cosmos.unreddit.databinding.ItemPostTextBinding
 import com.cosmos.unreddit.ui.common.widget.RedditView
 import com.cosmos.unreddit.util.ClickableMovementMethod
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 
 class PostListAdapter(
     private val repository: PostListRepository,
@@ -35,6 +33,8 @@ class PostListAdapter(
         fun onVideoClick(post: PostEntity)
 
         fun onLinkClick(post: PostEntity)
+
+        fun onSaveClick(post: PostEntity)
     }
 
     interface Listener {
@@ -43,6 +43,8 @@ class PostListAdapter(
         fun onMediaClick(position: Int)
 
         fun onMenuClick(position: Int)
+
+        fun onSaveClick(position: Int)
     }
 
     private val clickableMovementMethod = ClickableMovementMethod(
@@ -82,12 +84,11 @@ class PostListAdapter(
     private val listener = object : Listener {
         override fun onClick(position: Int, isLong: Boolean) {
             getItem(position)?.let {
-                it.seen = true
-                insertPostInHistory(it.id)
-                notifyItemChanged(position, it)
                 if (isLong) {
                     postClickListener.onLongClick(it)
                 } else {
+                    it.seen = true
+                    notifyItemChanged(position, it)
                     postClickListener.onClick(it)
                 }
             }
@@ -112,6 +113,13 @@ class PostListAdapter(
             }
         }
 
+        override fun onSaveClick(position: Int) {
+            getItem(position)?.let {
+                postClickListener.onSaveClick(it)
+                it.saved = !it.saved
+                notifyItemChanged(position, it)
+            }
+        }
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
@@ -188,12 +196,6 @@ class PostListAdapter(
         }
     }
 
-    private fun insertPostInHistory(id: String) {
-        GlobalScope.launch {
-            repository.insertPostInHistory(id)
-        }
-    }
-
     companion object {
         private val POST_COMPARATOR = object : DiffUtil.ItemCallback<PostEntity>() {
             override fun areItemsTheSame(oldItem: PostEntity, newItem: PostEntity): Boolean {
@@ -202,6 +204,10 @@ class PostListAdapter(
 
             override fun areContentsTheSame(oldItem: PostEntity, newItem: PostEntity): Boolean {
                 return oldItem == newItem
+            }
+
+            override fun getChangePayload(oldItem: PostEntity, newItem: PostEntity): Any {
+                return newItem
             }
         }
     }

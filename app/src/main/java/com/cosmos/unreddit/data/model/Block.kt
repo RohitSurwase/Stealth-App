@@ -6,8 +6,9 @@ import android.widget.LinearLayout
 import android.widget.TableLayout
 import android.widget.TableRow
 import androidx.core.view.setPadding
+import com.cosmos.unreddit.R
 import com.cosmos.unreddit.ui.common.widget.RedditTextView
-import com.cosmos.unreddit.util.extension.toPixels
+import com.cosmos.unreddit.util.ClickableMovementMethod
 
 sealed class Block {
     data class TextBlock(val text: CharSequence) : Block()
@@ -19,8 +20,11 @@ sealed class Block {
             rows.add(row)
         }
 
-        fun getTableLayout(context: Context): TableLayout {
-            val padding = context.toPixels(TABLE_PADDING).toInt()
+        fun getTableLayout(
+            context: Context,
+            clickableMovementMethod: ClickableMovementMethod
+        ): TableLayout {
+            val padding = context.resources.getDimension(R.dimen.table_padding).toInt()
 
             val tableLayout = TableLayout(context).apply {
                 layoutParams = LinearLayout.LayoutParams(
@@ -49,6 +53,7 @@ sealed class Block {
                         layoutParams = colParams
                         gravity = column.gravity
                         text = column.text
+                        movementMethod = clickableMovementMethod
                         setPadding(padding)
                     }
                     tableRow.addView(redditTextView)
@@ -71,9 +76,5 @@ sealed class Block {
             val text: CharSequence,
             val gravity: Int
         )
-
-        companion object {
-            private const val TABLE_PADDING = 8F
-        }
     }
 }

@@ -92,14 +92,27 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@id/barrier_bottom"
         app:layout_constraintBottom_toTopOf="@id/scrollview_awards"
+        app:layout_constraintVertical_bias="0"
         android:layout_marginTop="@dimen/post_margin_top_large"
         layout="@layout/include_post_flairs"/>
+
+    <include
+        android:id="@+id/include_crosspost"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/include_post_flairs"
+        app:layout_constraintBottom_toTopOf="@id/scrollview_awards"
+        android:layout_marginTop="@dimen/post_margin_top_small"
+        android:layout_marginHorizontal="@dimen/post_content_margin_horizontal"
+        layout="@layout/include_crosspost"/>
 
     <HorizontalScrollView
         android:id="@+id/scrollview_awards"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:layout_constraintTop_toBottomOf="@id/include_post_flairs"
+        app:layout_constraintTop_toBottomOf="@id/include_crosspost"
         app:layout_constraintBottom_toTopOf="@id/include_post_metrics"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"

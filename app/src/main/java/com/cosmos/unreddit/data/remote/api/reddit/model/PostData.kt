@@ -53,6 +53,9 @@ data class PostData(
     @Json(name = "is_self")
     val isSelf: Boolean,
 
+    @Json(name = "crosspost_parent_list")
+    val crossposts: List<PostData>?,
+
     @Json(name = "domain")
     val domain: String,
 
@@ -169,17 +172,24 @@ data class PostData(
     val mediaUrl: String
         get() = when (mediaType) {
             MediaType.REDDIT_VIDEO, MediaType.REDDIT_GIF -> {
-                media?.redditVideoPreview?.fallbackUrl
+                crossposts?.firstOrNull()?.mediaUrl
+                    ?: media?.redditVideoPreview?.fallbackUrl
                     ?: mediaPreview?.videoPreview?.fallbackUrl
             }
             MediaType.VIDEO -> {
-                media?.redditVideoPreview?.fallbackUrl
+                crossposts?.firstOrNull()?.mediaUrl
+                    ?: media?.redditVideoPreview?.fallbackUrl
                     ?: mediaPreview?.videoPreview?.fallbackUrl
                     ?: mediaPreview?.images?.getOrNull(0)?.variants?.mp4?.imageSource?.url
             }
-            MediaType.IMGUR_LINK -> mediaPreview?.images?.getOrNull(0)?.imageSource?.url
+            MediaType.IMGUR_LINK -> {
+                crossposts?.firstOrNull()?.mediaUrl
+                    ?: mediaPreview?.images?.getOrNull(0)?.imageSource?.url
+            }
             MediaType.GFYCAT -> {
-                media?.embed?.thumbnailUrl ?: mediaPreview?.videoPreview?.fallbackUrl
+                crossposts?.firstOrNull()?.mediaUrl
+                    ?: media?.embed?.thumbnailUrl
+                    ?: mediaPreview?.videoPreview?.fallbackUrl
             }
             else -> url
         } ?: url

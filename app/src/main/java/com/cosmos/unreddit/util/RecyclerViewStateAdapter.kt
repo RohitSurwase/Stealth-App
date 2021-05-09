@@ -21,14 +21,19 @@ class RecyclerViewStateAdapter(val onError: () -> Unit) :
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.bind(getItem(position).adapter)
+        val adapter = getItem(position).adapter
+        if (adapter is PagingDataAdapter<out Any, out RecyclerView.ViewHolder>) {
+            holder.bindPaging(adapter)
+        } else {
+            holder.bind(adapter)
+        }
     }
 
     inner class ViewHolder(
         private val binding: ItemListContentBinding
     ) : RecyclerView.ViewHolder(binding.root) {
 
-        fun bind(adapter: PagingDataAdapter<out Any, out RecyclerView.ViewHolder>) {
+        fun bindPaging(adapter: PagingDataAdapter<out Any, out RecyclerView.ViewHolder>) {
             adapter.addLoadStateListener(binding.listContent, binding.loadingState, onError)
 
             binding.listContent.apply {
@@ -39,11 +44,18 @@ class RecyclerViewStateAdapter(val onError: () -> Unit) :
                 )
             }
         }
+
+        fun bind(adapter: RecyclerView.Adapter<out RecyclerView.ViewHolder>) {
+            binding.listContent.apply {
+                layoutManager = LinearLayoutManager(context)
+                this.adapter = adapter
+            }
+        }
     }
 
     data class Page(
         @StringRes val title: Int,
-        val adapter: PagingDataAdapter<out Any, out RecyclerView.ViewHolder>
+        val adapter: RecyclerView.Adapter<out RecyclerView.ViewHolder>
     )
 
     companion object {

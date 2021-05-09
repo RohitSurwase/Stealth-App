@@ -23,6 +23,7 @@ import com.cosmos.unreddit.data.model.db.PostEntity
 import com.cosmos.unreddit.data.repository.PostListRepository
 import com.cosmos.unreddit.databinding.FragmentUserBinding
 import com.cosmos.unreddit.ui.base.BaseFragment
+import com.cosmos.unreddit.ui.commentmenu.CommentMenuFragment
 import com.cosmos.unreddit.ui.postdetails.PostDetailsFragment
 import com.cosmos.unreddit.ui.postlist.PostListAdapter
 import com.cosmos.unreddit.ui.postmenu.PostMenuFragment
@@ -31,6 +32,7 @@ import com.cosmos.unreddit.util.RecyclerViewStateAdapter
 import com.cosmos.unreddit.util.extension.getRecyclerView
 import com.cosmos.unreddit.util.extension.onRefreshFromNetwork
 import com.cosmos.unreddit.util.extension.scrollToTop
+import com.cosmos.unreddit.util.extension.setCommentListener
 import com.cosmos.unreddit.util.extension.setSortingListener
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.tabs.TabLayout
@@ -44,12 +46,12 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class UserFragment : BaseFragment() {
+class UserFragment : BaseFragment(), UserCommentsAdapter.CommentClickListener {
 
     private var _binding: FragmentUserBinding? = null
     private val binding get() = _binding!!
 
-    private val viewModel: UserViewModel by viewModels()
+    override val viewModel: UserViewModel by viewModels()
 
     private val args: UserFragmentArgs by navArgs()
 
@@ -114,7 +116,7 @@ class UserFragment : BaseFragment() {
 
     private fun initViewPager() {
         postListAdapter = PostListAdapter(repository, this, this)
-        commentListAdapter = UserCommentsAdapter(requireContext(), this, this::onCommentClick)
+        commentListAdapter = UserCommentsAdapter(requireContext(), this, this)
 
         val tabs: List<RecyclerViewStateAdapter.Page> = listOf(
             RecyclerViewStateAdapter.Page(R.string.tab_user_submitted, postListAdapter),
@@ -168,18 +170,6 @@ class UserFragment : BaseFragment() {
         }
     }
 
-    private fun onCommentClick(comment: CommentEntity) {
-        parentFragmentManager.beginTransaction()
-            .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
-            .add(
-                R.id.fragment_container,
-                PostDetailsFragment.newInstance(comment.permalink),
-                PostDetailsFragment.TAG
-            )
-            .addToBackStack(null)
-            .commit()
-    }
-
     private fun initAppBar() {
         with(binding) {
             sortCard.setOnClickListener { showSortDialog() }
@@ -191,6 +181,7 @@ class UserFragment : BaseFragment() {
         setSortingListener { sorting ->
             sorting?.let { viewModel.setSorting(sorting) }
         }
+        setCommentListener { comment -> comment?.let { viewModel.toggleSaveComment(it) } }
     }
 
     private fun bindInfo(user: User) {
@@ -288,6 +279,22 @@ class UserFragment : BaseFragment() {
 
     override fun onMenuClick(post: PostEntity) {
         PostMenuFragment.show(parentFragmentManager, post, PostMenuFragment.MenuType.USER)
+    }
+
+    override fun onClick(comment: CommentEntity) {
+        parentFragmentManager.beginTransaction()
+            .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
+            .add(
+                R.id.fragment_container,
+                PostDetailsFragment.newInstance(comment.permalink),
+                PostDetailsFragment.TAG
+            )
+            .addToBackStack(null)
+            .commit()
+    }
+
+    override fun onLongClick(comment: CommentEntity) {
+        CommentMenuFragment.show(childFragmentManager, comment, CommentMenuFragment.MenuType.USER)
     }
 
     override fun onDestroyView() {

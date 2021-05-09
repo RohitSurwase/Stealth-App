@@ -12,6 +12,18 @@
         app:shutter_background_color="@color/background"
         app:controller_layout_id="@layout/layout_exoplayer_controls"/>
 
+    <com.cosmos.unreddit.ui.common.widget.CheckableImageView
+        android:id="@+id/mute"
+        android:layout_width="@dimen/exoplayer_small_button_size"
+        android:layout_height="@dimen/exoplayer_small_button_size"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_margin="16dp"
+        app:srcCompat="@drawable/ic_mute"
+        android:tint="@color/mute_color_selector"
+        android:visibility="gone"
+        tools:visibility="visible"/>
+
     <com.cosmos.unreddit.ui.common.widget.InfoBarView
         android:id="@+id/info_retry"
         android:layout_width="match_parent"
@@ -24,6 +36,6 @@
         app:textMessage="@string/network_retry_message"
         app:textAction="@string/network_retry_action"
         android:visibility="gone"
-        tools:visibility="visible"/>
+        tools:visibility="gone"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

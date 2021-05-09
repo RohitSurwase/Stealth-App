@@ -81,5 +81,15 @@
             android:background="?attr/selectableItemBackgroundBorderless"
             app:srcCompat="@drawable/ic_more"/>
 
+        <com.cosmos.unreddit.ui.common.widget.CheckableImageView
+            android:id="@+id/button_save"
+            android:layout_width="@dimen/post_icon_size"
+            android:layout_height="@dimen/post_icon_size"
+            app:layout_constraintTop_toTopOf="@id/image_vote_icon"
+            app:layout_constraintBottom_toBottomOf="@id/image_vote_icon"
+            app:layout_constraintEnd_toStartOf="@id/button_more"
+            android:layout_marginEnd="@dimen/post_padding_horizontal"
+            app:srcCompat="@drawable/save" />
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

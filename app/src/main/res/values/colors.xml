@@ -9,10 +9,13 @@
     <color name="colorSecondaryLight">#FF6090</color>
     <color name="colorSecondaryDark">#B0003A</color>
 
+    <color name="red_500">#F44336</color>
+
     <color name="ratio_gradient_low">#F44336</color>
     <color name="ratio_gradient_high">#4CAF50</color>
 
     <color name="text_color">#212121</color>
+    <color name="text_color_dark">#212121</color>
     <color name="text_color_secondary">#9C9DB9</color>
     <!-- TODO: Merge with seen color -->
     <color name="text_color_disabled">#7F7F7F</color>
@@ -70,4 +73,7 @@
 
     <color name="exoplayer_buffered_color">#809A67EA</color>
     <color name="exoplayer_unplayed_color">#1A9A67EA</color>
+
+    <color name="profile_dialog_background">#80000000</color>
+    <color name="profile_new_background">#808080</color>
 </resources>

@@ -12,6 +12,7 @@ import com.cosmos.unreddit.data.remote.api.reddit.model.CommentChild
 import com.cosmos.unreddit.data.remote.api.reddit.model.CommentData
 import com.cosmos.unreddit.data.remote.api.reddit.model.MoreChild
 import com.cosmos.unreddit.data.remote.api.reddit.model.MoreData
+import com.cosmos.unreddit.data.remote.api.reddit.model.PostData
 import com.cosmos.unreddit.util.HtmlParser
 import com.cosmos.unreddit.util.extension.toMillis
 
@@ -19,6 +20,7 @@ object CommentMapper {
 
     suspend fun dataToEntity(
         data: CommentData,
+        parent: PostData? = null,
         htmlParser: HtmlParser = HtmlParser()
     ): CommentEntity {
         with(data) {
@@ -29,6 +31,7 @@ object CommentMapper {
                 author,
                 scoreString,
                 awardings.sortedByDescending { it.count }.map { Award(it.count, it.getIcon()) },
+                bodyHtml,
                 htmlParser.separateHtmlBlocks(bodyHtml),
                 editedMillis,
                 isSubmitter,
@@ -40,9 +43,9 @@ object CommentMapper {
                 controversiality,
                 Flair.fromData(authorFlairRichText, flair),
                 PosterType.fromDistinguished(distinguished),
-                linkTitle,
-                linkPermalink,
-                linkAuthor,
+                linkTitle ?: parent?.title,
+                linkPermalink ?: parent?.permalink,
+                linkAuthor ?: parent?.author,
                 subreddit,
                 commentIndicator,
                 name,
@@ -64,12 +67,12 @@ object CommentMapper {
         }
     }
 
-    suspend fun dataToEntities(data: List<Child>?): MutableList<Comment> {
+    suspend fun dataToEntities(data: List<Child>?, parent: PostData? = null): MutableList<Comment> {
         val htmlParser = HtmlParser()
 
         return data?.mapNotNull {
             when (it.kind) {
-                ChildType.t1 -> dataToEntity((it as CommentChild).data, htmlParser)
+                ChildType.t1 -> dataToEntity((it as CommentChild).data, parent, htmlParser)
                 ChildType.more -> dataToEntity((it as MoreChild).data)
                 else -> null
             }

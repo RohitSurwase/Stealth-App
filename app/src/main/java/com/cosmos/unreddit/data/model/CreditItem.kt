@@ -26,4 +26,14 @@ sealed class CreditItem {
             OTHER("")
         }
     }
+
+    data class Contributor(
+        val name: String,
+
+        val username: String,
+
+        @StringRes val description: Int,
+
+        val link: String
+    ) : CreditItem()
 }

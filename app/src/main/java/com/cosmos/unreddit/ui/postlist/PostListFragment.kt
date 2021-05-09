@@ -6,7 +6,6 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.isVisible
 import androidx.fragment.app.activityViewModels
-import androidx.fragment.app.setFragmentResultListener
 import androidx.lifecycle.asLiveData
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
@@ -19,10 +18,10 @@ import com.cosmos.unreddit.data.repository.PostListRepository
 import com.cosmos.unreddit.databinding.FragmentPostBinding
 import com.cosmos.unreddit.ui.base.BaseFragment
 import com.cosmos.unreddit.ui.loadstate.NetworkLoadStateAdapter
-import com.cosmos.unreddit.ui.postdetails.PostDetailsFragment
 import com.cosmos.unreddit.ui.sort.SortFragment
 import com.cosmos.unreddit.util.extension.betterSmoothScrollToPosition
 import com.cosmos.unreddit.util.extension.onRefreshFromNetwork
+import com.cosmos.unreddit.util.extension.setNavigationListener
 import com.cosmos.unreddit.util.extension.setSortingListener
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Job
@@ -38,7 +37,7 @@ class PostListFragment : BaseFragment() {
     private var _binding: FragmentPostBinding? = null
     private val binding get() = _binding!!
 
-    private val viewModel: PostListViewModel by activityViewModels()
+    override val viewModel: PostListViewModel by activityViewModels()
     private val uiViewModel: UiViewModel by activityViewModels()
 
     private var loadPostsJob: Job? = null
@@ -125,8 +124,7 @@ class PostListFragment : BaseFragment() {
     private fun initResultListener() {
         setSortingListener { sorting -> sorting?.let { viewModel.setSorting(it) } }
 
-        setFragmentResultListener(PostDetailsFragment.REQUEST_KEY_NAVIGATION) { _, bundle ->
-            val showNavigation = bundle.getBoolean(PostDetailsFragment.BUNDLE_KEY_NAVIGATION)
+        setNavigationListener { showNavigation ->
             uiViewModel.setNavigationVisibility(showNavigation)
         }
     }

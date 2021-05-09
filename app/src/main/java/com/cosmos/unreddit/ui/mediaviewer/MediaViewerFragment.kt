@@ -7,6 +7,7 @@ import android.view.ViewGroup
 import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -15,12 +16,17 @@ import com.cosmos.unreddit.R
 import com.cosmos.unreddit.data.model.GalleryMedia
 import com.cosmos.unreddit.data.model.MediaType
 import com.cosmos.unreddit.data.model.Resource
+import com.cosmos.unreddit.data.repository.PreferencesRepository
 import com.cosmos.unreddit.databinding.FragmentMediaViewerBinding
 import com.cosmos.unreddit.ui.base.BaseFragment
 import com.cosmos.unreddit.util.extension.betterSmoothScrollToPosition
 import com.cosmos.unreddit.util.extension.getRecyclerView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class MediaViewerFragment : BaseFragment() {
@@ -28,7 +34,7 @@ class MediaViewerFragment : BaseFragment() {
     private var _binding: FragmentMediaViewerBinding? = null
     private val binding get() = _binding!!
 
-    private val viewModel: MediaViewerViewModel by viewModels()
+    private val viewerViewModel: MediaViewerViewModel by viewModels()
 
     private val args: MediaViewerFragmentArgs by navArgs()
 
@@ -38,8 +44,12 @@ class MediaViewerFragment : BaseFragment() {
     private lateinit var mediaAdapter: MediaViewerAdapter
     private lateinit var thumbnailAdapter: MediaViewerThumbnailAdapter
 
+    @Inject
+    lateinit var preferencesRepository: PreferencesRepository
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        lifecycleScope.launch { preferencesRepository.getMuteVideo(false).first() }
         handleArguments()
     }
 
@@ -61,7 +71,7 @@ class MediaViewerFragment : BaseFragment() {
     }
 
     private fun bindViewModel() {
-        viewModel.media.observe(viewLifecycleOwner) {
+        viewerViewModel.media.observe(viewLifecycleOwner) {
             binding.loadingCradle.isVisible = it is Resource.Loading
             when (it) {
                 is Resource.Success -> bindMedia(it.data)
@@ -71,7 +81,7 @@ class MediaViewerFragment : BaseFragment() {
                 }
             }
         }
-        viewModel.selectedPage.observe(viewLifecycleOwner) {
+        viewerViewModel.selectedPage.observe(viewLifecycleOwner) {
             binding.listThumbnails.betterSmoothScrollToPosition(it)
             thumbnailAdapter.selectItem(it)
             binding.textPageCurrent.text = it.plus(1).toString()
@@ -87,14 +97,19 @@ class MediaViewerFragment : BaseFragment() {
     }
 
     private fun initViewPager() {
-        mediaAdapter = MediaViewerAdapter(requireContext())
+        val muteVideo = runBlocking { preferencesRepository.getMuteVideo(false).first() }
+
+        mediaAdapter = MediaViewerAdapter(requireContext(), muteVideo) {
+            lifecycleScope.launch { preferencesRepository.setMuteVideo(it) }
+        }
+
         binding.viewPager.apply {
             adapter = mediaAdapter
             getRecyclerView()?.overScrollMode = RecyclerView.OVER_SCROLL_NEVER
             registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
                 override fun onPageSelected(position: Int) {
                     super.onPageSelected(position)
-                    viewModel.setSelectedPage(position)
+                    viewerViewModel.setSelectedPage(position)
                 }
             })
         }
@@ -106,21 +121,21 @@ class MediaViewerFragment : BaseFragment() {
 
     private fun handleArguments() {
         if (args.images != null) {
-            viewModel.setMedia(args.images!!.toList())
+            viewerViewModel.setMedia(args.images!!.toList())
         } else if (args.link != null && args.type != MediaType.NO_MEDIA) {
-            viewModel.loadMedia(args.link!!, args.type)
+            viewerViewModel.loadMedia(args.link!!, args.type)
         } else {
             arguments?.let { bundle ->
                 if (bundle.containsKey(BUNDLE_KEY_IMAGES)) {
                     val images = bundle.getParcelableArrayList<GalleryMedia>(BUNDLE_KEY_IMAGES)
                     if (images != null) {
-                        viewModel.setMedia(images.toList())
+                        viewerViewModel.setMedia(images.toList())
                     }
                 } else if (bundle.containsKey(BUNDLE_KEY_LINK)) {
                     val link = bundle.getString(BUNDLE_KEY_LINK, "")
                     val type = bundle.getSerializable(BUNDLE_KEY_TYPE) as? MediaType
                         ?: MediaType.LINK
-                    viewModel.loadMedia(link, type)
+                    viewerViewModel.loadMedia(link, type)
                 }
                 isLegacyNavigation = true
             }
@@ -149,12 +164,12 @@ class MediaViewerFragment : BaseFragment() {
 
     private fun retry() {
         if (args.link != null) {
-            viewModel.loadMedia(args.link!!, args.type, true)
+            viewerViewModel.loadMedia(args.link!!, args.type, true)
         } else {
             val link = arguments?.getString(BUNDLE_KEY_LINK)
             val type = arguments?.getSerializable(BUNDLE_KEY_TYPE) as? MediaType
             if (link != null && type != null) {
-                viewModel.loadMedia(link, type, true)
+                viewerViewModel.loadMedia(link, type, true)
             }
         }
     }
