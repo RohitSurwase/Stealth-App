@@ -139,6 +139,7 @@
 
     <string name="about_section_credits">Credits</string>
     <string name="about_section_libraries">Libraries</string>
+    <string name="about_section_contributors">Contributors</string>
 
     <string name="navigation_label_home">Home</string>
     <string name="navigation_label_subscriptions">Subscriptions</string>
@@ -165,4 +166,7 @@
     <string name="profile_already_exists_error">Profile already exists</string>
 
     <string name="profile_manager_add_profile">Add Profile</string>
+
+    <string name="contributor_uDEV2019_description">German translation</string>
+    <string name="contributor_anothersapiens_description">Spanish translation</string>
 </resources>

@@ -51,6 +51,8 @@ class AboutFragment : BaseFragment() {
                     addAll(CREDITS.sortedBy { it.title })
                     add(CreditItem.Section(R.string.about_section_libraries))
                     addAll(LIBRARIES.sortedBy { it.title })
+                    add(CreditItem.Section(R.string.about_section_contributors))
+                    addAll(CONTRIBUTORS.sortedBy { it.name })
                 }
             }
             creditAdapter.submitList(items)
@@ -59,7 +61,11 @@ class AboutFragment : BaseFragment() {
 
     private fun initRecyclerView() {
         creditAdapter = CreditAdapter {
-            showCreditDialog(it)
+            if (it is CreditItem.Credit) {
+                showCreditDialog(it)
+            } else if (it is CreditItem.Contributor) {
+                openExternalLink(it.link)
+            }
         }
 
         binding.listAbout.apply {
@@ -238,6 +244,31 @@ class AboutFragment : BaseFragment() {
                     "https://github.com/jhy/jsoup",
                     CreditItem.Credit.LicenseType.MIT,
                     "https://github.com/jhy/jsoup/blob/master/LICENSE"
+                ),
+                CreditItem.Credit(
+                    "FullDraggableDrawer",
+                    "Drakeet Xu",
+                    "Make Android DrawerLayout can be dragged out in real-time within the range of fullscreen",
+                    "https://github.com/PureWriter/FullDraggableDrawer",
+                    CreditItem.Credit.LicenseType.APACHE_V2,
+                    "https://github.com/PureWriter/FullDraggableDrawer/blob/master/LICENSE"
+                )
+            )
+        }
+
+        private val CONTRIBUTORS: List<CreditItem.Contributor> by lazy {
+            listOf(
+                CreditItem.Contributor(
+                    "uDEV2019",
+                    "@uDEV2019",
+                    R.string.contributor_uDEV2019_description,
+                    "https://gitlab.com/uDEV2019"
+                ),
+                CreditItem.Contributor(
+                    "Another Sapiens",
+                    "@another-sapiens",
+                    R.string.contributor_anothersapiens_description,
+                    "https://gitlab.com/another-sapiens"
                 )
             )
         }
