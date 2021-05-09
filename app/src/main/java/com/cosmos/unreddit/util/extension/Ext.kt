@@ -185,6 +185,10 @@ fun ViewPager2.getItemView(position: Int): View? {
     return getRecyclerView()?.findViewHolderForAdapterPosition(position)?.itemView
 }
 
+fun ViewPager2.getListContent(position: Int): ItemListContentBinding? {
+    return getItemView(position)?.let { ItemListContentBinding.bind(it) }
+}
+
 fun ViewPager2.scrollToTop(position: Int) {
     getItemView(position)?.let {
         ItemListContentBinding.bind(it).apply {

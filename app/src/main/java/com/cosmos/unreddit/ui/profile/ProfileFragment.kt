@@ -22,6 +22,7 @@ import com.cosmos.unreddit.ui.postdetails.PostDetailsFragment
 import com.cosmos.unreddit.ui.profilemanager.ProfileManagerDialogFragment
 import com.cosmos.unreddit.ui.user.UserCommentsAdapter
 import com.cosmos.unreddit.util.RecyclerViewStateAdapter
+import com.cosmos.unreddit.util.extension.getListContent
 import com.cosmos.unreddit.util.extension.getRecyclerView
 import com.cosmos.unreddit.util.extension.scrollToTop
 import com.cosmos.unreddit.util.extension.setCommentListener
@@ -44,6 +45,17 @@ class ProfileFragment : BaseFragment(), UserCommentsAdapter.CommentClickListener
     private val uiViewModel: UiViewModel by activityViewModels()
 
     private lateinit var savedAdapter: ProfileSavedAdapter
+
+    // Workaround for MotionLayout that prevents bottom navigation from being hidden on scroll
+    private val onScrollListener = object : RecyclerView.OnScrollListener() {
+        override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+            if (dy > 0 && uiViewModel.navigationVisibility.value == true) {
+                uiViewModel.setNavigationVisibility(false)
+            } else if (dy < 0 && uiViewModel.navigationVisibility.value == false) {
+                uiViewModel.setNavigationVisibility(true)
+            }
+        }
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -106,6 +118,7 @@ class ProfileFragment : BaseFragment(), UserCommentsAdapter.CommentClickListener
                 override fun onPageSelected(position: Int) {
                     super.onPageSelected(position)
                     viewModel.setPage(position)
+                    registerScrollListener(position)
                 }
             })
         }
@@ -143,6 +156,15 @@ class ProfileFragment : BaseFragment(), UserCommentsAdapter.CommentClickListener
         }
     }
 
+    private fun registerScrollListener(position: Int) {
+        binding.viewPager.getListContent(position)?.let {
+            it.listContent.run {
+                clearOnScrollListeners()
+                addOnScrollListener(onScrollListener)
+            }
+        }
+    }
+
     override fun onClick(comment: Comment.CommentEntity) {
         parentFragmentManager.beginTransaction()
             .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
@@ -161,6 +183,15 @@ class ProfileFragment : BaseFragment(), UserCommentsAdapter.CommentClickListener
             comment,
             CommentMenuFragment.MenuType.DETAILS
         )
+    }
+
+    override fun onPause() {
+        super.onPause()
+        binding.viewPager.adapter?.let {
+            for (i in 0 until it.itemCount) {
+                binding.viewPager.getListContent(i)?.listContent?.clearOnScrollListeners()
+            }
+        }
     }
 
     override fun onDestroyView() {
