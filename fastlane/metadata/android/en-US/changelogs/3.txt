@@ -1,0 +1,12 @@
+### Added
+- Profiles: create different profiles to have distinct subscriptions, history and saved items
+- Support for crossposts
+- Ability to save posts and comments
+- Suggested sort
+- Mute button in Media Viewer
+- Clickable links in tables
+- German translation (thanks to @uDEV2019)
+- Spanish translation (thanks to @another-sapiens)
+
+### Changed
+- Open drawer more easily on a Subreddit page
