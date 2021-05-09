@@ -1,0 +1,1 @@
+Stealth es un cliente de Reddit orientado a la privacidad, sin cuenta y repleto de funciones.
