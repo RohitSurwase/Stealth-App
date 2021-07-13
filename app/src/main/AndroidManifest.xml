@@ -16,7 +16,7 @@
         <activity
             android:name=".MainActivity"
             android:theme="@style/AppTheme.Launcher">
-            <nav-graph android:value="@navigation/home"/>
+            <nav-graph android:value="@navigation/navigation_graph"/>
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

@@ -1,28 +1,28 @@
 package com.cosmos.unreddit
 
-import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.LiveData
 import androidx.navigation.NavController
+import androidx.navigation.NavDestination
+import androidx.navigation.fragment.NavHostFragment
+import androidx.navigation.ui.setupWithNavController
 import androidx.transition.Slide
 import androidx.transition.TransitionManager
 import com.cosmos.unreddit.databinding.ActivityMainBinding
-import com.cosmos.unreddit.util.extension.setupWithNavController
 import com.google.android.material.shape.CornerFamily
 import com.google.android.material.shape.MaterialShapeDrawable
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), NavController.OnDestinationChangedListener {
 
     private lateinit var binding: ActivityMainBinding
 
     private val viewModel: UiViewModel by viewModels()
 
-    private var currentNavController: LiveData<NavController>? = null
+    private lateinit var navController: NavController
 
     override fun onCreate(savedInstanceState: Bundle?) {
         setTheme(R.style.AppTheme)
@@ -32,40 +32,19 @@ class MainActivity : AppCompatActivity() {
 
         initBottomNavigationView()
 
-        // Workaround to prevent activity from being created twice
-        val newIntent = intent.clone() as Intent
-        intent.data = null
-
-        if (savedInstanceState == null) {
-            initNavigation()
-        }
-
-        currentNavController?.value?.handleDeepLink(newIntent)
+        initNavigation()
 
         viewModel.navigationVisibility.observe(this, this::showNavigation)
     }
 
-    override fun onRestoreInstanceState(savedInstanceState: Bundle) {
-        super.onRestoreInstanceState(savedInstanceState)
-        initNavigation()
-    }
-
     private fun initNavigation() {
-        val navGraphIds = listOf(
-            R.navigation.home,
-            R.navigation.subscriptions,
-            R.navigation.profile,
-            R.navigation.settings
-        )
+        val navHostFragment = supportFragmentManager.findFragmentById(R.id.fragment_container)
+                as NavHostFragment
+        navController = navHostFragment.navController.apply {
+            addOnDestinationChangedListener(this@MainActivity)
+        }
 
-        val controller = binding.bottomNavigation.setupWithNavController(
-            navGraphIds,
-            supportFragmentManager,
-            R.id.fragment_container,
-            intent
-        )
-
-        currentNavController = controller
+        binding.bottomNavigation.setupWithNavController(navController)
     }
 
     private fun initBottomNavigationView() {
@@ -87,5 +66,18 @@ class MainActivity : AppCompatActivity() {
         }
         TransitionManager.beginDelayedTransition(binding.root, transition)
         binding.bottomNavigation.visibility = if (show) View.VISIBLE else View.GONE
+    }
+
+    override fun onDestinationChanged(
+        controller: NavController,
+        destination: NavDestination,
+        arguments: Bundle?
+    ) {
+        when (destination.id) {
+            R.id.home, R.id.subscriptions, R.id.profile, R.id.settings -> {
+                viewModel.setNavigationVisibility(true)
+            }
+            else -> viewModel.setNavigationVisibility(false)
+        }
     }
 }

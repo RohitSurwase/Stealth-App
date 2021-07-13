@@ -48,7 +48,7 @@ open class BaseFragment : Fragment(), PostListAdapter.PostClickListener,
 
     protected open fun onBackPressed() {
         onBackPressedCallback.isEnabled = false
-        activity?.onBackPressed()
+        findNavController().navigateUp()
     }
 
     protected fun navigate(directions: NavDirections, navOptions: NavOptions = this.navOptions) {

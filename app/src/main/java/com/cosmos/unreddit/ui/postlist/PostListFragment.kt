@@ -146,6 +146,10 @@ class PostListFragment : BaseFragment() {
         SortFragment.show(childFragmentManager, viewModel.sorting.value)
     }
 
+    override fun onBackPressed() {
+        activity?.finish()
+    }
+
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
