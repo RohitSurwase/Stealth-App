@@ -66,7 +66,7 @@ class SubredditFragment : BaseFragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        viewModel.setSubreddit(args.subreddit)
+        viewModel.setSubreddit(args.subreddit.removeSuffix("/"))
     }
 
     override fun onCreateView(
