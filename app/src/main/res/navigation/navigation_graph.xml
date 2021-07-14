@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/navigation_graph"
     app:startDestination="@+id/home">
 
@@ -8,5 +9,22 @@
     <include app:graph="@navigation/subscriptions" />
     <include app:graph="@navigation/profile" />
     <include app:graph="@navigation/settings" />
+
+    <fragment
+        android:id="@+id/browserFragment"
+        android:name="com.cosmos.unreddit.ui.browser.BrowserFragment"
+        tools:layout="@layout/fragment_browser">
+        <argument
+            android:name="url"
+            app:argType="string"/>
+    </fragment>
+
+    <action
+        android:id="@+id/openBrowser"
+        app:destination="@id/browserFragment">
+        <argument
+            android:name="url"
+            app:argType="string"/>
+    </action>
 
 </navigation>
