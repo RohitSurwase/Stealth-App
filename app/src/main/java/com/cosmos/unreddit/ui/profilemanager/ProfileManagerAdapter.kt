@@ -22,6 +22,8 @@ class ProfileManagerAdapter(
         fun onDeleteProfileClick(profile: Profile)
 
         fun onNewProfileClick()
+
+        fun onRenameClick(profile: Profile)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
@@ -60,7 +62,7 @@ class ProfileManagerAdapter(
         } else {
             val item = getItem(position)
             if (item is ProfileItem.UserProfile) {
-                (holder as ProfileViewHolder).setDeletable(item.profile)
+                (holder as ProfileViewHolder).update(item.profile)
             }
         }
     }
@@ -77,8 +79,7 @@ class ProfileManagerAdapter(
     ) : RecyclerView.ViewHolder(binding.root) {
 
         fun bind(profile: Profile) {
-            binding.profile = profile
-            setDeletable(profile)
+            update(profile)
 
             itemView.setOnClickListener { profileClickListener.onProfileClick(profile) }
             binding.deleteIcon.setOnClickListener {
@@ -86,8 +87,15 @@ class ProfileManagerAdapter(
             }
         }
 
-        fun setDeletable(profile: Profile) {
-            binding.deleteIcon.isVisible = currentProfile?.id != profile.id
+        fun update(profile: Profile) {
+            binding.run {
+                this.profile = profile
+                deleteIcon.isVisible = currentProfile?.id != profile.id
+
+                editIcon.setOnClickListener {
+                    profileClickListener.onRenameClick(profile)
+                }
+            }
         }
     }
 

@@ -48,4 +48,11 @@ class ProfileManagerViewModel @Inject constructor(
             repository.deleteProfile(profile.id)
         }
     }
+
+    fun renameProfile(profile: Profile, newName: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val updatedProfile = profile.copy(name = newName)
+            repository.updateProfile(updatedProfile)
+        }
+    }
 }

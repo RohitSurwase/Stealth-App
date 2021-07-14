@@ -155,6 +155,9 @@
     <string name="dialog_create_profile_button">Create</string>
     <string name="dialog_create_profile_hint">Name</string>
 
+    <string name="dialog_rename_profile_title">Rename Profile</string>
+    <string name="dialog_rename_profile_button">Rename</string>
+
     <string name="dialog_delete_profile_title">Delete Profile</string>
     <string name="dialog_delete_profile_message">Are you sure you want to delete this profile?\nSubscriptions, history and saved items for this profile will be lost.</string>
 

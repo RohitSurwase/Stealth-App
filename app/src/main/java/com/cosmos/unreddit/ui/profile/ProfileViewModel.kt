@@ -5,6 +5,7 @@ import com.cosmos.unreddit.data.local.mapper.SavedMapper
 import com.cosmos.unreddit.data.model.Comment
 import com.cosmos.unreddit.data.model.SavedItem
 import com.cosmos.unreddit.data.model.db.PostEntity
+import com.cosmos.unreddit.data.model.db.Profile
 import com.cosmos.unreddit.data.model.preferences.ContentPreferences
 import com.cosmos.unreddit.data.repository.PostListRepository
 import com.cosmos.unreddit.data.repository.PreferencesRepository
@@ -15,6 +16,7 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.combineTransform
 import kotlinx.coroutines.flow.flatMapMerge
 import kotlinx.coroutines.flow.map
@@ -37,6 +39,14 @@ class ProfileViewModel @Inject constructor(
 
     private val _savedComments: Flow<List<Comment.CommentEntity>> = currentProfile.flatMapMerge {
         repository.getSavedComments(it.id)
+    }
+
+    val selectedProfile: Flow<Profile> = combine(
+        currentProfile,
+        repository.getAllProfiles()
+    ) { currentProfile, profiles ->
+        // Update current profile when any profile is updated
+        profiles.find { it.id == currentProfile.id } ?: currentProfile
     }
 
     val savedItems: Flow<List<SavedItem>> = combineTransform(
