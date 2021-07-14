@@ -10,9 +10,6 @@ import androidx.navigation.NavOptions
 import androidx.navigation.fragment.findNavController
 import com.cosmos.unreddit.NavigationGraphDirections
 import com.cosmos.unreddit.R
-import com.cosmos.unreddit.SubredditDirections
-import com.cosmos.unreddit.UserDirections
-import com.cosmos.unreddit.ViewerDirections
 import com.cosmos.unreddit.data.model.GalleryMedia
 import com.cosmos.unreddit.data.model.MediaType
 import com.cosmos.unreddit.data.model.db.PostEntity
@@ -143,19 +140,19 @@ open class BaseFragment : Fragment(), PostListAdapter.PostClickListener,
     }
 
     open fun openGallery(images: List<GalleryMedia>) {
-        navigate(ViewerDirections.openGallery(images.toTypedArray()))
+        navigate(NavigationGraphDirections.openGallery(images.toTypedArray()))
     }
 
     open fun openMedia(link: String, mediaType: MediaType) {
-        navigate(ViewerDirections.openMedia(link, mediaType))
+        navigate(NavigationGraphDirections.openMedia(link, mediaType))
     }
 
     open fun openSubreddit(subreddit: String) {
-        navigate(SubredditDirections.openSubreddit(subreddit))
+        navigate(NavigationGraphDirections.openSubreddit(subreddit))
     }
 
     open fun openUser(user: String) {
-        navigate(UserDirections.openUser(user))
+        navigate(NavigationGraphDirections.openUser(user))
     }
 
     open fun openRedditLink(link: String) {

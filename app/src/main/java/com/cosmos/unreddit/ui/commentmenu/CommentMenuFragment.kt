@@ -9,9 +9,8 @@ import androidx.core.os.bundleOf
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.setFragmentResult
 import androidx.navigation.fragment.findNavController
+import com.cosmos.unreddit.NavigationGraphDirections
 import com.cosmos.unreddit.R
-import com.cosmos.unreddit.SubredditDirections
-import com.cosmos.unreddit.UserDirections
 import com.cosmos.unreddit.data.model.Block
 import com.cosmos.unreddit.data.model.Comment
 import com.cosmos.unreddit.databinding.FragmentCommentMenuBinding
@@ -59,13 +58,15 @@ class CommentMenuFragment : BottomSheetDialogFragment() {
 
         with(binding) {
             buttonUser.setOnClickListener {
-                doAndDismiss { findNavController().navigate(UserDirections.openUser(comment.author)) }
+                doAndDismiss {
+                    findNavController().navigate(NavigationGraphDirections.openUser(comment.author))
+                }
             }
 
             buttonSubreddit.setOnClickListener {
                 val subreddit = comment.subreddit.removePrefix("r/")
                 doAndDismiss {
-                    findNavController().navigate(SubredditDirections.openSubreddit(subreddit))
+                    findNavController().navigate(NavigationGraphDirections.openSubreddit(subreddit))
                 }
             }
 

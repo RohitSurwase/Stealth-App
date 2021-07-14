@@ -11,8 +11,8 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager2.widget.ViewPager2
+import com.cosmos.unreddit.NavigationGraphDirections
 import com.cosmos.unreddit.R
-import com.cosmos.unreddit.SubscriptionsDirections
 import com.cosmos.unreddit.data.model.Sorting
 import com.cosmos.unreddit.data.repository.PostListRepository
 import com.cosmos.unreddit.databinding.FragmentSearchBinding
@@ -265,11 +265,11 @@ class SearchFragment : BaseFragment() {
     }
 
     private fun onSubredditClick(subreddit: String) {
-        navigate(SubscriptionsDirections.openSubreddit(subreddit))
+        navigate(NavigationGraphDirections.openSubreddit(subreddit))
     }
 
     private fun onUserClick(user: String) {
-        navigate(SearchFragmentDirections.openUser(user))
+        navigate(NavigationGraphDirections.openUser(user))
     }
 
     private fun retry() {

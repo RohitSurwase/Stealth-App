@@ -7,9 +7,8 @@ import android.view.ViewGroup
 import androidx.core.os.bundleOf
 import androidx.fragment.app.FragmentManager
 import androidx.navigation.fragment.findNavController
+import com.cosmos.unreddit.NavigationGraphDirections
 import com.cosmos.unreddit.R
-import com.cosmos.unreddit.SubredditDirections
-import com.cosmos.unreddit.UserDirections
 import com.cosmos.unreddit.data.model.db.PostEntity
 import com.cosmos.unreddit.databinding.FragmentPostMenuBinding
 import com.cosmos.unreddit.util.extension.doAndDismiss
@@ -47,13 +46,15 @@ class PostMenuFragment : BottomSheetDialogFragment() {
     private fun initActions(post: PostEntity) {
         with(binding) {
             buttonUser.setOnClickListener {
-                doAndDismiss { findNavController().navigate(UserDirections.openUser(post.author)) }
+                doAndDismiss {
+                    findNavController().navigate(NavigationGraphDirections.openUser(post.author))
+                }
             }
 
             buttonSubreddit.setOnClickListener {
                 val subreddit = post.subreddit.removePrefix("r/")
                 doAndDismiss {
-                    findNavController().navigate(SubredditDirections.openSubreddit(subreddit))
+                    findNavController().navigate(NavigationGraphDirections.openSubreddit(subreddit))
                 }
             }
 

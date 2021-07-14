@@ -5,9 +5,6 @@
     android:id="@+id/user"
     app:startDestination="@id/userFragment">
 
-    <include app:graph="@navigation/viewer" />
-    <include app:graph="@navigation/subreddit" />
-
     <fragment
         android:id="@+id/userFragment"
         android:name="com.cosmos.unreddit.ui.user.UserFragment"
@@ -23,41 +20,6 @@
         <argument
             android:name="user"
             app:argType="string" />
-
-        <action
-            android:id="@+id/openGallery"
-            app:destination="@id/viewer">
-            <argument
-                android:name="images"
-                app:argType="com.cosmos.unreddit.data.model.GalleryMedia[]" />
-        </action>
-
-        <action
-            android:id="@+id/openMedia"
-            app:destination="@id/viewer">
-            <argument
-                android:name="link"
-                app:argType="string" />
-            <argument
-                android:name="type"
-                app:argType="com.cosmos.unreddit.data.model.MediaType" />
-        </action>
     </fragment>
-
-    <action
-        android:id="@+id/openUser"
-        app:destination="@id/userFragment">
-        <argument
-            android:name="user"
-            app:argType="string"/>
-    </action>
-
-    <action
-        android:id="@+id/openSubreddit"
-        app:destination="@id/subreddit">
-        <argument
-            android:name="subreddit"
-            app:argType="string" />
-    </action>
 
 </navigation>
