@@ -5,42 +5,9 @@
     android:id="@+id/profile"
     app:startDestination="@id/profileFragment">
 
-    <include app:graph="@navigation/subreddit" />
-    <include app:graph="@navigation/user" />
-    <include app:graph="@navigation/viewer" />
-
     <fragment
         android:id="@+id/profileFragment"
         android:name="com.cosmos.unreddit.ui.profile.ProfileFragment"
-        tools:layout="@layout/fragment_profile">
-
-        <action
-            android:id="@+id/openMedia"
-            app:destination="@id/viewer">
-            <argument
-                android:name="link"
-                app:argType="string"/>
-            <argument
-                android:name="type"
-                app:argType="com.cosmos.unreddit.data.model.MediaType"/>
-        </action>
-
-        <action
-            android:id="@+id/openSubreddit"
-            app:destination="@id/subreddit">
-            <argument
-                android:name="subreddit"
-                app:argType="string" />
-        </action>
-
-        <action
-            android:id="@+id/openUser"
-            app:destination="@id/user">
-            <argument
-                android:name="user"
-                app:argType="string"/>
-        </action>
-
-    </fragment>
+        tools:layout="@layout/fragment_profile"/>
 
 </navigation>

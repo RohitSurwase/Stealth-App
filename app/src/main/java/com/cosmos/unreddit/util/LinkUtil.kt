@@ -12,6 +12,8 @@ object LinkUtil {
     private val SUBREDDIT_REGEX = Regex("/r/[A-Za-z0-9_-]{3,21}")
     private val USER_REGEX = Regex("/u/[A-Za-z0-9_-]{3,20}")
 
+    private val REDDIT_LINK = Regex("(.+?)\\.reddit\\.com")
+
     private const val REDDIT_SOUNDTRACK_NAME: String = "DASH_audio"
 
     fun getAlbumIdFromImgurLink(link: String): String {
@@ -69,8 +71,14 @@ object LinkUtil {
         val domain = httpUrl.host()
 
         return when {
-            domain == "www.reddit.com" || domain == "old.reddit.com" ||
-                    domain == "np.reddit.com" -> MediaType.REDDIT_LINK
+            domain.matches(REDDIT_LINK) -> {
+                if (httpUrl.pathSegments().contains("wiki")) {
+                    // TODO: Handle Wiki links
+                    MediaType.REDDIT_WIKI
+                } else {
+                    MediaType.REDDIT_LINK
+                }
+            }
 
             domain == "imgur.com" || domain == "m.imgur.com" -> {
                 when {

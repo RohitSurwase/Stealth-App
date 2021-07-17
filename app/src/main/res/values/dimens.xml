@@ -123,6 +123,9 @@
 
     <dimen name="media_thumbnail_size">64dp</dimen>
 
+    <dimen name="media_button_size">32dp</dimen>
+    <dimen name="media_button_margin">16dp</dimen>
+
     <dimen name="exoplayer_margin_horizontal">8dp</dimen>
     <dimen name="exoplayer_button_size">56dp</dimen>
     <dimen name="exoplayer_small_button_size">32dp</dimen>

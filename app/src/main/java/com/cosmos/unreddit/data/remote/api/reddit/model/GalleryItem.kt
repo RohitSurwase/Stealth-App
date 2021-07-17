@@ -15,5 +15,5 @@ data class GalleryItem(
     val previews: List<GalleryImage>?,
 
     @Json(name = "id")
-    val id: String
+    val id: String?
 )

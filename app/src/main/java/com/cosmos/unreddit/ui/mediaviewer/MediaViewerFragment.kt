@@ -1,9 +1,14 @@
 package com.cosmos.unreddit.ui.mediaviewer
 
+import android.Manifest
+import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.ContextCompat
 import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
 import androidx.fragment.app.viewModels
@@ -17,11 +22,13 @@ import com.cosmos.unreddit.data.model.GalleryMedia
 import com.cosmos.unreddit.data.model.MediaType
 import com.cosmos.unreddit.data.model.Resource
 import com.cosmos.unreddit.data.repository.PreferencesRepository
+import com.cosmos.unreddit.data.worker.MediaDownloadWorker
 import com.cosmos.unreddit.databinding.FragmentMediaViewerBinding
 import com.cosmos.unreddit.ui.base.BaseFragment
 import com.cosmos.unreddit.util.extension.betterSmoothScrollToPosition
 import com.cosmos.unreddit.util.extension.getRecyclerView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -46,6 +53,20 @@ class MediaViewerFragment : BaseFragment() {
 
     @Inject
     lateinit var preferencesRepository: PreferencesRepository
+
+    private val requestPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        if (isGranted) {
+            downloadMedia()
+        } else {
+            Snackbar.make(
+                binding.root,
+                R.string.snackbar_permission_storage_denied_message,
+                Snackbar.LENGTH_SHORT
+            ).show()
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -99,9 +120,21 @@ class MediaViewerFragment : BaseFragment() {
     private fun initViewPager() {
         val muteVideo = runBlocking { preferencesRepository.getMuteVideo(false).first() }
 
-        mediaAdapter = MediaViewerAdapter(requireContext(), muteVideo) {
-            lifecycleScope.launch { preferencesRepository.setMuteVideo(it) }
-        }
+        mediaAdapter = MediaViewerAdapter(
+            requireContext(),
+            muteVideo,
+            onMuteClick = {
+                lifecycleScope.launch { preferencesRepository.setMuteVideo(it) }
+            },
+            onDownloadClick = {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                    // No need to request storage permission on Android 10+
+                    downloadMedia()
+                } else {
+                    requestMediaDownload()
+                }
+            }
+        )
 
         binding.viewPager.apply {
             adapter = mediaAdapter
@@ -153,6 +186,42 @@ class MediaViewerFragment : BaseFragment() {
             binding.flowPageCounter.visibility = View.GONE
         }
         mediaAdapter.submitData(media)
+    }
+
+    private fun requestMediaDownload() {
+        when {
+            ContextCompat.checkSelfPermission(
+                requireContext(),
+                Manifest.permission.WRITE_EXTERNAL_STORAGE
+            ) == PackageManager.PERMISSION_GRANTED -> {
+                downloadMedia()
+            }
+            shouldShowRequestPermissionRationale(Manifest.permission.WRITE_EXTERNAL_STORAGE) -> {
+                Snackbar.make(
+                    binding.root,
+                    R.string.snackbar_permission_storage_request_message,
+                    Snackbar.LENGTH_INDEFINITE
+                ).setAction(R.string.ok) {
+                    requestPermissionLauncher.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                }.show()
+            }
+            else -> {
+                requestPermissionLauncher.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+            }
+        }
+    }
+
+    private fun downloadMedia() {
+        val page = viewerViewModel.selectedPage.value ?: return
+
+        val media = mediaAdapter.getItem(page)
+        media?.let {
+            MediaDownloadWorker.enqueueWork(
+                requireContext().applicationContext,
+                it.url,
+                it.type
+            )
+        }
     }
 
     private fun handleError(code: Int?) {

@@ -78,7 +78,7 @@ class ProfileManagerDialogFragment : DialogFragment(), ProfileManagerAdapter.Pro
     }
 
     private fun showAddProfileDialog() {
-        val profileBinding = DialogAddProfileBinding.inflate(LayoutInflater.from(requireContext()))
+        val profileBinding = DialogAddProfileBinding.inflate(layoutInflater)
         MaterialAlertDialogBuilder(requireContext())
             .setView(profileBinding.root)
             .setTitle(R.string.dialog_create_profile_title)
@@ -96,6 +96,35 @@ class ProfileManagerDialogFragment : DialogFragment(), ProfileManagerAdapter.Pro
                     val errorMessage = validateProfile(name)
                     if (errorMessage == null) {
                         name?.let { viewModel.addProfile(it) }
+                        this.dismiss()
+                    } else {
+                        profileBinding.inputName.error = errorMessage
+                    }
+                }
+            }
+    }
+
+    private fun showRenameProfileDialog(profile: Profile) {
+        val profileBinding = DialogAddProfileBinding.inflate(layoutInflater).apply {
+            inputName.editText?.setText(profile.name)
+        }
+        MaterialAlertDialogBuilder(requireContext())
+            .setView(profileBinding.root)
+            .setTitle(R.string.dialog_rename_profile_title)
+            .setPositiveButton(R.string.dialog_rename_profile_button) { _, _ ->
+                // Ignore
+            }
+            .setNeutralButton(R.string.dialog_cancel) { dialog, _ ->
+                dialog.dismiss()
+            }
+            .setCancelable(false)
+            .show()
+            .apply {
+                getButton(DialogInterface.BUTTON_POSITIVE).setOnClickListener {
+                    val name = profileBinding.inputName.text()
+                    val errorMessage = validateProfile(name)
+                    if (errorMessage == null) {
+                        name?.let { viewModel.renameProfile(profile, it) }
                         this.dismiss()
                     } else {
                         profileBinding.inputName.error = errorMessage
@@ -148,6 +177,10 @@ class ProfileManagerDialogFragment : DialogFragment(), ProfileManagerAdapter.Pro
 
     override fun onNewProfileClick() {
         showAddProfileDialog()
+    }
+
+    override fun onRenameClick(profile: Profile) {
+        showRenameProfileDialog(profile)
     }
 
     override fun onDestroyView() {

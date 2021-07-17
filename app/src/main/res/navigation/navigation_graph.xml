@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/navigation_graph"
+    app:startDestination="@+id/home">
+
+    <!-- Bottom Navigation -->
+    <include app:graph="@navigation/home" />
+    <include app:graph="@navigation/subscriptions" />
+    <include app:graph="@navigation/profile" />
+    <include app:graph="@navigation/settings" />
+
+    <!-- Global Destinations -->
+    <include app:graph="@navigation/post" />
+    <include app:graph="@navigation/subreddit" />
+    <include app:graph="@navigation/user" />
+    <include app:graph="@navigation/viewer" />
+    <include app:graph="@navigation/browser" />
+
+    <!-- Global Actions -->
+    <action
+        android:id="@+id/openBrowser"
+        app:destination="@id/browser">
+        <argument
+            android:name="url"
+            app:argType="string"/>
+    </action>
+
+    <action
+        android:id="@+id/openGallery"
+        app:destination="@id/viewer">
+        <argument
+            android:name="images"
+            app:argType="com.cosmos.unreddit.data.model.GalleryMedia[]"/>
+    </action>
+
+    <action
+        android:id="@+id/openMedia"
+        app:destination="@id/viewer">
+        <argument
+            android:name="link"
+            app:argType="string"/>
+        <argument
+            android:name="type"
+            app:argType="com.cosmos.unreddit.data.model.MediaType"/>
+    </action>
+
+    <action
+        android:id="@+id/openSubreddit"
+        app:destination="@id/subreddit">
+        <argument
+            android:name="subreddit"
+            app:argType="string" />
+    </action>
+
+    <action
+        android:id="@+id/openUser"
+        app:destination="@id/user">
+        <argument
+            android:name="user"
+            app:argType="string"/>
+    </action>
+
+</navigation>

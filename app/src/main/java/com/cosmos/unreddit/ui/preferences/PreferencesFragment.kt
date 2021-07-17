@@ -2,6 +2,8 @@ package com.cosmos.unreddit.ui.preferences
 
 import android.os.Bundle
 import android.view.View
+import androidx.activity.OnBackPressedCallback
+import androidx.activity.addCallback
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.NavOptions
@@ -30,6 +32,15 @@ class PreferencesFragment : PreferenceFragmentCompat() {
     private var aboutPreference: Preference? = null
 
     private val navOptions: NavOptions by lazy { getNavOptions() }
+
+    private lateinit var onBackPressedCallback: OnBackPressedCallback
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        onBackPressedCallback = requireActivity().onBackPressedDispatcher.addCallback(this) {
+            findNavController().navigateUp()
+        }
+    }
 
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         setPreferencesFromResource(R.xml.preferences, rootKey)

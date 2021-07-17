@@ -8,10 +8,8 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.NavDirections
 import androidx.navigation.NavOptions
 import androidx.navigation.fragment.findNavController
+import com.cosmos.unreddit.NavigationGraphDirections
 import com.cosmos.unreddit.R
-import com.cosmos.unreddit.SubredditDirections
-import com.cosmos.unreddit.UserDirections
-import com.cosmos.unreddit.ViewerDirections
 import com.cosmos.unreddit.data.model.GalleryMedia
 import com.cosmos.unreddit.data.model.MediaType
 import com.cosmos.unreddit.data.model.db.PostEntity
@@ -21,7 +19,6 @@ import com.cosmos.unreddit.ui.postdetails.PostDetailsFragment
 import com.cosmos.unreddit.ui.postlist.PostListAdapter
 import com.cosmos.unreddit.ui.postmenu.PostMenuFragment
 import com.cosmos.unreddit.util.LinkUtil
-import com.cosmos.unreddit.util.extension.openExternalLink
 
 open class BaseFragment : Fragment(), PostListAdapter.PostClickListener,
     RedditView.OnLinkClickListener {
@@ -48,7 +45,7 @@ open class BaseFragment : Fragment(), PostListAdapter.PostClickListener,
 
     protected open fun onBackPressed() {
         onBackPressedCallback.isEnabled = false
-        activity?.onBackPressed()
+        findNavController().navigateUp()
     }
 
     protected fun navigate(directions: NavDirections, navOptions: NavOptions = this.navOptions) {
@@ -101,7 +98,11 @@ open class BaseFragment : Fragment(), PostListAdapter.PostClickListener,
     }
 
     override fun onLinkClick(link: String) {
-        when (val mediaType = LinkUtil.getLinkType(link)) {
+        onLinkClick(link, LinkUtil.getLinkType(link))
+    }
+
+    open fun onLinkClick(link: String, mediaType: MediaType) {
+        when (mediaType) {
             MediaType.REDDIT_SUBREDDIT -> {
                 val subreddit = link.removePrefix("/r/")
                 openSubreddit(subreddit)
@@ -114,6 +115,8 @@ open class BaseFragment : Fragment(), PostListAdapter.PostClickListener,
 
             MediaType.REDDIT_LINK -> openRedditLink(link)
 
+            MediaType.REDDIT_WIKI -> openBrowser(link)
+
             MediaType.IMGUR_ALBUM,
             MediaType.IMGUR_GALLERY,
             MediaType.IMGUR_GIF,
@@ -124,7 +127,7 @@ open class BaseFragment : Fragment(), PostListAdapter.PostClickListener,
             MediaType.IMAGE,
             MediaType.VIDEO -> openMedia(link, mediaType)
 
-            else -> openExternalLink(link)
+            else -> openBrowser(link)
         }
     }
 
@@ -137,22 +140,26 @@ open class BaseFragment : Fragment(), PostListAdapter.PostClickListener,
     }
 
     open fun openGallery(images: List<GalleryMedia>) {
-        navigate(ViewerDirections.openGallery(images.toTypedArray()))
+        navigate(NavigationGraphDirections.openGallery(images.toTypedArray()))
     }
 
     open fun openMedia(link: String, mediaType: MediaType) {
-        navigate(ViewerDirections.openMedia(link, mediaType))
+        navigate(NavigationGraphDirections.openMedia(link, mediaType))
     }
 
     open fun openSubreddit(subreddit: String) {
-        navigate(SubredditDirections.openSubreddit(subreddit))
+        navigate(NavigationGraphDirections.openSubreddit(subreddit))
     }
 
     open fun openUser(user: String) {
-        navigate(UserDirections.openUser(user))
+        navigate(NavigationGraphDirections.openUser(user))
     }
 
     open fun openRedditLink(link: String) {
         navigate(Uri.parse(link))
+    }
+
+    open fun openBrowser(link: String) {
+        navigate(NavigationGraphDirections.openBrowser(link))
     }
 }

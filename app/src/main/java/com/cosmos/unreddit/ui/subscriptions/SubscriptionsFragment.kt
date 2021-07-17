@@ -10,6 +10,7 @@ import androidx.core.widget.doOnTextChanged
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.cosmos.unreddit.NavigationGraphDirections
 import com.cosmos.unreddit.R
 import com.cosmos.unreddit.UiViewModel
 import com.cosmos.unreddit.databinding.FragmentSubscriptionsBinding
@@ -122,7 +123,7 @@ class SubscriptionsFragment : BaseFragment() {
     }
 
     private fun onClick(subreddit: String) {
-        navigate(SubscriptionsFragmentDirections.openSubreddit(subreddit))
+        navigate(NavigationGraphDirections.openSubreddit(subreddit))
     }
 
     override fun onBackPressed() {

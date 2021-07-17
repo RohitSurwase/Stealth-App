@@ -66,7 +66,7 @@ class UserFragment : BaseFragment(), UserCommentsAdapter.CommentClickListener {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        viewModel.setUser(args.user)
+        viewModel.setUser(args.user.removeSuffix("/"))
     }
 
     override fun onCreateView(

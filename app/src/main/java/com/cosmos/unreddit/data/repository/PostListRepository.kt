@@ -187,6 +187,10 @@ class PostListRepository @Inject constructor(
         redditDatabase.profileDao().deleteFromId(profileId)
     }
 
+    suspend fun updateProfile(profile: Profile) {
+        redditDatabase.profileDao().update(profile)
+    }
+
     //endregion
 
     //region Save

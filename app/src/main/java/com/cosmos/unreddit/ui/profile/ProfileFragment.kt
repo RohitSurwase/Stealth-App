@@ -151,7 +151,7 @@ class ProfileFragment : BaseFragment(), UserCommentsAdapter.CommentClickListener
                 }
             }.collect()
         }
-        viewModel.currentProfile.asLiveData().observe(viewLifecycleOwner) {
+        viewModel.selectedProfile.asLiveData().observe(viewLifecycleOwner) {
             binding.profile = it
         }
     }

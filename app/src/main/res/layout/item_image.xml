@@ -39,4 +39,14 @@
         android:visibility="gone"
         tools:visibility="visible"/>
 
+    <ImageButton
+        android:id="@+id/button_download"
+        android:layout_width="@dimen/media_button_size"
+        android:layout_height="@dimen/media_button_size"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_margin="@dimen/media_button_margin"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        app:srcCompat="@drawable/ic_download"/>
+
 </androidx.constraintlayout.widget.ConstraintLayout>

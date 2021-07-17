@@ -5,8 +5,6 @@
     android:id="@+id/post"
     app:startDestination="@id/postDetailsFragment">
 
-    <include app:graph="@navigation/viewer"/>
-
     <fragment
         android:id="@+id/postDetailsFragment"
         android:name="com.cosmos.unreddit.ui.postdetails.PostDetailsFragment"
@@ -16,8 +14,24 @@
             app:uri=".*.reddit.com/r/{subreddit}/comments/{id}"/>
 
         <deepLink
+            android:id="@+id/deepLinkPost2"
+            app:uri=".*.reddit.com/r/{subreddit}/comments/{id}/"/>
+
+        <deepLink
+            android:id="@+id/deepLinkPostTitle"
+            app:uri=".*.reddit.com/r/{subreddit}/comments/{id}/{title}"/>
+
+        <deepLink
+            android:id="@+id/deepLinkPostTitle2"
+            app:uri=".*.reddit.com/r/{subreddit}/comments/{id}/{title}/"/>
+
+        <deepLink
             android:id="@+id/deepLinkPostThread"
             app:uri=".*.reddit.com/r/{subreddit}/comments/{id}/{title}/{comment}"/>
+
+        <deepLink
+            android:id="@+id/deepLinkPostThread2"
+            app:uri=".*.reddit.com/r/{subreddit}/comments/{id}/{title}/{comment}/"/>
 
         <argument
             android:name="subreddit"
@@ -39,25 +53,6 @@
             android:defaultValue="@null"
             app:argType="string"
             app:nullable="true" />
-
-        <action
-            android:id="@+id/openGallery"
-            app:destination="@id/viewer">
-            <argument
-                android:name="images"
-                app:argType="com.cosmos.unreddit.data.model.GalleryMedia[]" />
-        </action>
-
-        <action
-            android:id="@+id/openMedia"
-            app:destination="@id/viewer">
-            <argument
-                android:name="link"
-                app:argType="string" />
-            <argument
-                android:name="type"
-                app:argType="com.cosmos.unreddit.data.model.MediaType" />
-        </action>
     </fragment>
 
 </navigation>

@@ -25,6 +25,8 @@
 
     <color name="background">#FAFAFF</color>
 
+    <color name="icon_tint">#212121</color>
+
     <color name="chip_background_color">#EBEBFF</color>
     <color name="chip_selected_text_color">@color/colorPrimary</color>
 
