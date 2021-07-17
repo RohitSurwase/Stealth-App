@@ -24,6 +24,8 @@ buildscript {
 
         paging = '3.0.0'
 
+        work = "2.5.0"
+
         material = '1.4.0'
 
         touchImageView = '3.0.3'

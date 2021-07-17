@@ -90,6 +90,8 @@ dependencies {
 
     implementation "androidx.paging:paging-runtime-ktx:$rootProject.paging"
 
+    implementation "androidx.work:work-runtime-ktx:$rootProject.work"
+
     implementation "com.google.android.material:material:$rootProject.material"
 
     implementation "com.squareup.retrofit2:retrofit:$rootProject.retrofit"

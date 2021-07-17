@@ -3,6 +3,8 @@
     package="com.cosmos.unreddit">
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+        android:maxSdkVersion="28" />
 
     <application
         android:name=".UnredditApplication"
@@ -23,6 +25,13 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <receiver android:name=".data.receiver.DownloadManagerReceiver"  android:exported="false">
+            <intent-filter>
+                <action android:name="${applicationId}.ACTION_DOWNLOAD_RETRY"/>
+                <action android:name="${applicationId}.ACTION_DOWNLOAD_CANCEL" />
+            </intent-filter>
+        </receiver>
     </application>
 
     <queries>

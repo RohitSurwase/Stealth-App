@@ -3,7 +3,9 @@ package com.cosmos.unreddit.util
 import android.content.Context
 import com.cosmos.unreddit.R
 import java.text.DateFormat
-import java.util.*
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 import java.util.concurrent.TimeUnit
 
 object DateUtil {
@@ -63,5 +65,9 @@ object DateUtil {
     fun getFormattedDate(timeInMillis: Long): String {
         return DateFormat.getDateInstance(DateFormat.SHORT, Locale.getDefault())
             .format(Date(timeInMillis))
+    }
+
+    fun getFormattedDate(pattern: String, date: Date): String {
+        return SimpleDateFormat(pattern, Locale.getDefault()).format(date)
     }
 }

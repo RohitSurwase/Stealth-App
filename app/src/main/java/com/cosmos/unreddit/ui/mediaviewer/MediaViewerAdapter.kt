@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import coil.Coil
 import coil.request.CachePolicy
@@ -29,7 +30,8 @@ import java.net.HttpURLConnection
 class MediaViewerAdapter(
     context: Context,
     private val muteVideo: Boolean,
-    private val onMuteClick: (Boolean) -> Unit
+    private val onMuteClick: (Boolean) -> Unit,
+    private val onDownloadClick: () -> Unit
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     private val media: MutableList<GalleryMedia> = mutableListOf()
@@ -70,6 +72,10 @@ class MediaViewerAdapter(
         }
     }
 
+    fun getItem(position: Int): GalleryMedia? {
+        return media.getOrNull(position)
+    }
+
     fun submitData(images: List<GalleryMedia>) {
         this.media.clear()
         this.media.addAll(images)
@@ -90,7 +96,13 @@ class MediaViewerAdapter(
     ) : RecyclerView.ViewHolder(binding.root), View.OnTouchListener {
 
         init {
-            binding.image.setOnTouchListener(this)
+            binding.image.run {
+                setOnTouchListener(this@ImageViewHolder)
+                setOnClickListener {
+                    binding.buttonDownload.isVisible = !binding.buttonDownload.isVisible
+                }
+            }
+            binding.buttonDownload.setOnClickListener { onDownloadClick.invoke() }
         }
 
         fun bind(image: GalleryMedia) {
@@ -110,18 +122,30 @@ class MediaViewerAdapter(
                         diskCachePolicy(CachePolicy.READ_ONLY)
                         listener(
                             onStart = {
-                                binding.loadingCradle.isVisible = true
-                                binding.infoRetry.hide()
+                                binding.run {
+                                    loadingCradle.isVisible = true
+                                    buttonDownload.isVisible = false
+                                    infoRetry.hide()
+                                }
                             },
                             onCancel = {
-                                binding.loadingCradle.isVisible = false
+                                binding.run {
+                                    loadingCradle.isVisible = false
+                                    buttonDownload.isVisible = false
+                                }
                             },
                             onError = { _, _ ->
-                                binding.loadingCradle.isVisible = false
-                                binding.infoRetry.show()
+                                binding.run {
+                                    loadingCradle.isVisible = false
+                                    buttonDownload.isVisible = false
+                                    infoRetry.show()
+                                }
                             },
                             onSuccess = { _, _ ->
-                                binding.loadingCradle.isVisible = false
+                                binding.run {
+                                    loadingCradle.isVisible = false
+                                    buttonDownload.isVisible = true
+                                }
                             }
                         )
                         target { drawable -> setImageDrawable(drawable) }
@@ -160,6 +184,13 @@ class MediaViewerAdapter(
     inner class VideoViewHolder(
         private val binding: ItemVideoBinding
     ) : RecyclerView.ViewHolder(binding.root), Player.EventListener {
+
+        init {
+            binding.run {
+                controls.isVisible = false
+                buttonDownload.setOnClickListener { onDownloadClick.invoke() }
+            }
+        }
 
         fun bind(video: GalleryMedia) {
             val videoItem = exoPlayerHelper.getMediaItem(video.url)
@@ -207,7 +238,12 @@ class MediaViewerAdapter(
 
             players.add(player)
 
-            binding.video.player = player
+            binding.video.run {
+                this.player = player
+                setControllerVisibilityListener { controllerVisibility ->
+                    binding.controls.visibility = controllerVisibility
+                }
+            }
 
             binding.infoRetry.setActionClickListener { player.prepare() }
         }
@@ -228,9 +264,7 @@ class MediaViewerAdapter(
             if (hasAudio(trackGroups)) {
                 muteAudio(muteVideo)
 
-                binding.video.setControllerVisibilityListener { controllerVisibility ->
-                    binding.mute.visibility = controllerVisibility
-                }
+                binding.mute.isVisible = true
 
                 binding.mute.run {
                     isChecked = muteVideo
@@ -239,6 +273,8 @@ class MediaViewerAdapter(
                         onMuteClick.invoke(isMuted)
                     }
                 }
+            } else {
+                binding.mute.isVisible = false
             }
         }
 

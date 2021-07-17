@@ -2,6 +2,8 @@
     <string name="app_name">Stealth</string>
     <string name="app_description">An account-free, privacy-oriented, feature-rich Reddit client</string>
 
+    <string name="ok">OK</string>
+
     <string name="post_ratio">%1$d%%</string>
 
     <string name="time_difference_now">now</string>
@@ -172,4 +174,20 @@
 
     <string name="contributor_uDEV2019_description">German translation</string>
     <string name="contributor_anothersapiens_description">Spanish translation</string>
+
+    <string name="notification_download_title">Download Manager</string>
+    <string name="notification_download_content_pending">Download in progress</string>
+    <string name="notification_download_content_failed">Download failed</string>
+    <string name="notification_download_content_success">Download completed</string>
+
+    <string name="notification_download_action_retry">Retry</string>
+    <string name="notification_download_action_cancel">Cancel</string>
+
+    <string name="notification_download_channel_name">Download Manager</string>
+    <string name="notification_download_channel_description">Media downloader</string>
+
+    <string name="file_date_format">yyyyMMdd_HHmmss</string>
+
+    <string name="snackbar_permission_storage_request_message">Permission to write to external storage is required</string>
+    <string name="snackbar_permission_storage_denied_message">Permission to write to external storage was denied</string>
 </resources>

@@ -6,6 +6,8 @@
 
     <color name="background">#212121</color>
 
+    <color name="icon_tint">#FFFFFF</color>
+
     <color name="chip_background_color">#4B3C5A</color>
 
     <color name="card_background_color">#3C3250</color>
