@@ -1,3 +1,17 @@
+# 1.1.0 - 2021/07/17
+
+### Added
+- Built-in browser
+- Media downloader: save images and videos from posts
+- Ability to rename profiles
+
+### Changed
+- Improve navigation
+
+### Fixed
+- Crashes on some Subreddits
+- Wiki links opened as Subreddit links
+
 # 1.0.1 - 2021/05/09
 
 ### Fixed

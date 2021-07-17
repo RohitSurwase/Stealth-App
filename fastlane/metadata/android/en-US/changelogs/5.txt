@@ -1,0 +1,11 @@
+Added
+- Built-in browser
+- Media downloader: save images and videos from posts
+- Ability to rename profiles
+
+Changed
+- Improve navigation
+
+Fixed
+- Crashes on some Subreddits
+- Wiki links opened as Subreddit links
