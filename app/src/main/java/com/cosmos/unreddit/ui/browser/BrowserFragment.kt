@@ -59,6 +59,7 @@ class BrowserFragment : BaseFragment() {
         }
     }
 
+    @Suppress("SetJavaScriptEnabled")
     private fun initWebView() {
         binding.webview.webViewClient = object : WebViewClient() {
             override fun shouldOverrideUrlLoading(
@@ -84,6 +85,7 @@ class BrowserFragment : BaseFragment() {
                 binding.loadingCradle.isVisible = false
             }
         }
+        binding.webview.settings.javaScriptEnabled = true
     }
 
     override fun onBackPressed() {
