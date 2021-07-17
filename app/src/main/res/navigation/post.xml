@@ -18,6 +18,14 @@
             app:uri=".*.reddit.com/r/{subreddit}/comments/{id}/"/>
 
         <deepLink
+            android:id="@+id/deepLinkPostTitle"
+            app:uri=".*.reddit.com/r/{subreddit}/comments/{id}/{title}"/>
+
+        <deepLink
+            android:id="@+id/deepLinkPostTitle2"
+            app:uri=".*.reddit.com/r/{subreddit}/comments/{id}/{title}/"/>
+
+        <deepLink
             android:id="@+id/deepLinkPostThread"
             app:uri=".*.reddit.com/r/{subreddit}/comments/{id}/{title}/{comment}"/>
 
