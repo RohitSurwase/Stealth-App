@@ -10,8 +10,9 @@ import androidx.annotation.DrawableRes
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.isVisible
 import com.cosmos.unreddit.R
+import com.cosmos.unreddit.data.model.Sort
 import com.cosmos.unreddit.data.model.Sorting
-import com.cosmos.unreddit.data.remote.api.reddit.RedditApi
+import com.cosmos.unreddit.data.model.TimeSorting
 
 class SortIconView @JvmOverloads constructor(
     context: Context,
@@ -73,12 +74,12 @@ class SortIconView @JvmOverloads constructor(
             visibility = getTextVisibility(sorting)
 
             text = when (sorting.timeSorting) {
-                RedditApi.TimeSorting.HOUR -> context.getString(R.string.sort_time_hour_short)
-                RedditApi.TimeSorting.DAY -> context.getString(R.string.sort_time_day_short)
-                RedditApi.TimeSorting.WEEK -> context.getString(R.string.sort_time_week_short)
-                RedditApi.TimeSorting.MONTH -> context.getString(R.string.sort_time_month_short)
-                RedditApi.TimeSorting.YEAR -> context.getString(R.string.sort_time_year_short)
-                RedditApi.TimeSorting.ALL -> context.getString(R.string.sort_time_all_short)
+                TimeSorting.HOUR -> context.getString(R.string.sort_time_hour_short)
+                TimeSorting.DAY -> context.getString(R.string.sort_time_day_short)
+                TimeSorting.WEEK -> context.getString(R.string.sort_time_week_short)
+                TimeSorting.MONTH -> context.getString(R.string.sort_time_month_short)
+                TimeSorting.YEAR -> context.getString(R.string.sort_time_year_short)
+                TimeSorting.ALL -> context.getString(R.string.sort_time_all_short)
                 null -> {
                     if (showOutAnimation) startAnimation(popOutAnimation)
                     return@with
@@ -92,24 +93,24 @@ class SortIconView @JvmOverloads constructor(
     @DrawableRes
     private fun getIconResDrawable(sorting: Sorting): Int {
         return when (sorting.generalSorting) {
-            RedditApi.Sort.HOT -> R.drawable.ic_hot
-            RedditApi.Sort.NEW -> R.drawable.ic_new
-            RedditApi.Sort.TOP -> R.drawable.ic_top
-            RedditApi.Sort.RISING -> R.drawable.ic_rising
-            RedditApi.Sort.CONTROVERSIAL -> R.drawable.ic_controversial
-            RedditApi.Sort.RELEVANCE -> R.drawable.ic_relevance
-            RedditApi.Sort.COMMENTS -> R.drawable.ic_comments
-            RedditApi.Sort.BEST -> R.drawable.ic_best
-            RedditApi.Sort.OLD -> R.drawable.ic_old
-            RedditApi.Sort.QA -> R.drawable.ic_question_answer
+            Sort.HOT -> R.drawable.ic_hot
+            Sort.NEW -> R.drawable.ic_new
+            Sort.TOP -> R.drawable.ic_top
+            Sort.RISING -> R.drawable.ic_rising
+            Sort.CONTROVERSIAL -> R.drawable.ic_controversial
+            Sort.RELEVANCE -> R.drawable.ic_relevance
+            Sort.COMMENTS -> R.drawable.ic_comments
+            Sort.BEST -> R.drawable.ic_best
+            Sort.OLD -> R.drawable.ic_old
+            Sort.QA -> R.drawable.ic_question_answer
         }
     }
 
     private fun getIconVisibility(sorting: Sorting): Int {
         val shouldBeVisible = when (sortType) {
-            SortType.GENERAL -> sorting.generalSorting != RedditApi.Sort.HOT
+            SortType.GENERAL -> sorting.generalSorting != Sort.HOT
             SortType.SEARCH, SortType.USER -> true
-            SortType.POST -> sorting.generalSorting != RedditApi.Sort.BEST
+            SortType.POST -> sorting.generalSorting != Sort.BEST
         }
         return if (shouldBeVisible) View.VISIBLE else View.INVISIBLE
     }
@@ -117,12 +118,12 @@ class SortIconView @JvmOverloads constructor(
     private fun getTextVisibility(sorting: Sorting): Int {
         val shouldBeVisible = when (sortType) {
             SortType.GENERAL, SortType.USER ->
-                sorting.generalSorting == RedditApi.Sort.TOP ||
-                    sorting.generalSorting == RedditApi.Sort.CONTROVERSIAL
+                sorting.generalSorting == Sort.TOP ||
+                    sorting.generalSorting == Sort.CONTROVERSIAL
             SortType.SEARCH ->
-                sorting.generalSorting == RedditApi.Sort.TOP ||
-                    sorting.generalSorting == RedditApi.Sort.RELEVANCE ||
-                    sorting.generalSorting == RedditApi.Sort.COMMENTS
+                sorting.generalSorting == Sort.TOP ||
+                    sorting.generalSorting == Sort.RELEVANCE ||
+                    sorting.generalSorting == Sort.COMMENTS
             SortType.POST -> false
         }
         return if (shouldBeVisible) View.VISIBLE else View.GONE

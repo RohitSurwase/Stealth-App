@@ -5,10 +5,11 @@ import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import com.cosmos.unreddit.data.local.mapper.PostMapper2
 import com.cosmos.unreddit.data.model.Data
+import com.cosmos.unreddit.data.model.Sort
 import com.cosmos.unreddit.data.model.Sorting
+import com.cosmos.unreddit.data.model.TimeSorting
 import com.cosmos.unreddit.data.model.db.PostEntity
 import com.cosmos.unreddit.data.model.preferences.ContentPreferences
-import com.cosmos.unreddit.data.remote.api.reddit.RedditApi
 import com.cosmos.unreddit.data.repository.PostListRepository
 import com.cosmos.unreddit.data.repository.PreferencesRepository
 import com.cosmos.unreddit.di.DispatchersModule
@@ -102,6 +103,6 @@ class SubredditSearchViewModel @Inject constructor(
     }
 
     companion object {
-        private val DEFAULT_SORTING = Sorting(RedditApi.Sort.RELEVANCE, RedditApi.TimeSorting.ALL)
+        private val DEFAULT_SORTING = Sorting(Sort.RELEVANCE, TimeSorting.ALL)
     }
 }

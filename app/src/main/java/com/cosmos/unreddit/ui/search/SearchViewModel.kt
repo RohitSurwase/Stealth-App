@@ -9,12 +9,13 @@ import com.cosmos.unreddit.data.local.mapper.PostMapper2
 import com.cosmos.unreddit.data.local.mapper.SubredditMapper2
 import com.cosmos.unreddit.data.local.mapper.UserMapper2
 import com.cosmos.unreddit.data.model.Data
+import com.cosmos.unreddit.data.model.Sort
 import com.cosmos.unreddit.data.model.Sorting
+import com.cosmos.unreddit.data.model.TimeSorting
 import com.cosmos.unreddit.data.model.User
 import com.cosmos.unreddit.data.model.db.PostEntity
 import com.cosmos.unreddit.data.model.db.SubredditEntity
 import com.cosmos.unreddit.data.model.preferences.ContentPreferences
-import com.cosmos.unreddit.data.remote.api.reddit.RedditApi
 import com.cosmos.unreddit.data.remote.api.reddit.model.AboutChild
 import com.cosmos.unreddit.data.remote.api.reddit.model.AboutUserChild
 import com.cosmos.unreddit.data.repository.PostListRepository
@@ -150,6 +151,6 @@ class SearchViewModel @Inject constructor(
     }
 
     companion object {
-        private val DEFAULT_SORTING = Sorting(RedditApi.Sort.RELEVANCE, RedditApi.TimeSorting.ALL)
+        private val DEFAULT_SORTING = Sorting(Sort.RELEVANCE, TimeSorting.ALL)
     }
 }

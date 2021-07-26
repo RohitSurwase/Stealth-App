@@ -7,8 +7,8 @@ import com.cosmos.unreddit.data.model.GalleryMedia
 import com.cosmos.unreddit.data.model.GalleryMedia.Type
 import com.cosmos.unreddit.data.model.MediaType
 import com.cosmos.unreddit.data.model.Resource
+import com.cosmos.unreddit.data.model.Sort
 import com.cosmos.unreddit.data.model.Sorting
-import com.cosmos.unreddit.data.remote.api.reddit.RedditApi
 import com.cosmos.unreddit.data.repository.GfycatRepository
 import com.cosmos.unreddit.data.repository.ImgurRepository
 import com.cosmos.unreddit.data.repository.PostListRepository
@@ -128,7 +128,7 @@ class MediaViewerViewModel
                 }
                 MediaType.REDDIT_GALLERY -> {
                     val permalink = LinkUtil.getPermalinkFromMediaUrl(link)
-                    postListRepository.getPost(permalink, Sorting(RedditApi.Sort.BEST)).onStart {
+                    postListRepository.getPost(permalink, Sorting(Sort.BEST)).onStart {
                         _media.value = Resource.Loading()
                     }.catch {
                         catchError(it)

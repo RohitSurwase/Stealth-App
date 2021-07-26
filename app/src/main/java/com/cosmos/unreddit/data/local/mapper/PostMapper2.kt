@@ -4,9 +4,9 @@ import com.cosmos.unreddit.data.model.Award
 import com.cosmos.unreddit.data.model.Block
 import com.cosmos.unreddit.data.model.Flair
 import com.cosmos.unreddit.data.model.PosterType
+import com.cosmos.unreddit.data.model.Sort
 import com.cosmos.unreddit.data.model.Sorting
 import com.cosmos.unreddit.data.model.db.PostEntity
-import com.cosmos.unreddit.data.remote.api.reddit.RedditApi
 import com.cosmos.unreddit.data.remote.api.reddit.model.PostData
 import com.cosmos.unreddit.di.DispatchersModule.DefaultDispatcher
 import com.cosmos.unreddit.util.HtmlParser
@@ -44,7 +44,7 @@ class PostMapper2 @Inject constructor(
                 isSelf,
                 crossposts?.firstOrNull()?.let { toEntity(it) },
                 selfTextHtml,
-                Sorting(RedditApi.Sort.fromName(suggestedSort)),
+                Sorting(Sort.fromName(suggestedSort)),
                 redditText,
                 isOver18,
                 previewUrl,
