@@ -114,4 +114,8 @@ object LinkUtil {
             else -> MediaType.LINK
         }
     }
+
+    fun getPermalinkFromMediaUrl(link: String): String {
+        return HttpUrl.parse(link)?.pathSegments()?.lastOrNull() ?: link
+    }
 }
