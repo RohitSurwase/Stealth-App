@@ -1,0 +1,7 @@
+Added
+- Support for physical keyboards
+
+Fixed
+- NSFW content not showing in search results
+- Reddit galleries not loading in saved posts
+- Crashes with some user and Subreddit links
