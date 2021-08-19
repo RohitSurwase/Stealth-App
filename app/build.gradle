@@ -17,8 +17,8 @@ android {
         applicationId "com.cosmos.unreddit"
         minSdkVersion 21
         targetSdkVersion 31
-        versionCode 5
-        versionName "1.1.0"
+        versionCode 6
+        versionName "1.1.1"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
