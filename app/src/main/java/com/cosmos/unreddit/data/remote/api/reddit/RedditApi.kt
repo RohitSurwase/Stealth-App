@@ -23,7 +23,7 @@ interface RedditApi {
     @GET("/r/{subreddit}/about.json")
     suspend fun getSubredditInfo(@Path("subreddit") subreddit: String): Child
 
-    @GET("/r/{subreddit}/search.json?restrict_sr=1")
+    @GET("/r/{subreddit}/search.json?restrict_sr=1&include_over_18=1")
     suspend fun searchInSubreddit(
         @Path("subreddit") subreddit: String,
         @Query("q") query: String,

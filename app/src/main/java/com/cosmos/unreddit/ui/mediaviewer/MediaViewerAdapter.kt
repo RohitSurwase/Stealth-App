@@ -18,7 +18,7 @@ import com.cosmos.unreddit.databinding.ItemImageBinding
 import com.cosmos.unreddit.databinding.ItemVideoBinding
 import com.cosmos.unreddit.util.ExoPlayerHelper
 import com.cosmos.unreddit.util.LinkUtil
-import com.google.android.exoplayer2.ExoPlaybackException
+import com.google.android.exoplayer2.PlaybackException
 import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.SimpleExoPlayer
 import com.google.android.exoplayer2.source.MergingMediaSource
@@ -183,7 +183,7 @@ class MediaViewerAdapter(
 
     inner class VideoViewHolder(
         private val binding: ItemVideoBinding
-    ) : RecyclerView.ViewHolder(binding.root), Player.EventListener {
+    ) : RecyclerView.ViewHolder(binding.root), Player.Listener {
 
         init {
             binding.run {
@@ -207,8 +207,8 @@ class MediaViewerAdapter(
                 player.setMediaSource(mergedSource)
 
                 // Add special listener for Reddit videos with audio
-                player.addListener(object : Player.EventListener {
-                    override fun onPlayerError(error: ExoPlaybackException) {
+                player.addListener(object : Player.Listener {
+                    override fun onPlayerError(error: PlaybackException) {
                         if (isErrorFromAudio(error)) {
                             // Retry without audio if an error is thrown
                             player.setMediaItem(videoItem)
@@ -248,8 +248,8 @@ class MediaViewerAdapter(
             binding.infoRetry.setActionClickListener { player.prepare() }
         }
 
-        private fun isErrorFromAudio(error: ExoPlaybackException): Boolean {
-            if (error.type == ExoPlaybackException.TYPE_SOURCE) {
+        private fun isErrorFromAudio(error: PlaybackException): Boolean {
+            if (error.errorCode == PlaybackException.ERROR_CODE_IO_BAD_HTTP_STATUS) {
                 val cause = error.cause as? HttpDataSource.InvalidResponseCodeException
                 cause?.dataSpec?.key?.let { link ->
                     return (cause.responseCode == HttpURLConnection.HTTP_FORBIDDEN ||
@@ -297,7 +297,7 @@ class MediaViewerAdapter(
             return false
         }
 
-        override fun onPlayerError(error: ExoPlaybackException) {
+        override fun onPlayerError(error: PlaybackException) {
             binding.infoRetry.show()
         }
 

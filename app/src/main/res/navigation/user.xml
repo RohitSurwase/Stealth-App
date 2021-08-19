@@ -16,6 +16,9 @@
         <deepLink
             android:id="@+id/deepLinkUserExternal"
             app:uri=".*.reddit.com/user/{user}" />
+        <deepLink
+            android:id="@+id/deepLinkUserExternal2"
+            app:uri=".*.reddit.com/user/{user}/" />
 
         <argument
             android:name="user"

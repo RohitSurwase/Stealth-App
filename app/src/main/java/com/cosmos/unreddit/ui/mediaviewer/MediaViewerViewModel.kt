@@ -4,14 +4,19 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.cosmos.unreddit.data.local.mapper.PostMapper
 import com.cosmos.unreddit.data.model.GalleryMedia
 import com.cosmos.unreddit.data.model.GalleryMedia.Type
 import com.cosmos.unreddit.data.model.MediaType
 import com.cosmos.unreddit.data.model.Resource
+import com.cosmos.unreddit.data.model.Sorting
+import com.cosmos.unreddit.data.remote.api.reddit.RedditApi
 import com.cosmos.unreddit.data.repository.GfycatRepository
 import com.cosmos.unreddit.data.repository.ImgurRepository
+import com.cosmos.unreddit.data.repository.PostListRepository
 import com.cosmos.unreddit.data.repository.StreamableRepository
 import com.cosmos.unreddit.util.LinkUtil
+import com.cosmos.unreddit.util.PostUtil
 import com.cosmos.unreddit.util.extension.updateValue
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.catch
@@ -28,7 +33,8 @@ class MediaViewerViewModel
 @Inject constructor(
     private val imgurRepository: ImgurRepository,
     private val streamableRepository: StreamableRepository,
-    private val gfycatRepository: GfycatRepository
+    private val gfycatRepository: GfycatRepository,
+    private val postListRepository: PostListRepository
 ) : ViewModel() {
 
     private val _media: MutableLiveData<Resource<List<GalleryMedia>>> = MutableLiveData()
@@ -98,6 +104,18 @@ class MediaViewerViewModel
                                 description = image.description
                             )
                         }
+                    }.collect {
+                        setMedia(it)
+                    }
+                }
+                MediaType.REDDIT_GALLERY -> {
+                    val permalink = LinkUtil.getPermalinkFromMediaUrl(link)
+                    postListRepository.getPost(permalink, Sorting(RedditApi.Sort.BEST)).onStart {
+                        _media.value = Resource.Loading()
+                    }.catch {
+                        catchError(it)
+                    }.map { listings ->
+                        PostMapper.dataToEntity(PostUtil.getPostData(listings)).gallery
                     }.collect {
                         setMedia(it)
                     }
