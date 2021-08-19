@@ -3,8 +3,10 @@ package com.cosmos.unreddit.ui.common.widget
 import android.content.Context
 import android.util.AttributeSet
 import android.view.Gravity
+import android.view.KeyEvent
 import android.view.View
 import android.view.ViewGroup
+import android.view.inputmethod.EditorInfo
 import androidx.transition.Fade
 import androidx.transition.Slide
 import androidx.transition.TransitionManager
@@ -71,5 +73,26 @@ class SearchInputEditText @JvmOverloads constructor(
 
     fun addTarget(target: View) {
         appBarTransition.addTarget(target)
+    }
+
+    fun setSearchActionListener(action: (String) -> Unit) {
+        setOnEditorActionListener { _, actionId, _ ->
+            when (actionId) {
+                EditorInfo.IME_ACTION_SEARCH -> {
+                    action.invoke(text.toString())
+                    true
+                }
+                else -> false
+            }
+        }
+        setOnKeyListener { _, keyCode, _ ->
+            when (keyCode) {
+                KeyEvent.KEYCODE_ENTER, KeyEvent.KEYCODE_NUMPAD_ENTER -> {
+                    action.invoke(text.toString())
+                    true
+                }
+                else -> false
+            }
+        }
     }
 }

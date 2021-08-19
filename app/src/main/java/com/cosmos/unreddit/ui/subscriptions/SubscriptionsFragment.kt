@@ -4,7 +4,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.inputmethod.EditorInfo
 import androidx.core.view.isVisible
 import androidx.core.widget.doOnTextChanged
 import androidx.fragment.app.activityViewModels
@@ -15,7 +14,7 @@ import com.cosmos.unreddit.R
 import com.cosmos.unreddit.UiViewModel
 import com.cosmos.unreddit.databinding.FragmentSubscriptionsBinding
 import com.cosmos.unreddit.ui.base.BaseFragment
-import com.cosmos.unreddit.ui.search.SearchFragment
+import com.cosmos.unreddit.util.SearchUtil
 import com.cosmos.unreddit.util.extension.hideSoftKeyboard
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -89,16 +88,8 @@ class SubscriptionsFragment : BaseFragment() {
                 doOnTextChanged { text, _, _, _ ->
                     viewModel.setSearchQuery(text.toString())
                 }
-                setOnEditorActionListener { _, actionId, _ ->
-                    when (actionId) {
-                        EditorInfo.IME_ACTION_SEARCH -> {
-                            if (text.toString().length >= SearchFragment.QUERY_MIN_LENGTH) {
-                                showSearchFragment(text.toString())
-                            }
-                            true
-                        }
-                        else -> false
-                    }
+                setSearchActionListener {
+                    handleSearchAction(it)
                 }
             }
         }
@@ -124,6 +115,12 @@ class SubscriptionsFragment : BaseFragment() {
 
     private fun onClick(subreddit: String) {
         navigate(NavigationGraphDirections.openSubreddit(subreddit))
+    }
+
+    private fun handleSearchAction(query: String) {
+        if (SearchUtil.isQueryValid(query)) {
+            showSearchFragment(query)
+        }
     }
 
     override fun onBackPressed() {
