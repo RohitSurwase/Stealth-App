@@ -1,3 +1,13 @@
+# 1.1.1 - 2021/08/19
+
+### Added
+- Support for physical keyboards
+
+### Fixed
+- NSFW content not showing in search results
+- Reddit galleries not loading in saved posts
+- Crashes with some user and Subreddit links
+
 # 1.1.0 - 2021/07/17
 
 ### Added

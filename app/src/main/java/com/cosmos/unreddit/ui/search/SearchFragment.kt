@@ -4,7 +4,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.inputmethod.EditorInfo
 import androidx.core.view.isVisible
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
@@ -20,6 +19,7 @@ import com.cosmos.unreddit.ui.base.BaseFragment
 import com.cosmos.unreddit.ui.postlist.PostListAdapter
 import com.cosmos.unreddit.ui.sort.SortFragment
 import com.cosmos.unreddit.util.RecyclerViewStateAdapter
+import com.cosmos.unreddit.util.SearchUtil
 import com.cosmos.unreddit.util.extension.getRecyclerView
 import com.cosmos.unreddit.util.extension.onRefreshFromNetwork
 import com.cosmos.unreddit.util.extension.scrollToTop
@@ -191,17 +191,8 @@ class SearchFragment : BaseFragment() {
                 addTarget(sortCard)
                 addTarget(sortIcon)
                 addTarget(cancelCard)
-                setOnEditorActionListener { _, actionId, _ ->
-                    when (actionId) {
-                        EditorInfo.IME_ACTION_SEARCH -> {
-                            if (text.toString().length >= QUERY_MIN_LENGTH) {
-                                viewModel.setQuery(text.toString())
-                                showSearchInput(false)
-                            }
-                            true
-                        }
-                        else -> false
-                    }
+                setSearchActionListener {
+                    handleSearchAction(it)
                 }
             }
             sortCard.setOnClickListener { showSortDialog() }
@@ -261,6 +252,13 @@ class SearchFragment : BaseFragment() {
             viewModel.searchAndFilterUsers(query, sorting).collectLatest {
                 userAdapter.submitData(it)
             }
+        }
+    }
+
+    private fun handleSearchAction(query: String) {
+        if (SearchUtil.isQueryValid(query)) {
+            viewModel.setQuery(query)
+            showSearchInput(false)
         }
     }
 
