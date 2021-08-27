@@ -53,6 +53,10 @@ object LinkUtil {
         }
     }
 
+    fun getGfycatId(link: String): String {
+        return HttpUrl.parse(link)?.pathSegments()?.lastOrNull() ?: return link
+    }
+
     private fun transformGfycatLink(link: String): String {
         return link.replace("size_restricted.gif", "mobile.mp4")
     }

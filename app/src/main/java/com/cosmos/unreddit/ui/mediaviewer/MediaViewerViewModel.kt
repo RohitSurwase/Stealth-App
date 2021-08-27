@@ -70,10 +70,13 @@ class MediaViewerViewModel
                     setMedia(GalleryMedia.singleton(Type.VIDEO, LinkUtil.getGfycatVideo(link)))
                 }
                 MediaType.REDGIFS -> {
-                    gfycatRepository.parseRedgifsLink(link).onStart {
+                    val id = LinkUtil.getGfycatId(link)
+                    gfycatRepository.getRedgifsGif(id).onStart {
                         _media.value = Resource.Loading()
                     }.catch {
                         catchError(it)
+                    }.map {
+                        GalleryMedia.singleton(Type.VIDEO, it.gfyItem.contentUrls.mp4.url)
                     }.collect {
                         setMedia(it)
                     }
