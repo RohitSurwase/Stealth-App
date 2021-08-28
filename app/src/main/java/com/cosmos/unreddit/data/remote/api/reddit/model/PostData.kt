@@ -186,11 +186,6 @@ data class PostData(
                 crossposts?.firstOrNull()?.mediaUrl
                     ?: mediaPreview?.images?.getOrNull(0)?.imageSource?.url
             }
-            MediaType.GFYCAT -> {
-                crossposts?.firstOrNull()?.mediaUrl
-                    ?: media?.embed?.thumbnailUrl
-                    ?: mediaPreview?.videoPreview?.fallbackUrl
-            }
             else -> url
         } ?: url
 

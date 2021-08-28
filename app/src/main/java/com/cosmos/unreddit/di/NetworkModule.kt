@@ -1,19 +1,14 @@
 package com.cosmos.unreddit.di
 
 import com.cosmos.unreddit.data.remote.RawJsonInterceptor
+import com.cosmos.unreddit.data.remote.api.gfycat.GfycatApi
 import com.cosmos.unreddit.data.remote.api.imgur.ImgurApi
 import com.cosmos.unreddit.data.remote.api.reddit.RedditApi
 import com.cosmos.unreddit.data.remote.api.reddit.SortingConverterFactory
 import com.cosmos.unreddit.data.remote.api.reddit.adapter.EditedAdapter
 import com.cosmos.unreddit.data.remote.api.reddit.adapter.MediaMetadataAdapter
 import com.cosmos.unreddit.data.remote.api.reddit.adapter.RepliesAdapter
-import com.cosmos.unreddit.data.remote.api.reddit.model.AboutChild
-import com.cosmos.unreddit.data.remote.api.reddit.model.AboutUserChild
-import com.cosmos.unreddit.data.remote.api.reddit.model.Child
-import com.cosmos.unreddit.data.remote.api.reddit.model.ChildType
-import com.cosmos.unreddit.data.remote.api.reddit.model.CommentChild
-import com.cosmos.unreddit.data.remote.api.reddit.model.MoreChild
-import com.cosmos.unreddit.data.remote.api.reddit.model.PostChild
+import com.cosmos.unreddit.data.remote.api.reddit.model.*
 import com.cosmos.unreddit.data.remote.api.streamable.StreamableApi
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.adapters.PolymorphicJsonAdapterFactory
@@ -40,6 +35,22 @@ object NetworkModule {
     @Retention(AnnotationRetention.BINARY)
     annotation class BasicMoshi
 
+    @Qualifier
+    @Retention(AnnotationRetention.BINARY)
+    annotation class Gfycat
+
+    @Qualifier
+    @Retention(AnnotationRetention.BINARY)
+    annotation class Redgifs
+
+    @Qualifier
+    @Retention(AnnotationRetention.BINARY)
+    annotation class RedditOkHttp
+
+    @Qualifier
+    @Retention(AnnotationRetention.BINARY)
+    annotation class GenericOkHttp
+
     @RedditMoshi
     @Provides
     @Singleton
@@ -65,17 +76,29 @@ object NetworkModule {
             .build()
     }
 
+    @RedditOkHttp
     @Provides
     @Singleton
-    fun provideOkHttpClient(): OkHttpClient {
+    fun provideRedditOkHttpClient(): OkHttpClient {
         return OkHttpClient.Builder()
             .addInterceptor(RawJsonInterceptor())
             .build()
     }
 
+    @GenericOkHttp
     @Provides
     @Singleton
-    fun provideRedditApi(@RedditMoshi moshi: Moshi, okHttpClient: OkHttpClient): RedditApi {
+    fun provideGenericOkHttpClient(): OkHttpClient {
+        return OkHttpClient.Builder()
+            .build()
+    }
+
+    @Provides
+    @Singleton
+    fun provideRedditApi(
+        @RedditMoshi moshi: Moshi,
+        @RedditOkHttp okHttpClient: OkHttpClient
+    ): RedditApi {
         return Retrofit.Builder()
             .baseUrl(HttpUrl.parse(RedditApi.BASE_URL)!!)
             .addConverterFactory(MoshiConverterFactory.create(moshi))
@@ -87,7 +110,10 @@ object NetworkModule {
 
     @Provides
     @Singleton
-    fun provideImgurApi(@BasicMoshi moshi: Moshi, okHttpClient: OkHttpClient): ImgurApi {
+    fun provideImgurApi(
+        @BasicMoshi moshi: Moshi,
+        @GenericOkHttp okHttpClient: OkHttpClient
+    ): ImgurApi {
         return Retrofit.Builder()
             .baseUrl(HttpUrl.parse(ImgurApi.BASE_URL)!!)
             .addConverterFactory(MoshiConverterFactory.create(moshi))
@@ -98,12 +124,45 @@ object NetworkModule {
 
     @Provides
     @Singleton
-    fun provideStreamableApi(@BasicMoshi moshi: Moshi, okHttpClient: OkHttpClient): StreamableApi {
+    fun provideStreamableApi(
+        @BasicMoshi moshi: Moshi,
+        @GenericOkHttp okHttpClient: OkHttpClient
+    ): StreamableApi {
         return Retrofit.Builder()
             .baseUrl(HttpUrl.parse(StreamableApi.BASE_URL)!!)
             .addConverterFactory(MoshiConverterFactory.create(moshi))
             .client(okHttpClient)
             .build()
             .create(StreamableApi::class.java)
+    }
+
+    @Gfycat
+    @Provides
+    @Singleton
+    fun provideGfycatApi(
+        @BasicMoshi moshi: Moshi,
+        @GenericOkHttp okHttpClient: OkHttpClient
+    ): GfycatApi {
+        return Retrofit.Builder()
+            .baseUrl(GfycatApi.BASE_URL_GFYCAT)
+            .addConverterFactory(MoshiConverterFactory.create(moshi))
+            .client(okHttpClient)
+            .build()
+            .create(GfycatApi::class.java)
+    }
+
+    @Redgifs
+    @Provides
+    @Singleton
+    fun provideRedgifsApi(
+        @BasicMoshi moshi: Moshi,
+        @GenericOkHttp okHttpClient: OkHttpClient
+    ): GfycatApi {
+        return Retrofit.Builder()
+            .baseUrl(GfycatApi.BASE_URL_REDGIFS)
+            .addConverterFactory(MoshiConverterFactory.create(moshi))
+            .client(okHttpClient)
+            .build()
+            .create(GfycatApi::class.java)
     }
 }

@@ -41,20 +41,8 @@ object LinkUtil {
         return link.contains(REDDIT_SOUNDTRACK_NAME)
     }
 
-    fun getGfycatVideo(link: String): String {
-        val httpUrl = HttpUrl.parse(link) ?: return link
-        return when (httpUrl.host()) {
-            "thumbs.gfycat.com" -> transformGfycatLink(link)
-            "i.embed.ly" -> {
-                val url = httpUrl.queryParameter("url")
-                url?.let { transformGfycatLink(it) } ?: link
-            }
-            else -> link
-        }
-    }
-
-    private fun transformGfycatLink(link: String): String {
-        return link.replace("size_restricted.gif", "mobile.mp4")
+    fun getGfycatId(link: String): String {
+        return HttpUrl.parse(link)?.pathSegments()?.lastOrNull() ?: return link
     }
 
     fun getStreamableShortcode(link: String): String {
@@ -65,6 +53,9 @@ object LinkUtil {
         when {
             link.matches(SUBREDDIT_REGEX) -> return MediaType.REDDIT_SUBREDDIT
             link.matches(USER_REGEX) -> return MediaType.REDDIT_USER
+            link.startsWith("/r/") -> {
+                return MediaType.REDDIT_PERMALINK
+            }
         }
 
         val httpUrl = HttpUrl.parse(link) ?: return MediaType.NO_MEDIA
