@@ -33,6 +33,14 @@
             android:id="@+id/deepLinkPostThread2"
             app:uri=".*.reddit.com/r/{subreddit}/comments/{id}/{title}/{comment}/"/>
 
+        <deepLink
+            android:id="@+id/deepLinkShort"
+            app:uri="redd.it/{id}"/>
+
+        <deepLink
+            android:id="@+id/deepLinkShort2"
+            app:uri="redd.it/{id}/"/>
+
         <argument
             android:name="subreddit"
             android:defaultValue="@null"
