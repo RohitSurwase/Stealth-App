@@ -117,6 +117,11 @@ open class BaseFragment : Fragment(), PostListAdapter.PostClickListener,
 
             MediaType.REDDIT_WIKI -> openBrowser(link)
 
+            MediaType.REDDIT_PERMALINK -> {
+                val post = "https://www.reddit.com$link"
+                openRedditLink(post)
+            }
+
             MediaType.IMGUR_ALBUM,
             MediaType.IMGUR_GALLERY,
             MediaType.IMGUR_GIF,

@@ -53,6 +53,9 @@ object LinkUtil {
         when {
             link.matches(SUBREDDIT_REGEX) -> return MediaType.REDDIT_SUBREDDIT
             link.matches(USER_REGEX) -> return MediaType.REDDIT_USER
+            link.startsWith("/r/") -> {
+                return MediaType.REDDIT_PERMALINK
+            }
         }
 
         val httpUrl = HttpUrl.parse(link) ?: return MediaType.NO_MEDIA
