@@ -1,33 +1,27 @@
 package com.cosmos.unreddit.data.repository
 
-import com.cosmos.unreddit.data.model.GalleryMedia
-import kotlinx.coroutines.Dispatchers
+import com.cosmos.unreddit.data.remote.api.gfycat.GfycatApi
+import com.cosmos.unreddit.data.remote.api.gfycat.model.Item
+import com.cosmos.unreddit.di.NetworkModule.Gfycat
+import com.cosmos.unreddit.di.NetworkModule.Redgifs
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.flowOn
-import org.jsoup.Jsoup
 import javax.inject.Inject
 import javax.inject.Singleton
-import kotlin.coroutines.CoroutineContext
 
 @Singleton
-class GfycatRepository @Inject constructor() {
+class GfycatRepository @Inject constructor(
+    @Gfycat private val gfycatApi: GfycatApi,
+    @Redgifs private val redgifsApi: GfycatApi
+) {
 
-    @Suppress("BlockingMethodInNonBlockingContext")
-    fun parseRedgifsLink(
-        link: String,
-        coroutineContext: CoroutineContext = Dispatchers.IO
-    ): Flow<List<GalleryMedia>> = flow {
-        val document = Jsoup.connect(link).timeout(TIMEOUT).get()
+    fun getGfycatGif(id: String): Flow<Item> = flow {
+        emit(gfycatApi.getGif(id))
+    }
 
-        val videoUrl = document.selectFirst("video")
-            ?.selectFirst("source")
-            ?.attr("src")
-
-        if (videoUrl != null) {
-            emit(GalleryMedia.singleton(GalleryMedia.Type.VIDEO, videoUrl))
-        }
-    }.flowOn(coroutineContext)
+    fun getRedgifsGif(id: String): Flow<Item> = flow {
+        emit(redgifsApi.getGif(id))
+    }
 
     companion object {
         private const val TIMEOUT = 10000

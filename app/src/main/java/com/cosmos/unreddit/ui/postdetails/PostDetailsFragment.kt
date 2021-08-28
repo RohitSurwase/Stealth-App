@@ -196,17 +196,23 @@ class PostDetailsFragment :
     }
 
     private fun handleArguments() {
-        if (args.subreddit != null && args.id != null) {
-            val stringBuilder = StringBuilder().apply {
-                append("/r/").append(args.subreddit).append("/comments/").append(args.id)
-            }
+        if (args.id != null) {
+            val permalink = if (args.subreddit != null) {
+                // Full URL
+                val stringBuilder = StringBuilder().apply {
+                    append("/r/").append(args.subreddit).append("/comments/").append(args.id)
+                }
 
-            if (args.title != null && args.comment != null) {
-                stringBuilder.append("/").append(args.title).append("/").append(args.comment)
-                viewModel.setSingleThread(true)
-            }
+                if (args.title != null && args.comment != null) {
+                    stringBuilder.append("/").append(args.title).append("/").append(args.comment)
+                    viewModel.setSingleThread(true)
+                }
 
-            val permalink = stringBuilder.toString()
+                stringBuilder.toString()
+            } else {
+                // Shortened URL
+                args.id!!
+            }
 
             viewModel.setPermalink(permalink)
         } else {

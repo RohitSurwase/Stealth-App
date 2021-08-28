@@ -1,0 +1,6 @@
+Added
+- Support for redd.it links
+
+Fixed
+- Redgifs videos
+- Reddit permalinks opened as external links

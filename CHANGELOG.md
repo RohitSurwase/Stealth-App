@@ -1,3 +1,12 @@
+# 1.1.2 - 2021/08/28
+
+### Added
+- Support for redd.it links
+
+### Fixed
+- Redgifs videos
+- Reddit permalinks opened as external links
+
 # 1.1.1 - 2021/08/19
 
 ### Added

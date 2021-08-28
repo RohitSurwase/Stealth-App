@@ -66,14 +66,21 @@ class MediaViewerViewModel
                         GalleryMedia.singleton(Type.VIDEO, link, LinkUtil.getRedditSoundTrack(link))
                     )
                 }
-                MediaType.GFYCAT -> {
-                    setMedia(GalleryMedia.singleton(Type.VIDEO, LinkUtil.getGfycatVideo(link)))
-                }
-                MediaType.REDGIFS -> {
-                    gfycatRepository.parseRedgifsLink(link).onStart {
+                MediaType.GFYCAT, MediaType.REDGIFS -> {
+                    val id = LinkUtil.getGfycatId(link)
+
+                    val gifItem = if (mediaType == MediaType.GFYCAT) {
+                        gfycatRepository.getGfycatGif(id)
+                    } else {
+                        gfycatRepository.getRedgifsGif(id)
+                    }
+
+                    gifItem.onStart {
                         _media.value = Resource.Loading()
                     }.catch {
                         catchError(it)
+                    }.map {
+                        GalleryMedia.singleton(Type.VIDEO, it.gfyItem.contentUrls.mp4.url)
                     }.collect {
                         setMedia(it)
                     }
