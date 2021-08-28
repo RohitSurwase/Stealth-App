@@ -43,6 +43,14 @@ object NetworkModule {
     @Retention(AnnotationRetention.BINARY)
     annotation class Redgifs
 
+    @Qualifier
+    @Retention(AnnotationRetention.BINARY)
+    annotation class RedditOkHttp
+
+    @Qualifier
+    @Retention(AnnotationRetention.BINARY)
+    annotation class GenericOkHttp
+
     @RedditMoshi
     @Provides
     @Singleton
@@ -68,17 +76,29 @@ object NetworkModule {
             .build()
     }
 
+    @RedditOkHttp
     @Provides
     @Singleton
-    fun provideOkHttpClient(): OkHttpClient {
+    fun provideRedditOkHttpClient(): OkHttpClient {
         return OkHttpClient.Builder()
             .addInterceptor(RawJsonInterceptor())
             .build()
     }
 
+    @GenericOkHttp
     @Provides
     @Singleton
-    fun provideRedditApi(@RedditMoshi moshi: Moshi, okHttpClient: OkHttpClient): RedditApi {
+    fun provideGenericOkHttpClient(): OkHttpClient {
+        return OkHttpClient.Builder()
+            .build()
+    }
+
+    @Provides
+    @Singleton
+    fun provideRedditApi(
+        @RedditMoshi moshi: Moshi,
+        @RedditOkHttp okHttpClient: OkHttpClient
+    ): RedditApi {
         return Retrofit.Builder()
             .baseUrl(HttpUrl.parse(RedditApi.BASE_URL)!!)
             .addConverterFactory(MoshiConverterFactory.create(moshi))
@@ -90,7 +110,10 @@ object NetworkModule {
 
     @Provides
     @Singleton
-    fun provideImgurApi(@BasicMoshi moshi: Moshi, okHttpClient: OkHttpClient): ImgurApi {
+    fun provideImgurApi(
+        @BasicMoshi moshi: Moshi,
+        @GenericOkHttp okHttpClient: OkHttpClient
+    ): ImgurApi {
         return Retrofit.Builder()
             .baseUrl(HttpUrl.parse(ImgurApi.BASE_URL)!!)
             .addConverterFactory(MoshiConverterFactory.create(moshi))
@@ -101,7 +124,10 @@ object NetworkModule {
 
     @Provides
     @Singleton
-    fun provideStreamableApi(@BasicMoshi moshi: Moshi, okHttpClient: OkHttpClient): StreamableApi {
+    fun provideStreamableApi(
+        @BasicMoshi moshi: Moshi,
+        @GenericOkHttp okHttpClient: OkHttpClient
+    ): StreamableApi {
         return Retrofit.Builder()
             .baseUrl(HttpUrl.parse(StreamableApi.BASE_URL)!!)
             .addConverterFactory(MoshiConverterFactory.create(moshi))
@@ -113,7 +139,10 @@ object NetworkModule {
     @Gfycat
     @Provides
     @Singleton
-    fun provideGfycatApi(@BasicMoshi moshi: Moshi, okHttpClient: OkHttpClient): GfycatApi {
+    fun provideGfycatApi(
+        @BasicMoshi moshi: Moshi,
+        @GenericOkHttp okHttpClient: OkHttpClient
+    ): GfycatApi {
         return Retrofit.Builder()
             .baseUrl(GfycatApi.BASE_URL_GFYCAT)
             .addConverterFactory(MoshiConverterFactory.create(moshi))
@@ -125,7 +154,10 @@ object NetworkModule {
     @Redgifs
     @Provides
     @Singleton
-    fun provideRedgifsApi(@BasicMoshi moshi: Moshi, okHttpClient: OkHttpClient): GfycatApi {
+    fun provideRedgifsApi(
+        @BasicMoshi moshi: Moshi,
+        @GenericOkHttp okHttpClient: OkHttpClient
+    ): GfycatApi {
         return Retrofit.Builder()
             .baseUrl(GfycatApi.BASE_URL_REDGIFS)
             .addConverterFactory(MoshiConverterFactory.create(moshi))
