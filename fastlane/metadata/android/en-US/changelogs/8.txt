@@ -1,0 +1,2 @@
+Fixed
+- Crashes on Android 12+
