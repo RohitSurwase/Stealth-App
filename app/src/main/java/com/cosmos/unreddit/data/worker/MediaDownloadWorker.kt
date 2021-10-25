@@ -25,6 +25,7 @@ import com.cosmos.unreddit.R
 import com.cosmos.unreddit.data.model.GalleryMedia
 import com.cosmos.unreddit.data.receiver.DownloadManagerReceiver
 import com.cosmos.unreddit.util.DateUtil
+import com.cosmos.unreddit.util.IntentUtil
 import com.cosmos.unreddit.util.extension.cancelAllWorkByTag
 import com.cosmos.unreddit.util.extension.cancelNotification
 import com.cosmos.unreddit.util.extension.createNotificationChannel
@@ -91,7 +92,12 @@ class MediaDownloadWorker(
             }
             uri != null -> {
                 val intent = Intent(Intent.ACTION_VIEW, uri)
-                val pendingIntent = PendingIntent.getActivity(applicationContext, 0, intent, 0)
+                val pendingIntent = PendingIntent.getActivity(
+                    applicationContext,
+                    0,
+                    intent,
+                    IntentUtil.getPendingIntentFlag(false)
+                )
 
                 builder
                     .setContentText(

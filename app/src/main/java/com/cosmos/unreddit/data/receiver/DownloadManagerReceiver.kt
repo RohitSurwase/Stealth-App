@@ -7,6 +7,7 @@ import android.content.Intent
 import com.cosmos.unreddit.BuildConfig
 import com.cosmos.unreddit.data.model.GalleryMedia
 import com.cosmos.unreddit.data.worker.MediaDownloadWorker
+import com.cosmos.unreddit.util.IntentUtil
 
 class DownloadManagerReceiver : BroadcastReceiver() {
 
@@ -54,7 +55,12 @@ class DownloadManagerReceiver : BroadcastReceiver() {
                 putExtra(KEY_TYPE, type.value)
             }
 
-            return PendingIntent.getBroadcast(context, 0, intent, 0)
+            return PendingIntent.getBroadcast(
+                context,
+                0,
+                intent,
+                IntentUtil.getPendingIntentFlag(false)
+            )
         }
 
         fun getCancelPendingIntent(
@@ -66,7 +72,12 @@ class DownloadManagerReceiver : BroadcastReceiver() {
                 putExtra(KEY_URL, url)
             }
 
-            return PendingIntent.getBroadcast(context, 0, intent, 0)
+            return PendingIntent.getBroadcast(
+                context,
+                0,
+                intent,
+                IntentUtil.getPendingIntentFlag(false)
+            )
         }
     }
 }
