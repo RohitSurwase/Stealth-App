@@ -114,7 +114,7 @@
             android:orientation="horizontal"
             app:layout_constraintGuide_begin="?attr/actionBarSize" />
 
-        <androidx.recyclerview.widget.RecyclerView
+        <com.cosmos.unreddit.ui.common.widget.PostRecyclerView
             android:id="@+id/list_post"
             android:layout_width="0dp"
             android:layout_height="0dp"

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<inset
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:insetLeft="@dimen/post_divider_inset"
+    android:insetRight="@dimen/post_divider_inset">
+    <shape>
+        <size android:height="1dp"/>
+        <gradient
+            android:type="linear"
+            android:angle="0"
+            android:startColor="@color/colorPrimaryLight"
+            android:centerColor="@color/colorSecondaryLight"
+            android:endColor="@color/colorPrimaryLight" />
+    </shape>
+</inset>

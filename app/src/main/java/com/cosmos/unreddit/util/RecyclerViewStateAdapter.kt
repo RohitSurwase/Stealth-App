@@ -9,6 +9,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.cosmos.unreddit.databinding.ItemListContentBinding
+import com.cosmos.unreddit.ui.common.PostDividerItemDecoration
 import com.cosmos.unreddit.ui.loadstate.NetworkLoadStateAdapter
 import com.cosmos.unreddit.util.extension.addLoadStateListener
 import com.cosmos.unreddit.util.extension.applyWindowInsets
@@ -22,22 +23,34 @@ class RecyclerViewStateAdapter(val onError: () -> Unit) :
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        val adapter = getItem(position).adapter
-        if (adapter is PagingDataAdapter<out Any, out RecyclerView.ViewHolder>) {
-            holder.bindPaging(adapter)
-        } else {
-            holder.bind(adapter)
-        }
+        holder.bindPage(getItem(position))
     }
 
     inner class ViewHolder(
         private val binding: ItemListContentBinding
     ) : RecyclerView.ViewHolder(binding.root) {
 
-        fun bindPaging(adapter: PagingDataAdapter<out Any, out RecyclerView.ViewHolder>) {
+        fun bindPage(page: Page) {
+            if (page.showItemDecoration) {
+                binding.listContent.apply {
+                    addItemDecoration(PostDividerItemDecoration(context))
+                }
+            }
+
+            page.adapter.run {
+                if (this is PagingDataAdapter<out Any, out RecyclerView.ViewHolder>) {
+                    bindPaging(this)
+                } else {
+                    bind(this)
+                }
+            }
+        }
+
+        private fun bindPaging(adapter: PagingDataAdapter<out Any, out RecyclerView.ViewHolder>) {
             adapter.addLoadStateListener(binding.listContent, binding.loadingState, onError)
 
             binding.listContent.apply {
+                applyWindowInsets(left = false, top = false, right = false)
                 layoutManager = LinearLayoutManager(context)
                 this.adapter = adapter.withLoadStateHeaderAndFooter(
                     header = NetworkLoadStateAdapter { adapter.retry() },
@@ -46,7 +59,7 @@ class RecyclerViewStateAdapter(val onError: () -> Unit) :
             }
         }
 
-        fun bind(adapter: RecyclerView.Adapter<out RecyclerView.ViewHolder>) {
+        private fun bind(adapter: RecyclerView.Adapter<out RecyclerView.ViewHolder>) {
             binding.listContent.apply {
                 applyWindowInsets(left = false, top = false, right = false)
                 layoutManager = LinearLayoutManager(context)
@@ -57,7 +70,8 @@ class RecyclerViewStateAdapter(val onError: () -> Unit) :
 
     data class Page(
         @StringRes val title: Int,
-        val adapter: RecyclerView.Adapter<out RecyclerView.ViewHolder>
+        val adapter: RecyclerView.Adapter<out RecyclerView.ViewHolder>,
+        val showItemDecoration: Boolean = false
     )
 
     companion object {

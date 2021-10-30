@@ -136,7 +136,7 @@ class SearchFragment : BaseFragment() {
         userAdapter = SearchUserAdapter { onUserClick(it) }
 
         val tabs: List<RecyclerViewStateAdapter.Page> = listOf(
-            RecyclerViewStateAdapter.Page(R.string.tab_search_post, postListAdapter),
+            RecyclerViewStateAdapter.Page(R.string.tab_search_post, postListAdapter, true),
             RecyclerViewStateAdapter.Page(R.string.tab_search_subreddit, subredditAdapter),
             RecyclerViewStateAdapter.Page(R.string.tab_search_user, userAdapter)
         )

@@ -105,7 +105,7 @@ class ProfileFragment : BaseFragment(), UserCommentsAdapter.CommentClickListener
         savedAdapter = ProfileSavedAdapter(requireContext(), this, this, this)
 
         val tabs: List<RecyclerViewStateAdapter.Page> = listOf(
-            RecyclerViewStateAdapter.Page(R.string.tab_profile_saved, savedAdapter),
+            RecyclerViewStateAdapter.Page(R.string.tab_profile_saved, savedAdapter, true),
         )
 
         val userStateAdapter = RecyclerViewStateAdapter {

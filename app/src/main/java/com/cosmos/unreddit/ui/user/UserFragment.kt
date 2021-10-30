@@ -137,7 +137,7 @@ class UserFragment : BaseFragment(), UserCommentsAdapter.CommentClickListener {
         commentListAdapter = UserCommentsAdapter(requireContext(), this, this)
 
         val tabs: List<RecyclerViewStateAdapter.Page> = listOf(
-            RecyclerViewStateAdapter.Page(R.string.tab_user_submitted, postListAdapter),
+            RecyclerViewStateAdapter.Page(R.string.tab_user_submitted, postListAdapter, true),
             RecyclerViewStateAdapter.Page(R.string.tab_user_comments, commentListAdapter)
         )
 
