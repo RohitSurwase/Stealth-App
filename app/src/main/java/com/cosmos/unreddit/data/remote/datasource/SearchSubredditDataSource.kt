@@ -36,6 +36,8 @@ class SearchSubredditDataSource(
     }
 
     override fun getRefreshKey(state: PagingState<String, SubredditEntity>): String? {
-        return null
+        return state.anchorPosition?.let { anchorPosition ->
+            state.closestPageToPosition(anchorPosition)?.prevKey
+        }
     }
 }

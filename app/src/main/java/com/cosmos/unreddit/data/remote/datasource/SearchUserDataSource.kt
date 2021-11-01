@@ -36,6 +36,8 @@ class SearchUserDataSource(
     }
 
     override fun getRefreshKey(state: PagingState<String, User>): String? {
-        return null
+        return state.anchorPosition?.let { anchorPosition ->
+            state.closestPageToPosition(anchorPosition)?.prevKey
+        }
     }
 }
