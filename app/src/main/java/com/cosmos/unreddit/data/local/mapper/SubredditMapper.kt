@@ -7,6 +7,7 @@ import com.cosmos.unreddit.data.remote.api.reddit.model.Child
 import com.cosmos.unreddit.data.remote.api.reddit.model.ChildType
 import com.cosmos.unreddit.util.HtmlParser
 
+@Deprecated("Use SubredditMapper2 instead.")
 object SubredditMapper {
 
     suspend fun dataToEntity(

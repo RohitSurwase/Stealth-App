@@ -16,6 +16,7 @@ import com.cosmos.unreddit.util.extension.formatNumber
 import com.cosmos.unreddit.util.extension.toMillis
 import kotlin.math.round
 
+@Deprecated("Use PostMapper2 instead.")
 object PostMapper {
 
     suspend fun dataToEntity(data: PostData, htmlParser: HtmlParser = HtmlParser()): PostEntity {

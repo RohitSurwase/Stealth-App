@@ -6,6 +6,7 @@ import com.cosmos.unreddit.data.remote.api.reddit.model.AboutUserData
 import com.cosmos.unreddit.data.remote.api.reddit.model.Child
 import com.cosmos.unreddit.data.remote.api.reddit.model.ChildType
 
+@Deprecated("Use UserMapper2 instead.")
 object UserMapper {
 
     fun dataToEntity(data: AboutUserData): User {

@@ -16,6 +16,7 @@ import com.cosmos.unreddit.data.remote.api.reddit.model.PostData
 import com.cosmos.unreddit.util.HtmlParser
 import com.cosmos.unreddit.util.extension.toMillis
 
+@Deprecated("Use CommentMapper2 instead.")
 object CommentMapper {
 
     suspend fun dataToEntity(
