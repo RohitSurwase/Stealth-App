@@ -6,15 +6,14 @@ import androidx.paging.PagingData
 import com.cosmos.unreddit.data.local.RedditDatabase
 import com.cosmos.unreddit.data.model.Comment
 import com.cosmos.unreddit.data.model.Sorting
-import com.cosmos.unreddit.data.model.User
 import com.cosmos.unreddit.data.model.db.History
 import com.cosmos.unreddit.data.model.db.PostEntity
 import com.cosmos.unreddit.data.model.db.Profile
-import com.cosmos.unreddit.data.model.db.SubredditEntity
 import com.cosmos.unreddit.data.model.db.Subscription
 import com.cosmos.unreddit.data.remote.api.reddit.RedditApi
 import com.cosmos.unreddit.data.remote.api.reddit.model.AboutChild
 import com.cosmos.unreddit.data.remote.api.reddit.model.AboutUserChild
+import com.cosmos.unreddit.data.remote.api.reddit.model.Child
 import com.cosmos.unreddit.data.remote.api.reddit.model.Listing
 import com.cosmos.unreddit.data.remote.api.reddit.model.MoreChildren
 import com.cosmos.unreddit.data.remote.datasource.CommentsDataSource
@@ -50,7 +49,7 @@ class PostListRepository @Inject constructor(
         subreddit: String,
         sorting: Sorting,
         pageSize: Int = DEFAULT_LIMIT
-    ): Flow<PagingData<PostEntity>> {
+    ): Flow<PagingData<Child>> {
         return Pager(PagingConfig(pageSize = pageSize)) {
             PostListDataSource(redditApi, subreddit, sorting)
         }.flow
@@ -89,7 +88,7 @@ class PostListRepository @Inject constructor(
         user: String,
         sorting: Sorting,
         pageSize: Int = DEFAULT_LIMIT
-    ): Flow<PagingData<PostEntity>> {
+    ): Flow<PagingData<Child>> {
         return Pager(PagingConfig(pageSize = pageSize)) {
             UserPostsDataSource(redditApi, user, sorting)
         }.flow
@@ -99,7 +98,7 @@ class PostListRepository @Inject constructor(
         user: String,
         sorting: Sorting,
         pageSize: Int = DEFAULT_LIMIT
-    ): Flow<PagingData<Comment>> {
+    ): Flow<PagingData<Child>> {
         return Pager(PagingConfig(pageSize = pageSize)) {
             CommentsDataSource(redditApi, user, sorting)
         }.flow
@@ -117,7 +116,7 @@ class PostListRepository @Inject constructor(
         query: String,
         sorting: Sorting,
         pageSize: Int = DEFAULT_LIMIT
-    ): Flow<PagingData<PostEntity>> {
+    ): Flow<PagingData<Child>> {
         return Pager(PagingConfig(pageSize = pageSize)) {
             SearchPostDataSource(redditApi, query, sorting)
         }.flow
@@ -127,7 +126,7 @@ class PostListRepository @Inject constructor(
         query: String,
         sorting: Sorting,
         pageSize: Int = DEFAULT_LIMIT
-    ): Flow<PagingData<User>> {
+    ): Flow<PagingData<Child>> {
         return Pager(PagingConfig(pageSize = pageSize)) {
             SearchUserDataSource(redditApi, query, sorting)
         }.flow
@@ -137,7 +136,7 @@ class PostListRepository @Inject constructor(
         query: String,
         sorting: Sorting,
         pageSize: Int = DEFAULT_LIMIT
-    ): Flow<PagingData<SubredditEntity>> {
+    ): Flow<PagingData<Child>> {
         return Pager(PagingConfig(pageSize = pageSize)) {
             SearchSubredditDataSource(redditApi, query, sorting)
         }.flow
@@ -148,7 +147,7 @@ class PostListRepository @Inject constructor(
         subreddit: String,
         sorting: Sorting,
         pageSize: Int = DEFAULT_LIMIT
-    ): Flow<PagingData<PostEntity>> {
+    ): Flow<PagingData<Child>> {
         return Pager(PagingConfig(pageSize = pageSize)) {
             SubredditSearchPostDataSource(redditApi, subreddit, query, sorting)
         }.flow
