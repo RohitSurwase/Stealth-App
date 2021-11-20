@@ -7,7 +7,7 @@ import android.view.ViewGroup
 import androidx.core.view.isVisible
 import androidx.fragment.app.FragmentTransaction
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.Lifecycle
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager2.widget.ViewPager2
@@ -17,7 +17,6 @@ import coil.size.Scale
 import com.cosmos.unreddit.R
 import com.cosmos.unreddit.data.model.Comment.CommentEntity
 import com.cosmos.unreddit.data.model.Resource
-import com.cosmos.unreddit.data.model.Sorting
 import com.cosmos.unreddit.data.model.User
 import com.cosmos.unreddit.data.model.db.PostEntity
 import com.cosmos.unreddit.data.repository.PostListRepository
@@ -30,6 +29,7 @@ import com.cosmos.unreddit.ui.postmenu.PostMenuFragment
 import com.cosmos.unreddit.ui.sort.SortFragment
 import com.cosmos.unreddit.util.RecyclerViewStateAdapter
 import com.cosmos.unreddit.util.extension.getRecyclerView
+import com.cosmos.unreddit.util.extension.launchRepeat
 import com.cosmos.unreddit.util.extension.onRefreshFromNetwork
 import com.cosmos.unreddit.util.extension.scrollToTop
 import com.cosmos.unreddit.util.extension.setCommentListener
@@ -38,10 +38,8 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -54,9 +52,6 @@ class UserFragment : BaseFragment(), UserCommentsAdapter.CommentClickListener {
     override val viewModel: UserViewModel by viewModels()
 
     private val args: UserFragmentArgs by navArgs()
-
-    private var userPostJob: Job? = null
-    private var userCommentJob: Job? = null
 
     private lateinit var postListAdapter: PostListAdapter
     private lateinit var commentListAdapter: UserCommentsAdapter
@@ -97,20 +92,38 @@ class UserFragment : BaseFragment(), UserCommentsAdapter.CommentClickListener {
                 }
             }
         }
-        viewLifecycleOwner.lifecycleScope.launchWhenStarted {
-            combine(
-                viewModel.user,
-                viewModel.sorting,
-                viewModel.page,
-                viewModel.contentPreferences
-            ) { user, sorting, page, contentPreferences ->
-                postListAdapter.contentPreferences = contentPreferences
-                user?.let {
-                    viewModel.loadUserInfo(false)
-                    load(page, user, sorting)
+        launchRepeat(Lifecycle.State.STARTED) {
+            launch {
+                viewModel.user.collect { user ->
+                    user.takeIf { it.isNotBlank() }?.let {
+                        viewModel.loadUserInfo(false)
+                    }
                 }
-                binding.sortIcon.setSorting(sorting)
-            }.collect()
+            }
+
+            launch {
+                viewModel.contentPreferences.collect {
+                    postListAdapter.contentPreferences = it
+                }
+            }
+
+            launch {
+                viewModel.sorting.collect {
+                    binding.sortIcon.setSorting(it)
+                }
+            }
+
+            launch {
+                viewModel.postDataFlow.collectLatest {
+                    postListAdapter.submitData(it)
+                }
+            }
+
+            launch {
+                viewModel.commentDataFlow.collectLatest {
+                    commentListAdapter.submitData(it)
+                }
+            }
         }
     }
 
@@ -158,14 +171,17 @@ class UserFragment : BaseFragment(), UserCommentsAdapter.CommentClickListener {
             tab.setText(tabs[position].title)
         }.attach()
 
-        lifecycleScope.launchWhenStarted {
-            postListAdapter.onRefreshFromNetwork {
-                binding.viewPager.scrollToTop(0)
+        launchRepeat(Lifecycle.State.STARTED) {
+            launch {
+                postListAdapter.onRefreshFromNetwork {
+                    binding.viewPager.scrollToTop(0)
+                }
             }
-        }
-        lifecycleScope.launchWhenStarted {
-            commentListAdapter.onRefreshFromNetwork {
-                binding.viewPager.scrollToTop(1)
+
+            launch {
+                commentListAdapter.onRefreshFromNetwork {
+                    binding.viewPager.scrollToTop(1)
+                }
             }
         }
     }
@@ -197,31 +213,6 @@ class UserFragment : BaseFragment(), UserCommentsAdapter.CommentClickListener {
                 crossfade(true)
                 scale(Scale.FILL)
                 precision(Precision.AUTOMATIC)
-            }
-        }
-    }
-
-    private fun load(position: Int, user: String, sorting: Sorting) {
-        when (position) {
-            0 -> loadPosts(user, sorting)
-            1 -> loadComments(user, sorting)
-        }
-    }
-
-    private fun loadPosts(user: String, sorting: Sorting) {
-        userPostJob?.cancel()
-        userPostJob = viewLifecycleOwner.lifecycleScope.launch {
-            viewModel.loadAndFilterPosts(user, sorting).collectLatest {
-                postListAdapter.submitData(it)
-            }
-        }
-    }
-
-    private fun loadComments(user: String, sorting: Sorting) {
-        userCommentJob?.cancel()
-        userCommentJob = viewLifecycleOwner.lifecycleScope.launch {
-            viewModel.loadAndFilterComments(user, sorting).collectLatest {
-                commentListAdapter.submitData(it)
             }
         }
     }

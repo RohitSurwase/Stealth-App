@@ -6,40 +6,36 @@ import androidx.core.content.ContextCompat
 import androidx.paging.PagingData
 import androidx.paging.filter
 import androidx.paging.map
+import com.cosmos.unreddit.data.local.mapper.PostMapper2
+import com.cosmos.unreddit.data.model.Data
 import com.cosmos.unreddit.data.model.db.PostEntity
-import com.cosmos.unreddit.data.model.preferences.ContentPreferences
 import com.cosmos.unreddit.data.remote.api.reddit.model.Child
 import com.cosmos.unreddit.data.remote.api.reddit.model.Listing
 import com.cosmos.unreddit.data.remote.api.reddit.model.PostChild
 import com.cosmos.unreddit.data.remote.api.reddit.model.PostData
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.withContext
 
 object PostUtil {
     fun getProcessedUrl(url: String): String = url.replace("&amp;", "&")
 
-    // TODO: Move somewhere else
-    fun filterPosts(
-        posts: Flow<PagingData<PostEntity>>,
-        history: Flow<List<String>>,
-        saved: Flow<List<String>>,
-        contentPreferences: Flow<ContentPreferences>
-    ): Flow<PagingData<PostEntity>> {
-        return combine(
-            posts,
-            history,
-            saved,
-            contentPreferences
-        ) { _posts, _history, _saved, _contentPreferences ->
-            _posts.filter { post ->
-                _contentPreferences.showNsfw || !post.isOver18
-            }.map { post ->
+    suspend fun filterPosts(
+        pagingData: PagingData<Child>,
+        user: Data.User,
+        postMapper: PostMapper2,
+        defaultDispatcher: CoroutineDispatcher
+    ): PagingData<PostEntity> = withContext(defaultDispatcher) {
+        pagingData
+            .map { postMapper.dataToEntity((it as PostChild).data) }
+            .filter { post ->
+                user.contentPreferences.showNsfw || !post.isOver18
+            }
+            .map { post ->
                 post.apply {
-                    this.seen = _history.contains(post.id)
-                    this.saved = _saved.contains(post.id)
+                    seen = user.history.contains(post.id)
+                    saved = user.saved.contains(post.id)
                 }
             }
-        }
     }
 
     fun getAuthorGradientColor(

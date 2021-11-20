@@ -6,28 +6,25 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.isVisible
 import androidx.fragment.app.activityViewModels
-import androidx.lifecycle.asLiveData
-import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.Lifecycle
 import androidx.navigation.fragment.findNavController
 import androidx.paging.LoadState
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.cosmos.unreddit.R
 import com.cosmos.unreddit.UiViewModel
-import com.cosmos.unreddit.data.model.Sorting
 import com.cosmos.unreddit.data.repository.PostListRepository
 import com.cosmos.unreddit.databinding.FragmentPostBinding
 import com.cosmos.unreddit.ui.base.BaseFragment
 import com.cosmos.unreddit.ui.loadstate.NetworkLoadStateAdapter
 import com.cosmos.unreddit.ui.sort.SortFragment
 import com.cosmos.unreddit.util.extension.betterSmoothScrollToPosition
+import com.cosmos.unreddit.util.extension.launchRepeat
 import com.cosmos.unreddit.util.extension.onRefreshFromNetwork
 import com.cosmos.unreddit.util.extension.setNavigationListener
 import com.cosmos.unreddit.util.extension.setSortingListener
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -39,8 +36,6 @@ class PostListFragment : BaseFragment() {
 
     override val viewModel: PostListViewModel by activityViewModels()
     private val uiViewModel: UiViewModel by activityViewModels()
-
-    private var loadPostsJob: Job? = null
 
     private lateinit var postListAdapter: PostListAdapter
 
@@ -72,19 +67,31 @@ class PostListFragment : BaseFragment() {
     }
 
     private fun bindViewModel() {
-        viewLifecycleOwner.lifecycleScope.launchWhenStarted {
-            combine(
-                viewModel.subreddit,
-                viewModel.sorting,
-                viewModel.contentPreferences
-            ) { subreddit, sorting, contentPreferences ->
-                binding.infoRetry.hide()
-                postListAdapter.contentPreferences = contentPreferences
-                loadPosts(subreddit, sorting)
-            }.collect()
-        }
-        viewModel.sorting.asLiveData().observe(viewLifecycleOwner) {
-            binding.appBar.sortIcon.setSorting(it)
+        launchRepeat(Lifecycle.State.STARTED) {
+            launch {
+                viewModel.contentPreferences.collect {
+                    binding.infoRetry.hide()
+                    postListAdapter.contentPreferences = it
+                }
+            }
+
+            launch {
+                viewModel.fetchData.collect {
+                    binding.infoRetry.hide()
+                }
+            }
+
+            launch {
+                viewModel.postDataFlow.collectLatest {
+                    postListAdapter.submitData(it)
+                }
+            }
+
+            launch {
+                viewModel.sorting.collect {
+                    binding.appBar.sortIcon.setSorting(it)
+                }
+            }
         }
     }
 
@@ -110,7 +117,7 @@ class PostListFragment : BaseFragment() {
             )
         }
 
-        lifecycleScope.launchWhenStarted {
+        launchRepeat(Lifecycle.State.STARTED) {
             postListAdapter.onRefreshFromNetwork {
                 scrollToTop()
             }
@@ -126,15 +133,6 @@ class PostListFragment : BaseFragment() {
 
         setNavigationListener { showNavigation ->
             uiViewModel.setNavigationVisibility(showNavigation)
-        }
-    }
-
-    private fun loadPosts(subreddit: String, sorting: Sorting) {
-        loadPostsJob?.cancel()
-        loadPostsJob = viewLifecycleOwner.lifecycleScope.launch {
-            viewModel.loadAndFilterPosts(subreddit, sorting).collectLatest {
-                postListAdapter.submitData(it)
-            }
         }
     }
 

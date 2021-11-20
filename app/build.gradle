@@ -80,6 +80,7 @@ dependencies {
     implementation "androidx.fragment:fragment-ktx:$rootProject.fragment"
     implementation "androidx.lifecycle:lifecycle-livedata-ktx:$rootProject.lifecycle"
     implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$rootProject.lifecycle"
+    implementation "androidx.lifecycle:lifecycle-runtime-ktx:$rootProject.lifecycle"
     implementation "androidx.coordinatorlayout:coordinatorlayout:$rootProject.coordinatorlayout"
     implementation "androidx.viewpager2:viewpager2:$rootProject.viewpager2"
     implementation "androidx.preference:preference-ktx:$rootProject.preference"
