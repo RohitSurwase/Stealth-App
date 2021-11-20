@@ -28,7 +28,7 @@ import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.flatMapConcat
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.shareIn
@@ -56,7 +56,7 @@ class PostDetailsViewModel
     private val _singleThread: MutableLiveData<Boolean> = MutableLiveData(false)
     val singleThread: LiveData<Boolean> = _singleThread
 
-    private val savedCommentIds: Flow<List<String>> = currentProfile.flatMapConcat {
+    private val savedCommentIds: Flow<List<String>> = currentProfile.flatMapLatest {
         repository.getSavedCommentIds(it.id).distinctUntilChanged()
     }.shareIn(viewModelScope, SharingStarted.WhileSubscribed(), 1)
 

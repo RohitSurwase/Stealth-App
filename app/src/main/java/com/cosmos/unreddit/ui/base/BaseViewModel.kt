@@ -8,11 +8,10 @@ import com.cosmos.unreddit.data.model.db.Profile
 import com.cosmos.unreddit.data.model.db.Subscription
 import com.cosmos.unreddit.data.repository.PostListRepository
 import com.cosmos.unreddit.data.repository.PreferencesRepository
-import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.flatMapMerge
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.launch
@@ -22,24 +21,24 @@ open class BaseViewModel(
     private val postListRepository: PostListRepository
 ) : ViewModel() {
 
-    val currentProfile: Flow<Profile> = preferencesRepository.getCurrentProfile().map {
+    val currentProfile: SharedFlow<Profile> = preferencesRepository.getCurrentProfile().map {
         postListRepository.getProfile(it)
     }.shareIn(viewModelScope, SharingStarted.WhileSubscribed(), 1)
 
-    protected val historyIds: Flow<List<String>> = currentProfile.flatMapMerge {
-        postListRepository.getHistoryIds(it.id).distinctUntilChanged()
+    protected val historyIds: SharedFlow<List<String>> = currentProfile.flatMapLatest {
+        postListRepository.getHistoryIds(it.id)
     }.shareIn(viewModelScope, SharingStarted.WhileSubscribed(), 1)
 
-    protected val subscriptions: Flow<List<Subscription>> = currentProfile.flatMapMerge {
-        postListRepository.getSubscriptions(it.id).distinctUntilChanged()
+    protected val subscriptions: SharedFlow<List<Subscription>> = currentProfile.flatMapLatest {
+        postListRepository.getSubscriptions(it.id)
     }.shareIn(viewModelScope, SharingStarted.WhileSubscribed(), 1)
 
-    protected val subscriptionsNames: Flow<List<String>> = currentProfile.flatMapMerge {
-        postListRepository.getSubscriptionsNames(it.id).distinctUntilChanged()
+    protected val subscriptionsNames: SharedFlow<List<String>> = currentProfile.flatMapLatest {
+        postListRepository.getSubscriptionsNames(it.id)
     }.shareIn(viewModelScope, SharingStarted.WhileSubscribed(), 1)
 
-    protected val savedPostIds: Flow<List<String>> = currentProfile.flatMapMerge {
-        postListRepository.getSavedPostIds(it.id).distinctUntilChanged()
+    protected val savedPostIds: SharedFlow<List<String>> = currentProfile.flatMapLatest {
+        postListRepository.getSavedPostIds(it.id)
     }.shareIn(viewModelScope, SharingStarted.WhileSubscribed(), 1)
 
     fun toggleSavePost(post: PostEntity) {
