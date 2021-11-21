@@ -24,10 +24,10 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.distinctUntilChangedBy
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.flow.take
 import javax.inject.Inject
 
 @HiltViewModel
@@ -72,12 +72,12 @@ class PostListViewModel
         contentPreferences
     ) { history, saved, prefs ->
         Data.User(history, saved, prefs)
-    }
+    }.distinctUntilChangedBy { it.contentPreferences }
 
     init {
         postDataFlow = fetchData
             // Fetch last user data when search data is updated and merge them together
-            .flatMapLatest { fetchData -> userData.take(1).map { fetchData to it } }
+            .flatMapLatest { fetchData -> userData.map { fetchData to it } }
             .flatMapLatest { getPosts(it.first, it.second) }
             .cachedIn(viewModelScope)
     }

@@ -8,6 +8,7 @@ import com.cosmos.unreddit.data.model.db.Profile
 import com.cosmos.unreddit.data.model.db.Subscription
 import com.cosmos.unreddit.data.repository.PostListRepository
 import com.cosmos.unreddit.data.repository.PreferencesRepository
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.first
@@ -25,21 +26,21 @@ open class BaseViewModel(
         postListRepository.getProfile(it)
     }.shareIn(viewModelScope, SharingStarted.WhileSubscribed(), 1)
 
-    protected val historyIds: SharedFlow<List<String>> = currentProfile.flatMapLatest {
+    protected val historyIds: Flow<List<String>> = currentProfile.flatMapLatest {
         postListRepository.getHistoryIds(it.id)
-    }.shareIn(viewModelScope, SharingStarted.WhileSubscribed(), 1)
+    }
 
-    protected val subscriptions: SharedFlow<List<Subscription>> = currentProfile.flatMapLatest {
+    protected val subscriptions: Flow<List<Subscription>> = currentProfile.flatMapLatest {
         postListRepository.getSubscriptions(it.id)
-    }.shareIn(viewModelScope, SharingStarted.WhileSubscribed(), 1)
+    }
 
-    protected val subscriptionsNames: SharedFlow<List<String>> = currentProfile.flatMapLatest {
+    protected val subscriptionsNames: Flow<List<String>> = currentProfile.flatMapLatest {
         postListRepository.getSubscriptionsNames(it.id)
-    }.shareIn(viewModelScope, SharingStarted.WhileSubscribed(), 1)
+    }
 
-    protected val savedPostIds: SharedFlow<List<String>> = currentProfile.flatMapLatest {
+    protected val savedPostIds: Flow<List<String>> = currentProfile.flatMapLatest {
         postListRepository.getSavedPostIds(it.id)
-    }.shareIn(viewModelScope, SharingStarted.WhileSubscribed(), 1)
+    }
 
     fun toggleSavePost(post: PostEntity) {
         viewModelScope.launch {
