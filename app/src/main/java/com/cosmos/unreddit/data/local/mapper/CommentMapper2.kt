@@ -17,7 +17,9 @@ import com.cosmos.unreddit.util.extension.toMillis
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
+import javax.inject.Singleton
 
+@Singleton
 class CommentMapper2 @Inject constructor(
     @DispatchersModule.DefaultDispatcher defaultDispatcher: CoroutineDispatcher
 ) : Mapper<Child, Comment>(defaultDispatcher) {
