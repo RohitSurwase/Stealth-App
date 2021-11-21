@@ -8,7 +8,7 @@ import androidx.paging.cachedIn
 import androidx.paging.map
 import com.cosmos.unreddit.data.local.mapper.CommentMapper2
 import com.cosmos.unreddit.data.local.mapper.PostMapper2
-import com.cosmos.unreddit.data.local.mapper.UserMapper
+import com.cosmos.unreddit.data.local.mapper.UserMapper2
 import com.cosmos.unreddit.data.model.Comment
 import com.cosmos.unreddit.data.model.Data
 import com.cosmos.unreddit.data.model.Resource
@@ -50,6 +50,7 @@ class UserViewModel @Inject constructor(
     preferencesRepository: PreferencesRepository,
     private val postMapper: PostMapper2,
     private val commentMapper: CommentMapper2,
+    private val userMapper: UserMapper2,
     @DispatchersModule.DefaultDispatcher private val defaultDispatcher: CoroutineDispatcher
 ) : BaseViewModel(preferencesRepository, repository) {
 
@@ -157,7 +158,7 @@ class UserViewModel @Inject constructor(
                     else -> _about.value = Resource.Error()
                 }
             }.map {
-                UserMapper.dataToEntity(it.data)
+                userMapper.dataToEntity(it.data)
             }.collect {
                 _about.value = Resource.Success(it)
             }

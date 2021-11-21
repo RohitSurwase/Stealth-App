@@ -4,7 +4,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.cosmos.unreddit.data.local.mapper.CommentMapper
-import com.cosmos.unreddit.data.local.mapper.PostMapper
+import com.cosmos.unreddit.data.local.mapper.PostMapper2
 import com.cosmos.unreddit.data.model.Comment
 import com.cosmos.unreddit.data.model.Comment.CommentEntity
 import com.cosmos.unreddit.data.model.Resource
@@ -41,7 +41,8 @@ import javax.inject.Inject
 class PostDetailsViewModel
 @Inject constructor(
     preferencesRepository: PreferencesRepository,
-    private val repository: PostListRepository
+    private val repository: PostListRepository,
+    private val postMapper: PostMapper2
 ) : BaseViewModel(preferencesRepository, repository) {
 
     private val _coroutineContext = viewModelScope.coroutineContext + Dispatchers.IO
@@ -65,7 +66,7 @@ class PostDetailsViewModel
     private val _post: Flow<Resource<PostEntity>> = _listings.map {
         when (it) {
             is Resource.Success -> {
-                val data = PostMapper.dataToEntity(PostUtil.getPostData(it.data))
+                val data = postMapper.dataToEntity(PostUtil.getPostData(it.data))
                 Resource.Success(data)
             }
             is Resource.Loading -> Resource.Loading()

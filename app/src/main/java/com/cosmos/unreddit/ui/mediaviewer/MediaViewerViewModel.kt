@@ -4,7 +4,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.cosmos.unreddit.data.local.mapper.PostMapper
+import com.cosmos.unreddit.data.local.mapper.PostMapper2
 import com.cosmos.unreddit.data.model.GalleryMedia
 import com.cosmos.unreddit.data.model.GalleryMedia.Type
 import com.cosmos.unreddit.data.model.MediaType
@@ -34,7 +34,8 @@ class MediaViewerViewModel
     private val imgurRepository: ImgurRepository,
     private val streamableRepository: StreamableRepository,
     private val gfycatRepository: GfycatRepository,
-    private val postListRepository: PostListRepository
+    private val postListRepository: PostListRepository,
+    private val postMapper: PostMapper2
 ) : ViewModel() {
 
     private val _media: MutableLiveData<Resource<List<GalleryMedia>>> = MutableLiveData()
@@ -122,7 +123,7 @@ class MediaViewerViewModel
                     }.catch {
                         catchError(it)
                     }.map { listings ->
-                        PostMapper.dataToEntity(PostUtil.getPostData(listings)).gallery
+                        postMapper.dataToEntity(PostUtil.getPostData(listings)).gallery
                     }.collect {
                         setMedia(it)
                     }
