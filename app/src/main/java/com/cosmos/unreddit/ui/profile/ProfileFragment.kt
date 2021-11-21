@@ -7,6 +7,7 @@ import android.view.ViewGroup
 import androidx.fragment.app.FragmentTransaction
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.asLiveData
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
@@ -24,6 +25,7 @@ import com.cosmos.unreddit.ui.user.UserCommentsAdapter
 import com.cosmos.unreddit.util.RecyclerViewStateAdapter
 import com.cosmos.unreddit.util.extension.getListContent
 import com.cosmos.unreddit.util.extension.getRecyclerView
+import com.cosmos.unreddit.util.extension.launchRepeat
 import com.cosmos.unreddit.util.extension.scrollToTop
 import com.cosmos.unreddit.util.extension.setCommentListener
 import com.cosmos.unreddit.util.extension.setNavigationListener
@@ -142,13 +144,15 @@ class ProfileFragment : BaseFragment(), UserCommentsAdapter.CommentClickListener
     }
 
     private fun bindViewModel() {
-        viewLifecycleOwner.lifecycleScope.launchWhenStarted {
-            combine(viewModel.savedItems, viewModel.contentPreferences) { items, preferences ->
-                savedAdapter.run {
-                    contentPreferences = preferences
-                    submitList(items)
-                }
-            }.collect()
+        launchRepeat(Lifecycle.State.STARTED) {
+            launch {
+                combine(viewModel.savedItems, viewModel.contentPreferences) { items, preferences ->
+                    savedAdapter.run {
+                        contentPreferences = preferences
+                        submitList(items)
+                    }
+                }.collect()
+            }
         }
         viewModel.selectedProfile.asLiveData().observe(viewLifecycleOwner) {
             binding.profile = it

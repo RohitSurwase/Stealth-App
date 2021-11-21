@@ -9,6 +9,7 @@ import androidx.core.os.bundleOf
 import androidx.fragment.app.FragmentTransaction
 import androidx.fragment.app.setFragmentResult
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.asLiveData
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.navArgs
@@ -31,12 +32,14 @@ import com.cosmos.unreddit.ui.loadstate.ResourceStateAdapter
 import com.cosmos.unreddit.ui.mediaviewer.MediaViewerFragment
 import com.cosmos.unreddit.ui.sort.SortFragment
 import com.cosmos.unreddit.util.extension.betterSmoothScrollToPosition
+import com.cosmos.unreddit.util.extension.launchRepeat
 import com.cosmos.unreddit.util.extension.setCommentListener
 import com.cosmos.unreddit.util.extension.setSortingListener
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import javax.inject.Inject
 
@@ -72,7 +75,7 @@ class PostDetailsFragment :
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        lifecycleScope.launchWhenStarted {
+        lifecycleScope.launch {
             preferencesRepository.getContentPreferences().first()
         }
 
@@ -131,12 +134,14 @@ class PostDetailsFragment :
     }
 
     private fun bindViewModel() {
-        viewLifecycleOwner.lifecycleScope.launchWhenStarted {
-            combine(viewModel.permalink, viewModel.sorting) { permalink, _ ->
-                permalink?.let {
-                    viewModel.loadPost(false)
-                }
-            }.collect()
+        launchRepeat(Lifecycle.State.STARTED) {
+            launch {
+                combine(viewModel.permalink, viewModel.sorting) { permalink, _ ->
+                    permalink?.let {
+                        viewModel.loadPost(false)
+                    }
+                }.collect()
+            }
         }
         viewModel.post.asLiveData().observe(viewLifecycleOwner) {
             when (it) {
