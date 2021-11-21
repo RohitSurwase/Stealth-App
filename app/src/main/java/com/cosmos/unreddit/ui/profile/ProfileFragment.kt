@@ -50,9 +50,9 @@ class ProfileFragment : BaseFragment(), UserCommentsAdapter.CommentClickListener
     // Workaround for MotionLayout that prevents bottom navigation from being hidden on scroll
     private val onScrollListener = object : RecyclerView.OnScrollListener() {
         override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
-            if (dy > 0 && uiViewModel.navigationVisibility.value == true) {
+            if (dy > 0 && uiViewModel.navigationVisibility.value) {
                 uiViewModel.setNavigationVisibility(false)
-            } else if (dy < 0 && uiViewModel.navigationVisibility.value == false) {
+            } else if (dy < 0 && !uiViewModel.navigationVisibility.value) {
                 uiViewModel.setNavigationVisibility(true)
             }
         }
