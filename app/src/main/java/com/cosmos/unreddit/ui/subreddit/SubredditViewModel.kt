@@ -17,6 +17,7 @@ import com.cosmos.unreddit.data.repository.PreferencesRepository
 import com.cosmos.unreddit.di.DispatchersModule.DefaultDispatcher
 import com.cosmos.unreddit.ui.base.BaseViewModel
 import com.cosmos.unreddit.util.PostUtil
+import com.cosmos.unreddit.util.extension.latest
 import com.cosmos.unreddit.util.extension.updateValue
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
@@ -168,7 +169,7 @@ class SubredditViewModel @Inject constructor(
 
     fun toggleSubscription() {
         viewModelScope.launch {
-            currentProfile.replayCache.lastOrNull()?.let {
+            currentProfile.latest?.let {
                 if (isSubscribed.value) {
                     repository.unsubscribe(subredditName, it.id)
                 } else {

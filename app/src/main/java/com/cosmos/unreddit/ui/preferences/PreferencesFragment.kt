@@ -17,6 +17,7 @@ import com.cosmos.unreddit.UiViewModel
 import com.cosmos.unreddit.data.model.preferences.ContentPreferences.PreferencesKeys
 import com.cosmos.unreddit.data.model.preferences.UiPreferences
 import com.cosmos.unreddit.util.extension.getNavOptions
+import com.cosmos.unreddit.util.extension.latest
 import com.cosmos.unreddit.util.extension.launchRepeat
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dagger.hilt.android.AndroidEntryPoint
@@ -67,7 +68,7 @@ class PreferencesFragment : PreferenceFragmentCompat() {
             UiPreferences.PreferencesKeys.NIGHT_MODE.name
         )?.apply {
             setOnPreferenceClickListener {
-                viewModel.nightMode.replayCache.lastOrNull()?.let { mode ->
+                viewModel.nightMode.latest?.let { mode ->
                     UiPreferences.NightMode.asIndex(mode)?.let { index ->
                         showNightModeDialog(index)
                     }

@@ -24,6 +24,7 @@ import com.cosmos.unreddit.ui.user.UserCommentsAdapter
 import com.cosmos.unreddit.util.RecyclerViewStateAdapter
 import com.cosmos.unreddit.util.extension.getListContent
 import com.cosmos.unreddit.util.extension.getRecyclerView
+import com.cosmos.unreddit.util.extension.latest
 import com.cosmos.unreddit.util.extension.launchRepeat
 import com.cosmos.unreddit.util.extension.scrollToTop
 import com.cosmos.unreddit.util.extension.setCommentListener
@@ -91,7 +92,7 @@ class ProfileFragment : BaseFragment(), UserCommentsAdapter.CommentClickListener
     private fun initAppBar() {
         binding.usersCard.setOnClickListener {
             lifecycleScope.launch {
-                viewModel.currentProfile.replayCache.lastOrNull()?.let {
+                viewModel.currentProfile.latest?.let {
                     ProfileManagerDialogFragment.show(parentFragmentManager, it)
                 }
             }

@@ -14,6 +14,7 @@ import com.cosmos.unreddit.data.repository.PostListRepository
 import com.cosmos.unreddit.data.repository.PreferencesRepository
 import com.cosmos.unreddit.ui.base.BaseViewModel
 import com.cosmos.unreddit.util.PostUtil
+import com.cosmos.unreddit.util.extension.latest
 import com.cosmos.unreddit.util.extension.updateValue
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -149,7 +150,7 @@ class PostDetailsViewModel
 
     fun insertPostInHistory(postId: String) {
         viewModelScope.launch {
-            currentProfile.replayCache.lastOrNull()?.let {
+            currentProfile.latest?.let {
                 repository.insertPostInHistory(postId, it.id)
             }
         }
