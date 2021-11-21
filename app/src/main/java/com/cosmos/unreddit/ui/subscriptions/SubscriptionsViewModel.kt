@@ -1,7 +1,5 @@
 package com.cosmos.unreddit.ui.subscriptions
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.asLiveData
 import com.cosmos.unreddit.data.model.db.Subscription
 import com.cosmos.unreddit.data.repository.PostListRepository
 import com.cosmos.unreddit.data.repository.PreferencesRepository
@@ -10,6 +8,7 @@ import com.cosmos.unreddit.ui.base.BaseViewModel
 import com.cosmos.unreddit.util.extension.updateValue
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flowOn
@@ -24,12 +23,12 @@ class SubscriptionsViewModel @Inject constructor(
 
     private val _searchQuery: MutableStateFlow<String> = MutableStateFlow("")
 
-    val filteredSubscriptions: LiveData<List<Subscription>> = combine(
+    val filteredSubscriptions: Flow<List<Subscription>> = combine(
         subscriptions,
         _searchQuery
     ) { subscriptions, searchQuery ->
         subscriptions.filter { it.name.contains(searchQuery, ignoreCase = true) }
-    }.flowOn(defaultDispatcher).asLiveData()
+    }.flowOn(defaultDispatcher)
 
     fun setSearchQuery(query: String) {
         _searchQuery.updateValue(query)

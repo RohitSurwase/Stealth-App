@@ -88,42 +88,6 @@ class SubredditFragment : BaseFragment() {
     }
 
     private fun bindViewModel() {
-        viewModel.about.observe(viewLifecycleOwner) {
-            when (it) {
-                is Resource.Success -> bindInfo(it.data)
-                is Resource.Error -> handleError(it.code)
-                is Resource.Loading -> {
-                    // ignore
-                }
-            }
-        }
-        viewModel.isSubscribed.observe(
-            viewLifecycleOwner
-        ) { isSubscribed ->
-            with(bindingAbout.subredditSubscribeButton) {
-                visibility = View.VISIBLE
-                text = if (isSubscribed) {
-                    getString(R.string.subreddit_button_unsubscribe)
-                } else {
-                    getString(R.string.subreddit_button_subscribe)
-                }
-            }
-        }
-        viewModel.isDescriptionCollapsed.observe(
-            viewLifecycleOwner
-        ) { isCollapsed ->
-            // TODO: Animate layout changes
-            val maxHeight = if (isCollapsed) {
-                requireContext().toPixels(DESCRIPTION_MAX_HEIGHT).toInt()
-            } else {
-                Integer.MAX_VALUE
-            }
-            ConstraintSet().apply {
-                clone(bindingAbout.layoutRoot)
-                constrainMaxHeight(R.id.subreddit_public_description, maxHeight)
-                applyTo(bindingAbout.layoutRoot)
-            }
-        }
         launchRepeat(Lifecycle.State.STARTED) {
             launch {
                 viewModel.contentPreferences.collect {
@@ -154,6 +118,47 @@ class SubredditFragment : BaseFragment() {
             launch {
                 viewModel.postDataFlow.collectLatest {
                     postListAdapter.submitData(it)
+                }
+            }
+
+            launch {
+                viewModel.about.collect {
+                    when (it) {
+                        is Resource.Success -> bindInfo(it.data)
+                        is Resource.Error -> handleError(it.code)
+                        is Resource.Loading -> {
+                            // ignore
+                        }
+                    }
+                }
+            }
+
+            launch {
+                viewModel.isSubscribed.collect { isSubscribed ->
+                    with(bindingAbout.subredditSubscribeButton) {
+                        visibility = View.VISIBLE
+                        text = if (isSubscribed) {
+                            getString(R.string.subreddit_button_unsubscribe)
+                        } else {
+                            getString(R.string.subreddit_button_subscribe)
+                        }
+                    }
+                }
+            }
+
+            launch {
+                viewModel.isDescriptionCollapsed.collect { isCollapsed ->
+                    // TODO: Animate layout changes
+                    val maxHeight = if (isCollapsed) {
+                        requireContext().toPixels(DESCRIPTION_MAX_HEIGHT).toInt()
+                    } else {
+                        Integer.MAX_VALUE
+                    }
+                    ConstraintSet().apply {
+                        clone(bindingAbout.layoutRoot)
+                        constrainMaxHeight(R.id.subreddit_public_description, maxHeight)
+                        applyTo(bindingAbout.layoutRoot)
+                    }
                 }
             }
         }
@@ -235,10 +240,8 @@ class SubredditFragment : BaseFragment() {
     }
 
     private fun retry() {
-        viewModel.about.value?.let {
-            if (it is Resource.Error) {
-                viewModel.loadSubredditInfo(true)
-            }
+        if (viewModel.about.value is Resource.Error) {
+            viewModel.loadSubredditInfo(true)
         }
 
         postListAdapter.retry() // TODO: Don't retry if not necessary
@@ -258,7 +261,7 @@ class SubredditFragment : BaseFragment() {
         navigate(
             SubredditFragmentDirections.openSearch(
                 viewModel.subreddit.value,
-                viewModel.about.value?.dataValue?.icon
+                viewModel.about.value.dataValue?.icon
             )
         )
     }

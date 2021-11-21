@@ -1,7 +1,5 @@
 package com.cosmos.unreddit.ui.postdetails
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.cosmos.unreddit.data.local.mapper.CommentMapper
 import com.cosmos.unreddit.data.local.mapper.PostMapper2
@@ -21,16 +19,13 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
-import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import retrofit2.HttpException
@@ -51,12 +46,12 @@ class PostDetailsViewModel
     private val _permalink: MutableStateFlow<String?> = MutableStateFlow(null)
     val permalink: StateFlow<String?> = _permalink
 
-    private val _singleThread: MutableLiveData<Boolean> = MutableLiveData(false)
-    val singleThread: LiveData<Boolean> = _singleThread
+    private val _singleThread: MutableStateFlow<Boolean> = MutableStateFlow(false)
+    val singleThread: StateFlow<Boolean> = _singleThread
 
     private val savedCommentIds: Flow<List<String>> = currentProfile.flatMapLatest {
-        repository.getSavedCommentIds(it.id).distinctUntilChanged()
-    }.shareIn(viewModelScope, SharingStarted.WhileSubscribed(), 1)
+        repository.getSavedCommentIds(it.id)
+    }
 
     private val _listings: MutableStateFlow<Resource<List<Listing>>> =
         MutableStateFlow(Resource.Loading())
@@ -78,7 +73,7 @@ class PostDetailsViewModel
                 data.saved = savedIds.contains(data.id)
             }
         }
-    }.shareIn(viewModelScope, SharingStarted.WhileSubscribed(), 1)
+    }
 
     private val _comments: Flow<Resource<List<Comment>>> = _listings.map {
         when (it) {
@@ -93,7 +88,7 @@ class PostDetailsViewModel
             is Resource.Loading -> Resource.Loading()
             is Resource.Error -> Resource.Error(it.code, it.message)
         }
-    }.shareIn(viewModelScope, SharingStarted.WhileSubscribed(), 1)
+    }
 
     val comments: Flow<Resource<List<Comment>>> = combine(_comments, savedCommentIds) { comments, savedIds ->
         comments.apply {
@@ -122,7 +117,7 @@ class PostDetailsViewModel
 
     fun loadPost(forceUpdate: Boolean) {
         if (_permalink.value != null) {
-            if (_listings.value == null ||
+            if (_listings.value !is Resource.Success ||
                 _permalink.value != currentPermalink ||
                 _sorting.value != currentSorting ||
                 forceUpdate

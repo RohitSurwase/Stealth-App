@@ -12,6 +12,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -27,9 +28,11 @@ import com.cosmos.unreddit.databinding.FragmentMediaViewerBinding
 import com.cosmos.unreddit.ui.base.BaseFragment
 import com.cosmos.unreddit.util.extension.betterSmoothScrollToPosition
 import com.cosmos.unreddit.util.extension.getRecyclerView
+import com.cosmos.unreddit.util.extension.launchRepeat
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
@@ -92,20 +95,27 @@ class MediaViewerFragment : BaseFragment() {
     }
 
     private fun bindViewModel() {
-        viewerViewModel.media.observe(viewLifecycleOwner) {
-            binding.loadingCradle.isVisible = it is Resource.Loading
-            when (it) {
-                is Resource.Success -> bindMedia(it.data)
-                is Resource.Error -> handleError(it.code)
-                is Resource.Loading -> {
-                    // ignore
+        launchRepeat(Lifecycle.State.STARTED) {
+            launch {
+                viewerViewModel.media.collect {
+                    binding.loadingCradle.isVisible = it is Resource.Loading
+                    when (it) {
+                        is Resource.Success -> bindMedia(it.data)
+                        is Resource.Error -> handleError(it.code)
+                        is Resource.Loading -> {
+                            // ignore
+                        }
+                    }
                 }
             }
-        }
-        viewerViewModel.selectedPage.observe(viewLifecycleOwner) {
-            binding.listThumbnails.betterSmoothScrollToPosition(it)
-            thumbnailAdapter.selectItem(it)
-            binding.textPageCurrent.text = it.plus(1).toString()
+
+            launch {
+                viewerViewModel.selectedPage.collect {
+                    binding.listThumbnails.betterSmoothScrollToPosition(it)
+                    thumbnailAdapter.selectItem(it)
+                    binding.textPageCurrent.text = it.plus(1).toString()
+                }
+            }
         }
     }
 
@@ -212,7 +222,7 @@ class MediaViewerFragment : BaseFragment() {
     }
 
     private fun downloadMedia() {
-        val page = viewerViewModel.selectedPage.value ?: return
+        val page = viewerViewModel.selectedPage.value
 
         val media = mediaAdapter.getItem(page)
         media?.let {

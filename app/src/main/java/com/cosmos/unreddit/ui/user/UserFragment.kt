@@ -83,15 +83,6 @@ class UserFragment : BaseFragment(), UserCommentsAdapter.CommentClickListener {
     }
 
     private fun bindViewModel() {
-        viewModel.about.observe(viewLifecycleOwner) {
-            when (it) {
-                is Resource.Success -> bindInfo(it.data)
-                is Resource.Error -> handleError(it.code)
-                is Resource.Loading -> {
-                    // ignore
-                }
-            }
-        }
         launchRepeat(Lifecycle.State.STARTED) {
             launch {
                 viewModel.user.collect { user ->
@@ -122,6 +113,18 @@ class UserFragment : BaseFragment(), UserCommentsAdapter.CommentClickListener {
             launch {
                 viewModel.commentDataFlow.collectLatest {
                     commentListAdapter.submitData(it)
+                }
+            }
+
+            launch {
+                viewModel.about.collect {
+                    when (it) {
+                        is Resource.Success -> bindInfo(it.data)
+                        is Resource.Error -> handleError(it.code)
+                        is Resource.Loading -> {
+                            // ignore
+                        }
+                    }
                 }
             }
         }
@@ -226,10 +229,8 @@ class UserFragment : BaseFragment(), UserCommentsAdapter.CommentClickListener {
     }
 
     private fun retry() {
-        viewModel.about.value?.let {
-            if (it is Resource.Error) {
-                viewModel.loadUserInfo(true)
-            }
+        if (viewModel.about.value is Resource.Error) {
+            viewModel.loadUserInfo(true)
         }
         // TODO: Don't retry if not necessary
         postListAdapter.retry()

@@ -1,8 +1,5 @@
 package com.cosmos.unreddit.ui.subreddit
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
@@ -17,7 +14,7 @@ import com.cosmos.unreddit.data.model.preferences.ContentPreferences
 import com.cosmos.unreddit.data.remote.api.reddit.RedditApi
 import com.cosmos.unreddit.data.repository.PostListRepository
 import com.cosmos.unreddit.data.repository.PreferencesRepository
-import com.cosmos.unreddit.di.DispatchersModule
+import com.cosmos.unreddit.di.DispatchersModule.DefaultDispatcher
 import com.cosmos.unreddit.ui.base.BaseViewModel
 import com.cosmos.unreddit.util.PostUtil
 import com.cosmos.unreddit.util.extension.updateValue
@@ -32,6 +29,7 @@ import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.dropWhile
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
@@ -47,7 +45,7 @@ class SubredditViewModel @Inject constructor(
     preferencesRepository: PreferencesRepository,
     private val postMapper: PostMapper2,
     private val subredditMapper: SubredditMapper2,
-    @DispatchersModule.DefaultDispatcher private val defaultDispatcher: CoroutineDispatcher
+    @DefaultDispatcher private val defaultDispatcher: CoroutineDispatcher
 ) : BaseViewModel(preferencesRepository, repository) {
 
     val contentPreferences: Flow<ContentPreferences> =
@@ -59,24 +57,31 @@ class SubredditViewModel @Inject constructor(
     private val _subreddit: MutableStateFlow<String> = MutableStateFlow("")
     val subreddit: StateFlow<String> = _subreddit
 
-    private val _about: MutableLiveData<Resource<SubredditEntity>> = MutableLiveData()
-    val about: LiveData<Resource<SubredditEntity>> = _about
+    private val _about: MutableStateFlow<Resource<SubredditEntity>> =
+        MutableStateFlow(Resource.Loading())
+    val about: StateFlow<Resource<SubredditEntity>> = _about
 
-    private val _isDescriptionCollapsed = MutableLiveData(true)
-    val isDescriptionCollapsed: LiveData<Boolean> get() = _isDescriptionCollapsed
+    private val _isDescriptionCollapsed = MutableStateFlow(true)
+    val isDescriptionCollapsed: StateFlow<Boolean> = _isDescriptionCollapsed
 
-    val isSubscribed: LiveData<Boolean> = combine(
+    val isSubscribed: StateFlow<Boolean> = combine(
         _subreddit,
         subscriptionsNames
     ) { _subreddit, names ->
         names.any { it.equals(_subreddit, ignoreCase = true) }
-    }.asLiveData()
+    }.flowOn(
+        defaultDispatcher
+    ).stateIn(
+        viewModelScope,
+        SharingStarted.WhileSubscribed(5000),
+        false
+    )
 
     private val subredditName: String
-        get() = about.value?.dataValue?.displayName ?: subreddit.value
+        get() = about.value.dataValue?.displayName ?: subreddit.value
 
     private val icon: String?
-        get() = about.value?.dataValue?.icon
+        get() = about.value.dataValue?.icon
 
     val postDataFlow: Flow<PagingData<PostEntity>>
 
@@ -119,7 +124,7 @@ class SubredditViewModel @Inject constructor(
 
     fun loadSubredditInfo(forceUpdate: Boolean) {
         if (_subreddit.value.isNotBlank()) {
-            if (_about.value == null || forceUpdate) {
+            if (_about.value !is Resource.Success || forceUpdate) {
                 loadSubredditInfo(_subreddit.value)
             }
         } else {
@@ -158,13 +163,13 @@ class SubredditViewModel @Inject constructor(
     }
 
     fun toggleDescriptionCollapsed() {
-        _isDescriptionCollapsed.value = !_isDescriptionCollapsed.value!!
+        _isDescriptionCollapsed.value = !_isDescriptionCollapsed.value
     }
 
     fun toggleSubscription() {
         viewModelScope.launch {
             currentProfile.replayCache.lastOrNull()?.let {
-                if (isSubscribed.value == true) {
+                if (isSubscribed.value) {
                     repository.unsubscribe(subredditName, it.id)
                 } else {
                     repository.subscribe(subredditName, it.id, icon)

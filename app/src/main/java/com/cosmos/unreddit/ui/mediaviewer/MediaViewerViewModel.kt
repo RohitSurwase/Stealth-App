@@ -1,7 +1,5 @@
 package com.cosmos.unreddit.ui.mediaviewer
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.cosmos.unreddit.data.local.mapper.PostMapper2
@@ -21,6 +19,8 @@ import com.cosmos.unreddit.util.PostUtil
 import com.cosmos.unreddit.util.extension.updateValue
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.flowOn
@@ -42,14 +42,15 @@ class MediaViewerViewModel
     @DefaultDispatcher private val defaultDispatcher: CoroutineDispatcher
 ) : ViewModel() {
 
-    private val _media: MutableLiveData<Resource<List<GalleryMedia>>> = MutableLiveData()
-    val media: LiveData<Resource<List<GalleryMedia>>> get() = _media
+    private val _media: MutableStateFlow<Resource<List<GalleryMedia>>> =
+        MutableStateFlow(Resource.Loading())
+    val media: StateFlow<Resource<List<GalleryMedia>>> = _media
 
-    private val _selectedPage: MutableLiveData<Int> = MutableLiveData()
-    val selectedPage: LiveData<Int> get() = _selectedPage
+    private val _selectedPage: MutableStateFlow<Int> = MutableStateFlow(0)
+    val selectedPage: StateFlow<Int> = _selectedPage
 
     fun loadMedia(link: String, mediaType: MediaType, forceUpdate: Boolean = false) {
-        if (_media.value == null || forceUpdate) {
+        if (_media.value !is Resource.Success || forceUpdate) {
             retrieveMedia(link, mediaType)
         }
     }

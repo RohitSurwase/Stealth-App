@@ -6,6 +6,7 @@ import androidx.activity.OnBackPressedCallback
 import androidx.activity.addCallback
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.Lifecycle
 import androidx.navigation.NavOptions
 import androidx.navigation.fragment.findNavController
 import androidx.preference.Preference
@@ -16,8 +17,11 @@ import com.cosmos.unreddit.UiViewModel
 import com.cosmos.unreddit.data.model.preferences.ContentPreferences.PreferencesKeys
 import com.cosmos.unreddit.data.model.preferences.UiPreferences
 import com.cosmos.unreddit.util.extension.getNavOptions
+import com.cosmos.unreddit.util.extension.launchRepeat
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class PreferencesFragment : PreferenceFragmentCompat() {
@@ -63,7 +67,7 @@ class PreferencesFragment : PreferenceFragmentCompat() {
             UiPreferences.PreferencesKeys.NIGHT_MODE.name
         )?.apply {
             setOnPreferenceClickListener {
-                viewModel.nightMode.value?.let { mode ->
+                viewModel.nightMode.replayCache.lastOrNull()?.let { mode ->
                     UiPreferences.NightMode.asIndex(mode)?.let { index ->
                         showNightModeDialog(index)
                     }
@@ -108,22 +112,35 @@ class PreferencesFragment : PreferenceFragmentCompat() {
     }
 
     private fun bindViewModel() {
-        viewModel.nightMode.observe(viewLifecycleOwner) {
-            UiPreferences.NightMode.asIndex(it)?.let { index ->
-                val nightModeArray = resources.getStringArray(R.array.pref_night_mode_labels)
-                nightModePreference?.summary = nightModeArray.getOrNull(index)
+        launchRepeat(Lifecycle.State.STARTED) {
+            launch {
+                viewModel.nightMode.collect {
+                    UiPreferences.NightMode.asIndex(it)?.let { index ->
+                        val nightModeArray = resources.getStringArray(R.array.pref_night_mode_labels)
+                        nightModePreference?.summary = nightModeArray.getOrNull(index)
+                    }
+                }
+            }
+
+            launch {
+                viewModel.showNsfw.collect { showNsfw ->
+                    showNsfwPreference?.isChecked = showNsfw
+                    showNsfwPreviewPreference?.isEnabled = showNsfw
+                }
+            }
+
+            launch {
+                viewModel.showNsfwPreview.collect { showNsfwPreview ->
+                    showNsfwPreviewPreference?.isChecked = showNsfwPreview
+                }
+            }
+
+            launch {
+                viewModel.showSpoilerPreview.collect { showSpoilerPreview ->
+                    showSpoilerPreviewPreference?.isChecked = showSpoilerPreview
+                }
             }
         }
-        viewModel.showNsfw.observe(viewLifecycleOwner, { showNsfw ->
-            showNsfwPreference?.isChecked = showNsfw
-            showNsfwPreviewPreference?.isEnabled = showNsfw
-        })
-        viewModel.showNsfwPreview.observe(viewLifecycleOwner, { showNsfwPreview ->
-            showNsfwPreviewPreference?.isChecked = showNsfwPreview
-        })
-        viewModel.showSpoilerPreview.observe(viewLifecycleOwner, { showSpoilerPreview ->
-            showSpoilerPreviewPreference?.isChecked = showSpoilerPreview
-        })
     }
 
     private fun showNightModeDialog(checkedItem: Int) {

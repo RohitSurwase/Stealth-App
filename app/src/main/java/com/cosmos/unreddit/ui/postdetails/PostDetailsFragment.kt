@@ -6,11 +6,11 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.os.bundleOf
+import androidx.core.view.isVisible
 import androidx.fragment.app.FragmentTransaction
 import androidx.fragment.app.setFragmentResult
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.asLiveData
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.ConcatAdapter
@@ -142,37 +142,46 @@ class PostDetailsFragment :
                     }
                 }.collect()
             }
-        }
-        viewModel.post.asLiveData().observe(viewLifecycleOwner) {
-            when (it) {
-                is Resource.Success -> bindPost(it.data, false)
-                else -> {
-                    // ignore
+
+            launch {
+                viewModel.post.collect {
+                    when (it) {
+                        is Resource.Success -> bindPost(it.data, false)
+                        else -> {
+                            // ignore
+                        }
+                    }
                 }
             }
-        }
-        viewModel.comments.asLiveData().observe(viewLifecycleOwner) {
-            resourceStateAdapter.resource = it
-            when (it) {
-                is Resource.Success -> commentAdapter.submitData(it.data)
-                else -> {
-                    // ignore
+
+            launch {
+                viewModel.comments.collect {
+                    resourceStateAdapter.resource = it
+                    when (it) {
+                        is Resource.Success -> commentAdapter.submitData(it.data)
+                        else -> {
+                            // ignore
+                        }
+                    }
                 }
             }
-        }
-        viewModel.sorting.asLiveData().observe(
-            viewLifecycleOwner,
-            {
-                binding.appBar.sortIcon.setSorting(it)
+
+            launch {
+                viewModel.sorting.collect {
+                    binding.appBar.sortIcon.setSorting(it)
+                }
             }
-        )
-        viewModel.singleThread.observe(viewLifecycleOwner) { isSingleThread ->
-            val transition = Slide(Gravity.TOP).apply {
-                duration = 500
-                addTarget(binding.singleThreadLayout)
+
+            launch {
+                viewModel.singleThread.collect { isSingleThread ->
+                    val transition = Slide(Gravity.TOP).apply {
+                        duration = 500
+                        addTarget(binding.singleThreadLayout)
+                    }
+                    TransitionManager.beginDelayedTransition(binding.root, transition)
+                    binding.singleThreadLayout.isVisible = isSingleThread
+                }
             }
-            TransitionManager.beginDelayedTransition(binding.root, transition)
-            binding.singleThreadLayout.visibility = if (isSingleThread) View.VISIBLE else View.GONE
         }
     }
 

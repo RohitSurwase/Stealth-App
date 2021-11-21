@@ -8,7 +8,6 @@ import androidx.fragment.app.FragmentTransaction
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.asLiveData
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.RecyclerView
@@ -153,9 +152,12 @@ class ProfileFragment : BaseFragment(), UserCommentsAdapter.CommentClickListener
                     }
                 }.collect()
             }
-        }
-        viewModel.selectedProfile.asLiveData().observe(viewLifecycleOwner) {
-            binding.profile = it
+
+            launch {
+                viewModel.selectedProfile.collect {
+                    binding.profile = it
+                }
+            }
         }
     }
 

@@ -1,7 +1,5 @@
 package com.cosmos.unreddit.ui.user
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
@@ -32,7 +30,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.dropWhile
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOn
@@ -67,11 +64,11 @@ class UserViewModel @Inject constructor(
     private val _page: MutableStateFlow<Int> = MutableStateFlow(0)
     val page: StateFlow<Int> get() = _page
 
-    private val _about: MutableLiveData<Resource<User>> = MutableLiveData()
-    val about: LiveData<Resource<User>> = _about
+    private val _about: MutableStateFlow<Resource<User>> = MutableStateFlow(Resource.Loading())
+    val about: StateFlow<Resource<User>> = _about
 
     private val savedCommentIds: Flow<List<String>> = currentProfile.flatMapLatest {
-        repository.getSavedCommentIds(it.id).distinctUntilChanged()
+        repository.getSavedCommentIds(it.id)
     }
 
     val postDataFlow: Flow<PagingData<PostEntity>>
@@ -141,7 +138,7 @@ class UserViewModel @Inject constructor(
 
     fun loadUserInfo(forceUpdate: Boolean) {
         if (_user.value.isNotBlank()) {
-            if (_about.value == null || forceUpdate) {
+            if (_about.value !is Resource.Success || forceUpdate) {
                 loadUserInfo(_user.value)
             }
         } else {

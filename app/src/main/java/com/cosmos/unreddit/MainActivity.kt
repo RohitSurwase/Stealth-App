@@ -4,6 +4,9 @@ import android.os.Bundle
 import android.view.View
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.flowWithLifecycle
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination
 import androidx.navigation.fragment.NavHostFragment
@@ -14,6 +17,8 @@ import com.cosmos.unreddit.databinding.ActivityMainBinding
 import com.google.android.material.shape.CornerFamily
 import com.google.android.material.shape.MaterialShapeDrawable
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity(), NavController.OnDestinationChangedListener {
@@ -34,7 +39,11 @@ class MainActivity : AppCompatActivity(), NavController.OnDestinationChangedList
 
         initNavigation()
 
-        viewModel.navigationVisibility.observe(this, this::showNavigation)
+        lifecycleScope.launch {
+            viewModel.navigationVisibility
+                .flowWithLifecycle(lifecycle, Lifecycle.State.STARTED)
+                .collect(this@MainActivity::showNavigation)
+        }
     }
 
     private fun initNavigation() {
