@@ -3,6 +3,8 @@ package com.cosmos.unreddit
 import android.app.Application
 import android.os.Build
 import androidx.appcompat.app.AppCompatDelegate
+import androidx.hilt.work.HiltWorkerFactory
+import androidx.work.Configuration
 import coil.ImageLoader
 import coil.ImageLoaderFactory
 import coil.decode.GifDecoder
@@ -16,10 +18,13 @@ import okhttp3.OkHttpClient
 import javax.inject.Inject
 
 @HiltAndroidApp
-class UnredditApplication : Application(), ImageLoaderFactory {
+class UnredditApplication : Application(), ImageLoaderFactory, Configuration.Provider {
 
     @Inject
     lateinit var preferencesRepository: PreferencesRepository
+
+    @Inject
+    lateinit var workerFactory: HiltWorkerFactory
 
     override fun onCreate() {
         super.onCreate()
@@ -45,6 +50,12 @@ class UnredditApplication : Application(), ImageLoaderFactory {
                     .cache(CoilUtils.createDefaultCache(applicationContext))
                     .build()
             }
+            .build()
+    }
+
+    override fun getWorkManagerConfiguration(): Configuration {
+        return Configuration.Builder()
+            .setWorkerFactory(workerFactory)
             .build()
     }
 }

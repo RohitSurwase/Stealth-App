@@ -75,6 +75,7 @@ dependencies {
     kapt "androidx.hilt:hilt-compiler:$rootProject.hilt"
 
     implementation "androidx.hilt:hilt-navigation-fragment:$rootProject.hilt"
+    implementation "androidx.hilt:hilt-work:$rootProject.hilt"
 
     implementation "androidx.core:core-ktx:$rootProject.core"
     implementation "androidx.appcompat:appcompat:$rootProject.appCompat"
