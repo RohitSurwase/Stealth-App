@@ -5,10 +5,12 @@ import com.cosmos.unreddit.data.model.ProfileItem
 import com.cosmos.unreddit.data.model.db.Profile
 import com.cosmos.unreddit.data.repository.PostListRepository
 import com.cosmos.unreddit.data.repository.PreferencesRepository
+import com.cosmos.unreddit.di.DispatchersModule.DefaultDispatcher
 import com.cosmos.unreddit.ui.base.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -16,20 +18,23 @@ import javax.inject.Inject
 @HiltViewModel
 class ProfileManagerViewModel @Inject constructor(
     private val preferencesRepository: PreferencesRepository,
-    private val repository: PostListRepository
+    private val repository: PostListRepository,
+    @DefaultDispatcher private val defaultDispatcher: CoroutineDispatcher
 ) : BaseViewModel(preferencesRepository, repository) {
 
-    val profiles: Flow<List<ProfileItem>> = repository.getAllProfiles().map { list ->
-        list.map {
-            it.canDelete = list.size > 1
-            ProfileItem.UserProfile(it)
+    val profiles: Flow<List<ProfileItem>> = repository.getAllProfiles()
+        .map { list ->
+            list.map {
+                ProfileItem.UserProfile(it.apply { canDelete = list.size > 1 })
+            }
         }
-    }.map {
-        mutableListOf<ProfileItem>().apply {
-            addAll(it)
-            add(ProfileItem.NewProfile)
+        .map {
+            mutableListOf<ProfileItem>().apply {
+                addAll(it)
+                add(ProfileItem.NewProfile)
+            }
         }
-    }
+        .flowOn(defaultDispatcher)
 
     fun selectProfile(profile: Profile) {
         viewModelScope.launch {
@@ -44,13 +49,13 @@ class ProfileManagerViewModel @Inject constructor(
     }
 
     fun deleteProfile(profile: Profile) {
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch {
             repository.deleteProfile(profile.id)
         }
     }
 
     fun renameProfile(profile: Profile, newName: String) {
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch {
             val updatedProfile = profile.copy(name = newName)
             repository.updateProfile(updatedProfile)
         }

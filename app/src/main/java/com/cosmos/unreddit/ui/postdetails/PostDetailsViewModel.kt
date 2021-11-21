@@ -45,8 +45,6 @@ class PostDetailsViewModel
     private val postMapper: PostMapper2
 ) : BaseViewModel(preferencesRepository, repository) {
 
-    private val _coroutineContext = viewModelScope.coroutineContext + Dispatchers.IO
-
     private val _sorting: MutableStateFlow<Sorting> = MutableStateFlow(DEFAULT_SORTING)
     val sorting: StateFlow<Sorting> = _sorting
 
@@ -155,7 +153,7 @@ class PostDetailsViewModel
     }
 
     fun insertPostInHistory(postId: String) {
-        viewModelScope.launch(_coroutineContext) {
+        viewModelScope.launch {
             currentProfile.replayCache.lastOrNull()?.let {
                 repository.insertPostInHistory(postId, it.id)
             }

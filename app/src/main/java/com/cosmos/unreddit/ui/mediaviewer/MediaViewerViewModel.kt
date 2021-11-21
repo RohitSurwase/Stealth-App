@@ -15,12 +15,15 @@ import com.cosmos.unreddit.data.repository.GfycatRepository
 import com.cosmos.unreddit.data.repository.ImgurRepository
 import com.cosmos.unreddit.data.repository.PostListRepository
 import com.cosmos.unreddit.data.repository.StreamableRepository
+import com.cosmos.unreddit.di.DispatchersModule.DefaultDispatcher
 import com.cosmos.unreddit.util.LinkUtil
 import com.cosmos.unreddit.util.PostUtil
 import com.cosmos.unreddit.util.extension.updateValue
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
@@ -35,7 +38,8 @@ class MediaViewerViewModel
     private val streamableRepository: StreamableRepository,
     private val gfycatRepository: GfycatRepository,
     private val postListRepository: PostListRepository,
-    private val postMapper: PostMapper2
+    private val postMapper: PostMapper2,
+    @DefaultDispatcher private val defaultDispatcher: CoroutineDispatcher
 ) : ViewModel() {
 
     private val _media: MutableLiveData<Resource<List<GalleryMedia>>> = MutableLiveData()
@@ -100,21 +104,26 @@ class MediaViewerViewModel
                 }
                 MediaType.IMGUR_ALBUM, MediaType.IMGUR_GALLERY -> {
                     val albumId = LinkUtil.getAlbumIdFromImgurLink(link)
-                    imgurRepository.getAlbum(albumId).onStart {
-                        _media.value = Resource.Loading()
-                    }.catch {
-                        catchError(it)
-                    }.map { album ->
-                        album.data.images.map { image ->
-                            GalleryMedia(
-                                if (image.preferVideo) Type.VIDEO else Type.IMAGE,
-                                LinkUtil.getUrlFromImgurImage(image),
-                                description = image.description
-                            )
+                    imgurRepository.getAlbum(albumId)
+                        .map { album ->
+                            album.data.images.map { image ->
+                                GalleryMedia(
+                                    if (image.preferVideo) Type.VIDEO else Type.IMAGE,
+                                    LinkUtil.getUrlFromImgurImage(image),
+                                    description = image.description
+                                )
+                            }
                         }
-                    }.collect {
-                        setMedia(it)
-                    }
+                        .flowOn(defaultDispatcher)
+                        .onStart {
+                            _media.value = Resource.Loading()
+                        }
+                        .catch {
+                            catchError(it)
+                        }
+                        .collect {
+                            setMedia(it)
+                        }
                 }
                 MediaType.REDDIT_GALLERY -> {
                     val permalink = LinkUtil.getPermalinkFromMediaUrl(link)

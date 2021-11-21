@@ -35,6 +35,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.dropWhile
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
@@ -135,6 +136,7 @@ class UserViewModel @Inject constructor(
                         }
                     }
             }
+            .flowOn(defaultDispatcher)
     }
 
     fun loadUserInfo(forceUpdate: Boolean) {

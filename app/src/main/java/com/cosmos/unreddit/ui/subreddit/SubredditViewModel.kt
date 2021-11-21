@@ -23,7 +23,6 @@ import com.cosmos.unreddit.util.PostUtil
 import com.cosmos.unreddit.util.extension.updateValue
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -50,8 +49,6 @@ class SubredditViewModel @Inject constructor(
     private val subredditMapper: SubredditMapper2,
     @DispatchersModule.DefaultDispatcher private val defaultDispatcher: CoroutineDispatcher
 ) : BaseViewModel(preferencesRepository, repository) {
-
-    private val _coroutineContext = viewModelScope.coroutineContext + Dispatchers.IO
 
     val contentPreferences: Flow<ContentPreferences> =
         preferencesRepository.getContentPreferences()
@@ -165,7 +162,7 @@ class SubredditViewModel @Inject constructor(
     }
 
     fun toggleSubscription() {
-        viewModelScope.launch(_coroutineContext) {
+        viewModelScope.launch {
             currentProfile.replayCache.lastOrNull()?.let {
                 if (isSubscribed.value == true) {
                     repository.unsubscribe(subredditName, it.id)
