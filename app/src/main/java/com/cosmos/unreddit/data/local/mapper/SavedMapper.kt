@@ -6,6 +6,7 @@ import com.cosmos.unreddit.data.model.SavedItem
 import com.cosmos.unreddit.data.model.db.PostEntity
 import com.cosmos.unreddit.util.HtmlParser
 
+@Deprecated("Use SavedMapper2 instead.")
 object SavedMapper {
 
     suspend fun dataToEntity(data: PostEntity, htmlParser: HtmlParser = HtmlParser()): SavedItem {
