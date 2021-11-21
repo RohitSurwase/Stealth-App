@@ -24,7 +24,7 @@ class CommentMapper2 @Inject constructor(
     @DispatchersModule.DefaultDispatcher defaultDispatcher: CoroutineDispatcher
 ) : Mapper<Child, Comment>(defaultDispatcher) {
 
-    private val htmlParser: HtmlParser = HtmlParser()
+    private val htmlParser: HtmlParser = HtmlParser(defaultDispatcher)
 
     override suspend fun toEntity(from: Child): Comment {
         throw UnsupportedOperationException()

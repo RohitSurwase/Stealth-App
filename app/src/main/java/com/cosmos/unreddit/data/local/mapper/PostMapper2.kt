@@ -22,7 +22,7 @@ class PostMapper2 @Inject constructor(
     @DefaultDispatcher defaultDispatcher: CoroutineDispatcher
 ) : Mapper<PostData, PostEntity>(defaultDispatcher) {
 
-    private val htmlParser: HtmlParser = HtmlParser()
+    private val htmlParser: HtmlParser = HtmlParser(defaultDispatcher)
 
     override suspend fun toEntity(from: PostData): PostEntity {
         with(from) {

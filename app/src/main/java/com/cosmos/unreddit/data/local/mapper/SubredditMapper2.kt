@@ -13,7 +13,7 @@ class SubredditMapper2 @Inject constructor(
     @DispatchersModule.DefaultDispatcher defaultDispatcher: CoroutineDispatcher
 ) : Mapper<AboutData, SubredditEntity>(defaultDispatcher) {
 
-    private val htmlParser: HtmlParser = HtmlParser()
+    private val htmlParser: HtmlParser = HtmlParser(defaultDispatcher)
 
     override suspend fun toEntity(from: AboutData): SubredditEntity {
         with(from) {

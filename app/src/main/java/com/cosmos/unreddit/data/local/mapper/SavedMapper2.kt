@@ -16,7 +16,7 @@ class SavedMapper2 @Inject constructor(
     @DispatchersModule.DefaultDispatcher defaultDispatcher: CoroutineDispatcher
 ) : Mapper<Any, SavedItem>(defaultDispatcher) {
 
-    private val htmlParser: HtmlParser = HtmlParser()
+    private val htmlParser: HtmlParser = HtmlParser(defaultDispatcher)
 
     override suspend fun toEntity(from: Any): SavedItem {
         throw UnsupportedOperationException()
