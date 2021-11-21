@@ -11,7 +11,6 @@ import com.cosmos.unreddit.data.repository.PreferencesRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.shareIn
@@ -44,7 +43,7 @@ open class BaseViewModel(
 
     fun toggleSavePost(post: PostEntity) {
         viewModelScope.launch {
-            currentProfile.first().let {
+            currentProfile.replayCache.lastOrNull()?.let {
                 if (post.saved) {
                     postListRepository.unsavePost(post, it.id)
                 } else {
@@ -56,7 +55,7 @@ open class BaseViewModel(
 
     fun toggleSaveComment(comment: Comment.CommentEntity) {
         viewModelScope.launch {
-            currentProfile.first().let {
+            currentProfile.replayCache.lastOrNull()?.let {
                 if (comment.saved) {
                     postListRepository.unsaveComment(comment, it.id)
                 } else {

@@ -27,7 +27,6 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
@@ -156,7 +155,9 @@ class PostDetailsViewModel
 
     fun insertPostInHistory(postId: String) {
         viewModelScope.launch(_coroutineContext) {
-            currentProfile.first().let { repository.insertPostInHistory(postId, it.id) }
+            currentProfile.replayCache.lastOrNull()?.let {
+                repository.insertPostInHistory(postId, it.id)
+            }
         }
     }
 

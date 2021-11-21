@@ -32,7 +32,6 @@ import com.google.android.material.tabs.TabLayoutMediator
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
@@ -91,7 +90,7 @@ class ProfileFragment : BaseFragment(), UserCommentsAdapter.CommentClickListener
     private fun initAppBar() {
         binding.usersCard.setOnClickListener {
             lifecycleScope.launch {
-                viewModel.currentProfile.first().let {
+                viewModel.currentProfile.replayCache.lastOrNull()?.let {
                     ProfileManagerDialogFragment.show(parentFragmentManager, it)
                 }
             }

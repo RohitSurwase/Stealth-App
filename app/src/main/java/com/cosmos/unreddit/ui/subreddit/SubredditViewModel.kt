@@ -32,7 +32,6 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.dropWhile
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
@@ -167,7 +166,7 @@ class SubredditViewModel @Inject constructor(
 
     fun toggleSubscription() {
         viewModelScope.launch(_coroutineContext) {
-            currentProfile.first().let {
+            currentProfile.replayCache.lastOrNull()?.let {
                 if (isSubscribed.value == true) {
                     repository.unsubscribe(subredditName, it.id)
                 } else {
