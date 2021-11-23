@@ -38,7 +38,7 @@ class CommentMapper2 @Inject constructor(
             Comment.CommentEntity(
                 totalAwards,
                 linkId,
-                dataToEntities(replies?.data?.children),
+                dataToEntities(replies?.data?.children, null),
                 author,
                 scoreString,
                 awardings.sortedByDescending { it.count }.map { Award(it.count, it.getIcon()) },
@@ -91,7 +91,7 @@ class CommentMapper2 @Inject constructor(
 
     suspend fun dataToEntities(
         data: List<Child>?,
-        parent: PostData? = null
+        parent: PostData?
     ): MutableList<Comment> = withContext(defaultDispatcher) {
         data
             ?.filter {

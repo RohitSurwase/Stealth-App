@@ -9,12 +9,11 @@ import android.view.animation.AnimationUtils
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
-import androidx.lifecycle.LifecycleOwner
-import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.cosmos.unreddit.R
-import com.cosmos.unreddit.data.local.mapper.CommentMapper
+import com.cosmos.unreddit.data.local.mapper.CommentMapper2
 import com.cosmos.unreddit.data.model.Comment
 import com.cosmos.unreddit.data.model.Comment.CommentEntity
 import com.cosmos.unreddit.data.model.Comment.MoreEntity
@@ -23,27 +22,31 @@ import com.cosmos.unreddit.databinding.ItemCommentBinding
 import com.cosmos.unreddit.databinding.ItemMoreBinding
 import com.cosmos.unreddit.ui.common.widget.RedditView
 import com.cosmos.unreddit.util.extension.blurText
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class CommentAdapter(
     context: Context,
+    mainImmediateDispatcher: CoroutineDispatcher,
+    private val defaultDispatcher: CoroutineDispatcher,
     private val repository: PostListRepository,
-    private val viewLifecycleOwner: LifecycleOwner,
+    private val commentMapper: CommentMapper2,
     private val onLinkClickListener: RedditView.OnLinkClickListener? = null,
     private val onCommentLongClick: (CommentEntity) -> Unit
-) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+) : ListAdapter<Comment, RecyclerView.ViewHolder>(COMMENT_COMPARATOR) {
 
-    private val visibleComments = mutableListOf<Comment>()
     var linkId: String? = null
-        set(value) {
-            if (field != value) {
-                field = value
-            }
-        }
+
+    private val scope = CoroutineScope(Job() + mainImmediateDispatcher)
 
     private val commentOffset by lazy {
         context.resources.getDimension(R.dimen.comment_offset)
@@ -67,23 +70,19 @@ class CommentAdapter(
     }
 
     override fun getItemViewType(position: Int): Int {
-        return when (visibleComments[position]) {
+        return when (getItem(position)) {
             is CommentEntity -> Type.COMMENT.value
             is MoreEntity -> Type.MORE.value
             else -> throw IllegalArgumentException("Unknown type")
         }
     }
 
-    override fun getItemCount(): Int {
-        return visibleComments.size
-    }
-
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         when (getItemViewType(position)) {
             Type.COMMENT.value ->
-                (holder as CommentViewHolder).bind(visibleComments[position] as CommentEntity)
+                (holder as CommentViewHolder).bind(getItem(position) as CommentEntity)
             Type.MORE.value -> {
-                (holder as MoreViewHolder).bind(visibleComments[position] as MoreEntity)
+                (holder as MoreViewHolder).bind(getItem(position) as MoreEntity)
             }
             else -> throw IllegalArgumentException("Unknown type")
         }
@@ -97,7 +96,7 @@ class CommentAdapter(
         if (payloads.isEmpty()) {
             super.onBindViewHolder(holder, position, payloads)
         } else {
-            val comment = visibleComments[position]
+            val comment = getItem(position)
             if (holder is CommentViewHolder && comment is CommentEntity) {
                 holder.bindCommentHiddenIndicator(comment, true)
             }
@@ -105,114 +104,126 @@ class CommentAdapter(
     }
 
     private fun onCommentClick(position: Int) {
-        when (val comment = visibleComments[position]) {
+        val newList = currentList.toMutableList()
+        when (val comment = newList[position]) {
             is CommentEntity -> {
-                if (!comment.hasReplies) return
-
-                val startIndex = position + 1
-
-                if (!comment.isExpanded) {
-                    comment.isExpanded = true
-
-                    val replies = getExpandedReplies(comment.replies)
-                    visibleComments.addAll(startIndex, replies)
-
-                    notifyItemRangeInserted(startIndex, replies.size)
-                } else {
-                    comment.isExpanded = false
-
-                    val replyCount = getReplyCount(startIndex, comment.depth)
-                    comment.visibleReplyCount = replyCount
-
-                    val endIndex = startIndex + replyCount
-                    visibleComments.subList(startIndex, endIndex).clear()
-
-                    notifyItemRangeRemoved(startIndex, replyCount)
-                }
-
-                notifyItemChanged(position, comment)
+                scope.launch { onCommentClick(position, newList, comment) }
             }
             is MoreEntity -> {
-                viewLifecycleOwner.lifecycleScope.launch {
-                    val link = linkId ?: return@launch
-
-                    val containsMoreComments = comment.more.size > LOAD_MORE_LIMIT
-
-                    val children = comment.more.take(LOAD_MORE_LIMIT).joinToString(",")
-                    if (containsMoreComments) {
-                        // Remove first 100 comments from list
-                        with(comment) {
-                            more.subList(0, LOAD_MORE_LIMIT).clear()
-                            count = if (count > LOAD_MORE_LIMIT) count - LOAD_MORE_LIMIT else 0
-                        }
-                    }
-
-                    repository.getMoreChildren(children, link).onStart {
-                        comment.apply {
-                            isLoading = true
-                            isError = false
-                        }
-                        notifyItemChanged(position)
-                    }.catch {
-                        comment.apply {
-                            isLoading = false
-                            isError = true
-                        }
-                        notifyItemChanged(position)
-                    }.map {
-                        CommentMapper.dataToEntities(it.json.data.things)
-                    }.map {
-                        it.filter { comment -> comment.depth < COMMENT_DEPTH_LIMIT }
-                    }.map {
-                        restoreCommentHierarchy(it, comment.depth)
-                    }.collectLatest { comments ->
-                        comment.apply {
-                            isLoading = false
-                            isError = false
-                        }
-
-                        if (comment.depth > 0) {
-                            val parentComment = visibleComments.find { it.name == comment.parent }
-
-                            if (parentComment != null &&
-                                parentComment is CommentEntity &&
-                                parentComment.isExpanded
-                            ) {
-                                parentComment.replies.removeLastOrNull()
-                                parentComment.replies.addAll(comments)
-                                if (containsMoreComments) {
-                                    parentComment.replies.add(comment)
-                                }
-                            } else {
-                                return@collectLatest
-                            }
-                        }
-
-                        visibleComments.removeAt(position)
-                        notifyItemRemoved(position)
-                        visibleComments.addAll(position, comments)
-
-                        var itemCount = comments.size
-                        if (containsMoreComments) {
-                            visibleComments.add(position + itemCount, comment)
-                            itemCount++
-                        }
-
-                        notifyItemRangeInserted(position, itemCount)
-                    }
-                }
+                scope.launch { onMoreClick(position, newList, comment) }
             }
         }
     }
 
+    private suspend fun onCommentClick(
+        position: Int,
+        newList: MutableList<Comment>,
+        comment: CommentEntity
+    ) {
+        if (!comment.hasReplies) return
+
+        val startIndex = position + 1
+
+        if (!comment.isExpanded) {
+            comment.isExpanded = true
+
+            val replies = getExpandedReplies(comment.replies)
+            newList.addAll(startIndex, replies)
+        } else {
+            comment.isExpanded = false
+
+            val replyCount = getReplyCount(startIndex, comment.depth)
+            comment.visibleReplyCount = replyCount
+
+            val endIndex = startIndex + replyCount
+            newList.subList(startIndex, endIndex).clear()
+        }
+
+        notifyItemChanged(position, comment)
+        submitList(newList)
+    }
+
+    private suspend fun onMoreClick(
+        position: Int,
+        newList: MutableList<Comment>,
+        comment: MoreEntity
+    ) {
+        val link = linkId ?: return
+
+        val containsMoreComments = comment.more.size > LOAD_MORE_LIMIT
+
+        val children = comment.more.take(LOAD_MORE_LIMIT).joinToString(",")
+        if (containsMoreComments) {
+            // Remove first 100 comments from list
+            with(comment) {
+                more.subList(0, LOAD_MORE_LIMIT).clear()
+                count = if (count > LOAD_MORE_LIMIT) count - LOAD_MORE_LIMIT else 0
+            }
+        }
+
+        repository.getMoreChildren(children, link)
+            .map {
+                commentMapper.dataToEntities(it.json.data.things, null)
+            }
+            .map {
+                it.filter { comment -> comment.depth < COMMENT_DEPTH_LIMIT }
+            }
+            .map {
+                restoreCommentHierarchy(it, comment.depth)
+            }
+            .map { comments ->
+                comment.apply { isLoading = false; isError = false }
+
+                if (comment.depth > 0) {
+                    val parentComment = newList.find { it.name == comment.parent }
+
+                    if (parentComment != null &&
+                        parentComment is CommentEntity &&
+                        parentComment.isExpanded
+                    ) {
+                        parentComment.replies.removeLastOrNull()
+                        parentComment.replies.addAll(comments)
+                        if (containsMoreComments) {
+                            parentComment.replies.add(comment)
+                        }
+                    } else {
+                        return@map newList
+                    }
+                }
+
+                newList.removeAt(position)
+                newList.addAll(position, comments)
+
+                if (containsMoreComments) {
+                    newList.add(position + comments.size, comment)
+                }
+
+                return@map newList
+            }
+            .flowOn(defaultDispatcher)
+            .onStart {
+                comment.apply { isLoading = true; isError = false }
+                notifyItemChanged(position)
+            }
+            .catch {
+                comment.apply { isLoading = false; isError = true }
+                notifyItemChanged(position)
+            }
+            .collect { comments ->
+                submitList(comments)
+            }
+    }
+
     private fun onCommentLongClick(position: Int) {
-        val comment = visibleComments[position]
+        val comment = getItem(position)
         if (comment is CommentEntity) {
             onCommentLongClick.invoke(comment)
         }
     }
 
-    private fun getExpandedReplies(comments: List<Comment>): List<Comment> {
+    private suspend fun getExpandedReplies(
+        comments: List<Comment>
+    ): List<Comment> = withContext(defaultDispatcher) {
         val replies = mutableListOf<Comment>()
 
         for (comment in comments) {
@@ -227,24 +238,30 @@ class CommentAdapter(
             }
         }
 
-        return replies
+        return@withContext replies
     }
 
-    private fun getReplyCount(index: Int, depth: Int): Int {
+    private suspend fun getReplyCount(
+        index: Int,
+        depth: Int
+    ): Int = withContext(defaultDispatcher) {
         var count = 0
 
-        for (i in index until visibleComments.size) {
-            if (visibleComments[i].depth > depth) {
+        for (i in index until itemCount) {
+            if (getItem(i).depth > depth) {
                 count++
             } else {
                 break
             }
         }
 
-        return count
+        return@withContext count
     }
 
-    private fun restoreCommentHierarchy(comments: List<Comment>, depth: Int): List<Comment> {
+    private suspend fun restoreCommentHierarchy(
+        comments: List<Comment>,
+        depth: Int
+    ): List<Comment> = withContext(defaultDispatcher) {
         val restored = mutableListOf<Comment>()
 
         for (i in comments.indices) {
@@ -268,16 +285,11 @@ class CommentAdapter(
             restored.add(comment)
         }
 
-        return restored
+        return@withContext restored
     }
 
-    fun submitData(comments: List<Comment>) {
-        val result = DiffUtil.calculateDiff(CommentDiffCallback(this.visibleComments, comments))
-
-        this.visibleComments.clear()
-        this.visibleComments.addAll(comments)
-
-        result.dispatchUpdatesTo(this)
+    fun cleanUp() {
+        scope.cancel()
     }
 
     private inner class CommentViewHolder(
@@ -401,43 +413,32 @@ class CommentAdapter(
         }
     }
 
-    private inner class CommentDiffCallback(
-        private val oldComments: List<Comment>,
-        private val newComments: List<Comment>
-    ) : DiffUtil.Callback() {
-
-        override fun getOldListSize(): Int {
-            return oldComments.size
-        }
-
-        override fun getNewListSize(): Int {
-            return newComments.size
-        }
-
-        override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
-            val oldComment = oldComments[oldItemPosition]
-            val newComment = newComments[newItemPosition]
-
-            return if (oldComment is CommentEntity && newComment is CommentEntity) {
-                oldComment.name == newComment.name
-            } else if (oldComment is MoreEntity && newComment is MoreEntity) {
-                oldComment.id == newComment.id
-            } else {
-                false
-            }
-        }
-
-        override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
-            return oldComments[oldItemPosition] == newComments[newItemPosition]
-        }
-    }
-
     private enum class Type(val value: Int) {
         COMMENT(0), MORE(1)
     }
 
     companion object {
-        private const val LOAD_MORE_LIMIT = 100
-        private const val COMMENT_DEPTH_LIMIT = 10
+        const val LOAD_MORE_LIMIT = 100
+        const val COMMENT_DEPTH_LIMIT = 10
+
+        private val COMMENT_COMPARATOR = object : DiffUtil.ItemCallback<Comment>() {
+            override fun areItemsTheSame(oldItem: Comment, newItem: Comment): Boolean {
+                return when {
+                    oldItem is CommentEntity && newItem is CommentEntity -> {
+                        oldItem.name == newItem.name
+                    }
+                    oldItem is MoreEntity && newItem is MoreEntity -> {
+                        oldItem.id == newItem.id
+                    }
+                    else -> {
+                        false
+                    }
+                }
+            }
+
+            override fun areContentsTheSame(oldItem: Comment, newItem: Comment): Boolean {
+                return oldItem == newItem
+            }
+        }
     }
 }

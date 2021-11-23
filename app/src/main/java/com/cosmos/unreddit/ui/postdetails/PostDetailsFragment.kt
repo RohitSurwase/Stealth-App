@@ -15,9 +15,11 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView.Adapter.StateRestorationPolicy.PREVENT_WHEN_EMPTY
 import androidx.transition.Slide
 import androidx.transition.TransitionManager
 import com.cosmos.unreddit.R
+import com.cosmos.unreddit.data.local.mapper.CommentMapper2
 import com.cosmos.unreddit.data.model.GalleryMedia
 import com.cosmos.unreddit.data.model.MediaType
 import com.cosmos.unreddit.data.model.Resource
@@ -25,6 +27,8 @@ import com.cosmos.unreddit.data.model.db.PostEntity
 import com.cosmos.unreddit.data.repository.PostListRepository
 import com.cosmos.unreddit.data.repository.PreferencesRepository
 import com.cosmos.unreddit.databinding.FragmentPostDetailsBinding
+import com.cosmos.unreddit.di.DispatchersModule.DefaultDispatcher
+import com.cosmos.unreddit.di.DispatchersModule.MainImmediateDispatcher
 import com.cosmos.unreddit.ui.base.BaseFragment
 import com.cosmos.unreddit.ui.commentmenu.CommentMenuFragment
 import com.cosmos.unreddit.ui.common.ElasticDragDismissFrameLayout
@@ -36,6 +40,7 @@ import com.cosmos.unreddit.util.extension.launchRepeat
 import com.cosmos.unreddit.util.extension.setCommentListener
 import com.cosmos.unreddit.util.extension.setSortingListener
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
@@ -71,6 +76,17 @@ class PostDetailsFragment :
 
     @Inject
     lateinit var preferencesRepository: PreferencesRepository
+
+    @Inject
+    lateinit var commentMapper: CommentMapper2
+
+    @Inject
+    @MainImmediateDispatcher
+    lateinit var mainImmediateDispatcher: CoroutineDispatcher
+
+    @Inject
+    @DefaultDispatcher
+    lateinit var defaultDispatcher: CoroutineDispatcher
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -115,14 +131,30 @@ class PostDetailsFragment :
         binding.singleThreadLayout.setOnClickListener { loadFullDiscussion() }
     }
 
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        // Save comment hierarchy
+        viewModel.setComments(commentAdapter.currentList)
+    }
+
     private fun initRecyclerView() {
         val contentPreferences = runBlocking {
             preferencesRepository.getContentPreferences().first()
         }
 
         postAdapter = PostAdapter(contentPreferences, this, this)
-        commentAdapter = CommentAdapter(requireContext(), repository, viewLifecycleOwner, this) {
+        commentAdapter = CommentAdapter(
+            requireContext(),
+            mainImmediateDispatcher,
+            defaultDispatcher,
+            repository,
+            commentMapper,
+            this
+        ) {
             CommentMenuFragment.show(childFragmentManager, it, CommentMenuFragment.MenuType.DETAILS)
+        }.apply {
+            // Wait for data to restore adapter position
+            stateRestorationPolicy = PREVENT_WHEN_EMPTY
         }
         resourceStateAdapter = ResourceStateAdapter { retry() }
 
@@ -158,7 +190,7 @@ class PostDetailsFragment :
                 viewModel.comments.collect {
                     resourceStateAdapter.resource = it
                     when (it) {
-                        is Resource.Success -> commentAdapter.submitData(it.data)
+                        is Resource.Success -> commentAdapter.submitList(it.data)
                         else -> {
                             // ignore
                         }
@@ -293,6 +325,7 @@ class PostDetailsFragment :
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+        commentAdapter.cleanUp()
     }
 
     override fun onDrag(

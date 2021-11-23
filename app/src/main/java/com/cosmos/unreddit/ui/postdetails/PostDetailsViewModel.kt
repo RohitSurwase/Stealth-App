@@ -1,7 +1,7 @@
 package com.cosmos.unreddit.ui.postdetails
 
 import androidx.lifecycle.viewModelScope
-import com.cosmos.unreddit.data.local.mapper.CommentMapper
+import com.cosmos.unreddit.data.local.mapper.CommentMapper2
 import com.cosmos.unreddit.data.local.mapper.PostMapper2
 import com.cosmos.unreddit.data.model.Comment
 import com.cosmos.unreddit.data.model.Comment.CommentEntity
@@ -9,15 +9,16 @@ import com.cosmos.unreddit.data.model.Resource
 import com.cosmos.unreddit.data.model.Sorting
 import com.cosmos.unreddit.data.model.db.PostEntity
 import com.cosmos.unreddit.data.remote.api.reddit.RedditApi
-import com.cosmos.unreddit.data.remote.api.reddit.model.Listing
 import com.cosmos.unreddit.data.repository.PostListRepository
 import com.cosmos.unreddit.data.repository.PreferencesRepository
+import com.cosmos.unreddit.di.DispatchersModule.DefaultDispatcher
 import com.cosmos.unreddit.ui.base.BaseViewModel
 import com.cosmos.unreddit.util.PostUtil
 import com.cosmos.unreddit.util.extension.latest
 import com.cosmos.unreddit.util.extension.updateValue
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -25,7 +26,7 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -34,11 +35,12 @@ import java.io.IOException
 import javax.inject.Inject
 
 @HiltViewModel
-class PostDetailsViewModel
-@Inject constructor(
+class PostDetailsViewModel @Inject constructor(
     preferencesRepository: PreferencesRepository,
     private val repository: PostListRepository,
-    private val postMapper: PostMapper2
+    private val postMapper: PostMapper2,
+    private val commentMapper: CommentMapper2,
+    @DefaultDispatcher private val defaultDispatcher: CoroutineDispatcher
 ) : BaseViewModel(preferencesRepository, repository) {
 
     private val _sorting: MutableStateFlow<Sorting> = MutableStateFlow(DEFAULT_SORTING)
@@ -54,19 +56,11 @@ class PostDetailsViewModel
         repository.getSavedCommentIds(it.id)
     }
 
-    private val _listings: MutableStateFlow<Resource<List<Listing>>> =
+    private val _post: MutableStateFlow<Resource<PostEntity>> =
         MutableStateFlow(Resource.Loading())
 
-    private val _post: Flow<Resource<PostEntity>> = _listings.map {
-        when (it) {
-            is Resource.Success -> {
-                val data = postMapper.dataToEntity(PostUtil.getPostData(it.data))
-                Resource.Success(data)
-            }
-            is Resource.Loading -> Resource.Loading()
-            is Resource.Error -> Resource.Error(it.code, it.message)
-        }
-    }
+    private val _comments: MutableStateFlow<Resource<List<Comment>>> =
+        MutableStateFlow(Resource.Loading())
 
     val post: Flow<Resource<PostEntity>> = combine(_post, savedPostIds) { post, savedIds ->
         post.apply {
@@ -74,33 +68,23 @@ class PostDetailsViewModel
                 data.saved = savedIds.contains(data.id)
             }
         }
-    }
+    }.flowOn(defaultDispatcher)
 
-    private val _comments: Flow<Resource<List<Comment>>> = _listings.map {
-        when (it) {
-            is Resource.Success -> {
-                val list = CommentMapper.dataToEntities(
-                    PostUtil.getCommentsData(it.data),
-                    PostUtil.getPostData(it.data)
-                )
-                val data = getComments(list, DEPTH_LIMIT)
-                Resource.Success(data)
-            }
-            is Resource.Loading -> Resource.Loading()
-            is Resource.Error -> Resource.Error(it.code, it.message)
-        }
-    }
-
-    val comments: Flow<Resource<List<Comment>>> = combine(_comments, savedCommentIds) { comments, savedIds ->
+    val comments: Flow<Resource<List<Comment>>> = combine(
+        _comments,
+        savedCommentIds
+    ) { comments, savedIds ->
         comments.apply {
             if (this is Resource.Success) {
-                data.map { (it as? CommentEntity)?.saved = savedIds.contains(it.name) }
+                data.forEach { comment ->
+                    (comment as? CommentEntity)?.saved = savedIds.contains(comment.name)
+                }
             }
         }
-    }
+    }.flowOn(defaultDispatcher)
 
-    private suspend fun getComments(list: List<Comment>, depthLimit: Int): List<Comment> {
-        return withContext(Dispatchers.Default) {
+    private suspend fun getComments(list: List<Comment>, depthLimit: Int): List<Comment> =
+        withContext(defaultDispatcher) {
             val comments = mutableListOf<Comment>()
             for (comment in list) {
                 comments.add(comment)
@@ -109,16 +93,15 @@ class PostDetailsViewModel
                     comments.addAll(getComments(comment.replies, depthLimit))
                 }
             }
-            comments
+            return@withContext comments
         }
-    }
 
     private var currentPermalink: String? = null
     private var currentSorting: Sorting? = null
 
     fun loadPost(forceUpdate: Boolean) {
         if (_permalink.value != null) {
-            if (_listings.value !is Resource.Success ||
+            if (
                 _permalink.value != currentPermalink ||
                 _sorting.value != currentSorting ||
                 forceUpdate
@@ -128,23 +111,46 @@ class PostDetailsViewModel
                 loadPost(_permalink.value!!, _sorting.value)
             }
         } else {
-            _listings.value = Resource.Error()
+            _post.value = Resource.Error()
+            _comments.value = Resource.Error()
         }
     }
 
     private fun loadPost(permalink: String, sorting: Sorting) {
         viewModelScope.launch {
-            repository.getPost(permalink, sorting).onStart {
-                _listings.value = Resource.Loading()
-            }.catch {
-                when (it) {
-                    is IOException -> _listings.value = Resource.Error(message = it.message)
-                    is HttpException -> _listings.value = Resource.Error(it.code(), it.message())
-                    else -> _listings.value = Resource.Error()
+            repository.getPost(permalink, sorting)
+                .onStart {
+                    _post.value = Resource.Loading()
+                    _comments.value = Resource.Loading()
                 }
-            }.collect {
-                _listings.value = Resource.Success(it)
-            }
+                .catch { e ->
+                    when (e) {
+                        is IOException -> {
+                            _post.value = Resource.Error(message = e.message)
+                            _comments.value = Resource.Error(message = e.message)
+                        }
+                        is HttpException -> {
+                            _post.value = Resource.Error(e.code(), e.message())
+                            _comments.value = Resource.Error(e.code(), e.message())
+                        }
+                        else -> {
+                            _post.value = Resource.Error()
+                            _comments.value = Resource.Error()
+                        }
+                    }
+                }
+                .collect { listings ->
+                    val post = async { postMapper.dataToEntity(PostUtil.getPostData(listings)) }
+                    val comments = async {
+                        val list = commentMapper.dataToEntities(
+                            PostUtil.getCommentsData(listings),
+                            PostUtil.getPostData(listings)
+                        )
+                        getComments(list, DEPTH_LIMIT)
+                    }
+                    _post.value = Resource.Success(post.await())
+                    _comments.value = Resource.Success(comments.await())
+                }
         }
     }
 
@@ -157,19 +163,19 @@ class PostDetailsViewModel
     }
 
     fun setSorting(sorting: Sorting) {
-        if (_sorting.value != sorting) {
-            _sorting.value = sorting
-        }
+        _sorting.updateValue(sorting)
     }
 
     fun setPermalink(permalink: String) {
-        if (_permalink.value != permalink) {
-            _permalink.value = permalink
-        }
+        _permalink.updateValue(permalink)
     }
 
     fun setSingleThread(singleThread: Boolean) {
         _singleThread.updateValue(singleThread)
+    }
+
+    fun setComments(comments: List<Comment>) {
+        _comments.updateValue(Resource.Success(comments))
     }
 
     companion object {
