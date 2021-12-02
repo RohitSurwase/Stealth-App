@@ -5,9 +5,11 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.emptyPreferences
 import com.cosmos.unreddit.data.model.preferences.ContentPreferences
+import com.cosmos.unreddit.data.model.preferences.DataPreferences
 import com.cosmos.unreddit.data.model.preferences.MediaPreferences
 import com.cosmos.unreddit.data.model.preferences.ProfilePreferences
 import com.cosmos.unreddit.data.model.preferences.UiPreferences
+import com.cosmos.unreddit.data.remote.api.reddit.source.BaseRedditSource
 import com.cosmos.unreddit.util.extension.getValue
 import com.cosmos.unreddit.util.extension.setValue
 import kotlinx.coroutines.flow.Flow
@@ -71,6 +73,20 @@ class PreferencesRepository @Inject constructor(
     fun getShowSpoilerPreview(defaultValue: Boolean = false): Flow<Boolean> {
         return preferencesDatastore.getValue(
             ContentPreferences.PreferencesKeys.SHOW_SPOILER_PREVIEW,
+            defaultValue
+        )
+    }
+
+    suspend fun setRedditSource(redditSource: Int) {
+        preferencesDatastore.setValue(
+            DataPreferences.PreferencesKeys.REDDIT_SOURCE,
+            redditSource
+        )
+    }
+
+    fun getRedditSource(defaultValue: Int = BaseRedditSource.Source.REDDIT.value): Flow<Int> {
+        return preferencesDatastore.getValue(
+            DataPreferences.PreferencesKeys.REDDIT_SOURCE,
             defaultValue
         )
     }
