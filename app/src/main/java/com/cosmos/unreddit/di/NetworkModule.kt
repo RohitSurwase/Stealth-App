@@ -1,14 +1,22 @@
 package com.cosmos.unreddit.di
 
 import com.cosmos.unreddit.data.remote.RawJsonInterceptor
+import com.cosmos.unreddit.data.remote.TargetRedditInterceptor
 import com.cosmos.unreddit.data.remote.api.gfycat.GfycatApi
 import com.cosmos.unreddit.data.remote.api.imgur.ImgurApi
 import com.cosmos.unreddit.data.remote.api.reddit.RedditApi
 import com.cosmos.unreddit.data.remote.api.reddit.SortingConverterFactory
+import com.cosmos.unreddit.data.remote.api.reddit.TedditApi
 import com.cosmos.unreddit.data.remote.api.reddit.adapter.EditedAdapter
 import com.cosmos.unreddit.data.remote.api.reddit.adapter.MediaMetadataAdapter
 import com.cosmos.unreddit.data.remote.api.reddit.adapter.RepliesAdapter
-import com.cosmos.unreddit.data.remote.api.reddit.model.*
+import com.cosmos.unreddit.data.remote.api.reddit.model.AboutChild
+import com.cosmos.unreddit.data.remote.api.reddit.model.AboutUserChild
+import com.cosmos.unreddit.data.remote.api.reddit.model.Child
+import com.cosmos.unreddit.data.remote.api.reddit.model.ChildType
+import com.cosmos.unreddit.data.remote.api.reddit.model.CommentChild
+import com.cosmos.unreddit.data.remote.api.reddit.model.MoreChild
+import com.cosmos.unreddit.data.remote.api.reddit.model.PostChild
 import com.cosmos.unreddit.data.remote.api.streamable.StreamableApi
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.adapters.PolymorphicJsonAdapterFactory
@@ -49,6 +57,10 @@ object NetworkModule {
 
     @Qualifier
     @Retention(AnnotationRetention.BINARY)
+    annotation class TedditOkHttp
+
+    @Qualifier
+    @Retention(AnnotationRetention.BINARY)
     annotation class GenericOkHttp
 
     @RedditMoshi
@@ -85,6 +97,16 @@ object NetworkModule {
             .build()
     }
 
+    @TedditOkHttp
+    @Provides
+    @Singleton
+    fun provideTedditOkHttpClient(): OkHttpClient {
+        return OkHttpClient.Builder()
+            .addInterceptor(RawJsonInterceptor())
+            .addInterceptor(TargetRedditInterceptor())
+            .build()
+    }
+
     @GenericOkHttp
     @Provides
     @Singleton
@@ -106,6 +128,21 @@ object NetworkModule {
             .client(okHttpClient)
             .build()
             .create(RedditApi::class.java)
+    }
+
+    @Provides
+    @Singleton
+    fun provideTedditApi(
+        @RedditMoshi moshi: Moshi,
+        @TedditOkHttp okHttpClient: OkHttpClient
+    ): TedditApi {
+        return Retrofit.Builder()
+            .baseUrl(TedditApi.BASE_URL)
+            .addConverterFactory(MoshiConverterFactory.create(moshi))
+            .addConverterFactory(SortingConverterFactory())
+            .client(okHttpClient)
+            .build()
+            .create(TedditApi::class.java)
     }
 
     @Provides
