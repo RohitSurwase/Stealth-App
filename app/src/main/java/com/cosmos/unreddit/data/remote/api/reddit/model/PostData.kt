@@ -44,6 +44,9 @@ data class PostData(
     @Json(name = "author_flair_text")
     val authorFlair: String?,
 
+    @Json(name = "gallery_data")
+    val galleryData: GalleryData?,
+
     @Json(name = "score")
     val score: Int,
 
@@ -219,17 +222,18 @@ data class PostData(
             ?: url
 
     val gallery: List<GalleryMedia>
-        get() = mediaMetadata?.items?.mapNotNull { item ->
-            item.image?.let {
-                when {
-                    it.url != null -> {
-                        GalleryMedia(GalleryMedia.Type.IMAGE, it.url)
-                    }
-                    it.mp4 != null -> {
-                        GalleryMedia(GalleryMedia.Type.VIDEO, it.mp4)
-                    }
-                    else -> null
+        get() {
+            // Reddit's API provides two lists of gallery items:
+            // - gallery_data which is ordered but only contains IDs and captions
+            // - media_metadata which contains all the URLs but is unordered
+            // Therefore, we need to map the IDs from gallery_data with the URLs from media_metadata
+            // to have an ordered list of items
+            return galleryData?.items?.mapNotNull { galleryDataItem ->
+                mediaMetadata?.items?.find { galleryItem ->
+                    galleryItem.id == galleryDataItem.mediaId
+                }?.let { item ->
+                    item.image?.media
                 }
-            }
-        } ?: emptyList()
+            } ?: emptyList()
+        }
 }
