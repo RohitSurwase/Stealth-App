@@ -4,11 +4,11 @@ import android.util.Log
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
 import com.cosmos.unreddit.data.model.Sorting
-import com.cosmos.unreddit.data.remote.api.reddit.RedditApi
 import com.cosmos.unreddit.data.remote.api.reddit.model.Child
+import com.cosmos.unreddit.data.remote.api.reddit.source.CurrentSource
 
 class SearchSubredditDataSource(
-    private val redditApi: RedditApi,
+    private val source: CurrentSource,
     private val query: String,
     private val sorting: Sorting
 ) : PagingSource<String, Child>() {
@@ -17,7 +17,7 @@ class SearchSubredditDataSource(
 
     override suspend fun load(params: LoadParams<String>): LoadResult<String, Child> {
         return try {
-            val response = redditApi.searchSubreddit(
+            val response = source.searchSubreddit(
                 query,
                 sorting.generalSorting,
                 sorting.timeSorting,

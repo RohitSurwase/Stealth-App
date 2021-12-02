@@ -10,12 +10,12 @@ import com.cosmos.unreddit.data.model.db.History
 import com.cosmos.unreddit.data.model.db.PostEntity
 import com.cosmos.unreddit.data.model.db.Profile
 import com.cosmos.unreddit.data.model.db.Subscription
-import com.cosmos.unreddit.data.remote.api.reddit.RedditApi
 import com.cosmos.unreddit.data.remote.api.reddit.model.AboutChild
 import com.cosmos.unreddit.data.remote.api.reddit.model.AboutUserChild
 import com.cosmos.unreddit.data.remote.api.reddit.model.Child
 import com.cosmos.unreddit.data.remote.api.reddit.model.Listing
 import com.cosmos.unreddit.data.remote.api.reddit.model.MoreChildren
+import com.cosmos.unreddit.data.remote.api.reddit.source.CurrentSource
 import com.cosmos.unreddit.data.remote.datasource.CommentsDataSource
 import com.cosmos.unreddit.data.remote.datasource.PostListDataSource
 import com.cosmos.unreddit.data.remote.datasource.SearchPostDataSource
@@ -31,16 +31,16 @@ import javax.inject.Singleton
 
 @Singleton
 class PostListRepository @Inject constructor(
-    private val redditApi: RedditApi,
+    private val source: CurrentSource,
     private val redditDatabase: RedditDatabase
 ) {
 
     fun getPost(permalink: String, sorting: Sorting): Flow<List<Listing>> = flow {
-        emit(redditApi.getPost(permalink, sort = sorting.generalSorting))
+        emit(source.getPost(permalink, sort = sorting.generalSorting))
     }
 
     fun getMoreChildren(children: String, linkId: String): Flow<MoreChildren> = flow {
-        emit(redditApi.getMoreChildren(children, linkId))
+        emit(source.getMoreChildren(children, linkId))
     }
 
     //region Subreddit
@@ -51,12 +51,12 @@ class PostListRepository @Inject constructor(
         pageSize: Int = DEFAULT_LIMIT
     ): Flow<PagingData<Child>> {
         return Pager(PagingConfig(pageSize = pageSize)) {
-            PostListDataSource(redditApi, subreddit, sorting)
+            PostListDataSource(source, subreddit, sorting)
         }.flow
     }
 
     fun getSubredditInfo(subreddit: String): Flow<AboutChild> = flow {
-        emit(redditApi.getSubredditInfo(subreddit) as AboutChild)
+        emit(source.getSubredditInfo(subreddit) as AboutChild)
     }
 
     //endregion
@@ -90,7 +90,7 @@ class PostListRepository @Inject constructor(
         pageSize: Int = DEFAULT_LIMIT
     ): Flow<PagingData<Child>> {
         return Pager(PagingConfig(pageSize = pageSize)) {
-            UserPostsDataSource(redditApi, user, sorting)
+            UserPostsDataSource(source, user, sorting)
         }.flow
     }
 
@@ -100,12 +100,12 @@ class PostListRepository @Inject constructor(
         pageSize: Int = DEFAULT_LIMIT
     ): Flow<PagingData<Child>> {
         return Pager(PagingConfig(pageSize = pageSize)) {
-            CommentsDataSource(redditApi, user, sorting)
+            CommentsDataSource(source, user, sorting)
         }.flow
     }
 
     fun getUserInfo(user: String): Flow<AboutUserChild> = flow {
-        emit(redditApi.getUserInfo(user) as AboutUserChild)
+        emit(source.getUserInfo(user) as AboutUserChild)
     }
 
     //endregion
@@ -118,7 +118,7 @@ class PostListRepository @Inject constructor(
         pageSize: Int = DEFAULT_LIMIT
     ): Flow<PagingData<Child>> {
         return Pager(PagingConfig(pageSize = pageSize)) {
-            SearchPostDataSource(redditApi, query, sorting)
+            SearchPostDataSource(source, query, sorting)
         }.flow
     }
 
@@ -128,7 +128,7 @@ class PostListRepository @Inject constructor(
         pageSize: Int = DEFAULT_LIMIT
     ): Flow<PagingData<Child>> {
         return Pager(PagingConfig(pageSize = pageSize)) {
-            SearchUserDataSource(redditApi, query, sorting)
+            SearchUserDataSource(source, query, sorting)
         }.flow
     }
 
@@ -138,7 +138,7 @@ class PostListRepository @Inject constructor(
         pageSize: Int = DEFAULT_LIMIT
     ): Flow<PagingData<Child>> {
         return Pager(PagingConfig(pageSize = pageSize)) {
-            SearchSubredditDataSource(redditApi, query, sorting)
+            SearchSubredditDataSource(source, query, sorting)
         }.flow
     }
 
@@ -149,7 +149,7 @@ class PostListRepository @Inject constructor(
         pageSize: Int = DEFAULT_LIMIT
     ): Flow<PagingData<Child>> {
         return Pager(PagingConfig(pageSize = pageSize)) {
-            SubredditSearchPostDataSource(redditApi, subreddit, query, sorting)
+            SubredditSearchPostDataSource(source, subreddit, query, sorting)
         }.flow
     }
 

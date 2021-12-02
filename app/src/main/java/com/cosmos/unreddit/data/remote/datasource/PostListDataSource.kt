@@ -4,14 +4,14 @@ import android.util.Log
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
 import com.cosmos.unreddit.data.model.Sorting
-import com.cosmos.unreddit.data.remote.api.reddit.RedditApi
 import com.cosmos.unreddit.data.remote.api.reddit.model.Child
 import com.cosmos.unreddit.data.remote.api.reddit.model.Listing
+import com.cosmos.unreddit.data.remote.api.reddit.source.CurrentSource
 import retrofit2.HttpException
 import java.io.IOException
 
 open class PostListDataSource(
-    private val redditApi: RedditApi,
+    private val source: CurrentSource,
     private val query: String,
     private val sorting: Sorting
 ) : PagingSource<String, Child>() {
@@ -34,7 +34,7 @@ open class PostListDataSource(
     }
 
     open suspend fun getResponse(query: String, sorting: Sorting, after: String?): Listing {
-        return redditApi.getSubreddit(query, sorting.generalSorting, sorting.timeSorting, after)
+        return source.getSubreddit(query, sorting.generalSorting, sorting.timeSorting, after)
     }
 
     override fun getRefreshKey(state: PagingState<String, Child>): String? {
