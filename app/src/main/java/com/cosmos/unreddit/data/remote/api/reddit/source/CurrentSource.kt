@@ -7,12 +7,7 @@ import com.cosmos.unreddit.data.remote.api.reddit.model.Child
 import com.cosmos.unreddit.data.remote.api.reddit.model.Listing
 import com.cosmos.unreddit.data.remote.api.reddit.model.MoreChildren
 import com.cosmos.unreddit.data.repository.PreferencesRepository
-import com.cosmos.unreddit.di.CoroutinesScopesModule.ApplicationScope
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -21,7 +16,6 @@ import javax.inject.Singleton
 
 @Singleton
 class CurrentSource @Inject constructor(
-    @ApplicationScope externalScope: CoroutineScope,
     private val preferencesRepository: PreferencesRepository,
     private val redditSource: RedditSource,
     private val tedditSource: TedditSource
@@ -32,18 +26,6 @@ class CurrentSource @Inject constructor(
     private var source: BaseRedditSource = runBlocking {
         val sourceValue = preferencesRepository.getRedditSource().first()
         getRedditSource(sourceValue)
-    }
-
-    init {
-        externalScope.launch {
-            preferencesRepository.getRedditSource()
-                .drop(1) // Drop first value to avoid conflicts
-                .collect { sourceValue ->
-                    mutex.withLock {
-                        source = getRedditSource(sourceValue)
-                    }
-                }
-        }
     }
 
     override suspend fun getSubreddit(
@@ -132,6 +114,12 @@ class CurrentSource @Inject constructor(
     ): Listing {
         // TODO: Replace by source when an endpoint is available for Teddit
         return redditSource.searchSubreddit(query, sort, timeSorting, after)
+    }
+
+    suspend fun setRedditSource(value: Int) {
+        mutex.withLock {
+            source = getRedditSource(value)
+        }
     }
 
     private fun getRedditSource(value: Int): BaseRedditSource {

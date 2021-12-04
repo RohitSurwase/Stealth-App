@@ -2,6 +2,7 @@ package com.cosmos.unreddit.ui.preferences
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.cosmos.unreddit.data.remote.api.reddit.source.CurrentSource
 import com.cosmos.unreddit.data.repository.PreferencesRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
@@ -13,7 +14,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class PreferencesViewModel @Inject constructor(
-    private val preferencesRepository: PreferencesRepository
+    private val preferencesRepository: PreferencesRepository,
+    private val currentSource: CurrentSource
 ) : ViewModel() {
 
     val nightMode: SharedFlow<Int> = preferencesRepository.getNightMode()
@@ -55,6 +57,7 @@ class PreferencesViewModel @Inject constructor(
     fun setRedditSource(source: Int) {
         viewModelScope.launch {
             preferencesRepository.setRedditSource(source)
+            currentSource.setRedditSource(source)
         }
     }
 }
