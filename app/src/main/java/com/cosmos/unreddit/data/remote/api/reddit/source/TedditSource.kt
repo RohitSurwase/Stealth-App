@@ -44,7 +44,7 @@ class TedditSource @Inject constructor(private val tedditApi: TedditApi) : BaseR
     }
 
     override suspend fun getUserInfo(user: String): Child {
-        throw UnsupportedOperationException("No API endpoint")
+        return tedditApi.getUserPosts(user, Sort.HOT, null).about
     }
 
     override suspend fun getUserPosts(
@@ -53,7 +53,7 @@ class TedditSource @Inject constructor(private val tedditApi: TedditApi) : BaseR
         timeSorting: TimeSorting?,
         after: String?
     ): Listing {
-        return tedditApi.getUserPosts(user, sort, timeSorting, after)
+        return tedditApi.getUserPosts(user, sort, timeSorting, after).overview
     }
 
     override suspend fun getUserComments(
@@ -62,7 +62,7 @@ class TedditSource @Inject constructor(private val tedditApi: TedditApi) : BaseR
         timeSorting: TimeSorting?,
         after: String?
     ): Listing {
-        return tedditApi.getUserComments(user, sort, timeSorting, after)
+        return tedditApi.getUserComments(user, sort, timeSorting, after).overview
     }
 
     override suspend fun searchPost(

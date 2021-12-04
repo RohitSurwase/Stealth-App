@@ -64,8 +64,7 @@ class CurrentSource @Inject constructor(
     }
 
     override suspend fun getUserInfo(user: String): Child {
-        // TODO: Replace by source when an endpoint is available for Teddit
-        return redditSource.getUserInfo(user)
+        return source.getUserInfo(user)
     }
 
     override suspend fun getUserPosts(

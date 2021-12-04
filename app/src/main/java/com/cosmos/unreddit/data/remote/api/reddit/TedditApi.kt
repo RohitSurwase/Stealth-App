@@ -3,6 +3,7 @@ package com.cosmos.unreddit.data.remote.api.reddit
 import com.cosmos.unreddit.data.model.Sort
 import com.cosmos.unreddit.data.model.TimeSorting
 import com.cosmos.unreddit.data.remote.api.reddit.model.Listing
+import com.cosmos.unreddit.data.remote.api.reddit.model.TedditUser
 import retrofit2.http.GET
 import retrofit2.http.Path
 import retrofit2.http.Query
@@ -29,7 +30,7 @@ interface TedditApi {
         @Query("sort") sort: Sort,
         @Query("t") timeSorting: TimeSorting?,
         @Query("after") after: String? = null
-    ): Listing
+    ): TedditUser
 
     @GET("/u/{user}/comments?api")
     suspend fun getUserComments(
@@ -37,7 +38,7 @@ interface TedditApi {
         @Query("sort") sort: Sort,
         @Query("t") timeSorting: TimeSorting?,
         @Query("after") after: String? = null
-    ): Listing
+    ): TedditUser
 
     //endregion
 
