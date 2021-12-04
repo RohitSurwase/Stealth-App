@@ -28,12 +28,15 @@ import okhttp3.HttpUrl
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
+import java.util.concurrent.TimeUnit
 import javax.inject.Qualifier
 import javax.inject.Singleton
 
 @InstallIn(SingletonComponent::class)
 @Module
 object NetworkModule {
+
+    private val TIMEOUT = 60L to TimeUnit.SECONDS
 
     @Qualifier
     @Retention(AnnotationRetention.BINARY)
@@ -94,6 +97,9 @@ object NetworkModule {
     fun provideRedditOkHttpClient(): OkHttpClient {
         return OkHttpClient.Builder()
             .addInterceptor(RawJsonInterceptor())
+            .connectTimeout(TIMEOUT.first, TIMEOUT.second)
+            .readTimeout(TIMEOUT.first, TIMEOUT.second)
+            .writeTimeout(TIMEOUT.first, TIMEOUT.second)
             .build()
     }
 
@@ -104,6 +110,9 @@ object NetworkModule {
         return OkHttpClient.Builder()
             .addInterceptor(RawJsonInterceptor())
             .addInterceptor(TargetRedditInterceptor())
+            .connectTimeout(TIMEOUT.first, TIMEOUT.second)
+            .readTimeout(TIMEOUT.first, TIMEOUT.second)
+            .writeTimeout(TIMEOUT.first, TIMEOUT.second)
             .build()
     }
 
@@ -112,6 +121,9 @@ object NetworkModule {
     @Singleton
     fun provideGenericOkHttpClient(): OkHttpClient {
         return OkHttpClient.Builder()
+            .connectTimeout(TIMEOUT.first, TIMEOUT.second)
+            .readTimeout(TIMEOUT.first, TIMEOUT.second)
+            .writeTimeout(TIMEOUT.first, TIMEOUT.second)
             .build()
     }
 
