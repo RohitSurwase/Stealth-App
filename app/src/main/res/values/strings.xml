@@ -121,6 +121,9 @@
 
     <string name="dialog_reddit_source_title">Reddit Source</string>
 
+    <string name="dialog_reddit_source_disclaimer_title">Disclaimer</string>
+    <string name="dialog_reddit_source_disclaimer_body">This is an experimental feature.\nTeddit doesn\'t provide an API for all of Reddit\'s content. Therefore, some requests will still be sent to reddit.com.</string>
+
     <string name="empty_data">Nothing to see here…</string>
     <string name="empty_data_subscriptions">You have no subscriptions yet.\nUse the search feature to look for Subreddits.</string>
 

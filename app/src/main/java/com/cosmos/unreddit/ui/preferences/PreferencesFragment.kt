@@ -1,5 +1,6 @@
 package com.cosmos.unreddit.ui.preferences
 
+import android.content.DialogInterface
 import android.os.Bundle
 import android.view.View
 import androidx.activity.OnBackPressedCallback
@@ -194,11 +195,40 @@ class PreferencesFragment : PreferenceFragmentCompat() {
             .setTitle(R.string.dialog_reddit_source_title)
             .setSingleChoiceItems(R.array.pref_reddit_source_labels, checkedItem) { dialog, which ->
                 DataPreferences.RedditSource.fromValue(which).let { source ->
-                    updateRedditSource(source.value)
+                    when (source) {
+                        DataPreferences.RedditSource.REDDIT -> {
+                            // Update value without asking for confirmation
+                            updateRedditSource(source.value)
+                        }
+                        DataPreferences.RedditSource.TEDDIT -> {
+                            // Show disclaimer to user
+                            showRedditSourceDisclaimer(source)
+                        }
+                    }
                     dialog.dismiss()
                 }
             }
             .show()
+    }
+
+    private fun showRedditSourceDisclaimer(source: DataPreferences.RedditSource) {
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle(R.string.dialog_reddit_source_disclaimer_title)
+            .setMessage(R.string.dialog_reddit_source_disclaimer_body)
+            .setPositiveButton(R.string.ok) { _, _ ->
+                // Ignore
+            }
+            .setNeutralButton(R.string.dialog_cancel) { dialog, _ ->
+                dialog.dismiss()
+            }
+            .setCancelable(false)
+            .show()
+            .apply {
+                getButton(DialogInterface.BUTTON_POSITIVE).setOnClickListener {
+                    updateRedditSource(source.value)
+                    dismiss()
+                }
+            }
     }
 
     private fun updateRedditSource(source: Int) {
