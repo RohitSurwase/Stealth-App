@@ -12,10 +12,10 @@ interface TedditApi {
 
     //region Subreddit
 
-    @GET("/r/{subreddit}?api")
+    @GET("/r/{subreddit}/{sort}?api")
     suspend fun getSubreddit(
         @Path("subreddit") subreddit: String,
-        @Query("sort") sort: Sort,
+        @Path("sort") sort: Sort,
         @Query("t") timeSorting: TimeSorting?,
         @Query("after") after: String? = null
     ): Listing
