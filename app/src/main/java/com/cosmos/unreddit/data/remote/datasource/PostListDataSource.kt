@@ -23,7 +23,7 @@ open class PostListDataSource(
             val response = getResponse(query, sorting, params.key)
             val data = response.data
 
-            LoadResult.Page(data.children, data.before, data.after)
+            LoadResult.Page(data.children, null, data.after)
         } catch (exception: IOException) {
             Log.e("PostListDataSource", "Error", exception)
             LoadResult.Error(exception)

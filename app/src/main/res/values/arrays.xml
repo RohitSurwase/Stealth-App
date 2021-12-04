@@ -7,5 +7,10 @@
         <item>@string/preference_night_mode_amoled</item>
         <item>@string/preference_night_mode_system</item>
     </string-array>
+
+    <string-array name="pref_reddit_source_labels">
+        <item>@string/preference_reddit_source_reddit</item>
+        <item>@string/preference_reddit_source_teddit</item>
+    </string-array>
     
 </resources>

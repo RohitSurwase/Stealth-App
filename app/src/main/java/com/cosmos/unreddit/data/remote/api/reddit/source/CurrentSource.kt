@@ -2,6 +2,7 @@ package com.cosmos.unreddit.data.remote.api.reddit.source
 
 import com.cosmos.unreddit.data.model.Sort
 import com.cosmos.unreddit.data.model.TimeSorting
+import com.cosmos.unreddit.data.model.preferences.DataPreferences
 import com.cosmos.unreddit.data.remote.api.reddit.model.Child
 import com.cosmos.unreddit.data.remote.api.reddit.model.Listing
 import com.cosmos.unreddit.data.remote.api.reddit.model.MoreChildren
@@ -134,9 +135,9 @@ class CurrentSource @Inject constructor(
     }
 
     private fun getRedditSource(value: Int): BaseRedditSource {
-        return when(BaseRedditSource.Source.fromValue(value)) {
-            BaseRedditSource.Source.REDDIT -> redditSource
-            BaseRedditSource.Source.TEDDIT -> tedditSource
+        return when(DataPreferences.RedditSource.fromValue(value)) {
+            DataPreferences.RedditSource.REDDIT -> redditSource
+            DataPreferences.RedditSource.TEDDIT -> tedditSource
         }
     }
 }

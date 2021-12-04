@@ -25,6 +25,9 @@ class PreferencesViewModel @Inject constructor(
 
     val showSpoilerPreview: Flow<Boolean> = preferencesRepository.getShowSpoilerPreview()
 
+    val redditSource: SharedFlow<Int> = preferencesRepository.getRedditSource()
+        .shareIn(viewModelScope, SharingStarted.WhileSubscribed(), 1)
+
     fun setNightMode(nightMode: Int) {
         viewModelScope.launch {
             preferencesRepository.setNightMode(nightMode)
@@ -46,6 +49,12 @@ class PreferencesViewModel @Inject constructor(
     fun setShowSpoilerPreview(showSpoilerPreview: Boolean) {
         viewModelScope.launch {
             preferencesRepository.setShowSpoilerPreview(showSpoilerPreview)
+        }
+    }
+
+    fun setRedditSource(source: Int) {
+        viewModelScope.launch {
+            preferencesRepository.setRedditSource(source)
         }
     }
 }

@@ -119,11 +119,14 @@
     <string name="dialog_credit_show_website">Show Website</string>
     <string name="dialog_credit_show_license">Show License</string>
 
+    <string name="dialog_reddit_source_title">Reddit Source</string>
+
     <string name="empty_data">Nothing to see here…</string>
     <string name="empty_data_subscriptions">You have no subscriptions yet.\nUse the search feature to look for Subreddits.</string>
 
     <string name="preference_category_ui">UI</string>
     <string name="preference_category_content">CONTENT</string>
+    <string name="preference_category_data">DATA</string>
     <string name="preference_category_misc">MISC.</string>
 
     <string name="preference_night_mode">Theme</string>
@@ -135,6 +138,10 @@
     <string name="preference_show_nsfw">Show NSFW content</string>
     <string name="preference_show_nsfw_preview">Show NSFW preview</string>
     <string name="preference_show_spoiler_preview">Show Spoiler preview</string>
+
+    <string name="preference_reddit_source">Reddit Source</string>
+    <string name="preference_reddit_source_reddit">Reddit</string>
+    <string name="preference_reddit_source_teddit">Teddit</string>
 
     <string name="preference_about">About</string>
 

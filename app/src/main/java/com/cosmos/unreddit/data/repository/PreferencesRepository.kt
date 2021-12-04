@@ -9,7 +9,6 @@ import com.cosmos.unreddit.data.model.preferences.DataPreferences
 import com.cosmos.unreddit.data.model.preferences.MediaPreferences
 import com.cosmos.unreddit.data.model.preferences.ProfilePreferences
 import com.cosmos.unreddit.data.model.preferences.UiPreferences
-import com.cosmos.unreddit.data.remote.api.reddit.source.BaseRedditSource
 import com.cosmos.unreddit.util.extension.getValue
 import com.cosmos.unreddit.util.extension.setValue
 import kotlinx.coroutines.flow.Flow
@@ -84,7 +83,7 @@ class PreferencesRepository @Inject constructor(
         )
     }
 
-    fun getRedditSource(defaultValue: Int = BaseRedditSource.Source.REDDIT.value): Flow<Int> {
+    fun getRedditSource(defaultValue: Int = DataPreferences.RedditSource.REDDIT.value): Flow<Int> {
         return preferencesDatastore.getValue(
             DataPreferences.PreferencesKeys.REDDIT_SOURCE,
             defaultValue

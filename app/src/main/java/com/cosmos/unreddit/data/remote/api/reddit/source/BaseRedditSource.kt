@@ -84,12 +84,4 @@ sealed interface BaseRedditSource {
     ): Listing
 
     //endregion
-    
-    enum class Source(val value: Int) {
-        REDDIT(0), TEDDIT(1);
-        
-        companion object {
-            fun fromValue(value: Int): Source = values().find { it.value == value } ?: REDDIT
-        }
-    }
 }

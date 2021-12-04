@@ -14,6 +14,7 @@ import androidx.preference.SwitchPreferenceCompat
 import com.cosmos.unreddit.R
 import com.cosmos.unreddit.UiViewModel
 import com.cosmos.unreddit.data.model.preferences.ContentPreferences.PreferencesKeys
+import com.cosmos.unreddit.data.model.preferences.DataPreferences
 import com.cosmos.unreddit.data.model.preferences.UiPreferences
 import com.cosmos.unreddit.util.extension.getNavOptions
 import com.cosmos.unreddit.util.extension.latest
@@ -34,6 +35,7 @@ class PreferencesFragment : PreferenceFragmentCompat() {
     private var showNsfwPreference: SwitchPreferenceCompat? = null
     private var showNsfwPreviewPreference: SwitchPreferenceCompat? = null
     private var showSpoilerPreviewPreference: SwitchPreferenceCompat? = null
+    private var sourcePreference: Preference? = null
     private var aboutPreference: Preference? = null
 
     private val navOptions: NavOptions by lazy { getNavOptions() }
@@ -107,6 +109,17 @@ class PreferencesFragment : PreferenceFragmentCompat() {
             }
         }
 
+        sourcePreference = findPreference<Preference?>(
+            DataPreferences.PreferencesKeys.REDDIT_SOURCE.name
+        )?.apply {
+            setOnPreferenceClickListener {
+                viewModel.redditSource.latest?.let { source ->
+                    showRedditSourceDialog(source)
+                }
+                true
+            }
+        }
+
         aboutPreference = findPreference<Preference>("about")?.apply {
             setOnPreferenceClickListener {
                 openAbout()
@@ -144,6 +157,17 @@ class PreferencesFragment : PreferenceFragmentCompat() {
                     showSpoilerPreviewPreference?.isChecked = showSpoilerPreview
                 }
             }
+
+            launch {
+                viewModel.redditSource.collect { value ->
+                    DataPreferences.RedditSource.fromValue(value).let {
+                        val redditSourceArray = resources.getStringArray(
+                            R.array.pref_reddit_source_labels
+                        )
+                        sourcePreference?.summary = redditSourceArray.getOrNull(value)
+                    }
+                }
+            }
         }
     }
 
@@ -163,6 +187,22 @@ class PreferencesFragment : PreferenceFragmentCompat() {
         unredditApplication?.appTheme = mode
         activity?.recreate() // Recreate activity to force the change between dark and amoled
         viewModel.setNightMode(mode)
+    }
+
+    private fun showRedditSourceDialog(checkedItem: Int) {
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle(R.string.dialog_reddit_source_title)
+            .setSingleChoiceItems(R.array.pref_reddit_source_labels, checkedItem) { dialog, which ->
+                DataPreferences.RedditSource.fromValue(which).let { source ->
+                    updateRedditSource(source.value)
+                    dialog.dismiss()
+                }
+            }
+            .show()
+    }
+
+    private fun updateRedditSource(source: Int) {
+        viewModel.setRedditSource(source)
     }
 
     private fun openAbout() {
