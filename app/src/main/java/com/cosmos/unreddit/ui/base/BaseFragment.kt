@@ -4,6 +4,7 @@ import android.net.Uri
 import android.os.Bundle
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.addCallback
+import androidx.browser.customtabs.CustomTabsIntent
 import androidx.fragment.app.Fragment
 import androidx.navigation.NavDirections
 import androidx.navigation.NavOptions
@@ -165,6 +166,10 @@ open class BaseFragment : Fragment(), PostListAdapter.PostClickListener,
     }
 
     open fun openBrowser(link: String) {
-        navigate(NavigationGraphDirections.openBrowser(link))
+        CustomTabsIntent.Builder()
+            .setShowTitle(true)
+            .setShareState(CustomTabsIntent.SHARE_STATE_ON)
+            .build()
+            .launchUrl(requireContext(), Uri.parse(link))
     }
 }

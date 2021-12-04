@@ -28,6 +28,8 @@ buildscript {
 
         material = '1.4.0'
 
+        browser = '1.4.0'
+
         touchImageView = '3.0.3'
 
         exoPlayer = '2.16.0'

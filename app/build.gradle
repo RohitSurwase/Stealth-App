@@ -103,6 +103,8 @@ dependencies {
 
     implementation "com.google.android.material:material:$rootProject.material"
 
+    implementation "androidx.browser:browser:$rootProject.browser"
+
     implementation "com.squareup.retrofit2:retrofit:$rootProject.retrofit"
     implementation "com.squareup.retrofit2:converter-moshi:$rootProject.retrofit"
 
