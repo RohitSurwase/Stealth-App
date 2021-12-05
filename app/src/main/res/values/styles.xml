@@ -19,6 +19,7 @@
         <item name="switchStyle">@style/SwitchStyle</item>
 
         <item name="materialAlertDialogTheme">@style/MaterialAlertDialogTheme</item>
+        <item name="bottomSheetDialogTheme">@style/ThemeOverlay.App.BottomSheetDialog</item>
     </style>
 
     <style name="AppTheme" parent="BaseTheme"/>
@@ -49,16 +50,16 @@
     </style>
 
     <!-- Post Details -->
-    <style name="PostDetailsSheetTheme" parent="Theme.MaterialComponents.Light.BottomSheetDialog">
-        <item name="bottomSheetStyle">@style/PostDetailsBottomSheet</item>
+    <style name="ThemeOverlay.App.BottomSheetDialog" parent="ThemeOverlay.MaterialComponents.BottomSheetDialog">
+        <item name="bottomSheetStyle">@style/Widget.BottomSheetDialog</item>
     </style>
 
-    <style name="PostDetailsBottomSheet" parent="Widget.MaterialComponents.BottomSheet">
-        <item name="shapeAppearanceOverlay">@style/ShapeAppearancePostDetails</item>
+    <style name="Widget.BottomSheetDialog" parent="Widget.MaterialComponents.BottomSheet.Modal">
+        <item name="shapeAppearanceOverlay">@style/ShapeAppearance.BottomSheetDialog</item>
         <item name="backgroundTint">@color/background</item>
     </style>
 
-    <style name="ShapeAppearancePostDetails" parent="">
+    <style name="ShapeAppearance.BottomSheetDialog" parent="ShapeAppearance.MaterialComponents.LargeComponent">
         <item name="cornerSizeTopRight">16dp</item>
         <item name="cornerSizeTopLeft">16dp</item>
         <item name="cornerFamily">rounded</item>

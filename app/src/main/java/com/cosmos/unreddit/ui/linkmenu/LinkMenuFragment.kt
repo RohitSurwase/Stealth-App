@@ -9,7 +9,6 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.core.os.bundleOf
 import androidx.fragment.app.FragmentManager
-import com.cosmos.unreddit.R
 import com.cosmos.unreddit.data.model.MediaType
 import com.cosmos.unreddit.databinding.FragmentLinkMenuBinding
 import com.cosmos.unreddit.util.extension.doAndDismiss
@@ -81,10 +80,6 @@ class LinkMenuFragment : BottomSheetDialogFragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
-    }
-
-    override fun getTheme(): Int {
-        return R.style.PostDetailsSheetTheme
     }
 
     companion object {

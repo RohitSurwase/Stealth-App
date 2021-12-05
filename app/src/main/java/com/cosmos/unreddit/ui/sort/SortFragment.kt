@@ -9,7 +9,6 @@ import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.setFragmentResult
 import androidx.transition.Slide
 import androidx.transition.TransitionManager
-import com.cosmos.unreddit.R
 import com.cosmos.unreddit.data.model.Sorting
 import com.cosmos.unreddit.data.remote.api.reddit.RedditApi
 import com.cosmos.unreddit.databinding.FragmentSortBinding
@@ -158,10 +157,6 @@ class SortFragment : BottomSheetDialogFragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
-    }
-
-    override fun getTheme(): Int {
-        return R.style.PostDetailsSheetTheme
     }
 
     enum class SortType {
