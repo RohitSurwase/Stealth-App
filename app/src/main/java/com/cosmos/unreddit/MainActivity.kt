@@ -2,8 +2,13 @@ package com.cosmos.unreddit
 
 import android.os.Bundle
 import android.view.View
+import android.view.ViewGroup
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.updateMargins
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.flowWithLifecycle
 import androidx.lifecycle.lifecycleScope
@@ -32,6 +37,9 @@ class MainActivity : AppCompatActivity(), NavController.OnDestinationChangedList
     override fun onCreate(savedInstanceState: Bundle?) {
         setTheme(R.style.AppTheme)
         super.onCreate(savedInstanceState)
+
+        WindowCompat.setDecorFitsSystemWindows(window, false)
+
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
@@ -57,6 +65,17 @@ class MainActivity : AppCompatActivity(), NavController.OnDestinationChangedList
     }
 
     private fun initBottomNavigationView() {
+        ViewCompat.setOnApplyWindowInsetsListener(binding.bottomNavigation) { view, windowInsets ->
+            val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
+
+            val marginBottom = insets.bottom +
+                    resources.getDimension(R.dimen.bottom_navigation_margin).toInt()
+
+            (view.layoutParams as ViewGroup.MarginLayoutParams).updateMargins(bottom = marginBottom)
+
+            windowInsets
+        }
+
         val radius = resources.getDimension(R.dimen.bottom_navigation_radius)
         val bottomNavigationBackground = binding.bottomNavigation.background
                 as? MaterialShapeDrawable

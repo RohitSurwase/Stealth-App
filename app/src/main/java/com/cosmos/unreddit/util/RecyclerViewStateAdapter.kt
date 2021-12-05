@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.cosmos.unreddit.databinding.ItemListContentBinding
 import com.cosmos.unreddit.ui.loadstate.NetworkLoadStateAdapter
 import com.cosmos.unreddit.util.extension.addLoadStateListener
+import com.cosmos.unreddit.util.extension.applyWindowInsets
 
 class RecyclerViewStateAdapter(val onError: () -> Unit) :
     ListAdapter<RecyclerViewStateAdapter.Page, RecyclerViewStateAdapter.ViewHolder>(COMPARATOR) {
@@ -47,6 +48,7 @@ class RecyclerViewStateAdapter(val onError: () -> Unit) :
 
         fun bind(adapter: RecyclerView.Adapter<out RecyclerView.ViewHolder>) {
             binding.listContent.apply {
+                applyWindowInsets(left = false, top = false, right = false)
                 layoutManager = LinearLayoutManager(context)
                 this.adapter = adapter
             }

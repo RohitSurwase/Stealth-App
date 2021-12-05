@@ -35,6 +35,7 @@ import com.cosmos.unreddit.ui.common.ElasticDragDismissFrameLayout
 import com.cosmos.unreddit.ui.loadstate.ResourceStateAdapter
 import com.cosmos.unreddit.ui.mediaviewer.MediaViewerFragment
 import com.cosmos.unreddit.ui.sort.SortFragment
+import com.cosmos.unreddit.util.extension.applyWindowInsets
 import com.cosmos.unreddit.util.extension.betterSmoothScrollToPosition
 import com.cosmos.unreddit.util.extension.launchRepeat
 import com.cosmos.unreddit.util.extension.setCommentListener
@@ -113,6 +114,9 @@ class PostDetailsFragment :
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        binding.layoutRoot.applyWindowInsets(bottom = false)
+
         showNavigation(false)
 
         binding.root.addListener(this)
@@ -160,6 +164,7 @@ class PostDetailsFragment :
 
         val concatAdapter = ConcatAdapter(postAdapter, resourceStateAdapter, commentAdapter)
         binding.listComments.apply {
+            applyWindowInsets(left = false, top = false, right = false)
             layoutManager = LinearLayoutManager(requireContext())
             adapter = concatAdapter
         }

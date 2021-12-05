@@ -2,6 +2,7 @@ package com.cosmos.unreddit.ui.base
 
 import android.net.Uri
 import android.os.Bundle
+import android.view.View
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.addCallback
 import androidx.browser.customtabs.CustomTabsIntent
@@ -20,6 +21,7 @@ import com.cosmos.unreddit.ui.postdetails.PostDetailsFragment
 import com.cosmos.unreddit.ui.postlist.PostListAdapter
 import com.cosmos.unreddit.ui.postmenu.PostMenuFragment
 import com.cosmos.unreddit.util.LinkUtil
+import com.cosmos.unreddit.util.extension.applyWindowInsets
 
 open class BaseFragment : Fragment(), PostListAdapter.PostClickListener,
     RedditView.OnLinkClickListener {
@@ -42,6 +44,15 @@ open class BaseFragment : Fragment(), PostListAdapter.PostClickListener,
         onBackPressedCallback = requireActivity().onBackPressedDispatcher.addCallback(this) {
             onBackPressed()
         }
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        applyInsets(view)
+    }
+
+    protected open fun applyInsets(view: View) {
+        view.applyWindowInsets(bottom = false)
     }
 
     protected open fun onBackPressed() {

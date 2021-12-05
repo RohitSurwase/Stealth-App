@@ -18,6 +18,7 @@ import com.cosmos.unreddit.UiViewModel
 import com.cosmos.unreddit.databinding.FragmentSubscriptionsBinding
 import com.cosmos.unreddit.ui.base.BaseFragment
 import com.cosmos.unreddit.util.SearchUtil
+import com.cosmos.unreddit.util.extension.applyWindowInsets
 import com.cosmos.unreddit.util.extension.hideSoftKeyboard
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collect
@@ -32,7 +33,7 @@ class SubscriptionsFragment : BaseFragment() {
     override val viewModel: SubscriptionsViewModel by activityViewModels()
     private val uiViewModel: UiViewModel by activityViewModels()
 
-    private lateinit var adapter: SubscriptionsAdapter
+    private lateinit var subscriptionsAdapter: SubscriptionsAdapter
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -68,7 +69,7 @@ class SubscriptionsFragment : BaseFragment() {
             viewModel.filteredSubscriptions
                 .flowWithLifecycle(viewLifecycleOwner.lifecycle, Lifecycle.State.STARTED)
                 .collect { subscriptions ->
-                    adapter.submitList(subscriptions)
+                    subscriptionsAdapter.submitList(subscriptions)
                     if (binding.appBar.searchInput.isQueryEmpty()) {
                         binding.emptyData.isVisible = subscriptions.isEmpty()
                         binding.textEmptyData.isVisible = subscriptions.isEmpty()
@@ -78,9 +79,12 @@ class SubscriptionsFragment : BaseFragment() {
     }
 
     private fun initRecyclerView() {
-        adapter = SubscriptionsAdapter { onClick(it) }
-        binding.listSubscriptions.layoutManager = LinearLayoutManager(requireContext())
-        binding.listSubscriptions.adapter = adapter
+        subscriptionsAdapter = SubscriptionsAdapter { onClick(it) }
+        binding.listSubscriptions.apply {
+            applyWindowInsets(left = false, top = false, right = false)
+            layoutManager = LinearLayoutManager(requireContext())
+            adapter = subscriptionsAdapter
+        }
     }
 
     private fun initAppBar() {
