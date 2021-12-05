@@ -5,6 +5,6 @@ object SearchUtil {
     private const val QUERY_MAX_LENGTH = 20
 
     fun isQueryValid(query: String): Boolean {
-        return query.length in QUERY_MIN_LENGTH..QUERY_MAX_LENGTH
+        return query.length >= QUERY_MIN_LENGTH
     }
 }
