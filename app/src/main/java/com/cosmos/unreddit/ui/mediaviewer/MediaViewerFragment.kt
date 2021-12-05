@@ -10,6 +10,9 @@ import android.view.ViewGroup
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
 import androidx.core.os.bundleOf
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import androidx.core.view.isVisible
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
@@ -88,10 +91,17 @@ class MediaViewerFragment : BaseFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        showSystemBars(false)
+
         initRecyclerView()
         initViewPager()
         bindViewModel()
         binding.infoRetry.setActionClickListener { retry() }
+    }
+
+    override fun applyInsets(view: View) {
+        // Don't apply any insets
     }
 
     private fun bindViewModel() {
@@ -268,6 +278,19 @@ class MediaViewerFragment : BaseFragment() {
             .show()
     }
 
+    private fun showSystemBars(show: Boolean) {
+        ViewCompat.getWindowInsetsController(binding.root)?.let { windowInsetsController ->
+            windowInsetsController.systemBarsBehavior =
+                WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+            if (show) {
+                windowInsetsController.show(WindowInsetsCompat.Type.systemBars())
+            } else {
+                windowInsetsController.hide(WindowInsetsCompat.Type.systemBars())
+            }
+        }
+    }
+
+
     override fun onBackPressed() {
         if (isLegacyNavigation) {
             // Prevent onBackPressed event to be passed to PostDetailsFragment and show bottom nav
@@ -279,6 +302,7 @@ class MediaViewerFragment : BaseFragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
+        showSystemBars(true)
         mediaAdapter.clear()
         _binding = null
     }
