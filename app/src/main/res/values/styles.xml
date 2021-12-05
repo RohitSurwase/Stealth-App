@@ -12,6 +12,8 @@
         <item name="android:colorBackground">@color/background</item>
         <item name="colorSurface">@color/background</item>
 
+        <item name="colorOnSurface">@color/colorPrimaryLight</item>
+
         <item name="android:textColor">@color/text_color</item>
 
         <item name="preferenceTheme">@style/PreferenceTheme</item>
