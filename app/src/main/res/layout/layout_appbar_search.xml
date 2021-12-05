@@ -45,7 +45,7 @@
         android:backgroundTint="@android:color/transparent"
         android:hint="@string/subscriptions_search_hint"
         android:inputType="text"
-        android:imeOptions="actionSearch"
+        android:imeOptions="actionSearch|flagNoPersonalizedLearning"
         tools:visibility="gone"/>
 
     <com.cosmos.unreddit.ui.common.widget.CardButton
