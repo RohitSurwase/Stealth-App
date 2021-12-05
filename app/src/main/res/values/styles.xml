@@ -374,6 +374,7 @@
         <item name="alertDialogStyle">@style/MaterialAlertDialogStyle</item>
         <item name="materialAlertDialogTitleTextStyle">@style/MaterialAlertDialogTitleText</item>
         <item name="materialAlertDialogBodyTextStyle">@style/MaterialAlertDialogBodyText</item>
+        <item name="android:checkedTextViewStyle">@style/MaterialAlertDialogBodyText</item>
     </style>
 
     <style name="MaterialAlertDialogStyle" parent="MaterialAlertDialog.MaterialComponents">
