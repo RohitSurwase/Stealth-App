@@ -130,6 +130,7 @@
     <string name="preference_night_mode_light">Light Theme</string>
     <string name="preference_night_mode_dark">Dark Theme</string>
     <string name="preference_night_mode_system">Follow System</string>
+    <string name="preference_night_mode_amoled">Amoled</string>
 
     <string name="preference_show_nsfw">Show NSFW content</string>
     <string name="preference_show_nsfw_preview">Show NSFW preview</string>

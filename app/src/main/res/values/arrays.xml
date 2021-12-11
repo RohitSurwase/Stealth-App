@@ -4,6 +4,7 @@
     <string-array name="pref_night_mode_labels">
         <item>@string/preference_night_mode_light</item>
         <item>@string/preference_night_mode_dark</item>
+        <item>@string/preference_night_mode_amoled</item>
         <item>@string/preference_night_mode_system</item>
     </string-array>
     

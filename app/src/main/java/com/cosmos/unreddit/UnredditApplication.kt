@@ -10,6 +10,7 @@ import coil.ImageLoaderFactory
 import coil.decode.GifDecoder
 import coil.decode.ImageDecoderDecoder
 import coil.util.CoilUtils
+import com.cosmos.unreddit.data.model.preferences.UiPreferences
 import com.cosmos.unreddit.data.repository.PreferencesRepository
 import dagger.hilt.android.HiltAndroidApp
 import kotlinx.coroutines.flow.first
@@ -26,12 +27,24 @@ class UnredditApplication : Application(), ImageLoaderFactory, Configuration.Pro
     @Inject
     lateinit var workerFactory: HiltWorkerFactory
 
+    var appTheme: Int = -1
+        set(mode) {
+            field = if (!UiPreferences.NightMode.isAmoled(mode)) {
+                AppCompatDelegate.setDefaultNightMode(mode)
+                R.style.AppTheme
+            } else {
+                // Force dark mode when amoled is set
+                AppCompatDelegate.setDefaultNightMode(UiPreferences.NightMode.DARK.mode)
+                R.style.AmoledAppTheme
+            }
+        }
+
     override fun onCreate() {
         super.onCreate()
 
         runBlocking {
             val nightMode = preferencesRepository.getNightMode().first()
-            AppCompatDelegate.setDefaultNightMode(nightMode)
+            appTheme = nightMode
         }
     }
 

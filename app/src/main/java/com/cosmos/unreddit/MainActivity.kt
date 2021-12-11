@@ -19,6 +19,7 @@ import androidx.navigation.ui.setupWithNavController
 import androidx.transition.Slide
 import androidx.transition.TransitionManager
 import com.cosmos.unreddit.databinding.ActivityMainBinding
+import com.cosmos.unreddit.util.extension.unredditApplication
 import com.google.android.material.shape.CornerFamily
 import com.google.android.material.shape.MaterialShapeDrawable
 import dagger.hilt.android.AndroidEntryPoint
@@ -35,7 +36,7 @@ class MainActivity : AppCompatActivity(), NavController.OnDestinationChangedList
     private lateinit var navController: NavController
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        setTheme(R.style.AppTheme)
+        setTheme(unredditApplication.appTheme)
         super.onCreate(savedInstanceState)
 
         WindowCompat.setDecorFitsSystemWindows(window, false)

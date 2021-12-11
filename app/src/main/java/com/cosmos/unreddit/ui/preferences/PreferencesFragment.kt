@@ -4,7 +4,6 @@ import android.os.Bundle
 import android.view.View
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.addCallback
-import androidx.appcompat.app.AppCompatDelegate
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Lifecycle
 import androidx.navigation.NavOptions
@@ -19,6 +18,7 @@ import com.cosmos.unreddit.data.model.preferences.UiPreferences
 import com.cosmos.unreddit.util.extension.getNavOptions
 import com.cosmos.unreddit.util.extension.latest
 import com.cosmos.unreddit.util.extension.launchRepeat
+import com.cosmos.unreddit.util.extension.unredditApplication
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collect
@@ -160,7 +160,8 @@ class PreferencesFragment : PreferenceFragmentCompat() {
     }
 
     private fun updateNightMode(mode: Int) {
-        AppCompatDelegate.setDefaultNightMode(mode)
+        unredditApplication?.appTheme = mode
+        activity?.recreate() // Recreate activity to force the change between dark and amoled
         viewModel.setNightMode(mode)
     }
 

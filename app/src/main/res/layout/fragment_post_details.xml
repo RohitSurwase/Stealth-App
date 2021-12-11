@@ -7,7 +7,7 @@
     app:dragDismissScale="@dimen/post_details_dismiss_scale"
     app:cardCornerRadius="0dp"
     app:cardElevation="0dp"
-    app:cardBackgroundColor="@color/background">
+    app:cardBackgroundColor="?attr/colorSurface">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/layout_root"

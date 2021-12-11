@@ -58,7 +58,7 @@
 
     <style name="Widget.BottomSheetDialog" parent="Widget.MaterialComponents.BottomSheet.Modal">
         <item name="shapeAppearanceOverlay">@style/ShapeAppearance.BottomSheetDialog</item>
-        <item name="backgroundTint">@color/background</item>
+        <item name="backgroundTint">?attr/colorSurface</item>
     </style>
 
     <style name="ShapeAppearance.BottomSheetDialog" parent="ShapeAppearance.MaterialComponents.LargeComponent">
@@ -320,7 +320,7 @@
         <item name="tabIndicatorColor">@color/colorPrimary</item>
         <item name="tabGravity">center</item>
         <item name="tabSelectedTextColor">@color/colorPrimary</item>
-        <item name="android:background">@color/background</item>
+        <item name="android:background">?attr/colorSurface</item>
     </style>
 
     <style name="TextAppearanceAward" parent="">
@@ -346,7 +346,7 @@
     </style>
 
     <style name="ChipActionStyle" parent="Widget.MaterialComponents.Chip.Action">
-        <item name="chipBackgroundColor">@color/background</item>
+        <item name="chipBackgroundColor">?attr/colorSurface</item>
         <item name="chipStrokeWidth">1dp</item>
         <item name="chipStrokeColor">@color/colorPrimary</item>
         <item name="chipIconTint">@color/colorPrimary</item>
@@ -370,7 +370,6 @@
     <!-- Dialog -->
 
     <style name="MaterialAlertDialogTheme" parent="ThemeOverlay.MaterialComponents.MaterialAlertDialog">
-        <item name="colorSurface">@color/background</item>
         <item name="alertDialogStyle">@style/MaterialAlertDialogStyle</item>
         <item name="materialAlertDialogTitleTextStyle">@style/MaterialAlertDialogTitleText</item>
         <item name="materialAlertDialogBodyTextStyle">@style/MaterialAlertDialogBodyText</item>
