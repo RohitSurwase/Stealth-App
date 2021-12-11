@@ -89,6 +89,8 @@ class SubredditFragment : BaseFragment() {
         bindViewModel()
         bindingAbout.subredditSubscribeButton.setOnClickListener { viewModel.toggleSubscription() }
         bindingContent.loadingState.infoRetry.setActionClickListener { retry() }
+
+        viewModel.contentLayoutState?.let { bindingContent.layoutRoot.jumpToState(it) }
     }
 
     private fun bindViewModel() {
@@ -303,6 +305,10 @@ class SubredditFragment : BaseFragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
+
+        // Save header state to restore it in case of fragment recreation
+        viewModel.contentLayoutState = bindingContent.layoutRoot.currentState
+
         _binding = null
         _bindingContent = null
         _bindingAbout = null

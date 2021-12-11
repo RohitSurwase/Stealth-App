@@ -65,6 +65,8 @@ class SubredditViewModel @Inject constructor(
     private val _isDescriptionCollapsed = MutableStateFlow(true)
     val isDescriptionCollapsed: StateFlow<Boolean> = _isDescriptionCollapsed
 
+    var contentLayoutState: Int? = null
+
     val isSubscribed: StateFlow<Boolean> = combine(
         _subreddit,
         subscriptionsNames

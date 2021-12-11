@@ -80,6 +80,8 @@ class UserFragment : BaseFragment(), UserCommentsAdapter.CommentClickListener {
         initViewPager()
         bindViewModel()
         binding.infoRetry.setActionClickListener { retry() }
+
+        viewModel.layoutState?.let { binding.layoutRoot.jumpToState(it) }
     }
 
     private fun bindViewModel() {
@@ -291,6 +293,10 @@ class UserFragment : BaseFragment(), UserCommentsAdapter.CommentClickListener {
 
     override fun onDestroyView() {
         super.onDestroyView()
+
+        // Save header state to restore it in case of fragment recreation
+        viewModel.layoutState = binding.layoutRoot.currentState
+
         _binding = null
     }
 }

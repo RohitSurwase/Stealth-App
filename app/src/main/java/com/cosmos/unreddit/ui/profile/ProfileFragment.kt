@@ -79,6 +79,8 @@ class ProfileFragment : BaseFragment(), UserCommentsAdapter.CommentClickListener
         initAppBar()
         initViewPager()
         bindViewModel()
+
+        viewModel.layoutState?.let { binding.layoutRoot.jumpToState(it) }
     }
 
     private fun initResultListener() {
@@ -202,6 +204,10 @@ class ProfileFragment : BaseFragment(), UserCommentsAdapter.CommentClickListener
 
     override fun onDestroyView() {
         super.onDestroyView()
+
+        // Save header state to restore it in case of fragment recreation
+        viewModel.layoutState = binding.layoutRoot.currentState
+
         _binding = null
     }
 }

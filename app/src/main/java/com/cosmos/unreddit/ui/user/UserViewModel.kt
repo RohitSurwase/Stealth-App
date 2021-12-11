@@ -67,6 +67,8 @@ class UserViewModel @Inject constructor(
     private val _about: MutableStateFlow<Resource<User>> = MutableStateFlow(Resource.Loading())
     val about: StateFlow<Resource<User>> = _about
 
+    var layoutState: Int? = null
+
     private val savedCommentIds: Flow<List<String>> = currentProfile.flatMapLatest {
         repository.getSavedCommentIds(it.id)
     }

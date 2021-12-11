@@ -38,6 +38,8 @@ class ProfileViewModel @Inject constructor(
     private val _page: MutableStateFlow<Int> = MutableStateFlow(0)
     val page: StateFlow<Int> get() = _page
 
+    var layoutState: Int? = null
+
     private val _savedPosts: Flow<List<PostEntity>> = currentProfile.flatMapLatest {
         repository.getSavedPosts(it.id)
     }
