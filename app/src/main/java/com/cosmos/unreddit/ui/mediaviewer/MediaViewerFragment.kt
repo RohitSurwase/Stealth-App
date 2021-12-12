@@ -10,9 +10,6 @@ import android.view.ViewGroup
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
 import androidx.core.os.bundleOf
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
-import androidx.core.view.WindowInsetsControllerCompat
 import androidx.core.view.isVisible
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
@@ -32,6 +29,7 @@ import com.cosmos.unreddit.ui.base.BaseFragment
 import com.cosmos.unreddit.util.extension.betterSmoothScrollToPosition
 import com.cosmos.unreddit.util.extension.getRecyclerView
 import com.cosmos.unreddit.util.extension.launchRepeat
+import com.cosmos.unreddit.util.extension.showWindowInsets
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
@@ -279,14 +277,10 @@ class MediaViewerFragment : BaseFragment() {
     }
 
     private fun showSystemBars(show: Boolean) {
-        ViewCompat.getWindowInsetsController(binding.root)?.let { windowInsetsController ->
-            windowInsetsController.systemBarsBehavior =
-                WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
-            if (show) {
-                windowInsetsController.show(WindowInsetsCompat.Type.systemBars())
-            } else {
-                windowInsetsController.hide(WindowInsetsCompat.Type.systemBars())
-            }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            activity?.window?.decorView?.showWindowInsets(show)
+        } else {
+            binding.root.showWindowInsets(show)
         }
     }
 

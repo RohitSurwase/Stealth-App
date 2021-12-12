@@ -9,6 +9,8 @@ import android.widget.TextView
 import androidx.annotation.ColorInt
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsCompat.Type.InsetsType
+import androidx.core.view.WindowInsetsControllerCompat
 import androidx.core.view.updatePadding
 import coil.imageLoader
 import coil.request.ImageRequest
@@ -93,5 +95,20 @@ fun View.applyWindowInsets(
         )
 
         windowInsets
+    }
+}
+
+fun View.showWindowInsets(
+    show: Boolean,
+    @InsetsType types: Int = WindowInsetsCompat.Type.systemBars(),
+    behavior: Int = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+) {
+    ViewCompat.getWindowInsetsController(this)?.let { windowInsetsController ->
+        windowInsetsController.systemBarsBehavior = behavior
+        if (show) {
+            windowInsetsController.show(types)
+        } else {
+            windowInsetsController.hide(types)
+        }
     }
 }
