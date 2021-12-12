@@ -13,7 +13,6 @@ import androidx.lifecycle.Lifecycle
 import androidx.navigation.fragment.findNavController
 import androidx.paging.LoadState
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import com.cosmos.unreddit.R
 import com.cosmos.unreddit.UiViewModel
 import com.cosmos.unreddit.data.repository.PostListRepository
@@ -45,11 +44,15 @@ class PostListFragment : BaseFragment() {
 
     // Workaround for nested CoordinatorLayout that prevents bottom navigation from being hidden on
     // scroll
-    private val onScrollListener = object : RecyclerView.OnScrollListener() {
-        override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
-            if (dy > 0 && uiViewModel.navigationVisibility.value) {
+    private val onOffsetChangedListener = object : AppBarLayout.OnOffsetChangedListener {
+        private var visible: Boolean = true
+
+        override fun onOffsetChanged(appBarLayout: AppBarLayout?, verticalOffset: Int) {
+            if (verticalOffset != 0 && visible) {
+                visible = false
                 uiViewModel.setNavigationVisibility(false)
-            } else if (dy < 0 && !uiViewModel.navigationVisibility.value) {
+            } else if (verticalOffset == 0 && !visible) {
+                visible = true
                 uiViewModel.setNavigationVisibility(true)
             }
         }
@@ -149,8 +152,6 @@ class PostListFragment : BaseFragment() {
                 header = NetworkLoadStateAdapter { postListAdapter.retry() },
                 footer = NetworkLoadStateAdapter { postListAdapter.retry() }
             )
-            clearOnScrollListeners()
-            addOnScrollListener(onScrollListener)
         }
 
         launchRepeat(Lifecycle.State.STARTED) {
@@ -162,6 +163,7 @@ class PostListFragment : BaseFragment() {
 
     private fun initAppBar() {
         binding.appBar.sortCard.setOnClickListener { showSortDialog() }
+        binding.appBarLayout.addOnOffsetChangedListener(onOffsetChangedListener)
     }
 
     private fun initResultListener() {
