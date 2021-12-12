@@ -135,12 +135,6 @@ class PostDetailsFragment :
         binding.singleThreadLayout.setOnClickListener { loadFullDiscussion() }
     }
 
-    override fun onSaveInstanceState(outState: Bundle) {
-        super.onSaveInstanceState(outState)
-        // Save comment hierarchy
-        viewModel.setComments(commentAdapter.currentList)
-    }
-
     private fun initRecyclerView() {
         val contentPreferences = runBlocking {
             preferencesRepository.getContentPreferences().first()
@@ -329,6 +323,10 @@ class PostDetailsFragment :
 
     override fun onDestroyView() {
         super.onDestroyView()
+
+        // Save comment hierarchy
+        viewModel.setComments(commentAdapter.currentList)
+
         _binding = null
         commentAdapter.cleanUp()
     }
