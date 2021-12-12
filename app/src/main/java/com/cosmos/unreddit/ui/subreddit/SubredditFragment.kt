@@ -93,6 +93,10 @@ class SubredditFragment : BaseFragment() {
         viewModel.contentLayoutState?.let { bindingContent.layoutRoot.jumpToState(it) }
     }
 
+    override fun applyInsets(view: View) {
+        // ignore
+    }
+
     private fun bindViewModel() {
         launchRepeat(Lifecycle.State.STARTED) {
             launch {
