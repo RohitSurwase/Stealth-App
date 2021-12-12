@@ -8,7 +8,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
-import androidx.core.view.updateMargins
+import androidx.core.view.updateLayoutParams
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.flowWithLifecycle
 import androidx.lifecycle.lifecycleScope
@@ -69,10 +69,10 @@ class MainActivity : AppCompatActivity(), NavController.OnDestinationChangedList
         ViewCompat.setOnApplyWindowInsetsListener(binding.bottomNavigation) { view, windowInsets ->
             val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
 
-            val marginBottom = insets.bottom +
-                    resources.getDimension(R.dimen.bottom_navigation_margin).toInt()
-
-            (view.layoutParams as ViewGroup.MarginLayoutParams).updateMargins(bottom = marginBottom)
+            view.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                bottomMargin = insets.bottom +
+                        resources.getDimension(R.dimen.bottom_navigation_margin).toInt()
+            }
 
             windowInsets
         }
