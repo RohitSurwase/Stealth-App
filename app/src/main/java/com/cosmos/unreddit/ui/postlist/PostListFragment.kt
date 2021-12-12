@@ -4,12 +4,16 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.isVisible
+import androidx.core.view.updateLayoutParams
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Lifecycle
 import androidx.navigation.fragment.findNavController
 import androidx.paging.LoadState
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.cosmos.unreddit.R
 import com.cosmos.unreddit.UiViewModel
 import com.cosmos.unreddit.data.repository.PostListRepository
@@ -23,6 +27,7 @@ import com.cosmos.unreddit.util.extension.launchRepeat
 import com.cosmos.unreddit.util.extension.onRefreshFromNetwork
 import com.cosmos.unreddit.util.extension.setNavigationListener
 import com.cosmos.unreddit.util.extension.setSortingListener
+import com.google.android.material.appbar.AppBarLayout
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.collectLatest
@@ -37,6 +42,18 @@ class PostListFragment : BaseFragment() {
 
     override val viewModel: PostListViewModel by activityViewModels()
     private val uiViewModel: UiViewModel by activityViewModels()
+
+    // Workaround for nested CoordinatorLayout that prevents bottom navigation from being hidden on
+    // scroll
+    private val onScrollListener = object : RecyclerView.OnScrollListener() {
+        override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+            if (dy > 0 && uiViewModel.navigationVisibility.value) {
+                uiViewModel.setNavigationVisibility(false)
+            } else if (dy < 0 && !uiViewModel.navigationVisibility.value) {
+                uiViewModel.setNavigationVisibility(true)
+            }
+        }
+    }
 
     private lateinit var postListAdapter: PostListAdapter
 
@@ -54,6 +71,17 @@ class PostListFragment : BaseFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        ViewCompat.setOnApplyWindowInsetsListener(binding.appBar.root) { appBar, windowInsets ->
+            val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
+
+            appBar.updateLayoutParams<AppBarLayout.LayoutParams> {
+                topMargin = insets.top
+            }
+
+            windowInsets
+        }
+
         findNavController().addOnDestinationChangedListener { _, destination, _ ->
             when (destination.id) {
                 R.id.postListFragment -> uiViewModel.setNavigationVisibility(true)
@@ -65,6 +93,10 @@ class PostListFragment : BaseFragment() {
         initRecyclerView()
         bindViewModel()
         binding.infoRetry.setActionClickListener { postListAdapter.retry() }
+    }
+
+    override fun applyInsets(view: View) {
+        // ignore
     }
 
     private fun bindViewModel() {
@@ -117,6 +149,8 @@ class PostListFragment : BaseFragment() {
                 header = NetworkLoadStateAdapter { postListAdapter.retry() },
                 footer = NetworkLoadStateAdapter { postListAdapter.retry() }
             )
+            clearOnScrollListeners()
+            addOnScrollListener(onScrollListener)
         }
 
         launchRepeat(Lifecycle.State.STARTED) {
