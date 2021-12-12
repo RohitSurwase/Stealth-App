@@ -13,5 +13,6 @@ class PostRecyclerView @JvmOverloads constructor(
 
     init {
         addItemDecoration(PostDividerItemDecoration(context))
+        isVerticalScrollBarEnabled = false
     }
 }
