@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.view.View
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.addCallback
+import androidx.core.view.children
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Lifecycle
 import androidx.navigation.NavOptions
@@ -12,11 +13,14 @@ import androidx.navigation.fragment.findNavController
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.SwitchPreferenceCompat
+import androidx.recyclerview.widget.RecyclerView
 import com.cosmos.unreddit.R
 import com.cosmos.unreddit.UiViewModel
 import com.cosmos.unreddit.data.model.preferences.ContentPreferences.PreferencesKeys
 import com.cosmos.unreddit.data.model.preferences.DataPreferences
 import com.cosmos.unreddit.data.model.preferences.UiPreferences
+import com.cosmos.unreddit.databinding.LayoutPreferenceListBinding
+import com.cosmos.unreddit.util.extension.applyWindowInsets
 import com.cosmos.unreddit.util.extension.getNavOptions
 import com.cosmos.unreddit.util.extension.latest
 import com.cosmos.unreddit.util.extension.launchRepeat
@@ -28,6 +32,9 @@ import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class PreferencesFragment : PreferenceFragmentCompat() {
+
+    private var _binding: LayoutPreferenceListBinding? = null
+    private val binding get() = _binding!!
 
     private val viewModel: PreferencesViewModel by activityViewModels()
     private val uiViewModel: UiViewModel by activityViewModels()
@@ -57,8 +64,17 @@ class PreferencesFragment : PreferenceFragmentCompat() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        view.applyWindowInsets(bottom = false)
 
-        view.fitsSystemWindows = true
+        _binding = LayoutPreferenceListBinding.bind(view)
+
+        // Retrieve the preference list to configure the RecyclerView
+        val list = binding.listContainer.children.find { it is RecyclerView } as RecyclerView?
+        list?.apply {
+            applyWindowInsets(left = false, top = false, right = false)
+            isVerticalScrollBarEnabled = false
+            clipToPadding = false
+        }
 
         findNavController().addOnDestinationChangedListener { _, destination, _ ->
             when (destination.id) {
@@ -237,6 +253,11 @@ class PreferencesFragment : PreferenceFragmentCompat() {
 
     private fun openAbout() {
         findNavController().navigate(PreferencesFragmentDirections.openAbout(), navOptions)
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 
     companion object {
