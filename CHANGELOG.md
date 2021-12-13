@@ -1,3 +1,23 @@
+# 2.0.0-alpha01 - 2021/12/13
+
+### Added
+- Teddit API: choose between Reddit official API and Teddit API to fetch data (experimental)
+- Amoled theme
+- Incognito mode by default for keyboard
+
+### Changed
+- Improved performances
+- Various UI updates
+
+### Removed
+- In-app browser: replace with CustomTab
+- Max limit for search queries
+
+### Fixed
+- Unordered images in galleries
+- Comments not saved on configuration change
+- Banner not collapsing when navigating to/from Subreddits
+
 # 1.1.3 - 2021/10/25
 
 ### Fixed

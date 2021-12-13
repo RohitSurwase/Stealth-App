@@ -10,6 +10,8 @@ It provides features from Reddit, without the need for an account. In fact, the 
      alt="Get it on F-Droid"
      height="80">](https://f-droid.org/packages/com.cosmos.unreddit/)
 
+Join Stealth on Matrix: [#stealth-app:matrix.org](https://matrix.to/#/#stealth-app:matrix.org)
+
 ## Features
 
 - Browse Reddit (view posts, comments, subreddits, and users)
@@ -22,13 +24,8 @@ It provides features from Reddit, without the need for an account. In fact, the 
 - Show/hide NSFW content
 - Image flairs
 - Awards
+- Save photos and videos
 - Light/Dark theme
-
- ### More to come
-
- - Save photos and videos
- - Remind-Me
- - and more...
 
 ## License
 
