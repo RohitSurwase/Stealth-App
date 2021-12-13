@@ -7,7 +7,7 @@ import android.view.ViewGroup
 import androidx.fragment.app.FragmentTransaction
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.asLiveData
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.RecyclerView
@@ -24,6 +24,8 @@ import com.cosmos.unreddit.ui.user.UserCommentsAdapter
 import com.cosmos.unreddit.util.RecyclerViewStateAdapter
 import com.cosmos.unreddit.util.extension.getListContent
 import com.cosmos.unreddit.util.extension.getRecyclerView
+import com.cosmos.unreddit.util.extension.latest
+import com.cosmos.unreddit.util.extension.launchRepeat
 import com.cosmos.unreddit.util.extension.scrollToTop
 import com.cosmos.unreddit.util.extension.setCommentListener
 import com.cosmos.unreddit.util.extension.setNavigationListener
@@ -32,7 +34,6 @@ import com.google.android.material.tabs.TabLayoutMediator
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
@@ -49,9 +50,9 @@ class ProfileFragment : BaseFragment(), UserCommentsAdapter.CommentClickListener
     // Workaround for MotionLayout that prevents bottom navigation from being hidden on scroll
     private val onScrollListener = object : RecyclerView.OnScrollListener() {
         override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
-            if (dy > 0 && uiViewModel.navigationVisibility.value == true) {
+            if (dy > 0 && uiViewModel.navigationVisibility.value) {
                 uiViewModel.setNavigationVisibility(false)
-            } else if (dy < 0 && uiViewModel.navigationVisibility.value == false) {
+            } else if (dy < 0 && !uiViewModel.navigationVisibility.value) {
                 uiViewModel.setNavigationVisibility(true)
             }
         }
@@ -78,6 +79,8 @@ class ProfileFragment : BaseFragment(), UserCommentsAdapter.CommentClickListener
         initAppBar()
         initViewPager()
         bindViewModel()
+
+        viewModel.layoutState?.let { binding.layoutRoot.jumpToState(it) }
     }
 
     private fun initResultListener() {
@@ -91,7 +94,7 @@ class ProfileFragment : BaseFragment(), UserCommentsAdapter.CommentClickListener
     private fun initAppBar() {
         binding.usersCard.setOnClickListener {
             lifecycleScope.launch {
-                viewModel.currentProfile.first().let {
+                viewModel.currentProfile.latest?.let {
                     ProfileManagerDialogFragment.show(parentFragmentManager, it)
                 }
             }
@@ -102,7 +105,7 @@ class ProfileFragment : BaseFragment(), UserCommentsAdapter.CommentClickListener
         savedAdapter = ProfileSavedAdapter(requireContext(), this, this, this)
 
         val tabs: List<RecyclerViewStateAdapter.Page> = listOf(
-            RecyclerViewStateAdapter.Page(R.string.tab_profile_saved, savedAdapter),
+            RecyclerViewStateAdapter.Page(R.string.tab_profile_saved, savedAdapter, true),
         )
 
         val userStateAdapter = RecyclerViewStateAdapter {
@@ -143,16 +146,21 @@ class ProfileFragment : BaseFragment(), UserCommentsAdapter.CommentClickListener
     }
 
     private fun bindViewModel() {
-        viewLifecycleOwner.lifecycleScope.launchWhenStarted {
-            combine(viewModel.savedItems, viewModel.contentPreferences) { items, preferences ->
-                savedAdapter.run {
-                    contentPreferences = preferences
-                    submitList(items)
+        launchRepeat(Lifecycle.State.STARTED) {
+            launch {
+                combine(viewModel.savedItems, viewModel.contentPreferences) { items, preferences ->
+                    savedAdapter.run {
+                        contentPreferences = preferences
+                        submitList(items)
+                    }
+                }.collect()
+            }
+
+            launch {
+                viewModel.selectedProfile.collect {
+                    binding.profile = it
                 }
-            }.collect()
-        }
-        viewModel.selectedProfile.asLiveData().observe(viewLifecycleOwner) {
-            binding.profile = it
+            }
         }
     }
 
@@ -196,6 +204,10 @@ class ProfileFragment : BaseFragment(), UserCommentsAdapter.CommentClickListener
 
     override fun onDestroyView() {
         super.onDestroyView()
+
+        // Save header state to restore it in case of fragment recreation
+        viewModel.layoutState = binding.layoutRoot.currentState
+
         _binding = null
     }
 }

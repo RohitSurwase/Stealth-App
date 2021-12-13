@@ -7,6 +7,11 @@ import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.annotation.ColorInt
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsCompat.Type.InsetsType
+import androidx.core.view.WindowInsetsControllerCompat
+import androidx.core.view.updatePadding
 import coil.imageLoader
 import coil.request.ImageRequest
 import coil.size.Precision
@@ -66,4 +71,44 @@ fun ImageView.load(
 
 fun TextInputLayout.text(): String? {
     return editText?.text?.toString()
+}
+
+fun View.applyWindowInsets(
+    left: Boolean = true,
+    top: Boolean = true,
+    right: Boolean = true,
+    bottom: Boolean = true
+) {
+    ViewCompat.setOnApplyWindowInsetsListener(this) { view, windowInsets ->
+        val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
+
+        val paddingLeft = if (left) insets.left else view.paddingLeft
+        val paddingTop = if (top) insets.top else view.paddingTop
+        val paddingRight = if (right) insets.right else view.paddingRight
+        val paddingBottom = if (bottom) insets.bottom else view.paddingBottom
+
+        view.updatePadding(
+            left = paddingLeft,
+            top = paddingTop,
+            right = paddingRight,
+            bottom = paddingBottom
+        )
+
+        windowInsets
+    }
+}
+
+fun View.showWindowInsets(
+    show: Boolean,
+    @InsetsType types: Int = WindowInsetsCompat.Type.systemBars(),
+    behavior: Int = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+) {
+    ViewCompat.getWindowInsetsController(this)?.let { windowInsetsController ->
+        windowInsetsController.systemBarsBehavior = behavior
+        if (show) {
+            windowInsetsController.show(types)
+        } else {
+            windowInsetsController.hide(types)
+        }
+    }
 }

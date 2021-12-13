@@ -2,8 +2,16 @@ package com.cosmos.unreddit
 
 import android.os.Bundle
 import android.view.View
+import android.view.ViewGroup
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.updateLayoutParams
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.flowWithLifecycle
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination
 import androidx.navigation.fragment.NavHostFragment
@@ -11,9 +19,12 @@ import androidx.navigation.ui.setupWithNavController
 import androidx.transition.Slide
 import androidx.transition.TransitionManager
 import com.cosmos.unreddit.databinding.ActivityMainBinding
+import com.cosmos.unreddit.util.extension.unredditApplication
 import com.google.android.material.shape.CornerFamily
 import com.google.android.material.shape.MaterialShapeDrawable
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity(), NavController.OnDestinationChangedListener {
@@ -25,8 +36,11 @@ class MainActivity : AppCompatActivity(), NavController.OnDestinationChangedList
     private lateinit var navController: NavController
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        setTheme(R.style.AppTheme)
+        setTheme(unredditApplication.appTheme)
         super.onCreate(savedInstanceState)
+
+        WindowCompat.setDecorFitsSystemWindows(window, false)
+
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
@@ -34,7 +48,11 @@ class MainActivity : AppCompatActivity(), NavController.OnDestinationChangedList
 
         initNavigation()
 
-        viewModel.navigationVisibility.observe(this, this::showNavigation)
+        lifecycleScope.launch {
+            viewModel.navigationVisibility
+                .flowWithLifecycle(lifecycle, Lifecycle.State.STARTED)
+                .collect(this@MainActivity::showNavigation)
+        }
     }
 
     private fun initNavigation() {
@@ -48,6 +66,17 @@ class MainActivity : AppCompatActivity(), NavController.OnDestinationChangedList
     }
 
     private fun initBottomNavigationView() {
+        ViewCompat.setOnApplyWindowInsetsListener(binding.bottomNavigation) { view, windowInsets ->
+            val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
+
+            view.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                bottomMargin = insets.bottom +
+                        resources.getDimension(R.dimen.bottom_navigation_margin).toInt()
+            }
+
+            windowInsets
+        }
+
         val radius = resources.getDimension(R.dimen.bottom_navigation_radius)
         val bottomNavigationBackground = binding.bottomNavigation.background
                 as? MaterialShapeDrawable

@@ -7,6 +7,7 @@ import android.net.Uri
 import android.view.View
 import android.view.WindowManager
 import android.view.inputmethod.InputMethodManager
+import android.webkit.MimeTypeMap
 import android.widget.ImageView
 import androidx.core.view.isVisible
 import androidx.fragment.app.DialogFragment
@@ -233,4 +234,9 @@ fun Int?.formatNumber(): String {
             "${roundedSubscribers}m"
         }
     }
+}
+
+fun MimeTypeMap.getMimeTypeFromUrl(url: String): String? {
+    val extension = MimeTypeMap.getFileExtensionFromUrl(url)
+    return getMimeTypeFromExtension(extension)
 }

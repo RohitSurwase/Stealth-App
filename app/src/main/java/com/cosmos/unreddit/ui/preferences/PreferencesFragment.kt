@@ -1,26 +1,40 @@
 package com.cosmos.unreddit.ui.preferences
 
+import android.content.DialogInterface
 import android.os.Bundle
 import android.view.View
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.addCallback
-import androidx.appcompat.app.AppCompatDelegate
+import androidx.core.view.children
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.Lifecycle
 import androidx.navigation.NavOptions
 import androidx.navigation.fragment.findNavController
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.SwitchPreferenceCompat
+import androidx.recyclerview.widget.RecyclerView
 import com.cosmos.unreddit.R
 import com.cosmos.unreddit.UiViewModel
 import com.cosmos.unreddit.data.model.preferences.ContentPreferences.PreferencesKeys
+import com.cosmos.unreddit.data.model.preferences.DataPreferences
 import com.cosmos.unreddit.data.model.preferences.UiPreferences
+import com.cosmos.unreddit.databinding.LayoutPreferenceListBinding
+import com.cosmos.unreddit.util.extension.applyWindowInsets
 import com.cosmos.unreddit.util.extension.getNavOptions
+import com.cosmos.unreddit.util.extension.latest
+import com.cosmos.unreddit.util.extension.launchRepeat
+import com.cosmos.unreddit.util.extension.unredditApplication
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class PreferencesFragment : PreferenceFragmentCompat() {
+
+    private var _binding: LayoutPreferenceListBinding? = null
+    private val binding get() = _binding!!
 
     private val viewModel: PreferencesViewModel by activityViewModels()
     private val uiViewModel: UiViewModel by activityViewModels()
@@ -29,6 +43,7 @@ class PreferencesFragment : PreferenceFragmentCompat() {
     private var showNsfwPreference: SwitchPreferenceCompat? = null
     private var showNsfwPreviewPreference: SwitchPreferenceCompat? = null
     private var showSpoilerPreviewPreference: SwitchPreferenceCompat? = null
+    private var sourcePreference: Preference? = null
     private var aboutPreference: Preference? = null
 
     private val navOptions: NavOptions by lazy { getNavOptions() }
@@ -49,6 +64,18 @@ class PreferencesFragment : PreferenceFragmentCompat() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        view.applyWindowInsets(bottom = false)
+
+        _binding = LayoutPreferenceListBinding.bind(view)
+
+        // Retrieve the preference list to configure the RecyclerView
+        val list = binding.listContainer.children.find { it is RecyclerView } as RecyclerView?
+        list?.apply {
+            applyWindowInsets(left = false, top = false, right = false)
+            isVerticalScrollBarEnabled = false
+            clipToPadding = false
+        }
+
         findNavController().addOnDestinationChangedListener { _, destination, _ ->
             when (destination.id) {
                 R.id.preferencesFragment -> uiViewModel.setNavigationVisibility(true)
@@ -63,7 +90,7 @@ class PreferencesFragment : PreferenceFragmentCompat() {
             UiPreferences.PreferencesKeys.NIGHT_MODE.name
         )?.apply {
             setOnPreferenceClickListener {
-                viewModel.nightMode.value?.let { mode ->
+                viewModel.nightMode.latest?.let { mode ->
                     UiPreferences.NightMode.asIndex(mode)?.let { index ->
                         showNightModeDialog(index)
                     }
@@ -99,6 +126,17 @@ class PreferencesFragment : PreferenceFragmentCompat() {
             }
         }
 
+        sourcePreference = findPreference<Preference?>(
+            DataPreferences.PreferencesKeys.REDDIT_SOURCE.name
+        )?.apply {
+            setOnPreferenceClickListener {
+                viewModel.redditSource.latest?.let { source ->
+                    showRedditSourceDialog(source)
+                }
+                true
+            }
+        }
+
         aboutPreference = findPreference<Preference>("about")?.apply {
             setOnPreferenceClickListener {
                 openAbout()
@@ -108,22 +146,46 @@ class PreferencesFragment : PreferenceFragmentCompat() {
     }
 
     private fun bindViewModel() {
-        viewModel.nightMode.observe(viewLifecycleOwner) {
-            UiPreferences.NightMode.asIndex(it)?.let { index ->
-                val nightModeArray = resources.getStringArray(R.array.pref_night_mode_labels)
-                nightModePreference?.summary = nightModeArray.getOrNull(index)
+        launchRepeat(Lifecycle.State.STARTED) {
+            launch {
+                viewModel.nightMode.collect {
+                    UiPreferences.NightMode.asIndex(it)?.let { index ->
+                        val nightModeArray = resources.getStringArray(R.array.pref_night_mode_labels)
+                        nightModePreference?.summary = nightModeArray.getOrNull(index)
+                    }
+                }
+            }
+
+            launch {
+                viewModel.showNsfw.collect { showNsfw ->
+                    showNsfwPreference?.isChecked = showNsfw
+                    showNsfwPreviewPreference?.isEnabled = showNsfw
+                }
+            }
+
+            launch {
+                viewModel.showNsfwPreview.collect { showNsfwPreview ->
+                    showNsfwPreviewPreference?.isChecked = showNsfwPreview
+                }
+            }
+
+            launch {
+                viewModel.showSpoilerPreview.collect { showSpoilerPreview ->
+                    showSpoilerPreviewPreference?.isChecked = showSpoilerPreview
+                }
+            }
+
+            launch {
+                viewModel.redditSource.collect { value ->
+                    DataPreferences.RedditSource.fromValue(value).let {
+                        val redditSourceArray = resources.getStringArray(
+                            R.array.pref_reddit_source_labels
+                        )
+                        sourcePreference?.summary = redditSourceArray.getOrNull(value)
+                    }
+                }
             }
         }
-        viewModel.showNsfw.observe(viewLifecycleOwner, { showNsfw ->
-            showNsfwPreference?.isChecked = showNsfw
-            showNsfwPreviewPreference?.isEnabled = showNsfw
-        })
-        viewModel.showNsfwPreview.observe(viewLifecycleOwner, { showNsfwPreview ->
-            showNsfwPreviewPreference?.isChecked = showNsfwPreview
-        })
-        viewModel.showSpoilerPreview.observe(viewLifecycleOwner, { showSpoilerPreview ->
-            showSpoilerPreviewPreference?.isChecked = showSpoilerPreview
-        })
     }
 
     private fun showNightModeDialog(checkedItem: Int) {
@@ -139,12 +201,63 @@ class PreferencesFragment : PreferenceFragmentCompat() {
     }
 
     private fun updateNightMode(mode: Int) {
-        AppCompatDelegate.setDefaultNightMode(mode)
+        unredditApplication?.appTheme = mode
+        activity?.recreate() // Recreate activity to force the change between dark and amoled
         viewModel.setNightMode(mode)
+    }
+
+    private fun showRedditSourceDialog(checkedItem: Int) {
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle(R.string.dialog_reddit_source_title)
+            .setSingleChoiceItems(R.array.pref_reddit_source_labels, checkedItem) { dialog, which ->
+                DataPreferences.RedditSource.fromValue(which).let { source ->
+                    when (source) {
+                        DataPreferences.RedditSource.REDDIT -> {
+                            // Update value without asking for confirmation
+                            updateRedditSource(source.value)
+                        }
+                        DataPreferences.RedditSource.TEDDIT -> {
+                            // Show disclaimer to user
+                            showRedditSourceDisclaimer(source)
+                        }
+                    }
+                    dialog.dismiss()
+                }
+            }
+            .show()
+    }
+
+    private fun showRedditSourceDisclaimer(source: DataPreferences.RedditSource) {
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle(R.string.dialog_reddit_source_disclaimer_title)
+            .setMessage(R.string.dialog_reddit_source_disclaimer_body)
+            .setPositiveButton(R.string.ok) { _, _ ->
+                // Ignore
+            }
+            .setNeutralButton(R.string.dialog_cancel) { dialog, _ ->
+                dialog.dismiss()
+            }
+            .setCancelable(false)
+            .show()
+            .apply {
+                getButton(DialogInterface.BUTTON_POSITIVE).setOnClickListener {
+                    updateRedditSource(source.value)
+                    dismiss()
+                }
+            }
+    }
+
+    private fun updateRedditSource(source: Int) {
+        viewModel.setRedditSource(source)
     }
 
     private fun openAbout() {
         findNavController().navigate(PreferencesFragmentDirections.openAbout(), navOptions)
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 
     companion object {

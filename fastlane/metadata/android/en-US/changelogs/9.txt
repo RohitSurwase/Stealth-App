@@ -1,0 +1,17 @@
+Added
+- Teddit API: choose between Reddit official API and Teddit API to fetch data (experimental)
+- Amoled theme
+- Incognito mode by default for keyboard
+
+Changed
+- Improved performances
+- Various UI updates
+
+Removed
+- In-app browser: replace with CustomTab
+- Max limit for search queries
+
+Fixed
+- Unordered images in galleries
+- Comments not saved on configuration change
+- Banner not collapsing when navigating to/from Subreddits

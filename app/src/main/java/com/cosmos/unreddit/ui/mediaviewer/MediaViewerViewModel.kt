@@ -1,26 +1,29 @@
 package com.cosmos.unreddit.ui.mediaviewer
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.cosmos.unreddit.data.local.mapper.PostMapper
+import com.cosmos.unreddit.data.local.mapper.PostMapper2
 import com.cosmos.unreddit.data.model.GalleryMedia
 import com.cosmos.unreddit.data.model.GalleryMedia.Type
 import com.cosmos.unreddit.data.model.MediaType
 import com.cosmos.unreddit.data.model.Resource
+import com.cosmos.unreddit.data.model.Sort
 import com.cosmos.unreddit.data.model.Sorting
-import com.cosmos.unreddit.data.remote.api.reddit.RedditApi
 import com.cosmos.unreddit.data.repository.GfycatRepository
 import com.cosmos.unreddit.data.repository.ImgurRepository
 import com.cosmos.unreddit.data.repository.PostListRepository
 import com.cosmos.unreddit.data.repository.StreamableRepository
+import com.cosmos.unreddit.di.DispatchersModule.DefaultDispatcher
 import com.cosmos.unreddit.util.LinkUtil
 import com.cosmos.unreddit.util.PostUtil
 import com.cosmos.unreddit.util.extension.updateValue
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
@@ -34,17 +37,20 @@ class MediaViewerViewModel
     private val imgurRepository: ImgurRepository,
     private val streamableRepository: StreamableRepository,
     private val gfycatRepository: GfycatRepository,
-    private val postListRepository: PostListRepository
+    private val postListRepository: PostListRepository,
+    private val postMapper: PostMapper2,
+    @DefaultDispatcher private val defaultDispatcher: CoroutineDispatcher
 ) : ViewModel() {
 
-    private val _media: MutableLiveData<Resource<List<GalleryMedia>>> = MutableLiveData()
-    val media: LiveData<Resource<List<GalleryMedia>>> get() = _media
+    private val _media: MutableStateFlow<Resource<List<GalleryMedia>>> =
+        MutableStateFlow(Resource.Loading())
+    val media: StateFlow<Resource<List<GalleryMedia>>> = _media
 
-    private val _selectedPage: MutableLiveData<Int> = MutableLiveData()
-    val selectedPage: LiveData<Int> get() = _selectedPage
+    private val _selectedPage: MutableStateFlow<Int> = MutableStateFlow(0)
+    val selectedPage: StateFlow<Int> = _selectedPage
 
     fun loadMedia(link: String, mediaType: MediaType, forceUpdate: Boolean = false) {
-        if (_media.value == null || forceUpdate) {
+        if (_media.value !is Resource.Success || forceUpdate) {
             retrieveMedia(link, mediaType)
         }
     }
@@ -99,30 +105,35 @@ class MediaViewerViewModel
                 }
                 MediaType.IMGUR_ALBUM, MediaType.IMGUR_GALLERY -> {
                     val albumId = LinkUtil.getAlbumIdFromImgurLink(link)
-                    imgurRepository.getAlbum(albumId).onStart {
-                        _media.value = Resource.Loading()
-                    }.catch {
-                        catchError(it)
-                    }.map { album ->
-                        album.data.images.map { image ->
-                            GalleryMedia(
-                                if (image.preferVideo) Type.VIDEO else Type.IMAGE,
-                                LinkUtil.getUrlFromImgurImage(image),
-                                description = image.description
-                            )
+                    imgurRepository.getAlbum(albumId)
+                        .map { album ->
+                            album.data.images.map { image ->
+                                GalleryMedia(
+                                    if (image.preferVideo) Type.VIDEO else Type.IMAGE,
+                                    LinkUtil.getUrlFromImgurImage(image),
+                                    description = image.description
+                                )
+                            }
                         }
-                    }.collect {
-                        setMedia(it)
-                    }
+                        .flowOn(defaultDispatcher)
+                        .onStart {
+                            _media.value = Resource.Loading()
+                        }
+                        .catch {
+                            catchError(it)
+                        }
+                        .collect {
+                            setMedia(it)
+                        }
                 }
                 MediaType.REDDIT_GALLERY -> {
                     val permalink = LinkUtil.getPermalinkFromMediaUrl(link)
-                    postListRepository.getPost(permalink, Sorting(RedditApi.Sort.BEST)).onStart {
+                    postListRepository.getPost(permalink, Sorting(Sort.BEST)).onStart {
                         _media.value = Resource.Loading()
                     }.catch {
                         catchError(it)
                     }.map { listings ->
-                        PostMapper.dataToEntity(PostUtil.getPostData(listings)).gallery
+                        postMapper.dataToEntity(PostUtil.getPostData(listings)).gallery
                     }.collect {
                         setMedia(it)
                     }

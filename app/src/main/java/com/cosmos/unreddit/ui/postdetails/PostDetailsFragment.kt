@@ -6,17 +6,20 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.os.bundleOf
+import androidx.core.view.isVisible
 import androidx.fragment.app.FragmentTransaction
 import androidx.fragment.app.setFragmentResult
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.asLiveData
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView.Adapter.StateRestorationPolicy.PREVENT_WHEN_EMPTY
 import androidx.transition.Slide
 import androidx.transition.TransitionManager
 import com.cosmos.unreddit.R
+import com.cosmos.unreddit.data.local.mapper.CommentMapper2
 import com.cosmos.unreddit.data.model.GalleryMedia
 import com.cosmos.unreddit.data.model.MediaType
 import com.cosmos.unreddit.data.model.Resource
@@ -24,19 +27,25 @@ import com.cosmos.unreddit.data.model.db.PostEntity
 import com.cosmos.unreddit.data.repository.PostListRepository
 import com.cosmos.unreddit.data.repository.PreferencesRepository
 import com.cosmos.unreddit.databinding.FragmentPostDetailsBinding
+import com.cosmos.unreddit.di.DispatchersModule.DefaultDispatcher
+import com.cosmos.unreddit.di.DispatchersModule.MainImmediateDispatcher
 import com.cosmos.unreddit.ui.base.BaseFragment
 import com.cosmos.unreddit.ui.commentmenu.CommentMenuFragment
 import com.cosmos.unreddit.ui.common.ElasticDragDismissFrameLayout
 import com.cosmos.unreddit.ui.loadstate.ResourceStateAdapter
 import com.cosmos.unreddit.ui.mediaviewer.MediaViewerFragment
 import com.cosmos.unreddit.ui.sort.SortFragment
+import com.cosmos.unreddit.util.extension.applyWindowInsets
 import com.cosmos.unreddit.util.extension.betterSmoothScrollToPosition
+import com.cosmos.unreddit.util.extension.launchRepeat
 import com.cosmos.unreddit.util.extension.setCommentListener
 import com.cosmos.unreddit.util.extension.setSortingListener
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import javax.inject.Inject
 
@@ -69,10 +78,21 @@ class PostDetailsFragment :
     @Inject
     lateinit var preferencesRepository: PreferencesRepository
 
+    @Inject
+    lateinit var commentMapper: CommentMapper2
+
+    @Inject
+    @MainImmediateDispatcher
+    lateinit var mainImmediateDispatcher: CoroutineDispatcher
+
+    @Inject
+    @DefaultDispatcher
+    lateinit var defaultDispatcher: CoroutineDispatcher
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        lifecycleScope.launchWhenStarted {
+        lifecycleScope.launch {
             preferencesRepository.getContentPreferences().first()
         }
 
@@ -94,6 +114,9 @@ class PostDetailsFragment :
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        binding.layoutRoot.applyWindowInsets(bottom = false)
+
         showNavigation(false)
 
         binding.root.addListener(this)
@@ -118,56 +141,78 @@ class PostDetailsFragment :
         }
 
         postAdapter = PostAdapter(contentPreferences, this, this)
-        commentAdapter = CommentAdapter(requireContext(), repository, viewLifecycleOwner, this) {
+        commentAdapter = CommentAdapter(
+            requireContext(),
+            mainImmediateDispatcher,
+            defaultDispatcher,
+            repository,
+            commentMapper,
+            this
+        ) {
             CommentMenuFragment.show(childFragmentManager, it, CommentMenuFragment.MenuType.DETAILS)
+        }.apply {
+            // Wait for data to restore adapter position
+            stateRestorationPolicy = PREVENT_WHEN_EMPTY
         }
         resourceStateAdapter = ResourceStateAdapter { retry() }
 
         val concatAdapter = ConcatAdapter(postAdapter, resourceStateAdapter, commentAdapter)
         binding.listComments.apply {
+            applyWindowInsets(left = false, top = false, right = false)
             layoutManager = LinearLayoutManager(requireContext())
             adapter = concatAdapter
         }
     }
 
     private fun bindViewModel() {
-        viewLifecycleOwner.lifecycleScope.launchWhenStarted {
-            combine(viewModel.permalink, viewModel.sorting) { permalink, _ ->
-                permalink?.let {
-                    viewModel.loadPost(false)
-                }
-            }.collect()
-        }
-        viewModel.post.asLiveData().observe(viewLifecycleOwner) {
-            when (it) {
-                is Resource.Success -> bindPost(it.data, false)
-                else -> {
-                    // ignore
-                }
+        launchRepeat(Lifecycle.State.STARTED) {
+            launch {
+                combine(viewModel.permalink, viewModel.sorting) { permalink, _ ->
+                    permalink?.let {
+                        viewModel.loadPost(false)
+                    }
+                }.collect()
             }
-        }
-        viewModel.comments.asLiveData().observe(viewLifecycleOwner) {
-            resourceStateAdapter.resource = it
-            when (it) {
-                is Resource.Success -> commentAdapter.submitData(it.data)
-                else -> {
-                    // ignore
+
+            launch {
+                viewModel.post.collect {
+                    when (it) {
+                        is Resource.Success -> bindPost(it.data, false)
+                        else -> {
+                            // ignore
+                        }
+                    }
                 }
             }
-        }
-        viewModel.sorting.asLiveData().observe(
-            viewLifecycleOwner,
-            {
-                binding.appBar.sortIcon.setSorting(it)
+
+            launch {
+                viewModel.comments.collect {
+                    resourceStateAdapter.resource = it
+                    when (it) {
+                        is Resource.Success -> commentAdapter.submitList(it.data)
+                        else -> {
+                            // ignore
+                        }
+                    }
+                }
             }
-        )
-        viewModel.singleThread.observe(viewLifecycleOwner) { isSingleThread ->
-            val transition = Slide(Gravity.TOP).apply {
-                duration = 500
-                addTarget(binding.singleThreadLayout)
+
+            launch {
+                viewModel.sorting.collect {
+                    binding.appBar.sortIcon.setSorting(it)
+                }
             }
-            TransitionManager.beginDelayedTransition(binding.root, transition)
-            binding.singleThreadLayout.visibility = if (isSingleThread) View.VISIBLE else View.GONE
+
+            launch {
+                viewModel.singleThread.collect { isSingleThread ->
+                    val transition = Slide(Gravity.TOP).apply {
+                        duration = 500
+                        addTarget(binding.singleThreadLayout)
+                    }
+                    TransitionManager.beginDelayedTransition(binding.root, transition)
+                    binding.singleThreadLayout.isVisible = isSingleThread
+                }
+            }
         }
     }
 
@@ -278,7 +323,12 @@ class PostDetailsFragment :
 
     override fun onDestroyView() {
         super.onDestroyView()
+
+        // Save comment hierarchy
+        viewModel.setComments(commentAdapter.currentList)
+
         _binding = null
+        commentAdapter.cleanUp()
     }
 
     override fun onDrag(

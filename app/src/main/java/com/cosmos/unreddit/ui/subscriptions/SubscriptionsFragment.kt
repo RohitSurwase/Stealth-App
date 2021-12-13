@@ -7,6 +7,9 @@ import android.view.ViewGroup
 import androidx.core.view.isVisible
 import androidx.core.widget.doOnTextChanged
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.flowWithLifecycle
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.cosmos.unreddit.NavigationGraphDirections
@@ -15,8 +18,11 @@ import com.cosmos.unreddit.UiViewModel
 import com.cosmos.unreddit.databinding.FragmentSubscriptionsBinding
 import com.cosmos.unreddit.ui.base.BaseFragment
 import com.cosmos.unreddit.util.SearchUtil
+import com.cosmos.unreddit.util.extension.applyWindowInsets
 import com.cosmos.unreddit.util.extension.hideSoftKeyboard
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class SubscriptionsFragment : BaseFragment() {
@@ -27,7 +33,7 @@ class SubscriptionsFragment : BaseFragment() {
     override val viewModel: SubscriptionsViewModel by activityViewModels()
     private val uiViewModel: UiViewModel by activityViewModels()
 
-    private lateinit var adapter: SubscriptionsAdapter
+    private lateinit var subscriptionsAdapter: SubscriptionsAdapter
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -59,19 +65,26 @@ class SubscriptionsFragment : BaseFragment() {
     }
 
     private fun bindViewModel() {
-        viewModel.filteredSubscriptions.observe(viewLifecycleOwner) {
-            adapter.submitList(it)
-            if (binding.appBar.searchInput.isQueryEmpty()) {
-                binding.emptyData.isVisible = it.isEmpty()
-                binding.textEmptyData.isVisible = it.isEmpty()
-            }
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.filteredSubscriptions
+                .flowWithLifecycle(viewLifecycleOwner.lifecycle, Lifecycle.State.STARTED)
+                .collect { subscriptions ->
+                    subscriptionsAdapter.submitList(subscriptions)
+                    if (binding.appBar.searchInput.isQueryEmpty()) {
+                        binding.emptyData.isVisible = subscriptions.isEmpty()
+                        binding.textEmptyData.isVisible = subscriptions.isEmpty()
+                    }
+                }
         }
     }
 
     private fun initRecyclerView() {
-        adapter = SubscriptionsAdapter { onClick(it) }
-        binding.listSubscriptions.layoutManager = LinearLayoutManager(requireContext())
-        binding.listSubscriptions.adapter = adapter
+        subscriptionsAdapter = SubscriptionsAdapter { onClick(it) }
+        binding.listSubscriptions.apply {
+            applyWindowInsets(left = false, top = false, right = false)
+            layoutManager = LinearLayoutManager(requireContext())
+            adapter = subscriptionsAdapter
+        }
     }
 
     private fun initAppBar() {

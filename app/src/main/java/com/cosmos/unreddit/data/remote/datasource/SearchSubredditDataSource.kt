@@ -3,22 +3,21 @@ package com.cosmos.unreddit.data.remote.datasource
 import android.util.Log
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
-import com.cosmos.unreddit.data.local.mapper.SubredditMapper
 import com.cosmos.unreddit.data.model.Sorting
-import com.cosmos.unreddit.data.model.db.SubredditEntity
-import com.cosmos.unreddit.data.remote.api.reddit.RedditApi
+import com.cosmos.unreddit.data.remote.api.reddit.model.Child
+import com.cosmos.unreddit.data.remote.api.reddit.source.CurrentSource
 
 class SearchSubredditDataSource(
-    private val redditApi: RedditApi,
+    private val source: CurrentSource,
     private val query: String,
     private val sorting: Sorting
-) : PagingSource<String, SubredditEntity>() {
+) : PagingSource<String, Child>() {
 
     override val keyReuseSupported: Boolean = true
 
-    override suspend fun load(params: LoadParams<String>): LoadResult<String, SubredditEntity> {
+    override suspend fun load(params: LoadParams<String>): LoadResult<String, Child> {
         return try {
-            val response = redditApi.searchSubreddit(
+            val response = source.searchSubreddit(
                 query,
                 sorting.generalSorting,
                 sorting.timeSorting,
@@ -26,16 +25,16 @@ class SearchSubredditDataSource(
             )
             val data = response.data
 
-            val items = SubredditMapper.dataToEntities(data.children)
-
-            LoadResult.Page(items, data.before, data.after)
+            LoadResult.Page(data.children, data.before, data.after)
         } catch (e: Exception) {
             Log.e("SubredditDataSource", "Error", e)
             LoadResult.Error(e)
         }
     }
 
-    override fun getRefreshKey(state: PagingState<String, SubredditEntity>): String? {
-        return null
+    override fun getRefreshKey(state: PagingState<String, Child>): String? {
+        return state.anchorPosition?.let { anchorPosition ->
+            state.closestPageToPosition(anchorPosition)?.prevKey
+        }
     }
 }

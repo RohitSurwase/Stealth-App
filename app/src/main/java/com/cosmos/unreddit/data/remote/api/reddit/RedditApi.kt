@@ -1,5 +1,7 @@
 package com.cosmos.unreddit.data.remote.api.reddit
 
+import com.cosmos.unreddit.data.model.Sort
+import com.cosmos.unreddit.data.model.TimeSorting
 import com.cosmos.unreddit.data.remote.api.reddit.model.Child
 import com.cosmos.unreddit.data.remote.api.reddit.model.Listing
 import com.cosmos.unreddit.data.remote.api.reddit.model.MoreChildren
@@ -100,29 +102,6 @@ interface RedditApi {
     ): Listing
 
     //endregion
-
-    enum class Sort(val type: String) {
-        HOT("hot"), NEW("new"), TOP("top"), RISING("rising"),
-        CONTROVERSIAL("controversial"), RELEVANCE("relevance"), COMMENTS("comments"),
-        BEST("confidence"), OLD("old"), QA("qa");
-
-        companion object {
-            fun fromName(value: String?, default: Sort = BEST): Sort {
-                return values().find { it.type == value } ?: default
-            }
-        }
-    }
-
-    enum class TimeSorting(val type: String) {
-        HOUR("hour"), DAY("day"), WEEK("week"), MONTH("month"),
-        YEAR("year"), ALL("all");
-
-        companion object {
-            fun fromName(value: String?): TimeSorting? {
-                return values().find { it.type == value }
-            }
-        }
-    }
 
     companion object {
         const val BASE_URL = "https://www.reddit.com/"

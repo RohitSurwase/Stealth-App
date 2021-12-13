@@ -1,25 +1,31 @@
 package com.cosmos.unreddit.data.local.mapper
 
 import com.cosmos.unreddit.data.model.Award
-import com.cosmos.unreddit.data.model.Block.TextBlock
+import com.cosmos.unreddit.data.model.Block
 import com.cosmos.unreddit.data.model.Flair
 import com.cosmos.unreddit.data.model.PosterType
+import com.cosmos.unreddit.data.model.Sort
 import com.cosmos.unreddit.data.model.Sorting
 import com.cosmos.unreddit.data.model.db.PostEntity
-import com.cosmos.unreddit.data.remote.api.reddit.RedditApi
-import com.cosmos.unreddit.data.remote.api.reddit.model.Child
-import com.cosmos.unreddit.data.remote.api.reddit.model.ChildType
-import com.cosmos.unreddit.data.remote.api.reddit.model.PostChild
 import com.cosmos.unreddit.data.remote.api.reddit.model.PostData
+import com.cosmos.unreddit.di.DispatchersModule.DefaultDispatcher
 import com.cosmos.unreddit.util.HtmlParser
 import com.cosmos.unreddit.util.extension.formatNumber
 import com.cosmos.unreddit.util.extension.toMillis
+import kotlinx.coroutines.CoroutineDispatcher
+import javax.inject.Inject
+import javax.inject.Singleton
 import kotlin.math.round
 
-object PostMapper {
+@Singleton
+class PostMapper2 @Inject constructor(
+    @DefaultDispatcher defaultDispatcher: CoroutineDispatcher
+) : Mapper<PostData, PostEntity>(defaultDispatcher) {
 
-    suspend fun dataToEntity(data: PostData, htmlParser: HtmlParser = HtmlParser()): PostEntity {
-        with(data) {
+    private val htmlParser: HtmlParser = HtmlParser(defaultDispatcher)
+
+    override suspend fun toEntity(from: PostData): PostEntity {
+        with(from) {
             val redditText = htmlParser.separateHtmlBlocks(selfTextHtml)
             val flair = Flair.fromData(linkFlairRichText, flair)
             return PostEntity(
@@ -36,13 +42,13 @@ object PostMapper {
                 postType,
                 domain,
                 isSelf,
-                crossposts?.firstOrNull()?.let { dataToEntity(it) },
+                crossposts?.firstOrNull()?.let { toEntity(it) },
                 selfTextHtml,
-                Sorting(RedditApi.Sort.fromName(suggestedSort)),
+                Sorting(Sort.fromName(suggestedSort)),
                 redditText,
                 isOver18,
                 previewUrl,
-                (redditText.blocks.getOrNull(0)?.block as? TextBlock)?.text,
+                (redditText.blocks.getOrNull(0)?.block as? Block.TextBlock)?.text,
                 awardings.sortedByDescending { it.count }.map { Award(it.count, it.getIcon()) },
                 isSpoiler,
                 isArchived,
@@ -61,15 +67,5 @@ object PostMapper {
                 saved = false
             )
         }
-    }
-
-    suspend fun dataToEntities(data: List<Child>?): List<PostEntity> {
-        val htmlParser = HtmlParser()
-
-        return data?.filter {
-            it.kind == ChildType.t3
-        }?.map {
-            dataToEntity((it as PostChild).data, htmlParser)
-        } ?: emptyList()
     }
 }

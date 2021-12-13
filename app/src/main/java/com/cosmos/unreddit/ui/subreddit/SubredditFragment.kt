@@ -9,12 +9,11 @@ import androidx.constraintlayout.widget.ConstraintSet
 import androidx.core.view.GravityCompat
 import androidx.core.view.isVisible
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.Lifecycle
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.cosmos.unreddit.R
 import com.cosmos.unreddit.data.model.Resource
-import com.cosmos.unreddit.data.model.Sorting
 import com.cosmos.unreddit.data.model.db.PostEntity
 import com.cosmos.unreddit.data.model.db.SubredditEntity
 import com.cosmos.unreddit.data.repository.PostListRepository
@@ -27,17 +26,17 @@ import com.cosmos.unreddit.ui.postlist.PostListAdapter
 import com.cosmos.unreddit.ui.postmenu.PostMenuFragment
 import com.cosmos.unreddit.ui.sort.SortFragment
 import com.cosmos.unreddit.util.extension.addLoadStateListener
+import com.cosmos.unreddit.util.extension.applyWindowInsets
 import com.cosmos.unreddit.util.extension.betterSmoothScrollToPosition
+import com.cosmos.unreddit.util.extension.launchRepeat
 import com.cosmos.unreddit.util.extension.loadSubredditIcon
 import com.cosmos.unreddit.util.extension.onRefreshFromNetwork
 import com.cosmos.unreddit.util.extension.setSortingListener
 import com.cosmos.unreddit.util.extension.toPixels
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -56,8 +55,6 @@ class SubredditFragment : BaseFragment() {
     override val viewModel: SubredditViewModel by viewModels()
 
     private val args: SubredditFragmentArgs by navArgs()
-
-    private var loadPostsJob: Job? = null
 
     private lateinit var postListAdapter: PostListAdapter
 
@@ -82,6 +79,9 @@ class SubredditFragment : BaseFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        bindingContent.root.applyWindowInsets(left = false, right = false, bottom = false)
+
         initResultListener()
         initAppBar()
         initRecyclerView()
@@ -89,61 +89,88 @@ class SubredditFragment : BaseFragment() {
         bindViewModel()
         bindingAbout.subredditSubscribeButton.setOnClickListener { viewModel.toggleSubscription() }
         bindingContent.loadingState.infoRetry.setActionClickListener { retry() }
+
+        viewModel.contentLayoutState?.let { bindingContent.layoutRoot.jumpToState(it) }
+    }
+
+    override fun applyInsets(view: View) {
+        // ignore
     }
 
     private fun bindViewModel() {
-        viewModel.about.observe(viewLifecycleOwner) {
-            when (it) {
-                is Resource.Success -> bindInfo(it.data)
-                is Resource.Error -> handleError(it.code)
-                is Resource.Loading -> {
-                    // ignore
+        launchRepeat(Lifecycle.State.STARTED) {
+            launch {
+                viewModel.contentPreferences.collect {
+                    postListAdapter.contentPreferences = it
                 }
             }
-        }
-        viewModel.isSubscribed.observe(
-            viewLifecycleOwner,
-            { isSubscribed ->
-                with(bindingAbout.subredditSubscribeButton) {
-                    visibility = View.VISIBLE
-                    text = if (isSubscribed) {
-                        getString(R.string.subreddit_button_unsubscribe)
-                    } else {
-                        getString(R.string.subreddit_button_subscribe)
+
+            launch {
+                viewModel.searchData.collect {
+                    bindingContent.loadingState.infoRetry.hide()
+                }
+            }
+
+            launch {
+                viewModel.subreddit.collect { subreddit ->
+                    subreddit.takeIf { it.isNotBlank() }?.let {
+                        viewModel.loadSubredditInfo(false)
                     }
                 }
             }
-        )
-        viewModel.isDescriptionCollapsed.observe(
-            viewLifecycleOwner,
-            { isCollapsed ->
-                // TODO: Animate layout changes
-                val maxHeight = if (isCollapsed) {
-                    requireContext().toPixels(DESCRIPTION_MAX_HEIGHT).toInt()
-                } else {
-                    Integer.MAX_VALUE
-                }
-                ConstraintSet().apply {
-                    clone(bindingAbout.layoutRoot)
-                    constrainMaxHeight(R.id.subreddit_public_description, maxHeight)
-                    applyTo(bindingAbout.layoutRoot)
+
+            launch {
+                viewModel.sorting.collect {
+                    bindingContent.sortIcon.setSorting(it)
                 }
             }
-        )
-        viewLifecycleOwner.lifecycleScope.launchWhenStarted {
-            combine(
-                viewModel.subreddit,
-                viewModel.sorting,
-                viewModel.contentPreferences
-            ) { subreddit, sorting, contentPreferences ->
-                bindingContent.loadingState.infoRetry.hide()
-                postListAdapter.contentPreferences = contentPreferences
-                subreddit?.let {
-                    viewModel.loadSubredditInfo(false)
-                    loadPosts(subreddit, sorting)
+
+            launch {
+                viewModel.postDataFlow.collectLatest {
+                    postListAdapter.submitData(it)
                 }
-                bindingContent.sortIcon.setSorting(sorting)
-            }.collect()
+            }
+
+            launch {
+                viewModel.about.collect {
+                    when (it) {
+                        is Resource.Success -> bindInfo(it.data)
+                        is Resource.Error -> handleError(it.code)
+                        is Resource.Loading -> {
+                            // ignore
+                        }
+                    }
+                }
+            }
+
+            launch {
+                viewModel.isSubscribed.collect { isSubscribed ->
+                    with(bindingAbout.subredditSubscribeButton) {
+                        visibility = View.VISIBLE
+                        text = if (isSubscribed) {
+                            getString(R.string.subreddit_button_unsubscribe)
+                        } else {
+                            getString(R.string.subreddit_button_subscribe)
+                        }
+                    }
+                }
+            }
+
+            launch {
+                viewModel.isDescriptionCollapsed.collect { isCollapsed ->
+                    // TODO: Animate layout changes
+                    val maxHeight = if (isCollapsed) {
+                        requireContext().toPixels(DESCRIPTION_MAX_HEIGHT).toInt()
+                    } else {
+                        Integer.MAX_VALUE
+                    }
+                    ConstraintSet().apply {
+                        clone(bindingAbout.layoutRoot)
+                        constrainMaxHeight(R.id.subreddit_public_description, maxHeight)
+                        applyTo(bindingAbout.layoutRoot)
+                    }
+                }
+            }
         }
     }
 
@@ -154,6 +181,7 @@ class SubredditFragment : BaseFragment() {
             }
         }
         bindingContent.listPost.apply {
+            applyWindowInsets(left = false, top = false, right = false)
             layoutManager = LinearLayoutManager(requireContext())
             adapter = postListAdapter.withLoadStateHeaderAndFooter(
                 header = NetworkLoadStateAdapter { postListAdapter.retry() },
@@ -161,7 +189,7 @@ class SubredditFragment : BaseFragment() {
             )
         }
 
-        lifecycleScope.launchWhenStarted {
+        launchRepeat(Lifecycle.State.STARTED) {
             postListAdapter.onRefreshFromNetwork {
                 scrollToTop()
             }
@@ -214,15 +242,6 @@ class SubredditFragment : BaseFragment() {
         }
     }
 
-    private fun loadPosts(subreddit: String, sorting: Sorting) {
-        loadPostsJob?.cancel()
-        loadPostsJob = viewLifecycleOwner.lifecycleScope.launch {
-            viewModel.loadAndFilterPosts(subreddit, sorting).collectLatest {
-                postListAdapter.submitData(it)
-            }
-        }
-    }
-
     private fun handleError(code: Int?) {
         when (code) {
             403 -> showUnauthorizedDialog()
@@ -232,10 +251,8 @@ class SubredditFragment : BaseFragment() {
     }
 
     private fun retry() {
-        viewModel.about.value?.let {
-            if (it is Resource.Error) {
-                viewModel.loadSubredditInfo(true)
-            }
+        if (viewModel.about.value is Resource.Error) {
+            viewModel.loadSubredditInfo(true)
         }
 
         postListAdapter.retry() // TODO: Don't retry if not necessary
@@ -254,8 +271,8 @@ class SubredditFragment : BaseFragment() {
     private fun showSearchFragment() {
         navigate(
             SubredditFragmentDirections.openSearch(
-                viewModel.subreddit.value!!,
-                viewModel.about.value?.dataValue?.icon
+                viewModel.subreddit.value,
+                viewModel.about.value.dataValue?.icon
             )
         )
     }
@@ -292,6 +309,10 @@ class SubredditFragment : BaseFragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
+
+        // Save header state to restore it in case of fragment recreation
+        viewModel.contentLayoutState = bindingContent.layoutRoot.currentState
+
         _binding = null
         _bindingContent = null
         _bindingAbout = null

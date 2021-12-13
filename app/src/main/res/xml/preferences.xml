@@ -35,6 +35,17 @@
     </PreferenceCategory>
 
     <PreferenceCategory
+        app:key="data_category"
+        app:title="@string/preference_category_data">
+
+        <Preference
+            app:key="reddit_source"
+            app:title="@string/preference_reddit_source"
+            app:persistent="false"/>
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
         app:key="misc_category"
         app:title="@string/preference_category_misc">
 

@@ -1,14 +1,18 @@
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
 
     <style name="BaseTheme" parent="Theme.MaterialComponents.DayNight.NoActionBar">
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
-        <item name="android:statusBarColor">@color/colorPrimaryLight</item>
-        <item name="android:fitsSystemWindows">true</item>
+
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:windowLightStatusBar" tools:targetApi="m">true</item>
 
         <item name="android:colorBackground">@color/background</item>
         <item name="colorSurface">@color/background</item>
+
+        <item name="colorOnSurface">@color/colorPrimaryLight</item>
 
         <item name="android:textColor">@color/text_color</item>
 
@@ -17,6 +21,7 @@
         <item name="switchStyle">@style/SwitchStyle</item>
 
         <item name="materialAlertDialogTheme">@style/MaterialAlertDialogTheme</item>
+        <item name="bottomSheetDialogTheme">@style/ThemeOverlay.App.BottomSheetDialog</item>
     </style>
 
     <style name="AppTheme" parent="BaseTheme"/>
@@ -47,16 +52,16 @@
     </style>
 
     <!-- Post Details -->
-    <style name="PostDetailsSheetTheme" parent="Theme.MaterialComponents.Light.BottomSheetDialog">
-        <item name="bottomSheetStyle">@style/PostDetailsBottomSheet</item>
+    <style name="ThemeOverlay.App.BottomSheetDialog" parent="ThemeOverlay.MaterialComponents.BottomSheetDialog">
+        <item name="bottomSheetStyle">@style/Widget.BottomSheetDialog</item>
     </style>
 
-    <style name="PostDetailsBottomSheet" parent="Widget.MaterialComponents.BottomSheet">
-        <item name="shapeAppearanceOverlay">@style/ShapeAppearancePostDetails</item>
-        <item name="backgroundTint">@color/background</item>
+    <style name="Widget.BottomSheetDialog" parent="Widget.MaterialComponents.BottomSheet.Modal">
+        <item name="shapeAppearanceOverlay">@style/ShapeAppearance.BottomSheetDialog</item>
+        <item name="backgroundTint">?attr/colorSurface</item>
     </style>
 
-    <style name="ShapeAppearancePostDetails" parent="">
+    <style name="ShapeAppearance.BottomSheetDialog" parent="ShapeAppearance.MaterialComponents.LargeComponent">
         <item name="cornerSizeTopRight">16dp</item>
         <item name="cornerSizeTopLeft">16dp</item>
         <item name="cornerFamily">rounded</item>
@@ -315,7 +320,7 @@
         <item name="tabIndicatorColor">@color/colorPrimary</item>
         <item name="tabGravity">center</item>
         <item name="tabSelectedTextColor">@color/colorPrimary</item>
-        <item name="android:background">@color/background</item>
+        <item name="android:background">?attr/colorSurface</item>
     </style>
 
     <style name="TextAppearanceAward" parent="">
@@ -341,7 +346,7 @@
     </style>
 
     <style name="ChipActionStyle" parent="Widget.MaterialComponents.Chip.Action">
-        <item name="chipBackgroundColor">@color/background</item>
+        <item name="chipBackgroundColor">?attr/colorSurface</item>
         <item name="chipStrokeWidth">1dp</item>
         <item name="chipStrokeColor">@color/colorPrimary</item>
         <item name="chipIconTint">@color/colorPrimary</item>
@@ -365,10 +370,10 @@
     <!-- Dialog -->
 
     <style name="MaterialAlertDialogTheme" parent="ThemeOverlay.MaterialComponents.MaterialAlertDialog">
-        <item name="colorSurface">@color/background</item>
         <item name="alertDialogStyle">@style/MaterialAlertDialogStyle</item>
         <item name="materialAlertDialogTitleTextStyle">@style/MaterialAlertDialogTitleText</item>
         <item name="materialAlertDialogBodyTextStyle">@style/MaterialAlertDialogBodyText</item>
+        <item name="android:checkedTextViewStyle">@style/MaterialAlertDialogBodyText</item>
     </style>
 
     <style name="MaterialAlertDialogStyle" parent="MaterialAlertDialog.MaterialComponents">

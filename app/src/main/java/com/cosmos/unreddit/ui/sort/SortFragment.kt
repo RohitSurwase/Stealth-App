@@ -9,9 +9,9 @@ import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.setFragmentResult
 import androidx.transition.Slide
 import androidx.transition.TransitionManager
-import com.cosmos.unreddit.R
+import com.cosmos.unreddit.data.model.Sort
 import com.cosmos.unreddit.data.model.Sorting
-import com.cosmos.unreddit.data.remote.api.reddit.RedditApi
+import com.cosmos.unreddit.data.model.TimeSorting
 import com.cosmos.unreddit.databinding.FragmentSortBinding
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.google.android.material.chip.Chip
@@ -42,41 +42,41 @@ class SortFragment : BottomSheetDialogFragment() {
         val sorting = arguments?.getParcelable(BUNDLE_KEY_SORTING) as? Sorting ?: return
         with(sorting) {
             when (generalSorting) {
-                RedditApi.Sort.HOT -> binding.chipHot.isChecked = true
-                RedditApi.Sort.NEW -> binding.chipNew.isChecked = true
-                RedditApi.Sort.TOP -> {
+                Sort.HOT -> binding.chipHot.isChecked = true
+                Sort.NEW -> binding.chipNew.isChecked = true
+                Sort.TOP -> {
                     binding.chipTop.isChecked = true
                     if (type != SortType.POST) {
                         showTimeGroup()
                     }
                 }
-                RedditApi.Sort.RISING -> binding.chipRising.isChecked = true
-                RedditApi.Sort.CONTROVERSIAL -> {
+                Sort.RISING -> binding.chipRising.isChecked = true
+                Sort.CONTROVERSIAL -> {
                     binding.chipControversial.isChecked = true
                     if (type != SortType.POST) {
                         showTimeGroup()
                     }
                 }
-                RedditApi.Sort.RELEVANCE -> {
+                Sort.RELEVANCE -> {
                     binding.chipRelevance.isChecked = true
                     showTimeGroup()
                 }
-                RedditApi.Sort.COMMENTS -> {
+                Sort.COMMENTS -> {
                     binding.chipComments.isChecked = true
                     showTimeGroup()
                 }
-                RedditApi.Sort.BEST -> binding.chipBest.isChecked = true
-                RedditApi.Sort.OLD -> binding.chipOld.isChecked = true
-                RedditApi.Sort.QA -> binding.chipQa.isChecked = true
+                Sort.BEST -> binding.chipBest.isChecked = true
+                Sort.OLD -> binding.chipOld.isChecked = true
+                Sort.QA -> binding.chipQa.isChecked = true
             }
 
             when (timeSorting) {
-                RedditApi.TimeSorting.HOUR -> binding.chipHour.isChecked = true
-                RedditApi.TimeSorting.DAY -> binding.chipDay.isChecked = true
-                RedditApi.TimeSorting.WEEK -> binding.chipWeek.isChecked = true
-                RedditApi.TimeSorting.MONTH -> binding.chipMonth.isChecked = true
-                RedditApi.TimeSorting.YEAR -> binding.chipYear.isChecked = true
-                RedditApi.TimeSorting.ALL -> binding.chipAll.isChecked = true
+                TimeSorting.HOUR -> binding.chipHour.isChecked = true
+                TimeSorting.DAY -> binding.chipDay.isChecked = true
+                TimeSorting.WEEK -> binding.chipWeek.isChecked = true
+                TimeSorting.MONTH -> binding.chipMonth.isChecked = true
+                TimeSorting.YEAR -> binding.chipYear.isChecked = true
+                TimeSorting.ALL -> binding.chipAll.isChecked = true
             }
         }
 
@@ -103,30 +103,30 @@ class SortFragment : BottomSheetDialogFragment() {
         }
     }
 
-    private fun getGeneralChoice(): RedditApi.Sort? {
+    private fun getGeneralChoice(): Sort? {
         return when (binding.groupGeneral.checkedChipId) {
-            binding.chipHot.id -> RedditApi.Sort.HOT
-            binding.chipNew.id -> RedditApi.Sort.NEW
-            binding.chipTop.id -> RedditApi.Sort.TOP
-            binding.chipRising.id -> RedditApi.Sort.RISING
-            binding.chipControversial.id -> RedditApi.Sort.CONTROVERSIAL
-            binding.chipRelevance.id -> RedditApi.Sort.RELEVANCE
-            binding.chipComments.id -> RedditApi.Sort.COMMENTS
-            binding.chipBest.id -> RedditApi.Sort.BEST
-            binding.chipOld.id -> RedditApi.Sort.OLD
-            binding.chipQa.id -> RedditApi.Sort.QA
+            binding.chipHot.id -> Sort.HOT
+            binding.chipNew.id -> Sort.NEW
+            binding.chipTop.id -> Sort.TOP
+            binding.chipRising.id -> Sort.RISING
+            binding.chipControversial.id -> Sort.CONTROVERSIAL
+            binding.chipRelevance.id -> Sort.RELEVANCE
+            binding.chipComments.id -> Sort.COMMENTS
+            binding.chipBest.id -> Sort.BEST
+            binding.chipOld.id -> Sort.OLD
+            binding.chipQa.id -> Sort.QA
             else -> null
         }
     }
 
-    private fun getTimeChoice(): RedditApi.TimeSorting? {
+    private fun getTimeChoice(): TimeSorting? {
         return when (binding.groupTime.checkedChipId) {
-            binding.chipHour.id -> RedditApi.TimeSorting.HOUR
-            binding.chipDay.id -> RedditApi.TimeSorting.DAY
-            binding.chipWeek.id -> RedditApi.TimeSorting.WEEK
-            binding.chipMonth.id -> RedditApi.TimeSorting.MONTH
-            binding.chipYear.id -> RedditApi.TimeSorting.YEAR
-            binding.chipAll.id -> RedditApi.TimeSorting.ALL
+            binding.chipHour.id -> TimeSorting.HOUR
+            binding.chipDay.id -> TimeSorting.DAY
+            binding.chipWeek.id -> TimeSorting.WEEK
+            binding.chipMonth.id -> TimeSorting.MONTH
+            binding.chipYear.id -> TimeSorting.YEAR
+            binding.chipAll.id -> TimeSorting.ALL
             else -> null
         }
     }
@@ -158,10 +158,6 @@ class SortFragment : BottomSheetDialogFragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
-    }
-
-    override fun getTheme(): Int {
-        return R.style.PostDetailsSheetTheme
     }
 
     enum class SortType {

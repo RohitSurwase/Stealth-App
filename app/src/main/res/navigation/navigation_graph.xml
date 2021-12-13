@@ -15,17 +15,8 @@
     <include app:graph="@navigation/subreddit" />
     <include app:graph="@navigation/user" />
     <include app:graph="@navigation/viewer" />
-    <include app:graph="@navigation/browser" />
 
     <!-- Global Actions -->
-    <action
-        android:id="@+id/openBrowser"
-        app:destination="@id/browser">
-        <argument
-            android:name="url"
-            app:argType="string"/>
-    </action>
-
     <action
         android:id="@+id/openGallery"
         app:destination="@id/viewer">

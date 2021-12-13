@@ -3,8 +3,9 @@ package com.cosmos.unreddit.data.local
 import androidx.room.TypeConverter
 import com.cosmos.unreddit.data.model.PostType
 import com.cosmos.unreddit.data.model.PosterType
+import com.cosmos.unreddit.data.model.Sort
 import com.cosmos.unreddit.data.model.Sorting
-import com.cosmos.unreddit.data.remote.api.reddit.RedditApi
+import com.cosmos.unreddit.data.model.TimeSorting
 
 class Converters {
     @TypeConverter
@@ -32,8 +33,8 @@ class Converters {
         return string?.let {
             val values = it.split(";")
             Sorting(
-                RedditApi.Sort.fromName(values.getOrNull(0)),
-                RedditApi.TimeSorting.fromName(values.getOrNull(1))
+                Sort.fromName(values.getOrNull(0)),
+                TimeSorting.fromName(values.getOrNull(1))
             )
         }
     }

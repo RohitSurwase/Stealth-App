@@ -6,13 +6,13 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.isVisible
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager2.widget.ViewPager2
 import com.cosmos.unreddit.NavigationGraphDirections
 import com.cosmos.unreddit.R
-import com.cosmos.unreddit.data.model.Sorting
 import com.cosmos.unreddit.data.repository.PostListRepository
 import com.cosmos.unreddit.databinding.FragmentSearchBinding
 import com.cosmos.unreddit.ui.base.BaseFragment
@@ -21,17 +21,16 @@ import com.cosmos.unreddit.ui.sort.SortFragment
 import com.cosmos.unreddit.util.RecyclerViewStateAdapter
 import com.cosmos.unreddit.util.SearchUtil
 import com.cosmos.unreddit.util.extension.getRecyclerView
+import com.cosmos.unreddit.util.extension.launchRepeat
 import com.cosmos.unreddit.util.extension.onRefreshFromNetwork
 import com.cosmos.unreddit.util.extension.scrollToTop
 import com.cosmos.unreddit.util.extension.setSortingListener
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -44,10 +43,6 @@ class SearchFragment : BaseFragment() {
     override val viewModel: SearchViewModel by viewModels()
 
     private val args: SearchFragmentArgs by navArgs()
-
-    private var searchPostJob: Job? = null
-    private var searchSubredditJob: Job? = null
-    private var searchUserJob: Job? = null
 
     private lateinit var postListAdapter: PostListAdapter
     private lateinit var subredditAdapter: SearchSubredditAdapter
@@ -76,7 +71,7 @@ class SearchFragment : BaseFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        val query = viewModel.query.value ?: args.query
+        val query = viewModel.query.value.takeIf { it.isNotBlank() } ?: args.query
 
         binding.appBar.searchInput.setText(query)
 
@@ -94,26 +89,44 @@ class SearchFragment : BaseFragment() {
     }
 
     private fun bindViewModel() {
-        viewLifecycleOwner.lifecycleScope.launchWhenStarted {
-            viewModel.query.collectLatest { query ->
-                query?.let {
-                    binding.appBar.label.text = query
+        launchRepeat(Lifecycle.State.STARTED) {
+            launch {
+                viewModel.query.collect { query ->
+                    query.takeIf { it.isNotBlank() }?.let {
+                        binding.appBar.label.text = query
+                    }
                 }
             }
-        }
-        viewLifecycleOwner.lifecycleScope.launchWhenStarted {
-            combine(
-                viewModel.query,
-                viewModel.sorting,
-                viewModel.page,
-                viewModel.contentPreferences
-            ) { query, sorting, page, contentPreferences ->
-                postListAdapter.contentPreferences = contentPreferences
-                query?.let {
-                    search(page, query, sorting)
+
+            launch {
+                viewModel.contentPreferences.collect {
+                    postListAdapter.contentPreferences = it
                 }
-                binding.appBar.sortIcon.setSorting(sorting)
-            }.collect()
+            }
+
+            launch {
+                viewModel.sorting.collect {
+                    binding.appBar.sortIcon.setSorting(it)
+                }
+            }
+
+            launch {
+                viewModel.postDataFlow.collectLatest {
+                    postListAdapter.submitData(it)
+                }
+            }
+
+            launch {
+                viewModel.subredditDataFlow.collectLatest {
+                    subredditAdapter.submitData(it)
+                }
+            }
+
+            launch {
+                viewModel.userDataFlow.collectLatest {
+                    userAdapter.submitData(it)
+                }
+            }
         }
     }
 
@@ -123,7 +136,7 @@ class SearchFragment : BaseFragment() {
         userAdapter = SearchUserAdapter { onUserClick(it) }
 
         val tabs: List<RecyclerViewStateAdapter.Page> = listOf(
-            RecyclerViewStateAdapter.Page(R.string.tab_search_post, postListAdapter),
+            RecyclerViewStateAdapter.Page(R.string.tab_search_post, postListAdapter, true),
             RecyclerViewStateAdapter.Page(R.string.tab_search_subreddit, subredditAdapter),
             RecyclerViewStateAdapter.Page(R.string.tab_search_user, userAdapter)
         )
@@ -164,19 +177,23 @@ class SearchFragment : BaseFragment() {
             tab.setText(tabs[position].title)
         }.attach()
 
-        lifecycleScope.launchWhenStarted {
-            postListAdapter.onRefreshFromNetwork {
-                binding.viewPager.scrollToTop(0)
+        launchRepeat(Lifecycle.State.STARTED) {
+            launch {
+                postListAdapter.onRefreshFromNetwork {
+                    binding.viewPager.scrollToTop(0)
+                }
             }
-        }
-        lifecycleScope.launchWhenStarted {
-            subredditAdapter.onRefreshFromNetwork {
-                binding.viewPager.scrollToTop(1)
+
+            launch {
+                subredditAdapter.onRefreshFromNetwork {
+                    binding.viewPager.scrollToTop(1)
+                }
             }
-        }
-        lifecycleScope.launchWhenStarted {
-            userAdapter.onRefreshFromNetwork {
-                binding.viewPager.scrollToTop(2)
+
+            launch {
+                userAdapter.onRefreshFromNetwork {
+                    binding.viewPager.scrollToTop(2)
+                }
             }
         }
     }
@@ -217,41 +234,6 @@ class SearchFragment : BaseFragment() {
                 }
             }
             setSelection(text?.length ?: 0)
-        }
-    }
-
-    private fun search(position: Int, query: String, sorting: Sorting) {
-        when (position) {
-            0 -> searchPost(query, sorting)
-            1 -> searchSubreddit(query, sorting)
-            2 -> searchUser(query, sorting)
-        }
-    }
-
-    private fun searchPost(query: String, sorting: Sorting) {
-        searchPostJob?.cancel()
-        searchPostJob = viewLifecycleOwner.lifecycleScope.launch {
-            viewModel.searchAndFilterPosts(query, sorting).collectLatest {
-                postListAdapter.submitData(it)
-            }
-        }
-    }
-
-    private fun searchSubreddit(query: String, sorting: Sorting) {
-        searchSubredditJob?.cancel()
-        searchSubredditJob = viewLifecycleOwner.lifecycleScope.launch {
-            viewModel.searchAndFilterSubreddits(query, sorting).collectLatest {
-                subredditAdapter.submitData(it)
-            }
-        }
-    }
-
-    private fun searchUser(query: String, sorting: Sorting) {
-        searchUserJob?.cancel()
-        searchUserJob = viewLifecycleOwner.lifecycleScope.launch {
-            viewModel.searchAndFilterUsers(query, sorting).collectLatest {
-                userAdapter.submitData(it)
-            }
         }
     }
 
@@ -298,7 +280,5 @@ class SearchFragment : BaseFragment() {
 
     companion object {
         const val TAG = "SearchFragment"
-
-        const val QUERY_MIN_LENGTH = 3
     }
 }

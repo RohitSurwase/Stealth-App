@@ -2,8 +2,10 @@ package com.cosmos.unreddit.ui.base
 
 import android.net.Uri
 import android.os.Bundle
+import android.view.View
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.addCallback
+import androidx.browser.customtabs.CustomTabsIntent
 import androidx.fragment.app.Fragment
 import androidx.navigation.NavDirections
 import androidx.navigation.NavOptions
@@ -19,6 +21,7 @@ import com.cosmos.unreddit.ui.postdetails.PostDetailsFragment
 import com.cosmos.unreddit.ui.postlist.PostListAdapter
 import com.cosmos.unreddit.ui.postmenu.PostMenuFragment
 import com.cosmos.unreddit.util.LinkUtil
+import com.cosmos.unreddit.util.extension.applyWindowInsets
 
 open class BaseFragment : Fragment(), PostListAdapter.PostClickListener,
     RedditView.OnLinkClickListener {
@@ -41,6 +44,15 @@ open class BaseFragment : Fragment(), PostListAdapter.PostClickListener,
         onBackPressedCallback = requireActivity().onBackPressedDispatcher.addCallback(this) {
             onBackPressed()
         }
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        applyInsets(view)
+    }
+
+    protected open fun applyInsets(view: View) {
+        view.applyWindowInsets(bottom = false)
     }
 
     protected open fun onBackPressed() {
@@ -165,6 +177,10 @@ open class BaseFragment : Fragment(), PostListAdapter.PostClickListener,
     }
 
     open fun openBrowser(link: String) {
-        navigate(NavigationGraphDirections.openBrowser(link))
+        CustomTabsIntent.Builder()
+            .setShowTitle(true)
+            .setShareState(CustomTabsIntent.SHARE_STATE_ON)
+            .build()
+            .launchUrl(requireContext(), Uri.parse(link))
     }
 }

@@ -9,7 +9,9 @@ import androidx.core.os.bundleOf
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.asLiveData
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.flowWithLifecycle
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.RecyclerView
 import com.cosmos.unreddit.R
 import com.cosmos.unreddit.data.model.ProfileItem
@@ -22,6 +24,8 @@ import com.cosmos.unreddit.util.extension.getRecyclerView
 import com.cosmos.unreddit.util.extension.text
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class ProfileManagerDialogFragment : DialogFragment(), ProfileManagerAdapter.ProfileClickListener {
@@ -67,13 +71,17 @@ class ProfileManagerDialogFragment : DialogFragment(), ProfileManagerAdapter.Pro
     }
 
     private fun bindViewModel() {
-        viewModel.profiles.asLiveData().observe(viewLifecycleOwner) {
-            profileAdapter.submitList(it)
-            it.indexOfFirst { item ->
-                (item as? ProfileItem.UserProfile)?.profile?.id == currentProfile?.id
-            }.let { index ->
-                binding.viewPager.currentItem = index
-            }
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.profiles
+                .flowWithLifecycle(viewLifecycleOwner.lifecycle, Lifecycle.State.STARTED)
+                .collect { profiles ->
+                    profileAdapter.submitList(profiles)
+                    profiles.indexOfFirst { item ->
+                        (item as? ProfileItem.UserProfile)?.profile?.id == currentProfile?.id
+                    }.let { index ->
+                        binding.viewPager.currentItem = index
+                    }
+                }
         }
     }
 

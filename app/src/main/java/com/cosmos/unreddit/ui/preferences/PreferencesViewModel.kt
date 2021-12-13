@@ -1,29 +1,34 @@
 package com.cosmos.unreddit.ui.preferences
 
-import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
+import com.cosmos.unreddit.data.remote.api.reddit.source.CurrentSource
 import com.cosmos.unreddit.data.repository.PreferencesRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class PreferencesViewModel @Inject constructor(
-    private val preferencesRepository: PreferencesRepository
+    private val preferencesRepository: PreferencesRepository,
+    private val currentSource: CurrentSource
 ) : ViewModel() {
 
-    val nightMode: LiveData<Int> = preferencesRepository.getNightMode().asLiveData()
+    val nightMode: SharedFlow<Int> = preferencesRepository.getNightMode()
+        .shareIn(viewModelScope, SharingStarted.WhileSubscribed(), 1)
 
-    val showNsfw: LiveData<Boolean> = preferencesRepository.getShowNsfw()
-        .asLiveData()
+    val showNsfw: Flow<Boolean> = preferencesRepository.getShowNsfw()
 
-    val showNsfwPreview: LiveData<Boolean> = preferencesRepository.getShowNsfwPreview()
-        .asLiveData()
+    val showNsfwPreview: Flow<Boolean> = preferencesRepository.getShowNsfwPreview()
 
-    val showSpoilerPreview: LiveData<Boolean> = preferencesRepository.getShowSpoilerPreview()
-        .asLiveData()
+    val showSpoilerPreview: Flow<Boolean> = preferencesRepository.getShowSpoilerPreview()
+
+    val redditSource: SharedFlow<Int> = preferencesRepository.getRedditSource()
+        .shareIn(viewModelScope, SharingStarted.WhileSubscribed(), 1)
 
     fun setNightMode(nightMode: Int) {
         viewModelScope.launch {
@@ -46,6 +51,13 @@ class PreferencesViewModel @Inject constructor(
     fun setShowSpoilerPreview(showSpoilerPreview: Boolean) {
         viewModelScope.launch {
             preferencesRepository.setShowSpoilerPreview(showSpoilerPreview)
+        }
+    }
+
+    fun setRedditSource(source: Int) {
+        viewModelScope.launch {
+            preferencesRepository.setRedditSource(source)
+            currentSource.setRedditSource(source)
         }
     }
 }

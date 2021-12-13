@@ -1,17 +1,16 @@
 package com.cosmos.unreddit
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.cosmos.unreddit.util.extension.updateValue
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 
 class UiViewModel : ViewModel() {
 
-    private val _navigationVisibility = MutableLiveData<Boolean>()
-    val navigationVisibility: LiveData<Boolean> get() = _navigationVisibility
+    private val _navigationVisibility = MutableStateFlow(true)
+    val navigationVisibility: StateFlow<Boolean> = _navigationVisibility
 
     fun setNavigationVisibility(visible: Boolean) {
-        if (_navigationVisibility.value != visible) {
-            _navigationVisibility.value = visible
-        }
+        _navigationVisibility.updateValue(visible)
     }
 }

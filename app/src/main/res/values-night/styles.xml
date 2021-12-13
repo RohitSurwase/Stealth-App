@@ -1,7 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools">
     <style name="AppTheme" parent="BaseTheme">
-        <item name="android:statusBarColor">@color/background</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
         <item name="android:windowLightStatusBar" tools:targetApi="m">false</item>
+    </style>
+
+    <style name="AmoledAppTheme" parent="AppTheme">
+        <item name="android:colorBackground">#000000</item>
+        <item name="colorSurface">#000000</item>
     </style>
 </resources>

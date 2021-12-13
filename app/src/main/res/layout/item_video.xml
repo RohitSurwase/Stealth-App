@@ -9,7 +9,7 @@
         android:id="@+id/video"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        app:shutter_background_color="@color/background"
+        app:shutter_background_color="?attr/colorSurface"
         app:controller_layout_id="@layout/layout_exoplayer_controls"/>
 
     <LinearLayout

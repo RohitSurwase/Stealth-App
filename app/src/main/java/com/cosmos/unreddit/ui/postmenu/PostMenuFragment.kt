@@ -8,7 +8,6 @@ import androidx.core.os.bundleOf
 import androidx.fragment.app.FragmentManager
 import androidx.navigation.fragment.findNavController
 import com.cosmos.unreddit.NavigationGraphDirections
-import com.cosmos.unreddit.R
 import com.cosmos.unreddit.data.model.db.PostEntity
 import com.cosmos.unreddit.databinding.FragmentPostMenuBinding
 import com.cosmos.unreddit.util.extension.doAndDismiss
@@ -76,10 +75,6 @@ class PostMenuFragment : BottomSheetDialogFragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
-    }
-
-    override fun getTheme(): Int {
-        return R.style.PostDetailsSheetTheme
     }
 
     enum class MenuType {

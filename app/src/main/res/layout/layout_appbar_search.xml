@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="?attr/actionBarSize"
     xmlns:tools="http://schemas.android.com/tools"
-    android:background="@color/background">
+    android:background="?attr/colorSurface">
 
     <com.cosmos.unreddit.ui.common.widget.CardButton
         android:id="@+id/back_card"
@@ -45,7 +45,7 @@
         android:backgroundTint="@android:color/transparent"
         android:hint="@string/subscriptions_search_hint"
         android:inputType="text"
-        android:imeOptions="actionSearch"
+        android:imeOptions="actionSearch|flagNoPersonalizedLearning"
         tools:visibility="gone"/>
 
     <com.cosmos.unreddit.ui.common.widget.CardButton

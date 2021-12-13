@@ -3,6 +3,7 @@ package com.cosmos.unreddit.data.remote.api.reddit.model
 import com.cosmos.unreddit.data.model.GalleryMedia
 import com.cosmos.unreddit.data.model.MediaType
 import com.cosmos.unreddit.data.model.PostType
+import com.cosmos.unreddit.util.extension.mimeType
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
 
@@ -43,6 +44,9 @@ data class PostData(
 
     @Json(name = "author_flair_text")
     val authorFlair: String?,
+
+    @Json(name = "gallery_data")
+    val galleryData: GalleryData?,
 
     @Json(name = "score")
     val score: Int,
@@ -119,8 +123,8 @@ data class PostData(
     @Json(name = "is_video")
     val isVideo: Boolean
 ) {
-    val mediaType: MediaType
-        get() = when {
+    val mediaType: MediaType =
+        when {
             isSelf -> MediaType.NO_MEDIA
             isRedditGallery == true -> MediaType.REDDIT_GALLERY
             isVideo -> {
@@ -169,8 +173,8 @@ data class PostData(
             else -> MediaType.LINK
         }
 
-    val mediaUrl: String
-        get() = when (mediaType) {
+    val mediaUrl: String =
+        when (mediaType) {
             MediaType.REDDIT_VIDEO, MediaType.REDDIT_GIF -> {
                 crossposts?.firstOrNull()?.mediaUrl
                     ?: media?.redditVideoPreview?.fallbackUrl
@@ -189,8 +193,8 @@ data class PostData(
             else -> url
         } ?: url
 
-    val postType: PostType
-        get() = when (mediaType) {
+    val postType: PostType =
+        when (mediaType) {
             MediaType.NO_MEDIA -> PostType.TEXT
 
             MediaType.REDDIT_VIDEO,
@@ -212,24 +216,24 @@ data class PostData(
             else -> PostType.LINK
         }
 
-    val previewUrl: String
-        get() = mediaPreview?.images?.getOrNull(0)?.imageSource?.url
+    val previewUrl: String? =
+        mediaPreview?.images?.getOrNull(0)?.imageSource?.url
             ?: mediaMetadata?.items?.getOrNull(0)?.image?.url
             ?: mediaMetadata?.items?.getOrNull(0)?.previews?.lastOrNull()?.url
-            ?: url
+            // Keep URL only if it's an image
+            ?: url.takeIf { postType != PostType.LINK || it.mimeType.startsWith("image") }
 
-    val gallery: List<GalleryMedia>
-        get() = mediaMetadata?.items?.mapNotNull { item ->
-            item.image?.let {
-                when {
-                    it.url != null -> {
-                        GalleryMedia(GalleryMedia.Type.IMAGE, it.url)
-                    }
-                    it.mp4 != null -> {
-                        GalleryMedia(GalleryMedia.Type.VIDEO, it.mp4)
-                    }
-                    else -> null
-                }
+    // Reddit's API provides two lists of gallery items:
+    // - gallery_data which is ordered but only contains IDs and captions
+    // - media_metadata which contains all the URLs but is unordered
+    // Therefore, we need to map the IDs from gallery_data with the URLs from media_metadata
+    // to have an ordered list of items
+    val gallery: List<GalleryMedia> =
+        galleryData?.items?.mapNotNull { galleryDataItem ->
+            mediaMetadata?.items?.find { galleryItem ->
+                galleryItem.id == galleryDataItem.mediaId
+            }?.let { item ->
+                item.image?.media
             }
         } ?: emptyList()
 }

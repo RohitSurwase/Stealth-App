@@ -1,19 +1,22 @@
 package com.cosmos.unreddit.data.local.mapper
 
 import com.cosmos.unreddit.data.model.db.SubredditEntity
-import com.cosmos.unreddit.data.remote.api.reddit.model.AboutChild
 import com.cosmos.unreddit.data.remote.api.reddit.model.AboutData
-import com.cosmos.unreddit.data.remote.api.reddit.model.Child
-import com.cosmos.unreddit.data.remote.api.reddit.model.ChildType
+import com.cosmos.unreddit.di.DispatchersModule
 import com.cosmos.unreddit.util.HtmlParser
+import kotlinx.coroutines.CoroutineDispatcher
+import javax.inject.Inject
+import javax.inject.Singleton
 
-object SubredditMapper {
+@Singleton
+class SubredditMapper2 @Inject constructor(
+    @DispatchersModule.DefaultDispatcher defaultDispatcher: CoroutineDispatcher
+) : Mapper<AboutData, SubredditEntity>(defaultDispatcher) {
 
-    suspend fun dataToEntity(
-        data: AboutData,
-        htmlParser: HtmlParser = HtmlParser()
-    ): SubredditEntity {
-        with(data) {
+    private val htmlParser: HtmlParser = HtmlParser(defaultDispatcher)
+
+    override suspend fun toEntity(from: AboutData): SubredditEntity {
+        with(from) {
             return SubredditEntity(
                 wikiEnabled ?: false,
                 displayName,
@@ -33,19 +36,5 @@ object SubredditMapper {
                 getTimeInMillis()
             )
         }
-    }
-
-    suspend fun dataToEntities(data: List<Child>?): List<SubredditEntity> {
-        val subredditList = mutableListOf<SubredditEntity>()
-
-        val htmlParser = HtmlParser()
-
-        data?.forEach {
-            if (it.kind == ChildType.t5) {
-                subredditList.add(dataToEntity((it as AboutChild).data, htmlParser))
-            }
-        }
-
-        return subredditList
     }
 }

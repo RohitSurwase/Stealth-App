@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     package="com.cosmos.unreddit">
 
     <uses-permission android:name="android.permission.INTERNET" />
@@ -33,6 +34,13 @@
                 <action android:name="${applicationId}.ACTION_DOWNLOAD_CANCEL" />
             </intent-filter>
         </receiver>
+
+        <provider
+            android:name="androidx.startup.InitializationProvider"
+            android:authorities="${applicationId}.androidx-startup"
+            tools:node="remove">
+        </provider>
+
     </application>
 
     <queries>
@@ -42,6 +50,9 @@
         </intent>
         <intent>
             <action android:name="android.intent.action.VIEW"/>
+        </intent>
+        <intent>
+            <action android:name="android.support.customtabs.action.CustomTabsService" />
         </intent>
     </queries>
 

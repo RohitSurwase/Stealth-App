@@ -11,6 +11,7 @@ import com.cosmos.unreddit.R
 import com.cosmos.unreddit.data.model.CreditItem
 import com.cosmos.unreddit.databinding.FragmentAboutBinding
 import com.cosmos.unreddit.ui.base.BaseFragment
+import com.cosmos.unreddit.util.extension.applyWindowInsets
 import com.cosmos.unreddit.util.extension.openExternalLink
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.Dispatchers
@@ -69,6 +70,7 @@ class AboutFragment : BaseFragment() {
         }
 
         binding.listAbout.apply {
+            applyWindowInsets(left = false, top = false, right = false)
             layoutManager = LinearLayoutManager(context)
             adapter = creditAdapter
         }

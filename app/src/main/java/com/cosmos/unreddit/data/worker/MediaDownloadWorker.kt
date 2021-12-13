@@ -15,6 +15,7 @@ import android.webkit.MimeTypeMap
 import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
+import androidx.hilt.work.HiltWorker
 import androidx.work.CoroutineWorker
 import androidx.work.ExistingWorkPolicy
 import androidx.work.OneTimeWorkRequestBuilder
@@ -24,6 +25,7 @@ import com.cosmos.unreddit.BuildConfig
 import com.cosmos.unreddit.R
 import com.cosmos.unreddit.data.model.GalleryMedia
 import com.cosmos.unreddit.data.receiver.DownloadManagerReceiver
+import com.cosmos.unreddit.di.DispatchersModule.IoDispatcher
 import com.cosmos.unreddit.util.DateUtil
 import com.cosmos.unreddit.util.IntentUtil
 import com.cosmos.unreddit.util.extension.cancelAllWorkByTag
@@ -31,7 +33,9 @@ import com.cosmos.unreddit.util.extension.cancelNotification
 import com.cosmos.unreddit.util.extension.createNotificationChannel
 import com.cosmos.unreddit.util.extension.enqueueUniqueWork
 import com.cosmos.unreddit.util.extension.showNotification
-import kotlinx.coroutines.Dispatchers
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedInject
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
@@ -43,9 +47,11 @@ import okio.sink
 import java.io.File
 import java.util.Date
 
-class MediaDownloadWorker(
-    appContext: Context,
-    params: WorkerParameters
+@HiltWorker
+class MediaDownloadWorker @AssistedInject constructor (
+    @Assisted appContext: Context,
+    @Assisted params: WorkerParameters,
+    @IoDispatcher private val ioDispatcher: CoroutineDispatcher
 ) : CoroutineWorker(appContext, params) {
 
     private val filename: String
@@ -155,7 +161,7 @@ class MediaDownloadWorker(
             }
         }
 
-        withContext(Dispatchers.IO) {
+        withContext(ioDispatcher) {
             runCatching {
                 val response = OkHttpClient().newCall(Request.Builder().url(url).build()).execute()
 
@@ -221,7 +227,7 @@ class MediaDownloadWorker(
 
         val file = File(publicDirectory, name)
 
-        withContext(Dispatchers.IO) {
+        withContext(ioDispatcher) {
             runCatching {
                 val response = OkHttpClient().newCall(Request.Builder().url(url).build()).execute()
 

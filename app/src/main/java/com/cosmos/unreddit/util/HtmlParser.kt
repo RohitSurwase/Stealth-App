@@ -2,17 +2,17 @@ package com.cosmos.unreddit.util
 
 import android.view.Gravity
 import androidx.core.text.HtmlCompat
-import com.cosmos.unreddit.data.model.Block.*
+import com.cosmos.unreddit.data.model.Block.TableBlock
+import com.cosmos.unreddit.data.model.Block.TextBlock
 import com.cosmos.unreddit.data.model.HtmlBlock
 import com.cosmos.unreddit.data.model.RedditText
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
 import org.jsoup.Jsoup
 import org.jsoup.parser.Parser
-import java.util.*
-import kotlin.coroutines.CoroutineContext
+import java.util.LinkedList
 
-class HtmlParser {
+class HtmlParser(private val defaultDispatcher: CoroutineDispatcher) {
 
     private val TABLE_REGEX = Regex("<table>.*?</table>", RegexOption.DOT_MATCHES_ALL)
     private val CODE_REGEX = Regex("<pre><code>(.*?)</code></pre>", RegexOption.DOT_MATCHES_ALL)
@@ -20,11 +20,7 @@ class HtmlParser {
 
     private val tagHandler = RedditTagHandler()
 
-    suspend fun separateHtmlBlocks(
-        html: String?,
-        coroutineContext: CoroutineContext = Dispatchers.Default
-    ): RedditText {
-        return withContext(coroutineContext) {
+    suspend fun separateHtmlBlocks(html: String?): RedditText = withContext(defaultDispatcher) {
             val redditText = RedditText()
 
             if (html == null) return@withContext redditText
@@ -72,8 +68,7 @@ class HtmlParser {
                 redditText.addBlock(getTextBlock(newHtml), HtmlBlock.BlockType.TEXT)
             }
 
-            redditText
-        }
+            return@withContext redditText
     }
 
     private fun getTableFromHtmlTable(html: String): TableBlock {

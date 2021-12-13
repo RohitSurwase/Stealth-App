@@ -32,6 +32,8 @@
     <dimen name="post_flair_padding">4dp</dimen>
     <dimen name="post_flair_gap">8dp</dimen>
 
+    <dimen name="post_divider_inset">64dp</dimen>
+
     <dimen name="post_type_indicator_margin">16dp</dimen>
 
     <dimen name="sort_padding">16dp</dimen>

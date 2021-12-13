@@ -17,8 +17,8 @@ android {
         applicationId "com.cosmos.unreddit"
         minSdkVersion 21
         targetSdkVersion 31
-        versionCode 8
-        versionName "1.1.3"
+        versionCode 9
+        versionName "2.0.0-alpha01"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
@@ -41,6 +41,10 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
             signingConfig signingConfigs.release
         }
+        debug {
+            applicationIdSuffix ".dev"
+            debuggable true
+        }
     }
 
     buildFeatures {
@@ -55,6 +59,9 @@ android {
 
     kotlinOptions {
         jvmTarget = "1.8"
+        freeCompilerArgs += [
+                "-Xuse-experimental=kotlinx.coroutines.ExperimentalCoroutinesApi"
+        ]
     }
 }
 
@@ -68,6 +75,7 @@ dependencies {
     kapt "androidx.hilt:hilt-compiler:$rootProject.hilt"
 
     implementation "androidx.hilt:hilt-navigation-fragment:$rootProject.hilt"
+    implementation "androidx.hilt:hilt-work:$rootProject.hilt"
 
     implementation "androidx.core:core-ktx:$rootProject.core"
     implementation "androidx.appcompat:appcompat:$rootProject.appCompat"
@@ -76,6 +84,7 @@ dependencies {
     implementation "androidx.fragment:fragment-ktx:$rootProject.fragment"
     implementation "androidx.lifecycle:lifecycle-livedata-ktx:$rootProject.lifecycle"
     implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$rootProject.lifecycle"
+    implementation "androidx.lifecycle:lifecycle-runtime-ktx:$rootProject.lifecycle"
     implementation "androidx.coordinatorlayout:coordinatorlayout:$rootProject.coordinatorlayout"
     implementation "androidx.viewpager2:viewpager2:$rootProject.viewpager2"
     implementation "androidx.preference:preference-ktx:$rootProject.preference"
@@ -93,6 +102,8 @@ dependencies {
     implementation "androidx.work:work-runtime-ktx:$rootProject.work"
 
     implementation "com.google.android.material:material:$rootProject.material"
+
+    implementation "androidx.browser:browser:$rootProject.browser"
 
     implementation "com.squareup.retrofit2:retrofit:$rootProject.retrofit"
     implementation "com.squareup.retrofit2:converter-moshi:$rootProject.retrofit"

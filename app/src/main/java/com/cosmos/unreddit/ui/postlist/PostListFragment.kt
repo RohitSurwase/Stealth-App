@@ -4,30 +4,32 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.isVisible
+import androidx.core.view.updateLayoutParams
 import androidx.fragment.app.activityViewModels
-import androidx.lifecycle.asLiveData
-import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.Lifecycle
 import androidx.navigation.fragment.findNavController
 import androidx.paging.LoadState
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.cosmos.unreddit.R
 import com.cosmos.unreddit.UiViewModel
-import com.cosmos.unreddit.data.model.Sorting
 import com.cosmos.unreddit.data.repository.PostListRepository
 import com.cosmos.unreddit.databinding.FragmentPostBinding
 import com.cosmos.unreddit.ui.base.BaseFragment
 import com.cosmos.unreddit.ui.loadstate.NetworkLoadStateAdapter
 import com.cosmos.unreddit.ui.sort.SortFragment
+import com.cosmos.unreddit.util.extension.applyWindowInsets
 import com.cosmos.unreddit.util.extension.betterSmoothScrollToPosition
+import com.cosmos.unreddit.util.extension.launchRepeat
 import com.cosmos.unreddit.util.extension.onRefreshFromNetwork
 import com.cosmos.unreddit.util.extension.setNavigationListener
 import com.cosmos.unreddit.util.extension.setSortingListener
+import com.google.android.material.appbar.AppBarLayout
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -40,7 +42,21 @@ class PostListFragment : BaseFragment() {
     override val viewModel: PostListViewModel by activityViewModels()
     private val uiViewModel: UiViewModel by activityViewModels()
 
-    private var loadPostsJob: Job? = null
+    // Workaround for nested CoordinatorLayout that prevents bottom navigation from being hidden on
+    // scroll
+    private val onOffsetChangedListener = object : AppBarLayout.OnOffsetChangedListener {
+        private var visible: Boolean = true
+
+        override fun onOffsetChanged(appBarLayout: AppBarLayout?, verticalOffset: Int) {
+            if (verticalOffset != 0 && visible) {
+                visible = false
+                uiViewModel.setNavigationVisibility(false)
+            } else if (verticalOffset == 0 && !visible) {
+                visible = true
+                uiViewModel.setNavigationVisibility(true)
+            }
+        }
+    }
 
     private lateinit var postListAdapter: PostListAdapter
 
@@ -58,6 +74,17 @@ class PostListFragment : BaseFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        ViewCompat.setOnApplyWindowInsetsListener(binding.appBar.root) { appBar, windowInsets ->
+            val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
+
+            appBar.updateLayoutParams<AppBarLayout.LayoutParams> {
+                topMargin = insets.top
+            }
+
+            windowInsets
+        }
+
         findNavController().addOnDestinationChangedListener { _, destination, _ ->
             when (destination.id) {
                 R.id.postListFragment -> uiViewModel.setNavigationVisibility(true)
@@ -71,20 +98,36 @@ class PostListFragment : BaseFragment() {
         binding.infoRetry.setActionClickListener { postListAdapter.retry() }
     }
 
+    override fun applyInsets(view: View) {
+        // ignore
+    }
+
     private fun bindViewModel() {
-        viewLifecycleOwner.lifecycleScope.launchWhenStarted {
-            combine(
-                viewModel.subreddit,
-                viewModel.sorting,
-                viewModel.contentPreferences
-            ) { subreddit, sorting, contentPreferences ->
-                binding.infoRetry.hide()
-                postListAdapter.contentPreferences = contentPreferences
-                loadPosts(subreddit, sorting)
-            }.collect()
-        }
-        viewModel.sorting.asLiveData().observe(viewLifecycleOwner) {
-            binding.appBar.sortIcon.setSorting(it)
+        launchRepeat(Lifecycle.State.STARTED) {
+            launch {
+                viewModel.contentPreferences.collect {
+                    binding.infoRetry.hide()
+                    postListAdapter.contentPreferences = it
+                }
+            }
+
+            launch {
+                viewModel.fetchData.collect {
+                    binding.infoRetry.hide()
+                }
+            }
+
+            launch {
+                viewModel.postDataFlow.collectLatest {
+                    postListAdapter.submitData(it)
+                }
+            }
+
+            launch {
+                viewModel.sorting.collect {
+                    binding.appBar.sortIcon.setSorting(it)
+                }
+            }
         }
     }
 
@@ -103,6 +146,7 @@ class PostListFragment : BaseFragment() {
         }
 
         binding.listPost.apply {
+            applyWindowInsets(left = false, top = false, right = false)
             layoutManager = LinearLayoutManager(requireContext())
             adapter = postListAdapter.withLoadStateHeaderAndFooter(
                 header = NetworkLoadStateAdapter { postListAdapter.retry() },
@@ -110,7 +154,7 @@ class PostListFragment : BaseFragment() {
             )
         }
 
-        lifecycleScope.launchWhenStarted {
+        launchRepeat(Lifecycle.State.STARTED) {
             postListAdapter.onRefreshFromNetwork {
                 scrollToTop()
             }
@@ -119,6 +163,7 @@ class PostListFragment : BaseFragment() {
 
     private fun initAppBar() {
         binding.appBar.sortCard.setOnClickListener { showSortDialog() }
+        binding.appBarLayout.addOnOffsetChangedListener(onOffsetChangedListener)
     }
 
     private fun initResultListener() {
@@ -126,15 +171,6 @@ class PostListFragment : BaseFragment() {
 
         setNavigationListener { showNavigation ->
             uiViewModel.setNavigationVisibility(showNavigation)
-        }
-    }
-
-    private fun loadPosts(subreddit: String, sorting: Sorting) {
-        loadPostsJob?.cancel()
-        loadPostsJob = viewLifecycleOwner.lifecycleScope.launch {
-            viewModel.loadAndFilterPosts(subreddit, sorting).collectLatest {
-                postListAdapter.submitData(it)
-            }
         }
     }
 

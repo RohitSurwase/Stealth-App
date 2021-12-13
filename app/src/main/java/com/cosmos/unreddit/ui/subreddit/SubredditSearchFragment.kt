@@ -6,11 +6,10 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.isVisible
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.Lifecycle
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.cosmos.unreddit.R
-import com.cosmos.unreddit.data.model.Sorting
 import com.cosmos.unreddit.data.repository.PostListRepository
 import com.cosmos.unreddit.databinding.FragmentSubredditSearchBinding
 import com.cosmos.unreddit.ui.base.BaseFragment
@@ -19,16 +18,16 @@ import com.cosmos.unreddit.ui.postlist.PostListAdapter
 import com.cosmos.unreddit.ui.sort.SortFragment
 import com.cosmos.unreddit.util.SearchUtil
 import com.cosmos.unreddit.util.extension.addLoadStateListener
+import com.cosmos.unreddit.util.extension.applyWindowInsets
 import com.cosmos.unreddit.util.extension.betterSmoothScrollToPosition
 import com.cosmos.unreddit.util.extension.hideSoftKeyboard
+import com.cosmos.unreddit.util.extension.launchRepeat
 import com.cosmos.unreddit.util.extension.loadSubredditIcon
 import com.cosmos.unreddit.util.extension.onRefreshFromNetwork
 import com.cosmos.unreddit.util.extension.setSortingListener
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -41,8 +40,6 @@ class SubredditSearchFragment : BaseFragment(), PostListAdapter.PostClickListene
     override val viewModel: SubredditSearchViewModel by viewModels()
 
     private val args: SubredditSearchFragmentArgs by navArgs()
-
-    private var searchPostJob: Job? = null
 
     private lateinit var postListAdapter: PostListAdapter
 
@@ -85,34 +82,47 @@ class SubredditSearchFragment : BaseFragment(), PostListAdapter.PostClickListene
     }
 
     private fun bindViewModel() {
-        viewLifecycleOwner.lifecycleScope.launchWhenStarted {
-            viewModel.query.collectLatest { query ->
-                query?.let {
-                    binding.appBar.label.text = query
+        launchRepeat(Lifecycle.State.STARTED) {
+            launch {
+                viewModel.query.collect { query ->
+                    query.takeIf { it.isNotBlank() }?.let {
+                        binding.appBar.label.text = query
+                    }
                 }
             }
-        }
-        viewLifecycleOwner.lifecycleScope.launchWhenStarted {
-            viewModel.subreddit.collectLatest { subreddit ->
-                subreddit?.let {
-                    binding.appBar.searchInput.hint = getString(R.string.search_hint_subreddit, it)
+
+            launch {
+                viewModel.subreddit.collect { subreddit ->
+                    subreddit.takeIf { it.isNotBlank() }?.let {
+                        binding.appBar.searchInput.hint =
+                            getString(R.string.search_hint_subreddit, it)
+                    }
                 }
             }
-        }
-        viewLifecycleOwner.lifecycleScope.launchWhenStarted {
-            combine(
-                viewModel.subreddit,
-                viewModel.query,
-                viewModel.sorting,
-                viewModel.contentPreferences
-            ) { subreddit, query, sorting, contentPreferences ->
-                binding.loadingState.infoRetry.hide()
-                postListAdapter.contentPreferences = contentPreferences
-                if (subreddit != null && query != null) {
-                    searchPost(query, sorting)
+
+            launch {
+                viewModel.searchData.collect {
+                    binding.loadingState.infoRetry.hide()
                 }
-                binding.appBar.sortIcon.setSorting(sorting)
-            }.collect()
+            }
+
+            launch {
+                viewModel.contentPreferences.collect {
+                    postListAdapter.contentPreferences = it
+                }
+            }
+
+            launch {
+                viewModel.sorting.collect {
+                    binding.appBar.sortIcon.setSorting(it)
+                }
+            }
+
+            launch {
+                viewModel.postDataFlow.collectLatest {
+                    postListAdapter.submitData(it)
+                }
+            }
         }
     }
 
@@ -123,7 +133,8 @@ class SubredditSearchFragment : BaseFragment(), PostListAdapter.PostClickListene
             }
         }
 
-        with(binding.listPost) {
+        binding.listPost.apply {
+            applyWindowInsets(left = false, top = false, right = false)
             layoutManager = LinearLayoutManager(requireContext())
             adapter = postListAdapter.withLoadStateHeaderAndFooter(
                 header = NetworkLoadStateAdapter { postListAdapter.retry() },
@@ -131,7 +142,7 @@ class SubredditSearchFragment : BaseFragment(), PostListAdapter.PostClickListene
             )
         }
 
-        lifecycleScope.launchWhenStarted {
+        launchRepeat(Lifecycle.State.STARTED) {
             postListAdapter.onRefreshFromNetwork {
                 scrollToTop()
             }
@@ -168,15 +179,6 @@ class SubredditSearchFragment : BaseFragment(), PostListAdapter.PostClickListene
         binding.listPost.betterSmoothScrollToPosition(0)
     }
 
-    private fun searchPost(query: String, sorting: Sorting) {
-        searchPostJob?.cancel()
-        searchPostJob = viewLifecycleOwner.lifecycleScope.launch {
-            viewModel.searchAndFilterPosts(query, sorting).collectLatest {
-                postListAdapter.submitData(it)
-            }
-        }
-    }
-
     private fun showSearchInput(show: Boolean) {
         binding.appBar.searchInput.show(binding.appBar.root, show) {
             with(binding.appBar) {
@@ -205,7 +207,7 @@ class SubredditSearchFragment : BaseFragment(), PostListAdapter.PostClickListene
     }
 
     private fun cancelSearch() {
-        if (viewModel.query.value != null) {
+        if (viewModel.query.value.isNotBlank()) {
             showSearchInput(false)
         } else {
             binding.appBar.searchInput.hideSoftKeyboard()
@@ -221,7 +223,7 @@ class SubredditSearchFragment : BaseFragment(), PostListAdapter.PostClickListene
     }
 
     override fun onBackPressed() {
-        if (binding.appBar.searchInput.isVisible && viewModel.query.value != null) {
+        if (binding.appBar.searchInput.isVisible && viewModel.query.value.isNotBlank()) {
             showSearchInput(false)
         } else {
             super.onBackPressed()
