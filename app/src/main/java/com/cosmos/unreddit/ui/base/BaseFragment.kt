@@ -129,6 +129,8 @@ open class BaseFragment : Fragment(), PostListAdapter.PostClickListener,
 
             MediaType.REDDIT_WIKI -> openBrowser(link)
 
+            MediaType.REDDIT_POLL -> openBrowser(link)
+
             MediaType.REDDIT_PERMALINK -> {
                 val post = "https://www.reddit.com$link"
                 openRedditLink(post)

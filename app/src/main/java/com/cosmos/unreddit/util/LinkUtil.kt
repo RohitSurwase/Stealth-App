@@ -66,6 +66,8 @@ object LinkUtil {
                 if (httpUrl.pathSegments().contains("wiki")) {
                     // TODO: Handle Wiki links
                     MediaType.REDDIT_WIKI
+                } else if (httpUrl.pathSegments().contains("poll")) {
+                    MediaType.REDDIT_POLL
                 } else {
                     MediaType.REDDIT_LINK
                 }
