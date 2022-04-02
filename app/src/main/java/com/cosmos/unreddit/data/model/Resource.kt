@@ -15,6 +15,7 @@ sealed class Resource<out T> {
 
     data class Error<out T>(
         val code: Int? = null,
-        val message: String? = null
+        val message: String? = null,
+        val throwable: Throwable? = null
     ) : Resource<T>()
 }

@@ -27,5 +27,5 @@ data class Subscription (
     val icon: String?,
 
     @ColumnInfo(name = "profile_id")
-    val profileId: Int
+    var profileId: Int = 1
 )
