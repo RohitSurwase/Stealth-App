@@ -8,6 +8,7 @@ import com.cosmos.unreddit.data.local.mapper.ProfileMapper
 import com.cosmos.unreddit.data.local.mapper.SubscriptionMapper
 import com.cosmos.unreddit.data.model.backup.Profile
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.withContext
 
 typealias SubscriptionBackup = com.cosmos.unreddit.data.model.backup.Subscription
 
@@ -27,6 +28,12 @@ sealed class BackupManager(
     }
 
     protected suspend fun insertProfiles(profiles: List<Profile>) {
+        withContext(defaultDispatcher) {
+            insert(profiles)
+        }
+    }
+
+    private suspend fun insert(profiles: List<Profile>) {
         val profileDao = redditDatabase.profileDao()
         val subscriptionDao = redditDatabase.subscriptionDao()
         val postDao = redditDatabase.postDao()
