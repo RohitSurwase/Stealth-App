@@ -19,7 +19,7 @@ import kotlinx.coroutines.withContext
 import okio.buffer
 import okio.sink
 import okio.source
-import java.io.FileOutputStream
+import okio.use
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -53,7 +53,9 @@ class StealthBackupManager @Inject constructor(
         return runCatching {
             withContext(ioDispatcher) {
                 appContext.contentResolver.openInputStream(uri)?.use { inputStream ->
-                    adapter.fromJson(inputStream.source().buffer())
+                    inputStream.source().buffer().use { bufferedSource ->
+                        adapter.fromJson(bufferedSource)
+                    }
                 } ?: emptyList()
             }
         }.onSuccess { profiles ->
@@ -66,13 +68,13 @@ class StealthBackupManager @Inject constructor(
 
         val adapter = moshi.adapter<List<Profile>>(
             Types.newParameterizedType(List::class.java, Profile::class.java)
-        )
+        ).indent("  ")
 
         return runCatching {
             withContext(ioDispatcher) {
-                appContext.contentResolver.openFileDescriptor(uri, "w")?.use { pfd ->
-                    FileOutputStream(pfd.fileDescriptor).use { fos ->
-                        adapter.toJson(fos.sink().buffer(), profiles)
+                appContext.contentResolver.openOutputStream(uri)?.use { outputStream ->
+                    outputStream.sink().buffer().use { bufferedSink ->
+                        adapter.toJson(bufferedSink, profiles)
                     }
                 }
             }

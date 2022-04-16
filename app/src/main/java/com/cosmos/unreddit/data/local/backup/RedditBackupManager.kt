@@ -21,6 +21,7 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
 import okio.buffer
 import okio.source
+import okio.use
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -52,7 +53,9 @@ class RedditBackupManager @Inject constructor(
         return runCatching {
             withContext(ioDispatcher) {
                 appContext.contentResolver.openInputStream(uri)?.use { inputStream ->
-                    adapter.fromJson(inputStream.source().buffer())
+                    inputStream.source().buffer().use { bufferedSource ->
+                        adapter.fromJson(bufferedSource)
+                    }
                 }
             }
         }.onSuccess {
