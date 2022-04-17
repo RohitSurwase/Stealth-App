@@ -146,6 +146,8 @@
     <string name="preference_reddit_source_reddit">Reddit</string>
     <string name="preference_reddit_source_teddit">Teddit</string>
 
+    <string name="preference_backup">Import/Export</string>
+
     <string name="preference_about">About</string>
 
     <string name="fragment_about_label">About</string>
@@ -201,4 +203,27 @@
 
     <string name="snackbar_permission_storage_request_message">Permission to write to external storage is required</string>
     <string name="snackbar_permission_storage_denied_message">Permission to write to external storage was denied</string>
+
+    <string name="fragment_backup_label">Import/Export</string>
+
+    <string name="backup_operation_backup">Backup</string>
+    <string name="backup_operation_restore">Restore</string>
+
+    <string name="backup_location_button_pick">Pick File</string>
+    <string name="backup_location_explanation_backup">Select a file to back up your profiles, subscriptions, and saved items</string>
+    <string name="backup_location_explanation_restore_stealth">Select a Stealth backup file to restore your profiles, subscriptions, and saved items</string>
+    <string name="backup_location_explanation_restore_reddit">Select Reddit\'s "mine.json" file to import your Reddit\'s subscriptions to Stealth</string>
+
+    <string name="backup_loading_success_backup">Backup complete!</string>
+    <string name="backup_loading_success_restore_stealth">Stealth backup restored successfully!</string>
+    <string name="backup_loading_success_restore_reddit">Reddit data imported successfully!</string>
+
+    <string name="backup_loading_failed_backup">Something went wrong while backing up your data.\nPlease try again.</string>
+    <string name="backup_loading_failed_restore_stealth">Something went wrong while restoring up your data.\nPlease try again.</string>
+    <string name="backup_loading_failed_restore_reddit">Something went wrong while importing your data.\nPlease try again.</string>
+
+    <string name="backup_button_previous">Previous</string>
+    <string name="backup_button_next">Next</string>
+    <string name="backup_button_lets_go">Let\'s Go</string>
+    <string name="backup_button_finish">Finish</string>
 </resources>

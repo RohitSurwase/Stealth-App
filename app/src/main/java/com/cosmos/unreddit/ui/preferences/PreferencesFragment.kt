@@ -43,6 +43,7 @@ class PreferencesFragment : PreferenceFragmentCompat() {
     private var showNsfwPreference: SwitchPreferenceCompat? = null
     private var showNsfwPreviewPreference: SwitchPreferenceCompat? = null
     private var showSpoilerPreviewPreference: SwitchPreferenceCompat? = null
+    private var backupPreference: Preference? = null
     private var sourcePreference: Preference? = null
     private var aboutPreference: Preference? = null
 
@@ -122,6 +123,13 @@ class PreferencesFragment : PreferenceFragmentCompat() {
         )?.apply {
             setOnPreferenceChangeListener { _, newValue ->
                 viewModel.setShowSpoilerPreview(newValue as Boolean)
+                true
+            }
+        }
+
+        backupPreference = findPreference<Preference>("backup")?.apply {
+            setOnPreferenceClickListener {
+                openBackup()
                 true
             }
         }
@@ -249,6 +257,10 @@ class PreferencesFragment : PreferenceFragmentCompat() {
 
     private fun updateRedditSource(source: Int) {
         viewModel.setRedditSource(source)
+    }
+
+    private fun openBackup() {
+        findNavController().navigate(PreferencesFragmentDirections.openBackup(), navOptions)
     }
 
     private fun openAbout() {

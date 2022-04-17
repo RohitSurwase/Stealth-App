@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <data>
+        <variable
+            name="backupType"
+            type="com.cosmos.unreddit.data.model.BackupTypeItem" />
+    </data>
+
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/card"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/subscriptions_card_height"
+        android:clickable="true"
+        android:focusable="true"
+        android:checkable="true"
+        style="@style/SubscriptionsCardStyle">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:padding="@dimen/subscriptions_padding"
+            android:background="@drawable/card_background">
+
+            <com.google.android.material.imageview.ShapeableImageView
+                android:id="@+id/type_image"
+                style="@style/Widget.ShapeableImageView.Circular"
+                android:layout_width="@dimen/subscriptions_image_size"
+                android:layout_height="@dimen/subscriptions_image_size"
+                android:tint="@color/icon_tint"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                tools:src="@drawable/ic_stealth"/>
+
+            <TextView
+                android:id="@+id/type_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:layout_constraintLeft_toRightOf="@id/type_image"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                android:layout_marginStart="@dimen/subscriptions_margin_horizontal"
+                android:textAppearance="@style/TextAppearanceSubscription"
+                android:text="@{backupType.type.displayName}"
+                tools:text="Stealth"/>
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </com.google.android.material.card.MaterialCardView>
+
+</layout>

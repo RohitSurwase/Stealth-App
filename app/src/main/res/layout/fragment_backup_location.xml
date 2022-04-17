@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <TextView
+        android:id="@+id/text_explanation"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="8dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/image_pick_file"
+        android:textAlignment="center"
+        tools:text="@string/backup_location_explanation_backup"/>
+
+    <ImageView
+        android:id="@+id/image_pick_file"
+        android:layout_width="@dimen/backup_pick_image_size"
+        android:layout_height="@dimen/backup_pick_image_size"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/text_explanation"
+        app:layout_constraintBottom_toTopOf="@id/pick_button"
+        android:src="@drawable/image_pick_file"/>
+
+    <Button
+        android:id="@+id/pick_button"
+        style="@style/ButtonStyle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:text="@string/backup_location_button_pick"/>
+
+    <TextView
+        android:id="@+id/text_filename"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="12dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/pick_button"
+        android:textColor="@color/text_color_secondary"
+        android:textSize="12sp"
+        tools:text="backup.json"/>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

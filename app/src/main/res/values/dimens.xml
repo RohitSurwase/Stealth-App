@@ -153,4 +153,8 @@
     <dimen name="profile_delete_icon_size">20dp</dimen>
 
     <dimen name="table_padding">8dp</dimen>
+
+    <dimen name="backup_button_margin">16dp</dimen>
+    <dimen name="backup_pick_image_size">150dp</dimen>
+    <dimen name="backup_operation_card_height">84dp</dimen>
 </resources>
