@@ -1,0 +1,7 @@
+Added
+- Import/Export feature: back up and restore data from Stealth or Reddit
+
+Fixed
+- Discrepancies in comments when leaving and coming back to post detail
+- Bottom navigation not hiding on scroll in Post List
+- Crashes when clicking on poll links (thanks to @mwiggins)

@@ -1,3 +1,13 @@
+# 2.0.0-alpha02 - 2022/04/17
+
+### Added
+- Import/Export feature: back up and restore data from Stealth or Reddit
+
+### Fixed
+- Discrepancies in comments when leaving and coming back to post detail
+- Bottom navigation not hiding on scroll in Post List
+- Crashes when clicking on poll links (thanks to @mwiggins)
+
 # 2.0.0-alpha01 - 2021/12/13
 
 ### Added
