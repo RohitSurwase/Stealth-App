@@ -187,6 +187,7 @@
 
     <string name="contributor_uDEV2019_description">German translation</string>
     <string name="contributor_anothersapiens_description">Spanish translation</string>
+    <string name="contributor_mwiggins_description">Developer</string>
 
     <string name="notification_download_title">Download Manager</string>
     <string name="notification_download_content_pending">Download in progress</string>
