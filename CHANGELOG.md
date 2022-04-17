@@ -1,3 +1,8 @@
+# 2.0.0-alpha03 - 2022/04/17
+
+### Fixed
+- Crashes when restoring backups
+
 # 2.0.0-alpha02 - 2022/04/17
 
 ### Added
