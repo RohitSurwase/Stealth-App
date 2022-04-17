@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/backup_card"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/backup_operation_card_height"
+        android:clickable="true"
+        android:focusable="true"
+        android:checkable="true"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/restore_card"
+        app:layout_constraintVertical_chainStyle="packed"
+        style="@style/CardStyle">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:padding="@dimen/subscriptions_padding"
+            android:background="@drawable/card_background">
+
+            <com.google.android.material.imageview.ShapeableImageView
+                android:id="@+id/backup_image"
+                style="@style/Widget.ShapeableImageView.Circular"
+                android:layout_width="@dimen/subscriptions_image_size"
+                android:layout_height="@dimen/subscriptions_image_size"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                android:src="@drawable/ic_download"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:layout_constraintLeft_toRightOf="@id/backup_image"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                android:layout_marginStart="@dimen/subscriptions_margin_horizontal"
+                android:textAppearance="@style/TextAppearanceSubscription"
+                android:text="@string/backup_operation_backup" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </com.google.android.material.card.MaterialCardView>
+
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/restore_card"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/backup_operation_card_height"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/backup_card"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:clickable="true"
+        android:focusable="true"
+        android:checkable="true"
+        style="@style/CardStyle">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:padding="@dimen/subscriptions_padding"
+            android:background="@drawable/card_background">
+
+            <com.google.android.material.imageview.ShapeableImageView
+                android:id="@+id/restore_image"
+                style="@style/Widget.ShapeableImageView.Circular"
+                android:layout_width="@dimen/subscriptions_image_size"
+                android:layout_height="@dimen/subscriptions_image_size"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                android:src="@drawable/ic_upload"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:layout_constraintLeft_toRightOf="@id/restore_image"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                android:layout_marginStart="@dimen/subscriptions_margin_horizontal"
+                android:textAppearance="@style/TextAppearanceSubscription"
+                android:text="@string/backup_operation_restore" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </com.google.android.material.card.MaterialCardView>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

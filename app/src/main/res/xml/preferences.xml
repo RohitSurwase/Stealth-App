@@ -43,6 +43,11 @@
             app:title="@string/preference_reddit_source"
             app:persistent="false"/>
 
+        <Preference
+            app:key="backup"
+            app:title="@string/preference_backup"
+            app:persistent="false"/>
+
     </PreferenceCategory>
 
     <PreferenceCategory

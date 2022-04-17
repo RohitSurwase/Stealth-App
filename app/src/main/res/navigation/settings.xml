@@ -5,12 +5,18 @@
     android:id="@+id/settings"
     app:startDestination="@id/preferencesFragment">
 
+    <include app:graph="@navigation/backup" />
+
     <fragment
         android:id="@+id/preferencesFragment"
         android:name="com.cosmos.unreddit.ui.preferences.PreferencesFragment">
         <action
             android:id="@+id/openAbout"
             app:destination="@id/aboutFragment"/>
+
+        <action
+            android:id="@+id/openBackup"
+            app:destination="@id/backup"/>
     </fragment>
 
     <fragment

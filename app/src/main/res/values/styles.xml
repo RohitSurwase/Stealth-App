@@ -208,6 +208,11 @@
         <item name="cornerSize">50%</item>
     </style>
 
+    <style name="Widget.ShapeableImageView.Circular" parent="">
+        <item name="contentPadding">4dp</item>
+        <item name="shapeAppearanceOverlay">@style/CircularImageViewStyle</item>
+    </style>
+
     <!-- Subscriptions -->
 
     <style name="TextAppearanceSubscription" parent="">

@@ -321,12 +321,15 @@ class PostDetailsFragment :
         }
     }
 
-    override fun onDestroyView() {
-        super.onDestroyView()
+    override fun onPause() {
+        super.onPause()
 
         // Save comment hierarchy
         viewModel.setComments(commentAdapter.currentList)
+    }
 
+    override fun onDestroyView() {
+        super.onDestroyView()
         _binding = null
         commentAdapter.cleanUp()
     }

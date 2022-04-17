@@ -271,6 +271,12 @@ class AboutFragment : BaseFragment() {
                     "@another-sapiens",
                     R.string.contributor_anothersapiens_description,
                     "https://gitlab.com/another-sapiens"
+                ),
+                CreditItem.Contributor(
+                    "matt wiggins",
+                    "@mwiggins",
+                    R.string.contributor_mwiggins_description,
+                    "https://gitlab.com/mwiggins"
                 )
             )
         }
