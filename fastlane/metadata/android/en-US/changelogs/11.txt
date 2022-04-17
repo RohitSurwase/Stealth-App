@@ -1,0 +1,2 @@
+Fixed
+- Crashes when restoring backups
