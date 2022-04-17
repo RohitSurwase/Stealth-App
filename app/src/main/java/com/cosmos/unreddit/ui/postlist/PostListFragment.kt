@@ -45,7 +45,8 @@ class PostListFragment : BaseFragment() {
     // Workaround for nested CoordinatorLayout that prevents bottom navigation from being hidden on
     // scroll
     private val onOffsetChangedListener = object : AppBarLayout.OnOffsetChangedListener {
-        private var visible: Boolean = true
+        var visible: Boolean = true
+            private set
 
         override fun onOffsetChanged(appBarLayout: AppBarLayout?, verticalOffset: Int) {
             if (verticalOffset != 0 && visible) {
@@ -170,7 +171,7 @@ class PostListFragment : BaseFragment() {
         setSortingListener { sorting -> sorting?.let { viewModel.setSorting(it) } }
 
         setNavigationListener { showNavigation ->
-            uiViewModel.setNavigationVisibility(showNavigation)
+            uiViewModel.setNavigationVisibility(showNavigation && onOffsetChangedListener.visible)
         }
     }
 
