@@ -68,8 +68,6 @@ android {
 dependencies {
     implementation fileTree(dir: "libs", include: ["*.jar"])
 
-    implementation "org.jetbrains.kotlin:kotlin-stdlib:$rootProject.kotlin"
-
     implementation "com.google.dagger:hilt-android:$rootProject.hiltGradlePlugin"
     kapt "com.google.dagger:hilt-android-compiler:$rootProject.hiltGradlePlugin"
     kapt "androidx.hilt:hilt-compiler:$rootProject.hilt"
