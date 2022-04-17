@@ -8,7 +8,11 @@ apply plugin: "androidx.navigation.safeargs.kotlin"
 def keystorePropertiesFile = rootProject.file("keystore.properties")
 def keystoreProperties = new Properties()
 
-keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
+if (keystorePropertiesFile.exists()) {
+    keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
+} else {
+    keystoreProperties['storeFile'] = 'keystore.jks'
+}
 
 android {
     compileSdkVersion 32
