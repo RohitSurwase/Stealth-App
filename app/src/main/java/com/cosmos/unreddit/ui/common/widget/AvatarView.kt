@@ -10,7 +10,6 @@ import com.cosmos.unreddit.R
 import com.cosmos.unreddit.util.extension.fitToRange
 import com.cosmos.unreddit.util.extension.sum
 import com.google.android.material.imageview.ShapeableImageView
-import java.util.Locale
 
 class AvatarView @JvmOverloads constructor(
     context: Context,
@@ -63,11 +62,12 @@ class AvatarView @JvmOverloads constructor(
     }
 
     private fun textToInitials(): String? {
-        return text?.toUpperCase(Locale.getDefault())?.split("\\s")?.map { it.first() }
-            ?.joinToString("")
+        return text?.split(SPACE_REGEX)?.joinToString("") { it.first().uppercase() }
     }
 
     companion object {
+        private val SPACE_REGEX = Regex("\\s")
+
         private val colorArray = arrayOf(
             R.color.profile_background_1,
             R.color.profile_background_2,
