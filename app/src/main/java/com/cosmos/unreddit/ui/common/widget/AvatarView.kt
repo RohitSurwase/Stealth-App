@@ -1,10 +1,14 @@
 package com.cosmos.unreddit.ui.common.widget
 
 import android.content.Context
+import android.content.res.ColorStateList
 import android.util.AttributeSet
 import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.content.ContextCompat
 import com.cosmos.unreddit.R
+import com.cosmos.unreddit.util.extension.fitToRange
+import com.cosmos.unreddit.util.extension.sum
 import com.google.android.material.imageview.ShapeableImageView
 import java.util.Locale
 
@@ -18,6 +22,9 @@ class AvatarView @JvmOverloads constructor(
     private var initials: TextView
 
     private var text: String? = null
+
+    private val backgroundColor: Int
+        get() = text?.sum?.fitToRange(colorArray.indices)?.let { colorArray[it] } ?: colorArray[0]
 
     init {
         context.theme.obtainStyledAttributes(
@@ -40,16 +47,38 @@ class AvatarView @JvmOverloads constructor(
 
     override fun onFinishInflate() {
         super.onFinishInflate()
-        initials.text = textToInitials()
+        updateView()
     }
 
     fun setText(text: String?) {
         this.text = text
+        updateView()
+    }
+
+    private fun updateView() {
         initials.text = textToInitials()
+        avatar.backgroundTintList = ColorStateList.valueOf(
+            ContextCompat.getColor(context, backgroundColor)
+        )
     }
 
     private fun textToInitials(): String? {
         return text?.toUpperCase(Locale.getDefault())?.split("\\s")?.map { it.first() }
             ?.joinToString("")
+    }
+
+    companion object {
+        private val colorArray = arrayOf(
+            R.color.profile_background_1,
+            R.color.profile_background_2,
+            R.color.profile_background_3,
+            R.color.profile_background_4,
+            R.color.profile_background_5,
+            R.color.profile_background_6,
+            R.color.profile_background_7,
+            R.color.profile_background_8,
+            R.color.profile_background_9,
+            R.color.profile_background_10,
+        )
     }
 }

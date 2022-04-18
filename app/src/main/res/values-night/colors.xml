@@ -14,4 +14,15 @@
 
     <color name="admin_color">#EF5350</color>
     <color name="moderator_color">#66BB6A</color>
+
+    <color name="profile_background_1">#E57373</color>
+    <color name="profile_background_2">#F06292</color>
+    <color name="profile_background_3">#BA68C8</color>
+    <color name="profile_background_4">#7986CB</color>
+    <color name="profile_background_5">#64B5F6</color>
+    <color name="profile_background_6">#81C784</color>
+    <color name="profile_background_7">#FFB74D</color>
+    <color name="profile_background_8">#FF8A65</color>
+    <color name="profile_background_9">#A1887F</color>
+    <color name="profile_background_10">#90A4AE</color>
 </resources>
