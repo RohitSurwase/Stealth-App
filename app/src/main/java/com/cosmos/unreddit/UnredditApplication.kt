@@ -55,7 +55,7 @@ class UnredditApplication : Application(), ImageLoaderFactory, Configuration.Pro
         return ImageLoader.Builder(applicationContext)
             .componentRegistry {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-                    add(ImageDecoderDecoder())
+                    add(ImageDecoderDecoder(applicationContext))
                 } else {
                     add(GifDecoder())
                 }
