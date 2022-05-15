@@ -12,6 +12,7 @@ import coil.decode.ImageDecoderDecoder
 import coil.util.CoilUtils
 import com.cosmos.unreddit.data.model.preferences.UiPreferences
 import com.cosmos.unreddit.data.repository.PreferencesRepository
+import com.cosmos.unreddit.util.FileUncaughtExceptionHandler
 import dagger.hilt.android.HiltAndroidApp
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
@@ -46,6 +47,8 @@ class UnredditApplication : Application(), ImageLoaderFactory, Configuration.Pro
             val nightMode = preferencesRepository.getNightMode().first()
             appTheme = nightMode
         }
+
+        Thread.setDefaultUncaughtExceptionHandler(FileUncaughtExceptionHandler(this))
     }
 
     override fun newImageLoader(): ImageLoader {
