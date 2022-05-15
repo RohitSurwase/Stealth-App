@@ -40,6 +40,7 @@ class PreferencesFragment : PreferenceFragmentCompat() {
     private val uiViewModel: UiViewModel by activityViewModels()
 
     private var nightModePreference: Preference? = null
+    private var leftHandedModePreference: SwitchPreferenceCompat? = null
     private var showNsfwPreference: SwitchPreferenceCompat? = null
     private var showNsfwPreviewPreference: SwitchPreferenceCompat? = null
     private var showSpoilerPreviewPreference: SwitchPreferenceCompat? = null
@@ -96,6 +97,15 @@ class PreferencesFragment : PreferenceFragmentCompat() {
                         showNightModeDialog(index)
                     }
                 }
+                true
+            }
+        }
+
+        leftHandedModePreference = findPreference<SwitchPreferenceCompat>(
+            UiPreferences.PreferencesKeys.LEFT_HANDED_MODE.name
+        )?.apply {
+            setOnPreferenceChangeListener { _, newValue ->
+                viewModel.setLeftHandedMode(newValue as Boolean)
                 true
             }
         }
@@ -161,6 +171,12 @@ class PreferencesFragment : PreferenceFragmentCompat() {
                         val nightModeArray = resources.getStringArray(R.array.pref_night_mode_labels)
                         nightModePreference?.summary = nightModeArray.getOrNull(index)
                     }
+                }
+            }
+
+            launch {
+                viewModel.leftHandedMode.collect { leftHandedMode ->
+                    leftHandedModePreference?.isChecked = leftHandedMode
                 }
             }
 

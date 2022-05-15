@@ -1,13 +1,16 @@
 package com.cosmos.unreddit.data.model.preferences
 
 import androidx.appcompat.app.AppCompatDelegate
+import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.intPreferencesKey
 
 data class UiPreferences(
-    val nightMode: Int
+    val nightMode: Int,
+    val leftHandedMode: Boolean
 ) {
     object PreferencesKeys {
         val NIGHT_MODE = intPreferencesKey("night_mode")
+        val LEFT_HANDED_MODE = booleanPreferencesKey("left_handed_mode")
     }
 
     enum class NightMode(val index: Int, val mode: Int) {

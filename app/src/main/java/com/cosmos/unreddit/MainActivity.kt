@@ -1,10 +1,11 @@
 package com.cosmos.unreddit
 
 import android.os.Bundle
-import android.view.View
+import android.view.Gravity
 import android.view.ViewGroup
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
@@ -16,10 +17,11 @@ import androidx.navigation.NavController
 import androidx.navigation.NavDestination
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupWithNavController
-import androidx.transition.Slide
-import androidx.transition.TransitionManager
 import com.cosmos.unreddit.databinding.ActivityMainBinding
+import com.cosmos.unreddit.util.HideBottomViewBehavior
+import com.cosmos.unreddit.util.extension.launchRepeat
 import com.cosmos.unreddit.util.extension.unredditApplication
+import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.shape.CornerFamily
 import com.google.android.material.shape.MaterialShapeDrawable
 import dagger.hilt.android.AndroidEntryPoint
@@ -44,14 +46,22 @@ class MainActivity : AppCompatActivity(), NavController.OnDestinationChangedList
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        initBottomNavigationView()
-
         initNavigation()
 
         lifecycleScope.launch {
             viewModel.navigationVisibility
                 .flowWithLifecycle(lifecycle, Lifecycle.State.STARTED)
                 .collect(this@MainActivity::showNavigation)
+        }
+
+        launchRepeat(Lifecycle.State.STARTED) {
+            launch {
+                viewModel.navigationVisibility.collect(this@MainActivity::showNavigation)
+            }
+
+            launch {
+                viewModel.leftHandedMode.collect(this@MainActivity::initBottomNavigationView)
+            }
         }
     }
 
@@ -65,7 +75,7 @@ class MainActivity : AppCompatActivity(), NavController.OnDestinationChangedList
         binding.bottomNavigation.setupWithNavController(navController)
     }
 
-    private fun initBottomNavigationView() {
+    private fun initBottomNavigationView(leftHandedMode: Boolean) {
         ViewCompat.setOnApplyWindowInsetsListener(binding.bottomNavigation) { view, windowInsets ->
             val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
 
@@ -77,24 +87,53 @@ class MainActivity : AppCompatActivity(), NavController.OnDestinationChangedList
             windowInsets
         }
 
+        binding.bottomNavigation.updateLayoutParams<CoordinatorLayout.LayoutParams> {
+            gravity = if (leftHandedMode) {
+                Gravity.BOTTOM or Gravity.START
+            } else {
+                Gravity.BOTTOM or Gravity.END
+            }
+            behavior = HideBottomViewBehavior<BottomNavigationView>(leftHandedMode)
+        }
+
         val radius = resources.getDimension(R.dimen.bottom_navigation_radius)
         val bottomNavigationBackground = binding.bottomNavigation.background
                 as? MaterialShapeDrawable
 
-        bottomNavigationBackground?.apply {
-            shapeAppearanceModel = shapeAppearanceModel.toBuilder()
-                .setAllCorners(CornerFamily.ROUNDED, radius)
-                .build()
+        bottomNavigationBackground?.run {
+            val builder = shapeAppearanceModel.toBuilder()
+
+            if (leftHandedMode) {
+                builder.apply {
+                    setTopRightCorner(CornerFamily.ROUNDED, radius)
+                    setBottomRightCorner(CornerFamily.ROUNDED, radius)
+
+                    setTopLeftCorner(CornerFamily.CUT, 0F)
+                    setBottomLeftCorner(CornerFamily.CUT, 0F)
+                }
+            } else {
+                builder.apply {
+                    setTopRightCorner(CornerFamily.CUT, 0F)
+                    setBottomRightCorner(CornerFamily.CUT, 0F)
+
+                    setTopLeftCorner(CornerFamily.ROUNDED, radius)
+                    setBottomLeftCorner(CornerFamily.ROUNDED, radius)
+                }
+            }
+
+            shapeAppearanceModel = builder.build()
         }
     }
 
     private fun showNavigation(show: Boolean) {
-        val transition = Slide().apply {
-            duration = 500
-            addTarget(binding.bottomNavigation)
+        val layoutParams = binding.bottomNavigation.layoutParams as CoordinatorLayout.LayoutParams
+        val behavior = layoutParams.behavior as HideBottomViewBehavior?
+
+        if (show) {
+            behavior?.slideIn(binding.bottomNavigation)
+        } else {
+            behavior?.slideOut(binding.bottomNavigation)
         }
-        TransitionManager.beginDelayedTransition(binding.root, transition)
-        binding.bottomNavigation.visibility = if (show) View.VISIBLE else View.GONE
     }
 
     override fun onDestinationChanged(

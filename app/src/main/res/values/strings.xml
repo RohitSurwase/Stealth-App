@@ -138,6 +138,8 @@
     <string name="preference_night_mode_system">Follow System</string>
     <string name="preference_night_mode_amoled">Amoled</string>
 
+    <string name="preference_left_handed_mode">Left-handed mode</string>
+
     <string name="preference_show_nsfw">Show NSFW content</string>
     <string name="preference_show_nsfw_preview">Show NSFW preview</string>
     <string name="preference_show_spoiler_preview">Show Spoiler preview</string>
@@ -227,4 +229,7 @@
     <string name="backup_button_next">Next</string>
     <string name="backup_button_lets_go">Let\'s Go</string>
     <string name="backup_button_finish">Finish</string>
+
+    <string name="shelf_card_transition_name" translatable="false">shelf_transition_%1$d</string>
+    <string name="post_list_transition_name" translatable="false">post_list_transition</string>
 </resources>

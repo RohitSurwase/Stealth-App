@@ -33,6 +33,20 @@ class PreferencesRepository @Inject constructor(
         return preferencesDatastore.getValue(UiPreferences.PreferencesKeys.NIGHT_MODE, defaultValue)
     }
 
+    suspend fun setLeftHandedMode(leftHandedMode: Boolean) {
+        preferencesDatastore.setValue(
+            UiPreferences.PreferencesKeys.LEFT_HANDED_MODE,
+            leftHandedMode
+        )
+    }
+
+    fun getLeftHandedMode(defaultValue: Boolean = false): Flow<Boolean> {
+        return preferencesDatastore.getValue(
+            UiPreferences.PreferencesKeys.LEFT_HANDED_MODE,
+            defaultValue
+        )
+    }
+
     //endregion
 
     //region Content

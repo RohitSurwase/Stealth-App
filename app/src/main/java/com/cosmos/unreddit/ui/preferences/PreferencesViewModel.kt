@@ -21,6 +21,8 @@ class PreferencesViewModel @Inject constructor(
     val nightMode: SharedFlow<Int> = preferencesRepository.getNightMode()
         .shareIn(viewModelScope, SharingStarted.WhileSubscribed(), 1)
 
+    val leftHandedMode: Flow<Boolean> = preferencesRepository.getLeftHandedMode()
+
     val showNsfw: Flow<Boolean> = preferencesRepository.getShowNsfw()
 
     val showNsfwPreview: Flow<Boolean> = preferencesRepository.getShowNsfwPreview()
@@ -33,6 +35,12 @@ class PreferencesViewModel @Inject constructor(
     fun setNightMode(nightMode: Int) {
         viewModelScope.launch {
             preferencesRepository.setNightMode(nightMode)
+        }
+    }
+
+    fun setLeftHandedMode(leftHandedMode: Boolean) {
+        viewModelScope.launch {
+            preferencesRepository.setLeftHandedMode(leftHandedMode)
         }
     }
 
