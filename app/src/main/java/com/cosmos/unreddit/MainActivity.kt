@@ -11,8 +11,6 @@ import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updateLayoutParams
 import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.flowWithLifecycle
-import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination
 import androidx.navigation.fragment.NavHostFragment
@@ -25,7 +23,6 @@ import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.shape.CornerFamily
 import com.google.android.material.shape.MaterialShapeDrawable
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
@@ -47,12 +44,6 @@ class MainActivity : AppCompatActivity(), NavController.OnDestinationChangedList
         setContentView(binding.root)
 
         initNavigation()
-
-        lifecycleScope.launch {
-            viewModel.navigationVisibility
-                .flowWithLifecycle(lifecycle, Lifecycle.State.STARTED)
-                .collect(this@MainActivity::showNavigation)
-        }
 
         launchRepeat(Lifecycle.State.STARTED) {
             launch {
@@ -130,9 +121,15 @@ class MainActivity : AppCompatActivity(), NavController.OnDestinationChangedList
         val behavior = layoutParams.behavior as HideBottomViewBehavior?
 
         if (show) {
-            behavior?.slideIn(binding.bottomNavigation)
+            behavior?.run {
+                enabled = true
+                slideIn(binding.bottomNavigation)
+            }
         } else {
-            behavior?.slideOut(binding.bottomNavigation)
+            behavior?.run {
+                enabled = false
+                slideOut(binding.bottomNavigation)
+            }
         }
     }
 

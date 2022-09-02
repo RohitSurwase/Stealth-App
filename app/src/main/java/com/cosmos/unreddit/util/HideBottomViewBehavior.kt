@@ -32,6 +32,8 @@ class HideBottomViewBehavior<V: View> @JvmOverloads constructor(
     private val isScrolledDown: Boolean
         get() = currentState == STATE_SCROLLED_DOWN
 
+    var enabled: Boolean = true
+
     override fun onLayoutChild(parent: CoordinatorLayout, child: V, layoutDirection: Int): Boolean {
         val paramsCompat = child.layoutParams as ViewGroup.MarginLayoutParams
         width = child.measuredWidth + paramsCompat.rightMargin
@@ -46,7 +48,7 @@ class HideBottomViewBehavior<V: View> @JvmOverloads constructor(
         axes: Int,
         type: Int
     ): Boolean {
-        return axes == ViewCompat.SCROLL_AXIS_VERTICAL
+        return enabled && axes == ViewCompat.SCROLL_AXIS_VERTICAL
     }
 
     override fun onNestedScroll(
