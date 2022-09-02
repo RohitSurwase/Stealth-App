@@ -77,6 +77,9 @@ class SortFragment : BottomSheetDialogFragment() {
                 TimeSorting.MONTH -> binding.chipMonth.isChecked = true
                 TimeSorting.YEAR -> binding.chipYear.isChecked = true
                 TimeSorting.ALL -> binding.chipAll.isChecked = true
+                else -> {
+                    // Ignore
+                }
             }
         }
 

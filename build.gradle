@@ -1,9 +1,9 @@
 buildscript {
 
     ext {
-        kotlin = '1.6.20'
-        androidGradlePlugin = '7.1.3'
-        hiltGradlePlugin = '2.41'
+        kotlin = '1.7.10'
+        androidGradlePlugin = '7.2.2'
+        hiltGradlePlugin = '2.43.2'
 
         hilt = '1.0.0'
 
