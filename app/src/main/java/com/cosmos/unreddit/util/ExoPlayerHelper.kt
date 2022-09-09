@@ -16,6 +16,7 @@ class ExoPlayerHelper(context: Context) {
 
     private val httpDataSourceFactory = DefaultHttpDataSource.Factory()
         .setAllowCrossProtocolRedirects(true)
+        .setUserAgent(LinkUtil.USER_AGENT)
 
     private val exoDatabaseProvider = ExoDatabaseProvider(context)
 
@@ -29,7 +30,11 @@ class ExoPlayerHelper(context: Context) {
         .setCache(simpleCache)
         .setUpstreamDataSourceFactory(httpDataSourceFactory)
 
-    val defaultMediaSourceFactory = DefaultMediaSourceFactory(cacheDataSourceFactory)
+    val defaultMediaSourceFactory by lazy { DefaultMediaSourceFactory(cacheDataSourceFactory) }
+
+    fun setRequestProperties(requestProperties: Map<String, String>) {
+        httpDataSourceFactory.setDefaultRequestProperties(requestProperties)
+    }
 
     fun getMediaItem(url: String): MediaItem {
         return MediaItem.fromUri(url)

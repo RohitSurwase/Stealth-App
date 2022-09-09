@@ -25,6 +25,7 @@ import com.google.android.exoplayer2.source.MergingMediaSource
 import com.google.android.exoplayer2.source.TrackGroupArray
 import com.google.android.exoplayer2.trackselection.TrackSelectionArray
 import com.google.android.exoplayer2.upstream.HttpDataSource
+import okhttp3.HttpUrl
 import java.net.HttpURLConnection
 
 class MediaViewerAdapter(
@@ -193,11 +194,21 @@ class MediaViewerAdapter(
         }
 
         fun bind(video: GalleryMedia) {
-            val videoItem = exoPlayerHelper.getMediaItem(video.url)
+            val url = HttpUrl.parse(video.url) ?: return
+
+            if (url.host().contains("redgifs", ignoreCase = true)) {
+                val requestProperties = url
+                    .queryParameterNames()
+                    .associateWith { url.queryParameter(it) ?: "" }
+
+                exoPlayerHelper.setRequestProperties(requestProperties)
+            }
 
             val player = SimpleExoPlayer.Builder(binding.video.context)
                 .setMediaSourceFactory(exoPlayerHelper.defaultMediaSourceFactory)
                 .build()
+
+            val videoItem = exoPlayerHelper.getMediaItem(video.url)
 
             if (video.sound != null) {
                 val videoSource = exoPlayerHelper.getMediaSource(videoItem)
@@ -226,7 +237,7 @@ class MediaViewerAdapter(
                     }
                 })
             } else {
-                player.setMediaItem(videoItem)
+                player.setMediaSource(exoPlayerHelper.getMediaSource(videoItem))
                 player.addListener(this)
             }
 
