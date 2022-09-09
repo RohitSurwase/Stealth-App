@@ -9,6 +9,7 @@ import com.cosmos.unreddit.data.remote.api.reddit.SortingConverterFactory
 import com.cosmos.unreddit.data.remote.api.reddit.TedditApi
 import com.cosmos.unreddit.data.remote.api.reddit.adapter.EditedAdapter
 import com.cosmos.unreddit.data.remote.api.reddit.adapter.MediaMetadataAdapter
+import com.cosmos.unreddit.data.remote.api.reddit.adapter.NullToEmptyStringAdapter
 import com.cosmos.unreddit.data.remote.api.reddit.adapter.RepliesAdapter
 import com.cosmos.unreddit.data.remote.api.reddit.model.AboutChild
 import com.cosmos.unreddit.data.remote.api.reddit.model.AboutUserChild
@@ -80,6 +81,7 @@ object NetworkModule {
             .add(MediaMetadataAdapter.Factory)
             .add(RepliesAdapter())
             .add(EditedAdapter())
+            .add(NullToEmptyStringAdapter())
             .build()
     }
 
