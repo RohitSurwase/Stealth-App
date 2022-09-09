@@ -1,3 +1,16 @@
+# 2.0.0-alpha04 - 2022/09/10
+
+### Added
+- Support for body text in all posts
+- Log crashes to a file on external storage
+
+### Changed
+- Moved bottom navigation bar to the side (with left-handed support)
+
+### Fixed
+- Redgifs videos (temporary fix)
+- Crashes when domain or url is null in a post
+
 # 2.0.0-alpha03 - 2022/04/17
 
 ### Fixed
