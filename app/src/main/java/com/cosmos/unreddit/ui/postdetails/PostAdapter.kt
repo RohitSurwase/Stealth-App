@@ -75,12 +75,13 @@ class PostAdapter(
                 setTextColor(ContextCompat.getColor(context, post.posterType.color))
             }
 
+            bindText(post)
+
             bindAwards(post)
 
             bindFlairs(post)
 
             when (post.type) {
-                PostType.TEXT -> bindText(post)
                 PostType.IMAGE -> {
                     bindImage(post) {
                         error(R.drawable.preview_image_fallback)
@@ -101,6 +102,9 @@ class PostAdapter(
                         fallback(R.drawable.preview_video_fallback)
                     }
                     binding.imagePost.setOnClickListener { postClickListener.onVideoClick(post) }
+                }
+                else -> {
+                    // Ignore
                 }
             }
 
@@ -151,9 +155,7 @@ class PostAdapter(
 
             binding.includePostMetrics.buttonSave.isChecked = post.saved
 
-            if (post.type == PostType.TEXT) {
-                bindText(post)
-            }
+            bindText(post)
 
             bindAwards(post)
 
