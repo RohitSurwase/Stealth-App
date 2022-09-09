@@ -14,6 +14,8 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toTopOf="@id/text_post_title"
+        app:layout_constraintVertical_chainStyle="packed"
+        app:layout_constraintVertical_bias="0"
         layout="@layout/include_post_info"/>
 
     <TextView
@@ -24,17 +26,10 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@id/include_post_info"
-        app:layout_constraintBottom_toTopOf="@id/barrier_top"
+        app:layout_constraintBottom_toTopOf="@id/image_post"
         android:layout_marginHorizontal="@dimen/post_title_margin"
-        android:layout_marginVertical="@dimen/post_margin_top_small"
+        android:layout_marginTop="@dimen/post_margin_top_small"
         tools:text="This is a post" />
-
-    <androidx.constraintlayout.widget.Barrier
-        android:id="@+id/barrier_top"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:barrierDirection="top"
-        app:constraint_referenced_ids="image_post, text_post" />
 
     <com.google.android.material.imageview.ShapeableImageView
         android:id="@+id/image_post"
@@ -42,9 +37,10 @@
         android:layout_height="@dimen/post_image_height"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/barrier_top"
-        app:layout_constraintBottom_toTopOf="@id/barrier_bottom"
+        app:layout_constraintTop_toBottomOf="@id/text_post_title"
+        app:layout_constraintBottom_toTopOf="@id/text_post"
         android:layout_marginHorizontal="@dimen/post_content_margin_horizontal"
+        android:layout_marginTop="@dimen/post_margin_top_small"
         android:scaleType="centerCrop"
         android:elevation="@dimen/post_elevation"
         app:shapeAppearanceOverlay="@style/RoundedImageViewStyle"
@@ -72,8 +68,9 @@
         android:layout_height="wrap_content"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/barrier_top"
-        app:layout_constraintBottom_toTopOf="@id/barrier_bottom"
+        app:layout_constraintTop_toBottomOf="@id/image_post"
+        app:layout_constraintBottom_toTopOf="@id/include_post_flairs"
+        android:layout_marginTop="@dimen/post_margin_top_small"
         android:paddingHorizontal="@dimen/post_text_padding"
         android:visibility="gone"/>
 
@@ -90,7 +87,7 @@
         android:layout_height="wrap_content"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/barrier_bottom"
+        app:layout_constraintTop_toBottomOf="@id/text_post"
         app:layout_constraintBottom_toTopOf="@id/scrollview_awards"
         app:layout_constraintVertical_bias="0"
         android:layout_marginTop="@dimen/post_margin_top_large"

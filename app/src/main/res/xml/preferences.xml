@@ -10,6 +10,11 @@
             app:title="@string/preference_night_mode"
             app:persistent="false"/>
 
+        <SwitchPreferenceCompat
+            app:key="left_handed_mode"
+            app:title="@string/preference_left_handed_mode"
+            app:persistent="false"/>
+
     </PreferenceCategory>
 
     <PreferenceCategory

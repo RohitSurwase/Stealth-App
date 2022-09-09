@@ -22,7 +22,6 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
@@ -72,24 +71,34 @@ class MediaViewerViewModel
                         GalleryMedia.singleton(Type.VIDEO, link, LinkUtil.getRedditSoundTrack(link))
                     )
                 }
-                MediaType.GFYCAT, MediaType.REDGIFS -> {
+                MediaType.GFYCAT -> {
                     val id = LinkUtil.getGfycatId(link)
 
-                    val gifItem = if (mediaType == MediaType.GFYCAT) {
-                        gfycatRepository.getGfycatGif(id)
-                    } else {
-                        gfycatRepository.getRedgifsGif(id)
-                    }
-
-                    gifItem.onStart {
-                        _media.value = Resource.Loading()
-                    }.catch {
-                        catchError(it)
-                    }.map {
-                        GalleryMedia.singleton(Type.VIDEO, it.gfyItem.contentUrls.mp4.url)
-                    }.collect {
-                        setMedia(it)
-                    }
+                    gfycatRepository.getGfycatGif(id)
+                        .onStart {
+                            _media.value = Resource.Loading()
+                        }
+                        .catch {
+                            catchError(it)
+                        }
+                        .map {
+                            GalleryMedia.singleton(Type.VIDEO, it.gfyItem.contentUrls.mp4.url)
+                        }
+                        .collect {
+                            setMedia(it)
+                        }
+                }
+                MediaType.REDGIFS -> {
+                    gfycatRepository.parseRedgifsLink(link)
+                        .onStart {
+                            _media.value = Resource.Loading()
+                        }
+                        .catch {
+                            catchError(it)
+                        }
+                        .collect {
+                            setMedia(it)
+                        }
                 }
                 MediaType.STREAMABLE -> {
                     val shortcode = LinkUtil.getStreamableShortcode(link)

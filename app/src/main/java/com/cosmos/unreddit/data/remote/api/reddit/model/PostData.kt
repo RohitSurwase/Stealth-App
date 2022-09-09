@@ -3,6 +3,7 @@ package com.cosmos.unreddit.data.remote.api.reddit.model
 import com.cosmos.unreddit.data.model.GalleryMedia
 import com.cosmos.unreddit.data.model.MediaType
 import com.cosmos.unreddit.data.model.PostType
+import com.cosmos.unreddit.data.remote.api.reddit.adapter.NullToEmptyString
 import com.cosmos.unreddit.util.extension.mimeType
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
@@ -61,6 +62,7 @@ data class PostData(
     val crossposts: List<PostData>?,
 
     @Json(name = "domain")
+    @NullToEmptyString
     val domain: String,
 
     @Json(name = "selftext_html")
@@ -106,6 +108,7 @@ data class PostData(
     val isStickied: Boolean,
 
     @Json(name = "url")
+    @NullToEmptyString
     val url: String,
 
     @Json(name = "created_utc")
