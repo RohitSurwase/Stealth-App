@@ -12,6 +12,7 @@ import com.cosmos.unreddit.data.model.Sorting
 import com.cosmos.unreddit.data.repository.GfycatRepository
 import com.cosmos.unreddit.data.repository.ImgurRepository
 import com.cosmos.unreddit.data.repository.PostListRepository
+import com.cosmos.unreddit.data.repository.PreferencesRepository
 import com.cosmos.unreddit.data.repository.StreamableRepository
 import com.cosmos.unreddit.di.DispatchersModule.DefaultDispatcher
 import com.cosmos.unreddit.util.LinkUtil
@@ -19,12 +20,17 @@ import com.cosmos.unreddit.util.PostUtil
 import com.cosmos.unreddit.util.extension.updateValue
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import retrofit2.HttpException
 import java.io.IOException
@@ -38,6 +44,7 @@ class MediaViewerViewModel
     private val gfycatRepository: GfycatRepository,
     private val postListRepository: PostListRepository,
     private val postMapper: PostMapper2,
+    private val preferencesRepository: PreferencesRepository,
     @DefaultDispatcher private val defaultDispatcher: CoroutineDispatcher
 ) : ViewModel() {
 
@@ -47,6 +54,18 @@ class MediaViewerViewModel
 
     private val _selectedPage: MutableStateFlow<Int> = MutableStateFlow(0)
     val selectedPage: StateFlow<Int> = _selectedPage
+
+    val isMultiMedia: StateFlow<Boolean> = _media
+        .filter { it is Resource.Success }
+        .map { (it as Resource.Success).data.size > 1 }
+        .stateIn(viewModelScope, SharingStarted.Eagerly, false)
+
+    val isVideoMuted: Flow<Boolean>
+        get() = preferencesRepository.getMuteVideo(false)
+
+    init {
+        viewModelScope.launch { preferencesRepository.getMuteVideo(false).first() }
+    }
 
     fun loadMedia(link: String, mediaType: MediaType, forceUpdate: Boolean = false) {
         if (_media.value !is Resource.Success || forceUpdate) {
@@ -164,6 +183,12 @@ class MediaViewerViewModel
 
     fun setMedia(media: List<GalleryMedia>) {
         _media.updateValue(Resource.Success(media))
+    }
+
+    fun setMuted(mutedVideo: Boolean) {
+        viewModelScope.launch {
+            preferencesRepository.setMuteVideo(mutedVideo)
+        }
     }
 
     fun setSelectedPage(position: Int) {

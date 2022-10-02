@@ -78,4 +78,6 @@
 
     <color name="profile_dialog_background">#80000000</color>
     <color name="profile_new_background">#808080</color>
+
+    <color name="black">#000000</color>
 </resources>

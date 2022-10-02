@@ -9,8 +9,7 @@ import android.widget.TextView
 import androidx.annotation.ColorInt
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
-import androidx.core.view.WindowInsetsCompat.Type.InsetsType
-import androidx.core.view.WindowInsetsControllerCompat
+import androidx.core.view.isVisible
 import androidx.core.view.updatePadding
 import coil.imageLoader
 import coil.request.ImageRequest
@@ -98,17 +97,27 @@ fun View.applyWindowInsets(
     }
 }
 
-fun View.showWindowInsets(
-    show: Boolean,
-    @InsetsType types: Int = WindowInsetsCompat.Type.systemBars(),
-    behavior: Int = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
-) {
-    ViewCompat.getWindowInsetsController(this)?.let { windowInsetsController ->
-        windowInsetsController.systemBarsBehavior = behavior
-        if (show) {
-            windowInsetsController.show(types)
-        } else {
-            windowInsetsController.hide(types)
+fun View.showWithAlpha(show: Boolean, duration: Long) {
+    val fromAlpha = if (show) 0F else 1F
+    val toAlpha = if (show) 1F else 0F
+
+    alpha = fromAlpha
+
+    animate()
+        .alpha(toAlpha)
+        .withStartAction {
+            if (show) {
+                isVisible = true
+            }
         }
-    }
+        .withEndAction {
+            if (!show) {
+                isVisible = false
+            }
+        }
+        .setDuration(duration)
+        .start()
 }
+
+val Int.asBoolean: Boolean
+    get() = this == View.VISIBLE

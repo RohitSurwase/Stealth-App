@@ -56,6 +56,7 @@
     </style>
 
     <style name="ThemeOverlay.App.BottomSheetDialog.MediaViewer" parent="ThemeOverlay.App.BottomSheetDialog">
+        <item name="bottomSheetStyle">@style/Widget.BottomSheetDialog.MediaViewer</item>
         <item name="paddingTopSystemWindowInsets">false</item>
         <item name="paddingBottomSystemWindowInsets">false</item>
         <item name="enableEdgeToEdge">false</item>
@@ -64,6 +65,10 @@
     <style name="Widget.BottomSheetDialog" parent="Widget.MaterialComponents.BottomSheet.Modal">
         <item name="shapeAppearanceOverlay">@style/ShapeAppearance.BottomSheetDialog</item>
         <item name="backgroundTint">?attr/colorSurface</item>
+    </style>
+
+    <style name="Widget.BottomSheetDialog.MediaViewer" parent="Widget.BottomSheetDialog">
+        <item name="backgroundTint">@color/black</item>
     </style>
 
     <style name="ShapeAppearance.BottomSheetDialog" parent="ShapeAppearance.MaterialComponents.LargeComponent">
@@ -445,6 +450,10 @@
     <style name="Widget.TextView.ProfileName" parent="Widget.MaterialComponents.TextView">
         <item name="android:textSize">24sp</item>
         <item name="android:textColor">@android:color/white</item>
+    </style>
+
+    <style name="Widget.TextView.MediaCounter" parent="Widget.MaterialComponents.TextView">
+        <item name="android:textColor">@color/text_color_secondary</item>
     </style>
 
 </resources>

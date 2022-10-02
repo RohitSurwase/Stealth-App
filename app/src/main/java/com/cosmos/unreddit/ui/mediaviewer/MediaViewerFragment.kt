@@ -16,7 +16,6 @@ import androidx.core.view.WindowInsetsControllerCompat
 import androidx.core.view.isVisible
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -25,20 +24,19 @@ import com.cosmos.unreddit.R
 import com.cosmos.unreddit.data.model.GalleryMedia
 import com.cosmos.unreddit.data.model.MediaType
 import com.cosmos.unreddit.data.model.Resource
-import com.cosmos.unreddit.data.repository.PreferencesRepository
 import com.cosmos.unreddit.data.worker.MediaDownloadWorker
 import com.cosmos.unreddit.databinding.FragmentMediaViewerBinding
 import com.cosmos.unreddit.ui.common.FullscreenBottomSheetFragment
 import com.cosmos.unreddit.util.extension.betterSmoothScrollToPosition
 import com.cosmos.unreddit.util.extension.getRecyclerView
 import com.cosmos.unreddit.util.extension.launchRepeat
+import com.cosmos.unreddit.util.extension.showWithAlpha
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import javax.inject.Inject
 
 @AndroidEntryPoint
 class MediaViewerFragment : FullscreenBottomSheetFragment() {
@@ -56,9 +54,6 @@ class MediaViewerFragment : FullscreenBottomSheetFragment() {
     private lateinit var mediaAdapter: MediaViewerAdapter
     private lateinit var thumbnailAdapter: MediaViewerThumbnailAdapter
 
-    @Inject
-    lateinit var preferencesRepository: PreferencesRepository
-
     private val requestPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { isGranted ->
@@ -75,7 +70,6 @@ class MediaViewerFragment : FullscreenBottomSheetFragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        lifecycleScope.launch { preferencesRepository.getMuteVideo(false).first() }
         handleArguments()
     }
 
@@ -98,7 +92,10 @@ class MediaViewerFragment : FullscreenBottomSheetFragment() {
         initRecyclerView()
         initViewPager()
         bindViewModel()
-        binding.infoRetry.setActionClickListener { retry() }
+        binding.run {
+            buttonDownload.setOnClickListener { requestMediaDownload() }
+            infoRetry.setActionClickListener { retry() }
+        }
     }
 
     private fun bindViewModel() {
@@ -135,23 +132,26 @@ class MediaViewerFragment : FullscreenBottomSheetFragment() {
     }
 
     private fun initViewPager() {
-        val muteVideo = runBlocking { preferencesRepository.getMuteVideo(false).first() }
+        val muteVideo = runBlocking { viewerViewModel.isVideoMuted.first() }
 
         mediaAdapter = MediaViewerAdapter(
             requireContext(),
             muteVideo,
-            onMuteClick = {
-                lifecycleScope.launch { preferencesRepository.setMuteVideo(it) }
+            onMediaClick = {
+                showControls(!binding.controls.isVisible)
             },
-            onDownloadClick = {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                    // No need to request storage permission on Android 10+
-                    downloadMedia()
-                } else {
-                    requestMediaDownload()
-                }
+            showControls = {
+                showControls(it)
+            },
+            hasAudio = {
+                binding.buttonMute.isVisible = it
             }
         )
+
+        binding.buttonMute.run {
+            isChecked = muteVideo
+            setOnCheckedChangeListener { _, isMuted -> muteAudio(isMuted) }
+        }
 
         binding.viewPager.apply {
             adapter = mediaAdapter
@@ -197,16 +197,32 @@ class MediaViewerFragment : FullscreenBottomSheetFragment() {
         if (media.size > 1) {
             thumbnailAdapter.submitData(media)
             binding.textPageCount.text = media.size.toString()
-            binding.listThumbnails.visibility = View.VISIBLE
-            binding.flowPageCounter.visibility = View.VISIBLE
-        } else {
-            binding.listThumbnails.visibility = View.GONE
-            binding.flowPageCounter.visibility = View.GONE
         }
         mediaAdapter.submitData(media)
     }
 
+    private fun muteAudio(shouldMute: Boolean) {
+        val currentItemPosition = viewerViewModel.selectedPage.value
+        val videoViewHolder = binding.viewPager
+            .getRecyclerView()
+            ?.findViewHolderForAdapterPosition(currentItemPosition)
+                as? MediaViewerAdapter.VideoViewHolder
+
+        videoViewHolder?.muteAudio(shouldMute)
+
+        viewerViewModel.setMuted(shouldMute)
+    }
+
     private fun requestMediaDownload() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            // No need to request storage permission on Android 10+
+            downloadMedia()
+        } else {
+            requestStoragePermission()
+        }
+    }
+
+    private fun requestStoragePermission() {
         when {
             ContextCompat.checkSelfPermission(
                 requireContext(),
@@ -288,6 +304,19 @@ class MediaViewerFragment : FullscreenBottomSheetFragment() {
             } else {
                 windowInsetsController.hide(WindowInsetsCompat.Type.systemBars())
             }
+        }
+    }
+
+    private fun showControls(show: Boolean) {
+        val duration = 250L
+
+        binding.controls.showWithAlpha(show, duration)
+
+        if (viewerViewModel.isMultiMedia.value) {
+            binding.textPageCurrent.showWithAlpha(show, duration)
+            binding.textPageLabel.showWithAlpha(show, duration)
+            binding.textPageCount.showWithAlpha(show, duration)
+            binding.listThumbnails.showWithAlpha(show, duration)
         }
     }
 
