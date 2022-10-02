@@ -10,6 +10,9 @@ import android.view.ViewGroup
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
 import androidx.core.os.bundleOf
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import androidx.core.view.isVisible
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
@@ -25,22 +28,20 @@ import com.cosmos.unreddit.data.model.Resource
 import com.cosmos.unreddit.data.repository.PreferencesRepository
 import com.cosmos.unreddit.data.worker.MediaDownloadWorker
 import com.cosmos.unreddit.databinding.FragmentMediaViewerBinding
-import com.cosmos.unreddit.ui.base.BaseFragment
+import com.cosmos.unreddit.ui.common.FullscreenBottomSheetFragment
 import com.cosmos.unreddit.util.extension.betterSmoothScrollToPosition
 import com.cosmos.unreddit.util.extension.getRecyclerView
 import com.cosmos.unreddit.util.extension.launchRepeat
-import com.cosmos.unreddit.util.extension.showWindowInsets
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class MediaViewerFragment : BaseFragment() {
+class MediaViewerFragment : FullscreenBottomSheetFragment() {
 
     private var _binding: FragmentMediaViewerBinding? = null
     private val binding get() = _binding!!
@@ -90,16 +91,14 @@ class MediaViewerFragment : BaseFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        behavior?.skipCollapsed = true
+
         showSystemBars(false)
 
         initRecyclerView()
         initViewPager()
         bindViewModel()
         binding.infoRetry.setActionClickListener { retry() }
-    }
-
-    override fun applyInsets(view: View) {
-        // Don't apply any insets
     }
 
     private fun bindViewModel() {
@@ -157,6 +156,7 @@ class MediaViewerFragment : BaseFragment() {
         binding.viewPager.apply {
             adapter = mediaAdapter
             getRecyclerView()?.overScrollMode = RecyclerView.OVER_SCROLL_NEVER
+            getRecyclerView()?.isNestedScrollingEnabled = false
             registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
                 override fun onPageSelected(position: Int) {
                     super.onPageSelected(position)
@@ -271,26 +271,23 @@ class MediaViewerFragment : BaseFragment() {
         MaterialAlertDialogBuilder(requireContext())
             .setTitle(R.string.dialog_media_not_found_title)
             .setMessage(R.string.dialog_media_not_found_body)
-            .setPositiveButton(R.string.dialog_ok) { _, _ -> onBackPressed() }
+            .setPositiveButton(R.string.dialog_ok) { _, _ -> dismiss() }
             .setCancelable(false)
             .show()
     }
 
     private fun showSystemBars(show: Boolean) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            activity?.window?.decorView?.showWindowInsets(show)
-        } else {
-            binding.root.showWindowInsets(show)
-        }
-    }
+        dialog?.window?.let { window ->
+            val windowInsetsController = WindowCompat.getInsetsController(window, window.decorView)
 
+            windowInsetsController.systemBarsBehavior =
+                WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
 
-    override fun onBackPressed() {
-        if (isLegacyNavigation) {
-            // Prevent onBackPressed event to be passed to PostDetailsFragment and show bottom nav
-            parentFragmentManager.popBackStack()
-        } else {
-            super.onBackPressed()
+            if (show) {
+                windowInsetsController.show(WindowInsetsCompat.Type.systemBars())
+            } else {
+                windowInsetsController.hide(WindowInsetsCompat.Type.systemBars())
+            }
         }
     }
 

@@ -17,6 +17,7 @@ import com.cosmos.unreddit.data.model.MediaType
 import com.cosmos.unreddit.data.model.db.PostEntity
 import com.cosmos.unreddit.ui.common.widget.RedditView
 import com.cosmos.unreddit.ui.linkmenu.LinkMenuFragment
+import com.cosmos.unreddit.ui.mediaviewer.MediaViewerFragment
 import com.cosmos.unreddit.ui.postdetails.PostDetailsFragment
 import com.cosmos.unreddit.ui.postlist.PostListAdapter
 import com.cosmos.unreddit.ui.postmenu.PostMenuFragment
@@ -159,11 +160,15 @@ open class BaseFragment : Fragment(), PostListAdapter.PostClickListener,
     }
 
     open fun openGallery(images: List<GalleryMedia>) {
-        navigate(NavigationGraphDirections.openGallery(images.toTypedArray()))
+        MediaViewerFragment.newInstance(images).run {
+            show(this@BaseFragment.parentFragmentManager, MediaViewerFragment.TAG)
+        }
     }
 
     open fun openMedia(link: String, mediaType: MediaType) {
-        navigate(NavigationGraphDirections.openMedia(link, mediaType))
+        MediaViewerFragment.newInstance(link, mediaType).run {
+            show(this@BaseFragment.parentFragmentManager, MediaViewerFragment.TAG)
+        }
     }
 
     open fun openSubreddit(subreddit: String) {

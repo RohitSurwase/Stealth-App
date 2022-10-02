@@ -7,7 +7,6 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
-import androidx.fragment.app.FragmentTransaction
 import androidx.fragment.app.setFragmentResult
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
@@ -20,8 +19,6 @@ import androidx.transition.Slide
 import androidx.transition.TransitionManager
 import com.cosmos.unreddit.R
 import com.cosmos.unreddit.data.local.mapper.CommentMapper2
-import com.cosmos.unreddit.data.model.GalleryMedia
-import com.cosmos.unreddit.data.model.MediaType
 import com.cosmos.unreddit.data.model.Resource
 import com.cosmos.unreddit.data.model.db.PostEntity
 import com.cosmos.unreddit.data.repository.PostListRepository
@@ -33,7 +30,6 @@ import com.cosmos.unreddit.ui.base.BaseFragment
 import com.cosmos.unreddit.ui.commentmenu.CommentMenuFragment
 import com.cosmos.unreddit.ui.common.ElasticDragDismissFrameLayout
 import com.cosmos.unreddit.ui.loadstate.ResourceStateAdapter
-import com.cosmos.unreddit.ui.mediaviewer.MediaViewerFragment
 import com.cosmos.unreddit.ui.sort.SortFragment
 import com.cosmos.unreddit.util.extension.applyWindowInsets
 import com.cosmos.unreddit.util.extension.betterSmoothScrollToPosition
@@ -299,14 +295,6 @@ class PostDetailsFragment :
         )
     }
 
-    private fun showMediaViewer(mediaViewerFragment: MediaViewerFragment) {
-        parentFragmentManager.beginTransaction()
-            .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
-            .add(R.id.fragment_container, mediaViewerFragment, MediaViewerFragment.TAG)
-            .addToBackStack(null)
-            .commit()
-    }
-
     private fun showNavigation(show: Boolean) {
         setFragmentResult(REQUEST_KEY_NAVIGATION, bundleOf(BUNDLE_KEY_NAVIGATION to show))
     }
@@ -346,14 +334,6 @@ class PostDetailsFragment :
 
     override fun onDragDismissed() {
         onBackPressed()
-    }
-
-    override fun openGallery(images: List<GalleryMedia>) {
-        showMediaViewer(MediaViewerFragment.newInstance(images))
-    }
-
-    override fun openMedia(link: String, mediaType: MediaType) {
-        showMediaViewer(MediaViewerFragment.newInstance(link, mediaType))
     }
 
     companion object {
