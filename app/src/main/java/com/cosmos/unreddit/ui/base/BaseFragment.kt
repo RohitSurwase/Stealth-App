@@ -180,7 +180,11 @@ open class BaseFragment : Fragment(), PostListAdapter.PostClickListener,
     }
 
     open fun openRedditLink(link: String) {
-        navigate(Uri.parse(link))
+        try {
+            navigate(Uri.parse(link))
+        } catch (e: IllegalArgumentException) {
+            openBrowser(link)
+        }
     }
 
     open fun openBrowser(link: String) {
