@@ -7,6 +7,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
 import androidx.core.os.bundleOf
@@ -255,6 +256,12 @@ class MediaViewerFragment : FullscreenBottomSheetFragment() {
                 it.url,
                 it.type
             )
+
+            Toast.makeText(
+                requireContext(),
+                R.string.toast_download_started,
+                Toast.LENGTH_SHORT
+            ).show()
         }
     }
 

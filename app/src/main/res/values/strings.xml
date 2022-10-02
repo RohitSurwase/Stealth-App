@@ -207,6 +207,8 @@
     <string name="snackbar_permission_storage_request_message">Permission to write to external storage is required</string>
     <string name="snackbar_permission_storage_denied_message">Permission to write to external storage was denied</string>
 
+    <string name="toast_download_started">Download in progress…</string>
+
     <string name="fragment_backup_label">Import/Export</string>
 
     <string name="backup_operation_backup">Backup</string>
