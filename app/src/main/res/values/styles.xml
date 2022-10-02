@@ -51,9 +51,11 @@
         <item name="android:fontFamily">@font/stealth_medium</item>
     </style>
 
-    <!-- Post Details -->
     <style name="ThemeOverlay.App.BottomSheetDialog" parent="ThemeOverlay.MaterialComponents.BottomSheetDialog">
         <item name="bottomSheetStyle">@style/Widget.BottomSheetDialog</item>
+    </style>
+
+    <style name="ThemeOverlay.App.BottomSheetDialog.MediaViewer" parent="ThemeOverlay.App.BottomSheetDialog">
         <item name="paddingTopSystemWindowInsets">false</item>
         <item name="paddingBottomSystemWindowInsets">false</item>
         <item name="enableEdgeToEdge">false</item>

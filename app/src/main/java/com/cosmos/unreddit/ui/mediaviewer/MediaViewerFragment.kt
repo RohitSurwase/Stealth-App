@@ -291,6 +291,10 @@ class MediaViewerFragment : FullscreenBottomSheetFragment() {
         }
     }
 
+    override fun getTheme(): Int {
+        return R.style.ThemeOverlay_App_BottomSheetDialog_MediaViewer
+    }
+
     override fun onDestroyView() {
         super.onDestroyView()
         showSystemBars(true)
