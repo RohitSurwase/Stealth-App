@@ -118,7 +118,7 @@ class MediaViewerAdapter(
                         data(image.url)
                         crossfade(true)
                         scale(Scale.FILL)
-                        precision(Precision.EXACT)
+                        precision(Precision.AUTOMATIC)
                         memoryCachePolicy(CachePolicy.READ_ONLY)
                         diskCachePolicy(CachePolicy.READ_ONLY)
                         listener(
