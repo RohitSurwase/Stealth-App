@@ -7,6 +7,7 @@ import androidx.activity.OnBackPressedCallback
 import androidx.activity.addCallback
 import androidx.browser.customtabs.CustomTabsIntent
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentManager
 import androidx.navigation.NavDirections
 import androidx.navigation.NavOptions
 import androidx.navigation.fragment.findNavController
@@ -70,7 +71,11 @@ open class BaseFragment : Fragment(), PostListAdapter.PostClickListener,
     }
 
     override fun onClick(post: PostEntity) {
-        requireActivity().supportFragmentManager.beginTransaction()
+        onClick(parentFragmentManager, post)
+    }
+
+    protected open fun onClick(fragmentManager: FragmentManager, post: PostEntity) {
+        fragmentManager.beginTransaction()
             .setCustomAnimations(
                 R.anim.nav_enter_anim,
                 R.anim.nav_exit_anim,

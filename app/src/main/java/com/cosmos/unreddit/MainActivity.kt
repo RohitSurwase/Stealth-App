@@ -23,6 +23,7 @@ import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.shape.CornerFamily
 import com.google.android.material.shape.MaterialShapeDrawable
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
@@ -47,7 +48,10 @@ class MainActivity : AppCompatActivity(), NavController.OnDestinationChangedList
 
         launchRepeat(Lifecycle.State.STARTED) {
             launch {
-                viewModel.navigationVisibility.collect(this@MainActivity::showNavigation)
+                viewModel.navigationVisibility
+                    // Drop the first item to let initBottomNavigationView manage the visibility
+                    .drop(1)
+                    .collect(this@MainActivity::showNavigation)
             }
 
             launch {
@@ -114,21 +118,26 @@ class MainActivity : AppCompatActivity(), NavController.OnDestinationChangedList
 
             shapeAppearanceModel = builder.build()
         }
+
+        // Wait for the view to be ready to show/hide it (otherwise width could be 0)
+        binding.bottomNavigation.post {
+            showNavigation(viewModel.navigationVisibility.value, false)
+        }
     }
 
-    private fun showNavigation(show: Boolean) {
+    private fun showNavigation(show: Boolean, animate: Boolean = true) {
         val layoutParams = binding.bottomNavigation.layoutParams as CoordinatorLayout.LayoutParams
         val behavior = layoutParams.behavior as HideBottomViewBehavior?
 
         if (show) {
             behavior?.run {
                 enabled = true
-                slideIn(binding.bottomNavigation)
+                slideIn(binding.bottomNavigation, animate)
             }
         } else {
             behavior?.run {
                 enabled = false
-                slideOut(binding.bottomNavigation)
+                slideOut(binding.bottomNavigation, animate)
             }
         }
     }
@@ -139,7 +148,10 @@ class MainActivity : AppCompatActivity(), NavController.OnDestinationChangedList
         arguments: Bundle?
     ) {
         when (destination.id) {
-            R.id.home, R.id.subscriptions, R.id.profile, R.id.settings -> {
+            R.id.postListFragment,
+            R.id.subscriptionsFragment,
+            R.id.profileFragment,
+            R.id.preferencesFragment -> {
                 viewModel.setNavigationVisibility(true)
             }
             else -> viewModel.setNavigationVisibility(false)

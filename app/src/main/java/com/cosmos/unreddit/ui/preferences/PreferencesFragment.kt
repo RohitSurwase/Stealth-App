@@ -15,7 +15,6 @@ import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.SwitchPreferenceCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.cosmos.unreddit.R
-import com.cosmos.unreddit.UiViewModel
 import com.cosmos.unreddit.data.model.preferences.ContentPreferences.PreferencesKeys
 import com.cosmos.unreddit.data.model.preferences.DataPreferences
 import com.cosmos.unreddit.data.model.preferences.UiPreferences
@@ -27,7 +26,6 @@ import com.cosmos.unreddit.util.extension.launchRepeat
 import com.cosmos.unreddit.util.extension.unredditApplication
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
@@ -37,7 +35,6 @@ class PreferencesFragment : PreferenceFragmentCompat() {
     private val binding get() = _binding!!
 
     private val viewModel: PreferencesViewModel by activityViewModels()
-    private val uiViewModel: UiViewModel by activityViewModels()
 
     private var nightModePreference: Preference? = null
     private var leftHandedModePreference: SwitchPreferenceCompat? = null
@@ -78,12 +75,6 @@ class PreferencesFragment : PreferenceFragmentCompat() {
             clipToPadding = false
         }
 
-        findNavController().addOnDestinationChangedListener { _, destination, _ ->
-            when (destination.id) {
-                R.id.preferencesFragment -> uiViewModel.setNavigationVisibility(true)
-                else -> uiViewModel.setNavigationVisibility(false)
-            }
-        }
         bindViewModel()
     }
 

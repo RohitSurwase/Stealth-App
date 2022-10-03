@@ -10,10 +10,8 @@ import androidx.core.view.isVisible
 import androidx.core.view.updateLayoutParams
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Lifecycle
-import androidx.navigation.fragment.findNavController
 import androidx.paging.LoadState
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.cosmos.unreddit.R
 import com.cosmos.unreddit.UiViewModel
 import com.cosmos.unreddit.data.repository.PostListRepository
 import com.cosmos.unreddit.databinding.FragmentPostBinding
@@ -86,12 +84,6 @@ class PostListFragment : BaseFragment() {
             windowInsets
         }
 
-        findNavController().addOnDestinationChangedListener { _, destination, _ ->
-            when (destination.id) {
-                R.id.postListFragment -> uiViewModel.setNavigationVisibility(true)
-                else -> uiViewModel.setNavigationVisibility(false)
-            }
-        }
         initResultListener()
         initAppBar()
         initRecyclerView()

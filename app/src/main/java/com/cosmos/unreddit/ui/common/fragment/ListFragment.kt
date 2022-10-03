@@ -9,6 +9,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView.Adapter
 import androidx.recyclerview.widget.RecyclerView.Adapter.StateRestorationPolicy.PREVENT_WHEN_EMPTY
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
+import com.cosmos.unreddit.data.model.db.PostEntity
 import com.cosmos.unreddit.databinding.ItemListContentBinding
 import com.cosmos.unreddit.ui.base.BaseFragment
 import com.cosmos.unreddit.ui.common.PostDividerItemDecoration
@@ -35,6 +36,11 @@ abstract class ListFragment<T : Adapter<out ViewHolder>> : BaseFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         initRecyclerView()
+    }
+
+    override fun onClick(post: PostEntity) {
+        // Use activity's fragment manager to prevent crashes when opening a post
+        super.onClick(requireActivity().supportFragmentManager, post)
     }
 
     protected open fun initRecyclerView() {
