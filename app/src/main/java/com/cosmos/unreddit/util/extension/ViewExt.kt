@@ -4,12 +4,14 @@ import android.graphics.BlurMaskFilter
 import android.graphics.LinearGradient
 import android.graphics.Shader
 import android.view.View
+import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.annotation.ColorInt
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.isVisible
+import androidx.core.view.updateLayoutParams
 import androidx.core.view.updatePadding
 import coil.imageLoader
 import coil.request.ImageRequest
@@ -92,6 +94,26 @@ fun View.applyWindowInsets(
             right = paddingRight,
             bottom = paddingBottom
         )
+
+        windowInsets
+    }
+}
+
+fun View.applyMarginWindowInsets(
+    left: Boolean = true,
+    top: Boolean = true,
+    right: Boolean = true,
+    bottom: Boolean = true
+) {
+    ViewCompat.setOnApplyWindowInsetsListener(this) { view, windowInsets ->
+        val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
+
+        view.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+            if (left) leftMargin += insets.left
+            if (top) topMargin += insets.top
+            if (right) rightMargin += insets.right
+            if (bottom) bottomMargin += insets.bottom
+        }
 
         windowInsets
     }

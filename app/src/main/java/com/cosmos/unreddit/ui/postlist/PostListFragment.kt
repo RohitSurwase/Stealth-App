@@ -20,6 +20,7 @@ import com.cosmos.unreddit.databinding.FragmentPostBinding
 import com.cosmos.unreddit.ui.base.BaseFragment
 import com.cosmos.unreddit.ui.loadstate.NetworkLoadStateAdapter
 import com.cosmos.unreddit.ui.sort.SortFragment
+import com.cosmos.unreddit.util.extension.applyMarginWindowInsets
 import com.cosmos.unreddit.util.extension.applyWindowInsets
 import com.cosmos.unreddit.util.extension.betterSmoothScrollToPosition
 import com.cosmos.unreddit.util.extension.launchRepeat
@@ -28,7 +29,6 @@ import com.cosmos.unreddit.util.extension.setNavigationListener
 import com.cosmos.unreddit.util.extension.setSortingListener
 import com.google.android.material.appbar.AppBarLayout
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -96,7 +96,10 @@ class PostListFragment : BaseFragment() {
         initAppBar()
         initRecyclerView()
         bindViewModel()
-        binding.infoRetry.setActionClickListener { postListAdapter.retry() }
+        binding.infoRetry.apply {
+            applyMarginWindowInsets(left = false, right = false, bottom = false)
+            setActionClickListener { postListAdapter.retry() }
+        }
     }
 
     override fun applyInsets(view: View) {
