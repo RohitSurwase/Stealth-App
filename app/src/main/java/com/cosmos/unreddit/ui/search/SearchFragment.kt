@@ -5,34 +5,26 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.isVisible
-import androidx.fragment.app.viewModels
+import androidx.hilt.navigation.fragment.hiltNavGraphViewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.RecyclerView
-import androidx.viewpager2.widget.ViewPager2
-import com.cosmos.unreddit.NavigationGraphDirections
 import com.cosmos.unreddit.R
-import com.cosmos.unreddit.data.repository.PostListRepository
 import com.cosmos.unreddit.databinding.FragmentSearchBinding
 import com.cosmos.unreddit.ui.base.BaseFragment
-import com.cosmos.unreddit.ui.postlist.PostListAdapter
+import com.cosmos.unreddit.ui.common.adapter.FragmentAdapter
 import com.cosmos.unreddit.ui.sort.SortFragment
-import com.cosmos.unreddit.util.RecyclerViewStateAdapter
 import com.cosmos.unreddit.util.SearchUtil
 import com.cosmos.unreddit.util.extension.getRecyclerView
 import com.cosmos.unreddit.util.extension.launchRepeat
-import com.cosmos.unreddit.util.extension.onRefreshFromNetwork
 import com.cosmos.unreddit.util.extension.scrollToTop
 import com.cosmos.unreddit.util.extension.setSortingListener
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
 @AndroidEntryPoint
 class SearchFragment : BaseFragment() {
@@ -40,16 +32,9 @@ class SearchFragment : BaseFragment() {
     private var _binding: FragmentSearchBinding? = null
     private val binding get() = _binding!!
 
-    override val viewModel: SearchViewModel by viewModels()
+    override val viewModel: SearchViewModel by hiltNavGraphViewModels(R.id.search)
 
     private val args: SearchFragmentArgs by navArgs()
-
-    private lateinit var postListAdapter: PostListAdapter
-    private lateinit var subredditAdapter: SearchSubredditAdapter
-    private lateinit var userAdapter: SearchUserAdapter
-
-    @Inject
-    lateinit var repository: PostListRepository
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -80,8 +65,6 @@ class SearchFragment : BaseFragment() {
         initViewPager()
         bindViewModel()
 
-        binding.infoRetry.setActionClickListener { retry() }
-
         lifecycleScope.launch {
             delay(250)
             showSearchInput(false)
@@ -99,64 +82,29 @@ class SearchFragment : BaseFragment() {
             }
 
             launch {
-                viewModel.contentPreferences.collect {
-                    postListAdapter.contentPreferences = it
-                }
-            }
-
-            launch {
                 viewModel.sorting.collect {
                     binding.appBar.sortIcon.setSorting(it)
-                }
-            }
-
-            launch {
-                viewModel.postDataFlow.collectLatest {
-                    postListAdapter.submitData(it)
-                }
-            }
-
-            launch {
-                viewModel.subredditDataFlow.collectLatest {
-                    subredditAdapter.submitData(it)
-                }
-            }
-
-            launch {
-                viewModel.userDataFlow.collectLatest {
-                    userAdapter.submitData(it)
                 }
             }
         }
     }
 
     private fun initViewPager() {
-        postListAdapter = PostListAdapter(repository, this, this)
-        subredditAdapter = SearchSubredditAdapter { onSubredditClick(it) }
-        userAdapter = SearchUserAdapter { onUserClick(it) }
-
-        val tabs: List<RecyclerViewStateAdapter.Page> = listOf(
-            RecyclerViewStateAdapter.Page(R.string.tab_search_post, postListAdapter, true),
-            RecyclerViewStateAdapter.Page(R.string.tab_search_subreddit, subredditAdapter),
-            RecyclerViewStateAdapter.Page(R.string.tab_search_user, userAdapter)
+        val fragments = listOf(
+            FragmentAdapter.Page(R.string.tab_search_post, SearchPostFragment::class.java),
+            FragmentAdapter.Page(
+                R.string.tab_search_subreddit,
+                SearchSubredditFragment::class.java
+            ),
+            FragmentAdapter.Page(R.string.tab_search_user, SearchUserFragment::class.java)
         )
 
-        val searchStateAdapter = RecyclerViewStateAdapter {
-            showRetryBar()
-        }.apply {
-            submitList(tabs)
-        }
+        val fragmentAdapter = FragmentAdapter(this, fragments)
 
         binding.viewPager.apply {
-            adapter = searchStateAdapter
+            adapter = fragmentAdapter
+            offscreenPageLimit = 2
             getRecyclerView()?.overScrollMode = RecyclerView.OVER_SCROLL_NEVER
-            registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
-                override fun onPageSelected(position: Int) {
-                    super.onPageSelected(position)
-                    // TODO: Back to top when reselected
-                    viewModel.setPage(position)
-                }
-            })
         }
 
         binding.tabs.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
@@ -174,28 +122,8 @@ class SearchFragment : BaseFragment() {
         })
 
         TabLayoutMediator(binding.tabs, binding.viewPager) { tab, position ->
-            tab.setText(tabs[position].title)
+            tab.setText(fragments[position].title)
         }.attach()
-
-        launchRepeat(Lifecycle.State.STARTED) {
-            launch {
-                postListAdapter.onRefreshFromNetwork {
-                    binding.viewPager.scrollToTop(0)
-                }
-            }
-
-            launch {
-                subredditAdapter.onRefreshFromNetwork {
-                    binding.viewPager.scrollToTop(1)
-                }
-            }
-
-            launch {
-                userAdapter.onRefreshFromNetwork {
-                    binding.viewPager.scrollToTop(2)
-                }
-            }
-        }
     }
 
     private fun initAppBar() {
@@ -241,27 +169,6 @@ class SearchFragment : BaseFragment() {
         if (SearchUtil.isQueryValid(query)) {
             viewModel.setQuery(query)
             showSearchInput(false)
-        }
-    }
-
-    private fun onSubredditClick(subreddit: String) {
-        navigate(NavigationGraphDirections.openSubreddit(subreddit))
-    }
-
-    private fun onUserClick(user: String) {
-        navigate(NavigationGraphDirections.openUser(user))
-    }
-
-    private fun retry() {
-        // TODO: Don't retry if not necessary
-        postListAdapter.retry()
-        subredditAdapter.retry()
-        userAdapter.retry()
-    }
-
-    private fun showRetryBar() {
-        if (!binding.infoRetry.isVisible) {
-            binding.infoRetry.show()
         }
     }
 

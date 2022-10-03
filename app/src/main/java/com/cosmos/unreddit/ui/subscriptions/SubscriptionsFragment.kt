@@ -21,7 +21,6 @@ import com.cosmos.unreddit.util.SearchUtil
 import com.cosmos.unreddit.util.extension.applyWindowInsets
 import com.cosmos.unreddit.util.extension.hideSoftKeyboard
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
@@ -121,7 +120,7 @@ class SubscriptionsFragment : BaseFragment() {
     private fun showSearchFragment(query: String) {
         binding.appBar.searchInput.hideSoftKeyboard()
 
-        navigate(SubscriptionsFragmentDirections.search(query))
+        navigate(SubscriptionsFragmentDirections.openSearch(query))
 
         binding.appBar.searchInput.clear()
     }

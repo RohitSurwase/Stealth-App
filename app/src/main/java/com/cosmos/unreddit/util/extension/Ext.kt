@@ -5,10 +5,12 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.view.View
+import android.view.ViewGroup
 import android.view.WindowManager
 import android.view.inputmethod.InputMethodManager
 import android.webkit.MimeTypeMap
 import android.widget.ImageView
+import androidx.core.view.children
 import androidx.core.view.isVisible
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.Fragment
@@ -30,7 +32,6 @@ import com.cosmos.unreddit.databinding.ItemListContentBinding
 import com.cosmos.unreddit.ui.commentmenu.CommentMenuFragment
 import com.cosmos.unreddit.ui.postdetails.PostDetailsFragment
 import com.cosmos.unreddit.ui.sort.SortFragment
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.distinctUntilChangedBy
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.filter
@@ -187,11 +188,13 @@ fun ViewPager2.getItemView(position: Int): View? {
 }
 
 fun ViewPager2.getListContent(position: Int): ItemListContentBinding? {
-    return getItemView(position)?.let { ItemListContentBinding.bind(it) }
+    val viewGroup = getItemView(position) as? ViewGroup
+    return viewGroup?.children?.firstOrNull()?.let { ItemListContentBinding.bind(it) }
 }
 
 fun ViewPager2.scrollToTop(position: Int) {
-    getItemView(position)?.let {
+    val viewGroup = getItemView(position) as? ViewGroup
+    viewGroup?.children?.firstOrNull()?.let {
         ItemListContentBinding.bind(it).apply {
             listContent.betterSmoothScrollToPosition(0)
         }

@@ -70,7 +70,7 @@ open class BaseFragment : Fragment(), PostListAdapter.PostClickListener,
     }
 
     override fun onClick(post: PostEntity) {
-        parentFragmentManager.beginTransaction()
+        requireActivity().supportFragmentManager.beginTransaction()
             .setCustomAnimations(
                 R.anim.nav_enter_anim,
                 R.anim.nav_exit_anim,
