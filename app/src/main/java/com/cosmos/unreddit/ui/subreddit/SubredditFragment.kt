@@ -28,6 +28,7 @@ import com.cosmos.unreddit.ui.sort.SortFragment
 import com.cosmos.unreddit.util.extension.addLoadStateListener
 import com.cosmos.unreddit.util.extension.applyWindowInsets
 import com.cosmos.unreddit.util.extension.betterSmoothScrollToPosition
+import com.cosmos.unreddit.util.extension.clearSortingListener
 import com.cosmos.unreddit.util.extension.launchRepeat
 import com.cosmos.unreddit.util.extension.loadSubredditIcon
 import com.cosmos.unreddit.util.extension.onRefreshFromNetwork
@@ -35,7 +36,6 @@ import com.cosmos.unreddit.util.extension.setSortingListener
 import com.cosmos.unreddit.util.extension.toPixels
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -312,6 +312,8 @@ class SubredditFragment : BaseFragment() {
 
         // Save header state to restore it in case of fragment recreation
         viewModel.contentLayoutState = bindingContent.layoutRoot.currentState
+
+        clearSortingListener()
 
         _binding = null
         _bindingContent = null

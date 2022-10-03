@@ -33,6 +33,8 @@ import com.cosmos.unreddit.ui.loadstate.ResourceStateAdapter
 import com.cosmos.unreddit.ui.sort.SortFragment
 import com.cosmos.unreddit.util.extension.applyWindowInsets
 import com.cosmos.unreddit.util.extension.betterSmoothScrollToPosition
+import com.cosmos.unreddit.util.extension.clearCommentListener
+import com.cosmos.unreddit.util.extension.clearSortingListener
 import com.cosmos.unreddit.util.extension.launchRepeat
 import com.cosmos.unreddit.util.extension.setCommentListener
 import com.cosmos.unreddit.util.extension.setSortingListener
@@ -318,6 +320,8 @@ class PostDetailsFragment :
 
     override fun onDestroyView() {
         super.onDestroyView()
+        clearSortingListener()
+        clearCommentListener()
         _binding = null
         commentAdapter.cleanUp()
     }

@@ -21,6 +21,8 @@ import com.cosmos.unreddit.ui.sort.SortFragment
 import com.cosmos.unreddit.util.extension.applyMarginWindowInsets
 import com.cosmos.unreddit.util.extension.applyWindowInsets
 import com.cosmos.unreddit.util.extension.betterSmoothScrollToPosition
+import com.cosmos.unreddit.util.extension.clearNavigationListener
+import com.cosmos.unreddit.util.extension.clearSortingListener
 import com.cosmos.unreddit.util.extension.launchRepeat
 import com.cosmos.unreddit.util.extension.onRefreshFromNetwork
 import com.cosmos.unreddit.util.extension.setNavigationListener
@@ -184,6 +186,8 @@ class PostListFragment : BaseFragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
+        clearSortingListener()
+        clearNavigationListener()
         _binding = null
     }
 

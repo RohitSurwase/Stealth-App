@@ -17,6 +17,8 @@ import com.cosmos.unreddit.databinding.FragmentProfileBinding
 import com.cosmos.unreddit.ui.base.BaseFragment
 import com.cosmos.unreddit.ui.common.adapter.FragmentAdapter
 import com.cosmos.unreddit.ui.profilemanager.ProfileManagerDialogFragment
+import com.cosmos.unreddit.util.extension.clearCommentListener
+import com.cosmos.unreddit.util.extension.clearNavigationListener
 import com.cosmos.unreddit.util.extension.getListContent
 import com.cosmos.unreddit.util.extension.getRecyclerView
 import com.cosmos.unreddit.util.extension.latest
@@ -156,6 +158,9 @@ class ProfileFragment : BaseFragment() {
 
         // Save header state to restore it in case of fragment recreation
         viewModel.layoutState = binding.layoutRoot.currentState
+
+        clearCommentListener()
+        clearNavigationListener()
 
         _binding = null
     }

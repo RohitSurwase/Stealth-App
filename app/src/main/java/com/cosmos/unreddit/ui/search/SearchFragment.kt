@@ -16,6 +16,7 @@ import com.cosmos.unreddit.ui.base.BaseFragment
 import com.cosmos.unreddit.ui.common.adapter.FragmentAdapter
 import com.cosmos.unreddit.ui.sort.SortFragment
 import com.cosmos.unreddit.util.SearchUtil
+import com.cosmos.unreddit.util.extension.clearSortingListener
 import com.cosmos.unreddit.util.extension.getRecyclerView
 import com.cosmos.unreddit.util.extension.launchRepeat
 import com.cosmos.unreddit.util.extension.scrollToTop
@@ -180,8 +181,9 @@ class SearchFragment : BaseFragment() {
         )
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
+    override fun onDestroyView() {
+        super.onDestroyView()
+        clearSortingListener()
         _binding = null
     }
 

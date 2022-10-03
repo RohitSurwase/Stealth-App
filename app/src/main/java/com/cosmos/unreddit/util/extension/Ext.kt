@@ -14,6 +14,7 @@ import androidx.core.view.children
 import androidx.core.view.isVisible
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.clearFragmentResultListener
 import androidx.fragment.app.setFragmentResultListener
 import androidx.navigation.NavOptions
 import androidx.paging.LoadState
@@ -81,6 +82,10 @@ fun Fragment.setSortingListener(result: (Sorting?) -> Unit) {
     }
 }
 
+fun Fragment.clearSortingListener() {
+    childFragmentManager.clearFragmentResultListener(SortFragment.REQUEST_KEY_SORTING)
+}
+
 fun Fragment.setCommentListener(result: (Comment.CommentEntity?) -> Unit) {
     childFragmentManager.setFragmentResultListener(
         CommentMenuFragment.REQUEST_KEY_COMMENT,
@@ -92,11 +97,19 @@ fun Fragment.setCommentListener(result: (Comment.CommentEntity?) -> Unit) {
     }
 }
 
+fun Fragment.clearCommentListener() {
+    childFragmentManager.clearFragmentResultListener(CommentMenuFragment.REQUEST_KEY_COMMENT)
+}
+
 fun Fragment.setNavigationListener(result: (Boolean) -> Unit) {
     setFragmentResultListener(PostDetailsFragment.REQUEST_KEY_NAVIGATION) { _, bundle ->
         val showNavigation = bundle.getBoolean(PostDetailsFragment.BUNDLE_KEY_NAVIGATION)
         result(showNavigation)
     }
+}
+
+fun Fragment.clearNavigationListener() {
+    clearFragmentResultListener(PostDetailsFragment.REQUEST_KEY_NAVIGATION)
 }
 
 fun Fragment.openExternalLink(url: String) {

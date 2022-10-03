@@ -22,6 +22,8 @@ import com.cosmos.unreddit.ui.base.BaseFragment
 import com.cosmos.unreddit.ui.common.adapter.FragmentAdapter
 import com.cosmos.unreddit.ui.postmenu.PostMenuFragment
 import com.cosmos.unreddit.ui.sort.SortFragment
+import com.cosmos.unreddit.util.extension.clearCommentListener
+import com.cosmos.unreddit.util.extension.clearSortingListener
 import com.cosmos.unreddit.util.extension.getRecyclerView
 import com.cosmos.unreddit.util.extension.launchRepeat
 import com.cosmos.unreddit.util.extension.scrollToTop
@@ -222,6 +224,9 @@ class UserFragment : BaseFragment() {
 
         // Save header state to restore it in case of fragment recreation
         viewModel.layoutState = binding.layoutRoot.currentState
+
+        clearSortingListener()
+        clearCommentListener()
 
         _binding = null
     }
