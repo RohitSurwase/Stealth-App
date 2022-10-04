@@ -76,14 +76,14 @@
             style="@style/CardButtonStyle"/>
 
         <com.cosmos.unreddit.ui.common.widget.CardButton
-            android:id="@+id/search_card"
+            android:id="@+id/more_card"
             android:layout_width="@dimen/app_bar_button_size"
             android:layout_height="@dimen/app_bar_button_size"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintBottom_toBottomOf="@id/guideline_app_bar"
             android:layout_marginEnd="@dimen/app_bar_margin"
-            app:icon="@drawable/ic_search"
+            app:icon="@drawable/ic_more"
             style="@style/CardButtonStyle"/>
 
         <com.cosmos.unreddit.ui.common.widget.CardButton
@@ -91,7 +91,7 @@
             android:layout_width="@dimen/app_bar_button_size"
             android:layout_height="@dimen/app_bar_button_size"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintEnd_toStartOf="@id/search_card"
+            app:layout_constraintEnd_toStartOf="@id/more_card"
             app:layout_constraintBottom_toBottomOf="@id/guideline_app_bar"
             android:layout_marginEnd="@dimen/app_bar_margin"
             app:icon="@drawable/ic_sort"

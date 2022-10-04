@@ -3,8 +3,10 @@ package com.cosmos.unreddit.ui.subreddit
 import android.graphics.Color
 import android.os.Bundle
 import android.view.LayoutInflater
+import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
+import androidx.appcompat.widget.PopupMenu
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.core.view.GravityCompat
 import androidx.core.view.isVisible
@@ -25,15 +27,7 @@ import com.cosmos.unreddit.ui.loadstate.NetworkLoadStateAdapter
 import com.cosmos.unreddit.ui.postlist.PostListAdapter
 import com.cosmos.unreddit.ui.postmenu.PostMenuFragment
 import com.cosmos.unreddit.ui.sort.SortFragment
-import com.cosmos.unreddit.util.extension.addLoadStateListener
-import com.cosmos.unreddit.util.extension.applyWindowInsets
-import com.cosmos.unreddit.util.extension.betterSmoothScrollToPosition
-import com.cosmos.unreddit.util.extension.clearSortingListener
-import com.cosmos.unreddit.util.extension.launchRepeat
-import com.cosmos.unreddit.util.extension.loadSubredditIcon
-import com.cosmos.unreddit.util.extension.onRefreshFromNetwork
-import com.cosmos.unreddit.util.extension.setSortingListener
-import com.cosmos.unreddit.util.extension.toPixels
+import com.cosmos.unreddit.util.extension.*
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
@@ -41,7 +35,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class SubredditFragment : BaseFragment() {
+class SubredditFragment : BaseFragment(), PopupMenu.OnMenuItemClickListener {
 
     private var _binding: FragmentSubredditBinding? = null
     private val binding get() = _binding!!
@@ -210,7 +204,7 @@ class SubredditFragment : BaseFragment() {
         with(bindingContent) {
             sortCard.setOnClickListener { showSortDialog() }
             backCard.setOnClickListener { onBackPressed() }
-            searchCard.setOnClickListener { showSearchFragment() }
+            moreCard.setOnClickListener { showMenu() }
         }
     }
 
@@ -297,6 +291,30 @@ class SubredditFragment : BaseFragment() {
             .setPositiveButton(R.string.dialog_ok) { _, _ -> onBackPressed() }
             .setCancelable(false)
             .show()
+    }
+
+    private fun showMenu() {
+        PopupMenu(requireContext(), binding.subredditContent.moreCard)
+            .apply {
+                menuInflater.inflate(R.menu.subreddit_menu, this.menu)
+                setOnMenuItemClickListener(this@SubredditFragment)
+            }
+            .show()
+    }
+
+    private fun openDrawer() {
+        binding.drawerLayout.openDrawer(GravityCompat.END)
+    }
+
+    override fun onMenuItemClick(menuItem: MenuItem): Boolean {
+        when (menuItem.itemId) {
+            R.id.search -> showSearchFragment()
+            R.id.sidebar -> openDrawer()
+            else -> {
+                return false
+            }
+        }
+        return true
     }
 
     override fun onBackPressed() {

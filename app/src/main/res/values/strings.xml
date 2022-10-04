@@ -234,4 +234,7 @@
 
     <string name="shelf_card_transition_name" translatable="false">shelf_transition_%1$d</string>
     <string name="post_list_transition_name" translatable="false">post_list_transition</string>
+
+    <string name="menu_search">Search</string>
+    <string name="menu_sidebar">Sidebar</string>
 </resources>

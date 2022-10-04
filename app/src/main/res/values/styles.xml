@@ -22,6 +22,7 @@
 
         <item name="materialAlertDialogTheme">@style/MaterialAlertDialogTheme</item>
         <item name="bottomSheetDialogTheme">@style/ThemeOverlay.App.BottomSheetDialog</item>
+        <item name="popupMenuStyle">@style/Widget.App.PopupMenu</item>
     </style>
 
     <style name="AppTheme" parent="BaseTheme"/>
@@ -454,6 +455,10 @@
 
     <style name="Widget.TextView.MediaCounter" parent="Widget.MaterialComponents.TextView">
         <item name="android:textColor">@color/text_color_secondary</item>
+    </style>
+
+    <style name="Widget.App.PopupMenu" parent="Widget.MaterialComponents.PopupMenu">
+        <item name="android:popupBackground">@drawable/popup_menu_background</item>
     </style>
 
 </resources>
