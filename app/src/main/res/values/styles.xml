@@ -61,7 +61,6 @@
         <item name="paddingTopSystemWindowInsets">true</item>
         <item name="paddingBottomSystemWindowInsets">false</item>
         <item name="enableEdgeToEdge">false</item>
-        <item name="android:windowLayoutInDisplayCutoutMode" tools:targetApi="o_mr1">always</item>
     </style>
 
     <style name="Widget.BottomSheetDialog" parent="Widget.MaterialComponents.BottomSheet.Modal">
