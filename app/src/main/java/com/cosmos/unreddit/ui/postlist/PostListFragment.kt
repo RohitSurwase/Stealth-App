@@ -23,6 +23,7 @@ import com.cosmos.unreddit.util.extension.applyWindowInsets
 import com.cosmos.unreddit.util.extension.betterSmoothScrollToPosition
 import com.cosmos.unreddit.util.extension.clearNavigationListener
 import com.cosmos.unreddit.util.extension.clearSortingListener
+import com.cosmos.unreddit.util.extension.clearWindowInsetsListener
 import com.cosmos.unreddit.util.extension.launchRepeat
 import com.cosmos.unreddit.util.extension.onRefreshFromNetwork
 import com.cosmos.unreddit.util.extension.setNavigationListener
@@ -79,8 +80,12 @@ class PostListFragment : BaseFragment() {
         ViewCompat.setOnApplyWindowInsetsListener(binding.appBar.root) { appBar, windowInsets ->
             val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
 
-            appBar.updateLayoutParams<AppBarLayout.LayoutParams> {
-                topMargin = insets.top
+            appBar.run {
+                updateLayoutParams<AppBarLayout.LayoutParams> {
+                    topMargin = insets.top
+                }
+
+                clearWindowInsetsListener()
             }
 
             windowInsets

@@ -17,6 +17,7 @@ import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupWithNavController
 import com.cosmos.unreddit.databinding.ActivityMainBinding
 import com.cosmos.unreddit.util.HideBottomViewBehavior
+import com.cosmos.unreddit.util.extension.clearWindowInsetsListener
 import com.cosmos.unreddit.util.extension.launchRepeat
 import com.cosmos.unreddit.util.extension.unredditApplication
 import com.google.android.material.bottomnavigation.BottomNavigationView
@@ -74,9 +75,13 @@ class MainActivity : AppCompatActivity(), NavController.OnDestinationChangedList
         ViewCompat.setOnApplyWindowInsetsListener(binding.bottomNavigation) { view, windowInsets ->
             val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
 
-            view.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-                bottomMargin = insets.bottom +
-                        resources.getDimension(R.dimen.bottom_navigation_margin).toInt()
+            view.run {
+                updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                    bottomMargin = insets.bottom +
+                            resources.getDimension(R.dimen.bottom_navigation_margin).toInt()
+                }
+
+                clearWindowInsetsListener()
             }
 
             windowInsets

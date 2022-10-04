@@ -88,15 +88,23 @@ fun View.applyWindowInsets(
         val paddingRight = if (right) insets.right else view.paddingRight
         val paddingBottom = if (bottom) insets.bottom else view.paddingBottom
 
-        view.updatePadding(
-            left = paddingLeft,
-            top = paddingTop,
-            right = paddingRight,
-            bottom = paddingBottom
-        )
+        view.run {
+            updatePadding(
+                left = paddingLeft,
+                top = paddingTop,
+                right = paddingRight,
+                bottom = paddingBottom
+            )
+
+            clearWindowInsetsListener()
+        }
 
         windowInsets
     }
+}
+
+fun View.clearWindowInsetsListener() {
+    ViewCompat.setOnApplyWindowInsetsListener(this, null)
 }
 
 fun View.applyMarginWindowInsets(
@@ -108,11 +116,15 @@ fun View.applyMarginWindowInsets(
     ViewCompat.setOnApplyWindowInsetsListener(this) { view, windowInsets ->
         val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
 
-        view.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-            if (left) leftMargin += insets.left
-            if (top) topMargin += insets.top
-            if (right) rightMargin += insets.right
-            if (bottom) bottomMargin += insets.bottom
+        view.run {
+            updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                if (left) leftMargin += insets.left
+                if (top) topMargin += insets.top
+                if (right) rightMargin += insets.right
+                if (bottom) bottomMargin += insets.bottom
+            }
+
+            clearWindowInsetsListener()
         }
 
         windowInsets
