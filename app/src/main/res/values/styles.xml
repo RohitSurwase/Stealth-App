@@ -27,10 +27,10 @@
 
     <style name="AppTheme" parent="BaseTheme"/>
 
-    <style name="AppTheme.Launcher">
-        <item name="android:windowTranslucentNavigation">true</item>
-        <item name="android:windowTranslucentStatus">true</item>
-        <item name="android:windowBackground">@drawable/launch_screen</item>
+    <style name="AppTheme.Launcher" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">@color/background</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/ic_launcher_foreground</item>
+        <item name="postSplashScreenTheme">@style/AppTheme</item>
     </style>
 
     <style name="CardStyle" parent="Widget.MaterialComponents.CardView">

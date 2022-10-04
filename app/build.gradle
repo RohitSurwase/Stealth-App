@@ -107,6 +107,8 @@ dependencies {
 
     implementation "androidx.browser:browser:$rootProject.browser"
 
+    implementation "androidx.core:core-splashscreen:$rootProject.splashscreen"
+
     implementation "com.squareup.retrofit2:retrofit:$rootProject.retrofit"
     implementation "com.squareup.retrofit2:converter-moshi:$rootProject.retrofit"
 
