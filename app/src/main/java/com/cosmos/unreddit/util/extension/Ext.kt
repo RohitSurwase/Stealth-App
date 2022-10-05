@@ -3,13 +3,17 @@ package com.cosmos.unreddit.util.extension
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import android.content.res.Resources
 import android.net.Uri
+import android.os.Build
+import android.util.TypedValue
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
 import android.view.inputmethod.InputMethodManager
 import android.webkit.MimeTypeMap
 import android.widget.ImageView
+import androidx.annotation.DimenRes
 import androidx.core.view.children
 import androidx.core.view.isVisible
 import androidx.fragment.app.DialogFragment
@@ -255,4 +259,14 @@ fun Int?.formatNumber(): String {
 fun MimeTypeMap.getMimeTypeFromUrl(url: String): String? {
     val extension = MimeTypeMap.getFileExtensionFromUrl(url)
     return getMimeTypeFromExtension(extension)
+}
+
+fun Resources.getFloatValue(@DimenRes id: Int): Float {
+    return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+        getFloat(id)
+    } else {
+        val outValue = TypedValue()
+        getValue(id, outValue, true)
+        outValue.float
+    }
 }

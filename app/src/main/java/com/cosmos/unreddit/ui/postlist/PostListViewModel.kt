@@ -8,6 +8,7 @@ import com.cosmos.unreddit.data.model.Data
 import com.cosmos.unreddit.data.model.Sort
 import com.cosmos.unreddit.data.model.Sorting
 import com.cosmos.unreddit.data.model.db.PostEntity
+import com.cosmos.unreddit.data.model.db.Profile
 import com.cosmos.unreddit.data.model.preferences.ContentPreferences
 import com.cosmos.unreddit.data.repository.PostListRepository
 import com.cosmos.unreddit.data.repository.PreferencesRepository
@@ -28,19 +29,22 @@ import kotlinx.coroutines.flow.distinctUntilChangedBy
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class PostListViewModel
 @Inject constructor(
     private val repository: PostListRepository,
-    preferencesRepository: PreferencesRepository,
+    private val preferencesRepository: PreferencesRepository,
     private val postMapper: PostMapper2,
     @DefaultDispatcher private val defaultDispatcher: CoroutineDispatcher
 ) : BaseViewModel(preferencesRepository, repository) {
 
     val contentPreferences: Flow<ContentPreferences> =
         preferencesRepository.getContentPreferences()
+
+    val profiles: Flow<List<Profile>> = repository.getAllProfiles()
 
     private val _sorting: MutableStateFlow<Sorting> = MutableStateFlow(DEFAULT_SORTING)
     val sorting: StateFlow<Sorting> = _sorting
@@ -74,6 +78,8 @@ class PostListViewModel
         Data.User(history, saved, prefs)
     }.distinctUntilChangedBy { it.contentPreferences }
 
+    var isDrawerOpen: Boolean = false
+
     init {
         postDataFlow = fetchData
             // Fetch last user data when search data is updated and merge them together
@@ -91,6 +97,12 @@ class PostListViewModel
 
     fun setSorting(sorting: Sorting) {
         _sorting.updateValue(sorting)
+    }
+
+    fun selectProfile(profile: Profile) {
+        viewModelScope.launch {
+            preferencesRepository.setCurrentProfile(profile.id)
+        }
     }
 
     companion object {
