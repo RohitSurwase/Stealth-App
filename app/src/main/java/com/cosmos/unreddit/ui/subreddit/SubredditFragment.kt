@@ -27,7 +27,15 @@ import com.cosmos.unreddit.ui.loadstate.NetworkLoadStateAdapter
 import com.cosmos.unreddit.ui.postlist.PostListAdapter
 import com.cosmos.unreddit.ui.postmenu.PostMenuFragment
 import com.cosmos.unreddit.ui.sort.SortFragment
-import com.cosmos.unreddit.util.extension.*
+import com.cosmos.unreddit.util.extension.addLoadStateListener
+import com.cosmos.unreddit.util.extension.applyWindowInsets
+import com.cosmos.unreddit.util.extension.betterSmoothScrollToPosition
+import com.cosmos.unreddit.util.extension.clearSortingListener
+import com.cosmos.unreddit.util.extension.launchRepeat
+import com.cosmos.unreddit.util.extension.loadSubredditIcon
+import com.cosmos.unreddit.util.extension.onRefreshFromNetwork
+import com.cosmos.unreddit.util.extension.setSortingListener
+import com.cosmos.unreddit.util.extension.toPixels
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
@@ -84,7 +92,8 @@ class SubredditFragment : BaseFragment(), PopupMenu.OnMenuItemClickListener {
         bindingAbout.subredditSubscribeButton.setOnClickListener { viewModel.toggleSubscription() }
         bindingContent.loadingState.infoRetry.setActionClickListener { retry() }
 
-        viewModel.contentLayoutState?.let { bindingContent.layoutRoot.jumpToState(it) }
+        viewModel.contentLayoutProgress?.let { bindingContent.layoutRoot.progress = it }
+        viewModel.drawerContentLayoutProgress?.let { binding.drawerContent.progress = it }
     }
 
     override fun applyInsets(view: View) {
@@ -328,8 +337,10 @@ class SubredditFragment : BaseFragment(), PopupMenu.OnMenuItemClickListener {
     override fun onDestroyView() {
         super.onDestroyView()
 
-        // Save header state to restore it in case of fragment recreation
-        viewModel.contentLayoutState = bindingContent.layoutRoot.currentState
+        // Save progress of MotionLayout to restore it in case of fragment recreation
+        // currentState is not always properly updated
+        viewModel.contentLayoutProgress = bindingContent.layoutRoot.progress
+        viewModel.drawerContentLayoutProgress = binding.drawerContent.progress
 
         clearSortingListener()
 

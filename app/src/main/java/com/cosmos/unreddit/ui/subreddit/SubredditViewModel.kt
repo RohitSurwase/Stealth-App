@@ -26,7 +26,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.dropWhile
 import kotlinx.coroutines.flow.flatMapLatest
@@ -65,7 +64,8 @@ class SubredditViewModel @Inject constructor(
     private val _isDescriptionCollapsed = MutableStateFlow(true)
     val isDescriptionCollapsed: StateFlow<Boolean> = _isDescriptionCollapsed
 
-    var contentLayoutState: Int? = null
+    var contentLayoutProgress: Float? = null
+    var drawerContentLayoutProgress: Float? = null
 
     val isSubscribed: StateFlow<Boolean> = combine(
         _subreddit,

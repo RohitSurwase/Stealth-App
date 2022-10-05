@@ -17,6 +17,7 @@
         tools:context=".MainActivity">
 
         <com.cosmos.unreddit.util.DrawerContent
+            android:id="@+id/drawer_content"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             app:layoutDescription="@xml/scene_sidebar">
