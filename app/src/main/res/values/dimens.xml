@@ -161,4 +161,6 @@
     <dimen name="profile_home_size">36dp</dimen>
     <dimen name="profile_home_app_bar_size">32dp</dimen>
     <dimen name="profile_home_drawer_width">92dp</dimen>
+
+    <dimen name="profile_content_margin">48dp</dimen>
 </resources>

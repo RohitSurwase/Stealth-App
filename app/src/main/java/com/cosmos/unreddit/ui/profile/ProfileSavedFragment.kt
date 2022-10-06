@@ -2,6 +2,10 @@ package com.cosmos.unreddit.ui.profile
 
 import android.os.Bundle
 import android.view.View
+import android.view.ViewGroup.MarginLayoutParams
+import androidx.constraintlayout.widget.ConstraintSet
+import androidx.core.view.isVisible
+import androidx.core.view.updateLayoutParams
 import androidx.fragment.app.FragmentTransaction
 import androidx.fragment.app.activityViewModels
 import androidx.hilt.navigation.fragment.hiltNavGraphViewModels
@@ -30,8 +34,24 @@ class ProfileSavedFragment : ListFragment<ProfileSavedAdapter>(),
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        updateContentView()
         initResultListener()
         bindViewModel()
+    }
+
+    private fun updateContentView() {
+        // Update empty data view to be higher than usual
+        val contentMargin = resources.getDimension(R.dimen.profile_content_margin).toInt()
+
+        binding.loadingState.run {
+            ConstraintSet().apply {
+                clone(root)
+                clear(textEmptyData.id, ConstraintSet.BOTTOM)
+                applyTo(root)
+            }
+
+            emptyData.updateLayoutParams<MarginLayoutParams> { topMargin = contentMargin }
+        }
     }
 
     private fun bindViewModel() {
@@ -40,6 +60,10 @@ class ProfileSavedFragment : ListFragment<ProfileSavedAdapter>(),
                 adapter.run {
                     contentPreferences = preferences
                     submitList(items)
+                    binding.loadingState.run {
+                        emptyData.isVisible = items.isEmpty()
+                        textEmptyData.isVisible = items.isEmpty()
+                    }
                 }
             }.flowWithLifecycle(viewLifecycleOwner.lifecycle, Lifecycle.State.STARTED).collect()
         }
