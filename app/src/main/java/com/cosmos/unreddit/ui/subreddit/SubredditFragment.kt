@@ -8,8 +8,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.widget.PopupMenu
 import androidx.constraintlayout.widget.ConstraintSet
-import androidx.core.view.GravityCompat
-import androidx.core.view.isVisible
+import androidx.core.view.*
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.navigation.fragment.navArgs
@@ -27,15 +26,7 @@ import com.cosmos.unreddit.ui.loadstate.NetworkLoadStateAdapter
 import com.cosmos.unreddit.ui.postlist.PostListAdapter
 import com.cosmos.unreddit.ui.postmenu.PostMenuFragment
 import com.cosmos.unreddit.ui.sort.SortFragment
-import com.cosmos.unreddit.util.extension.addLoadStateListener
-import com.cosmos.unreddit.util.extension.applyWindowInsets
-import com.cosmos.unreddit.util.extension.betterSmoothScrollToPosition
-import com.cosmos.unreddit.util.extension.clearSortingListener
-import com.cosmos.unreddit.util.extension.launchRepeat
-import com.cosmos.unreddit.util.extension.loadSubredditIcon
-import com.cosmos.unreddit.util.extension.onRefreshFromNetwork
-import com.cosmos.unreddit.util.extension.setSortingListener
-import com.cosmos.unreddit.util.extension.toPixels
+import com.cosmos.unreddit.util.extension.*
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
@@ -97,7 +88,22 @@ class SubredditFragment : BaseFragment(), PopupMenu.OnMenuItemClickListener {
     }
 
     override fun applyInsets(view: View) {
-        // ignore
+        ViewCompat.setOnApplyWindowInsetsListener(view) { rootView, windowInsets ->
+            val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
+
+            binding.subredditAbout.subredditName.run {
+                updatePadding(
+                    paddingLeft,
+                    insets.top,
+                    paddingRight,
+                    paddingBottom
+                )
+            }
+
+            rootView.clearWindowInsetsListener()
+
+            windowInsets
+        }
     }
 
     private fun bindViewModel() {
