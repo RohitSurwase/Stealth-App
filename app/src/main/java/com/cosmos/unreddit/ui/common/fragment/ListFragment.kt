@@ -14,6 +14,7 @@ import com.cosmos.unreddit.databinding.ItemListContentBinding
 import com.cosmos.unreddit.ui.base.BaseFragment
 import com.cosmos.unreddit.ui.common.PostDividerItemDecoration
 import com.cosmos.unreddit.util.extension.applyWindowInsets
+import com.cosmos.unreddit.util.extension.currentNavigationFragment
 
 abstract class ListFragment<T : Adapter<out ViewHolder>> : BaseFragment() {
 
@@ -39,8 +40,9 @@ abstract class ListFragment<T : Adapter<out ViewHolder>> : BaseFragment() {
     }
 
     override fun onClick(post: PostEntity) {
-        // Use activity's fragment manager to prevent crashes when opening a post
-        super.onClick(requireActivity().supportFragmentManager, post)
+        activity?.currentNavigationFragment?.let { currentFragment ->
+            onClick(currentFragment.parentFragmentManager, post)
+        }
     }
 
     protected open fun initRecyclerView() {

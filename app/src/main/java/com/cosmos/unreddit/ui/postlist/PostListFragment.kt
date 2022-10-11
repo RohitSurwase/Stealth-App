@@ -96,7 +96,6 @@ class PostListFragment : BaseFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        initResultListener()
         initAppBar()
         initRecyclerView()
         initDrawer()
@@ -106,6 +105,11 @@ class PostListFragment : BaseFragment() {
             applyMarginWindowInsets(left = false, right = false, bottom = false)
             setActionClickListener { postListAdapter.retry() }
         }
+    }
+
+    override fun onStart() {
+        super.onStart()
+        initResultListener()
     }
 
     override fun applyInsets(view: View) {
@@ -303,13 +307,16 @@ class PostListFragment : BaseFragment() {
         }
     }
 
+    override fun onStop() {
+        super.onStop()
+        clearSortingListener()
+        clearNavigationListener()
+    }
+
     override fun onDestroyView() {
         super.onDestroyView()
 
         viewModel.isDrawerOpen = isDrawerOpen
-
-        clearSortingListener()
-        clearNavigationListener()
 
         _binding = null
     }

@@ -61,12 +61,17 @@ class ProfileFragment : BaseFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        initResultListener()
+
         initAppBar()
         initViewPager()
         bindViewModel()
 
         viewModel.layoutState?.let { binding.layoutRoot.jumpToState(it) }
+    }
+
+    override fun onStart() {
+        super.onStart()
+        initResultListener()
     }
 
     private fun initResultListener() {
@@ -153,14 +158,17 @@ class ProfileFragment : BaseFragment() {
         }
     }
 
+    override fun onStop() {
+        super.onStop()
+        clearCommentListener()
+        clearNavigationListener()
+    }
+
     override fun onDestroyView() {
         super.onDestroyView()
 
         // Save header state to restore it in case of fragment recreation
         viewModel.layoutState = binding.layoutRoot.currentState
-
-        clearCommentListener()
-        clearNavigationListener()
 
         _binding = null
     }
