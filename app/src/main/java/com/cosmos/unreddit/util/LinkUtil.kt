@@ -2,7 +2,7 @@ package com.cosmos.unreddit.util
 
 import com.cosmos.unreddit.data.model.MediaType
 import com.cosmos.unreddit.data.remote.api.imgur.model.Image
-import okhttp3.HttpUrl
+import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 
 object LinkUtil {
 
@@ -19,7 +19,7 @@ object LinkUtil {
     private const val REDDIT_SOUNDTRACK_NAME: String = "DASH_audio"
 
     fun getAlbumIdFromImgurLink(link: String): String {
-        return HttpUrl.parse(link)?.pathSegments()?.getOrNull(1) ?: ""
+        return link.toHttpUrlOrNull()?.pathSegments?.getOrNull(1) ?: ""
     }
 
     fun getUrlFromImgurImage(image: Image, convertToMp4: Boolean = true): String {
@@ -44,11 +44,11 @@ object LinkUtil {
     }
 
     fun getGfycatId(link: String): String {
-        return HttpUrl.parse(link)?.pathSegments()?.lastOrNull() ?: return link
+        return link.toHttpUrlOrNull()?.pathSegments?.lastOrNull() ?: return link
     }
 
     fun getStreamableShortcode(link: String): String {
-        return HttpUrl.parse(link)?.pathSegments()?.getOrNull(0) ?: ""
+        return link.toHttpUrlOrNull()?.pathSegments?.getOrNull(0) ?: ""
     }
 
     fun getLinkType(link: String): MediaType {
@@ -60,15 +60,15 @@ object LinkUtil {
             }
         }
 
-        val httpUrl = HttpUrl.parse(link) ?: return MediaType.NO_MEDIA
-        val domain = httpUrl.host()
+        val httpUrl = link.toHttpUrlOrNull() ?: return MediaType.NO_MEDIA
+        val domain = httpUrl.host
 
         return when {
             domain.matches(REDDIT_LINK) -> {
-                if (httpUrl.pathSegments().contains("wiki")) {
+                if (httpUrl.pathSegments.contains("wiki")) {
                     // TODO: Handle Wiki links
                     MediaType.REDDIT_WIKI
-                } else if (httpUrl.pathSegments().contains("poll")) {
+                } else if (httpUrl.pathSegments.contains("poll")) {
                     MediaType.REDDIT_POLL
                 } else {
                     MediaType.REDDIT_LINK
@@ -111,6 +111,6 @@ object LinkUtil {
     }
 
     fun getPermalinkFromMediaUrl(link: String): String {
-        return HttpUrl.parse(link)?.pathSegments()?.lastOrNull() ?: link
+        return link.toHttpUrlOrNull()?.pathSegments?.lastOrNull() ?: link
     }
 }

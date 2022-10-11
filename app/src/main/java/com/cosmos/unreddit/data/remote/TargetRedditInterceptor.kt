@@ -7,7 +7,7 @@ class TargetRedditInterceptor : Interceptor {
 
     override fun intercept(chain: Interceptor.Chain): Response {
         val request = chain.request()
-        val url = request.url()
+        val url = request.url
 
         val newUrl = url.newBuilder()
             .addQueryParameter("target", "reddit")

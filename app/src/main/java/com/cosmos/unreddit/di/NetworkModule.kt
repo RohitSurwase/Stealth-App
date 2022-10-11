@@ -25,7 +25,6 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
-import okhttp3.HttpUrl
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
@@ -136,7 +135,7 @@ object NetworkModule {
         @RedditOkHttp okHttpClient: OkHttpClient
     ): RedditApi {
         return Retrofit.Builder()
-            .baseUrl(HttpUrl.parse(RedditApi.BASE_URL)!!)
+            .baseUrl(RedditApi.BASE_URL)
             .addConverterFactory(MoshiConverterFactory.create(moshi))
             .addConverterFactory(SortingConverterFactory())
             .client(okHttpClient)
@@ -166,7 +165,7 @@ object NetworkModule {
         @GenericOkHttp okHttpClient: OkHttpClient
     ): ImgurApi {
         return Retrofit.Builder()
-            .baseUrl(HttpUrl.parse(ImgurApi.BASE_URL)!!)
+            .baseUrl(ImgurApi.BASE_URL)
             .addConverterFactory(MoshiConverterFactory.create(moshi))
             .client(okHttpClient)
             .build()
@@ -180,7 +179,7 @@ object NetworkModule {
         @GenericOkHttp okHttpClient: OkHttpClient
     ): StreamableApi {
         return Retrofit.Builder()
-            .baseUrl(HttpUrl.parse(StreamableApi.BASE_URL)!!)
+            .baseUrl(StreamableApi.BASE_URL)
             .addConverterFactory(MoshiConverterFactory.create(moshi))
             .client(okHttpClient)
             .build()

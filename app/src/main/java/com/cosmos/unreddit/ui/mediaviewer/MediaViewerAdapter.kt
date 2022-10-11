@@ -24,7 +24,7 @@ import com.google.android.exoplayer2.SimpleExoPlayer
 import com.google.android.exoplayer2.Tracks
 import com.google.android.exoplayer2.source.MergingMediaSource
 import com.google.android.exoplayer2.upstream.HttpDataSource
-import okhttp3.HttpUrl
+import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import java.net.HttpURLConnection
 
 class MediaViewerAdapter(
@@ -182,11 +182,11 @@ class MediaViewerAdapter(
     ) : RecyclerView.ViewHolder(binding.root), Player.Listener {
 
         fun bind(video: GalleryMedia) {
-            val url = HttpUrl.parse(video.url) ?: return
+            val url = video.url.toHttpUrlOrNull() ?: return
 
-            if (url.host().contains("redgifs", ignoreCase = true)) {
+            if (url.host.contains("redgifs", ignoreCase = true)) {
                 val requestProperties = url
-                    .queryParameterNames()
+                    .queryParameterNames
                     .associateWith { url.queryParameter(it) ?: "" }
 
                 exoPlayerHelper.setRequestProperties(requestProperties)

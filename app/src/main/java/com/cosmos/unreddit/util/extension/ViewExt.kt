@@ -17,8 +17,8 @@ import coil.imageLoader
 import coil.request.ImageRequest
 import coil.size.Precision
 import coil.size.Scale
-import coil.transform.BlurTransformation
 import com.cosmos.unreddit.R
+import com.cosmos.unreddit.util.BlurTransformation
 import com.google.android.material.textfield.TextInputLayout
 
 fun TextView.applyGradient(text: String, @ColorInt colors: IntArray) {

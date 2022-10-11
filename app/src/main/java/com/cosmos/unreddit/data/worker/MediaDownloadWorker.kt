@@ -179,7 +179,7 @@ class MediaDownloadWorker @AssistedInject constructor (
                         resolver.openOutputStream(it)?.use { outputStream ->
                             val sink = outputStream.sink().buffer()
 
-                            response.body()?.source()?.let { source ->
+                            response.body?.source()?.let { source ->
                                 sink.writeAllWhileActive(source)
                             }
 
@@ -234,7 +234,7 @@ class MediaDownloadWorker @AssistedInject constructor (
                 if (response.isSuccessful) {
                     val sink = file.sink().buffer()
 
-                    response.body()?.source()?.let { source ->
+                    response.body?.source()?.let { source ->
                         sink.writeAllWhileActive(source)
                     }
 
