@@ -90,5 +90,7 @@
     <color name="profile_background_9">#795548</color>
     <color name="profile_background_10">#607D8B</color>
 
+    <color name="white">#FFFFFF</color>
     <color name="black">#000000</color>
+    <color name="black_25">#40000000</color>
 </resources>

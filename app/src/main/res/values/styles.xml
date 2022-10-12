@@ -454,7 +454,7 @@
     </style>
 
     <style name="Widget.TextView.MediaCounter" parent="Widget.MaterialComponents.TextView">
-        <item name="android:textColor">@color/text_color_secondary</item>
+        <item name="android:textColor">@color/white</item>
     </style>
 
     <style name="Widget.App.PopupMenu" parent="Widget.MaterialComponents.PopupMenu">

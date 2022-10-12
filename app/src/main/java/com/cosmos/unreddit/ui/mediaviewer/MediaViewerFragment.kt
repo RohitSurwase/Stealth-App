@@ -11,10 +11,12 @@ import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
 import androidx.core.os.bundleOf
+import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.core.view.isVisible
+import androidx.core.view.updateLayoutParams
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.navigation.fragment.navArgs
@@ -29,6 +31,7 @@ import com.cosmos.unreddit.data.worker.MediaDownloadWorker
 import com.cosmos.unreddit.databinding.FragmentMediaViewerBinding
 import com.cosmos.unreddit.ui.common.FullscreenBottomSheetFragment
 import com.cosmos.unreddit.util.extension.betterSmoothScrollToPosition
+import com.cosmos.unreddit.util.extension.clearWindowInsetsListener
 import com.cosmos.unreddit.util.extension.getRecyclerView
 import com.cosmos.unreddit.util.extension.launchRepeat
 import com.cosmos.unreddit.util.extension.showWithAlpha
@@ -90,12 +93,38 @@ class MediaViewerFragment : FullscreenBottomSheetFragment() {
 
         showSystemBars(false)
 
+        applyInsets()
+
         initRecyclerView()
         initViewPager()
         bindViewModel()
         binding.run {
             buttonDownload.setOnClickListener { requestMediaDownload() }
             infoRetry.setActionClickListener { retry() }
+        }
+    }
+
+    private fun applyInsets() {
+        ViewCompat.setOnApplyWindowInsetsListener(binding.root) { rootView, windowInsets ->
+            windowInsets.displayCutout?.let { cutout ->
+                binding.run {
+                    infoRetry.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                        topMargin += cutout.safeInsetTop
+                    }
+
+                    controls.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                        topMargin += cutout.safeInsetTop
+                    }
+
+                    pageCounter.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                        topMargin += cutout.safeInsetTop
+                    }
+                }
+            }
+
+            rootView.clearWindowInsetsListener()
+
+            windowInsets
         }
     }
 
@@ -320,9 +349,7 @@ class MediaViewerFragment : FullscreenBottomSheetFragment() {
         binding.controls.showWithAlpha(show, duration)
 
         if (viewerViewModel.isMultiMedia.value) {
-            binding.textPageCurrent.showWithAlpha(show, duration)
-            binding.textPageLabel.showWithAlpha(show, duration)
-            binding.textPageCount.showWithAlpha(show, duration)
+            binding.pageCounter.showWithAlpha(show, duration)
             binding.listThumbnails.showWithAlpha(show, duration)
         }
     }
