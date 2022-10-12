@@ -16,8 +16,10 @@ import androidx.navigation.NavDestination
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupWithNavController
 import com.cosmos.unreddit.databinding.ActivityMainBinding
+import com.cosmos.unreddit.ui.postlist.PostListFragment
 import com.cosmos.unreddit.util.HideBottomViewBehavior
 import com.cosmos.unreddit.util.extension.clearWindowInsetsListener
+import com.cosmos.unreddit.util.extension.currentNavigationFragment
 import com.cosmos.unreddit.util.extension.launchRepeat
 import com.cosmos.unreddit.util.extension.unredditApplication
 import com.google.android.material.bottomnavigation.BottomNavigationView
@@ -68,7 +70,17 @@ class MainActivity : AppCompatActivity(), NavController.OnDestinationChangedList
             addOnDestinationChangedListener(this@MainActivity)
         }
 
-        binding.bottomNavigation.setupWithNavController(navController)
+        binding.bottomNavigation.run {
+            setupWithNavController(navController)
+            setOnItemReselectedListener {
+                when (it.itemId) {
+                    R.id.home -> (currentNavigationFragment as? PostListFragment)?.scrollToTop()
+                    else ->{
+                        // Ignore
+                    }
+                }
+            }
+        }
     }
 
     private fun initBottomNavigationView(leftHandedMode: Boolean) {

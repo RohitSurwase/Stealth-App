@@ -250,8 +250,11 @@ class PostListFragment : BaseFragment() {
     }
 
     private fun initAppBar() {
-        binding.appBar.sortCard.setOnClickListener { showSortDialog() }
-        binding.appBar.profileImage.setOnClickListener { openProfileDrawer() }
+        binding.appBar.run {
+            sortCard.setOnClickListener { showSortDialog() }
+            profileImage.setOnClickListener { openProfileDrawer() }
+            title.setOnClickListener { scrollToTop() }
+        }
         binding.appBarLayout.addOnOffsetChangedListener(onOffsetChangedListener)
     }
 
