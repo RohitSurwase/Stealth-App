@@ -63,6 +63,8 @@ class MediaViewerViewModel
     val isVideoMuted: Flow<Boolean>
         get() = preferencesRepository.getMuteVideo(false)
 
+    var hideControls: Boolean = false
+
     init {
         viewModelScope.launch { preferencesRepository.getMuteVideo(false).first() }
     }

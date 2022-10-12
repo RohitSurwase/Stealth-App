@@ -168,10 +168,13 @@ class MediaViewerFragment : FullscreenBottomSheetFragment() {
             requireContext(),
             muteVideo,
             onMediaClick = {
+                viewerViewModel.hideControls = !viewerViewModel.hideControls
                 showControls(!binding.controls.isVisible)
             },
-            showControls = {
-                showControls(it)
+            showControls = { show ->
+                if (!show || !viewerViewModel.hideControls) {
+                    showControls(show)
+                }
             },
             hasAudio = {
                 binding.buttonMute.isVisible = it
@@ -346,11 +349,20 @@ class MediaViewerFragment : FullscreenBottomSheetFragment() {
     private fun showControls(show: Boolean) {
         val duration = 250L
 
-        binding.controls.showWithAlpha(show, duration)
+        binding.run {
+            if (controls.isVisible != show) {
+                controls.showWithAlpha(show, duration)
+            }
 
-        if (viewerViewModel.isMultiMedia.value) {
-            binding.pageCounter.showWithAlpha(show, duration)
-            binding.listThumbnails.showWithAlpha(show, duration)
+            if (viewerViewModel.isMultiMedia.value) {
+                if (pageCounter.isVisible != show) {
+                    pageCounter.showWithAlpha(show, duration)
+                }
+
+                if (listThumbnails.isVisible != show) {
+                    listThumbnails.showWithAlpha(show, duration)
+                }
+            }
         }
     }
 
