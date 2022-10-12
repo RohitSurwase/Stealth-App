@@ -34,6 +34,10 @@ abstract class ListFragment<T : Adapter<out ViewHolder>> : BaseFragment() {
         return binding.root
     }
 
+    override fun applyInsets(view: View) {
+        // Ignore
+    }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         initRecyclerView()
