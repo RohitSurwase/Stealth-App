@@ -237,4 +237,5 @@
 
     <string name="menu_search">Search</string>
     <string name="menu_sidebar">Sidebar</string>
+    <string name="menu_refresh">Refresh</string>
 </resources>

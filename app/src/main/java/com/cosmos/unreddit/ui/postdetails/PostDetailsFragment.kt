@@ -3,8 +3,10 @@ package com.cosmos.unreddit.ui.postdetails
 import android.os.Bundle
 import android.view.Gravity
 import android.view.LayoutInflater
+import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
+import androidx.appcompat.widget.PopupMenu
 import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
 import androidx.fragment.app.setFragmentResult
@@ -48,9 +50,8 @@ import kotlinx.coroutines.runBlocking
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class PostDetailsFragment :
-    BaseFragment(),
-    ElasticDragDismissFrameLayout.ElasticDragDismissCallback {
+class PostDetailsFragment : BaseFragment(),
+    ElasticDragDismissFrameLayout.ElasticDragDismissCallback, PopupMenu.OnMenuItemClickListener {
 
     private var _binding: FragmentPostDetailsBinding? = null
     private val binding get() = _binding!!
@@ -218,6 +219,7 @@ class PostDetailsFragment :
         with(binding.appBar) {
             backCard.setOnClickListener { onBackPressed() }
             sortCard.setOnClickListener { showSortDialog() }
+            moreCard.setOnClickListener { showMenu() }
         }
     }
 
@@ -299,6 +301,25 @@ class PostDetailsFragment :
 
     private fun showNavigation(show: Boolean) {
         setFragmentResult(REQUEST_KEY_NAVIGATION, bundleOf(BUNDLE_KEY_NAVIGATION to show))
+    }
+
+    private fun showMenu() {
+        PopupMenu(requireContext(), binding.appBar.moreCard)
+            .apply {
+                menuInflater.inflate(R.menu.post_menu, this.menu)
+                setOnMenuItemClickListener(this@PostDetailsFragment)
+            }
+            .show()
+    }
+
+    override fun onMenuItemClick(item: MenuItem): Boolean {
+        when (item.itemId) {
+            R.id.refresh -> viewModel.loadPost(true)
+            else -> {
+                return false
+            }
+        }
+        return true
     }
 
     override fun onBackPressed() {
