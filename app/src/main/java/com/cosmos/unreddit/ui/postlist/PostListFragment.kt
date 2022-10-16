@@ -23,10 +23,12 @@ import com.cosmos.unreddit.data.model.db.Profile
 import com.cosmos.unreddit.data.repository.PostListRepository
 import com.cosmos.unreddit.databinding.FragmentPostBinding
 import com.cosmos.unreddit.ui.base.BaseFragment
+import com.cosmos.unreddit.ui.common.widget.PullToRefreshLayout
+import com.cosmos.unreddit.ui.common.widget.PullToRefreshView
 import com.cosmos.unreddit.ui.loadstate.NetworkLoadStateAdapter
 import com.cosmos.unreddit.ui.sort.SortFragment
+import com.cosmos.unreddit.util.DateUtil
 import com.cosmos.unreddit.util.extension.applyMarginWindowInsets
-import com.cosmos.unreddit.util.extension.applyWindowInsets
 import com.cosmos.unreddit.util.extension.betterSmoothScrollToPosition
 import com.cosmos.unreddit.util.extension.clearNavigationListener
 import com.cosmos.unreddit.util.extension.clearSortingListener
@@ -43,7 +45,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class PostListFragment : BaseFragment() {
+class PostListFragment : BaseFragment(), PullToRefreshLayout.OnRefreshListener {
 
     private var _binding: FragmentPostBinding? = null
     private val binding get() = _binding!!
@@ -173,6 +175,13 @@ class PostListFragment : BaseFragment() {
                     binding.appBar.profileImage.setText(it.name)
                 }
             }
+            
+            launch { 
+                viewModel.lastRefresh.collect {
+                    val time = getString(R.string.last_refresh, DateUtil.getLocalizedTime(it))
+                    (binding.pullRefresh.refreshView as? PullToRefreshView)?.setLastRefresh(time)
+                }
+            }
         }
     }
 
@@ -222,9 +231,17 @@ class PostListFragment : BaseFragment() {
     private fun initRecyclerView() {
         postListAdapter = PostListAdapter(repository, this, this).apply {
             addLoadStateListener { loadState ->
-                binding.listPost.isVisible = loadState.source.refresh is LoadState.NotLoading
+                val isLoading = loadState.source.refresh is LoadState.Loading
 
-                binding.loadingCradle.isVisible = loadState.source.refresh is LoadState.Loading
+                binding.run {
+                    if (!pullRefresh.isRefreshing) {
+                        listPost.isVisible = loadState.source.refresh is LoadState.NotLoading
+
+                        loadingCradle.isVisible = isLoading
+                    } else {
+                        pullRefresh.setRefreshing(isLoading)
+                    }
+                }
 
                 val errorState = loadState.source.refresh as? LoadState.Error
                 errorState?.let {
@@ -234,13 +251,14 @@ class PostListFragment : BaseFragment() {
         }
 
         binding.listPost.apply {
-            applyWindowInsets(left = false, top = false, right = false)
             layoutManager = LinearLayoutManager(requireContext())
             adapter = postListAdapter.withLoadStateHeaderAndFooter(
                 header = NetworkLoadStateAdapter { postListAdapter.retry() },
                 footer = NetworkLoadStateAdapter { postListAdapter.retry() }
             )
         }
+
+        binding.pullRefresh.setOnRefreshListener(this)
 
         launchRepeat(Lifecycle.State.STARTED) {
             postListAdapter.onRefreshFromNetwork {
@@ -300,6 +318,10 @@ class PostListFragment : BaseFragment() {
     private fun onProfileClick(profile: Profile) {
         viewModel.selectProfile(profile)
         closeProfileDrawer()
+    }
+
+    override fun onRefresh() {
+        postListAdapter.refresh()
     }
 
     override fun onBackPressed() {

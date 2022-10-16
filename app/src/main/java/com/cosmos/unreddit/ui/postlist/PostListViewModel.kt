@@ -23,11 +23,13 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.distinctUntilChangedBy
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -78,6 +80,9 @@ class PostListViewModel
         Data.User(history, saved, prefs)
     }.distinctUntilChangedBy { it.contentPreferences }
 
+    private val _lastRefresh: MutableStateFlow<Long> = MutableStateFlow(System.currentTimeMillis())
+    val lastRefresh: StateFlow<Long> = _lastRefresh.asStateFlow()
+
     var isDrawerOpen: Boolean = false
 
     init {
@@ -85,6 +90,7 @@ class PostListViewModel
             // Fetch last user data when search data is updated and merge them together
             .flatMapLatest { fetchData -> userData.map { fetchData to it } }
             .flatMapLatest { getPosts(it.first, it.second) }
+            .onEach { _lastRefresh.value = System.currentTimeMillis() }
             .cachedIn(viewModelScope)
     }
 

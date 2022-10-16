@@ -38,13 +38,19 @@
 
             </com.google.android.material.appbar.AppBarLayout>
 
-            <com.cosmos.unreddit.ui.common.widget.PostRecyclerView
-                android:id="@+id/list_post"
+            <com.cosmos.unreddit.ui.common.widget.PullToRefreshLayout
+                android:id="@+id/pull_refresh"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:clipToPadding="false"
-                android:overScrollMode="never"
-                app:layout_behavior="@string/appbar_scrolling_view_behavior"/>
+                app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+                <com.cosmos.unreddit.ui.common.widget.PostRecyclerView
+                    android:id="@+id/list_post"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:clipToPadding="false"
+                    android:overScrollMode="never" />
+            </com.cosmos.unreddit.ui.common.widget.PullToRefreshLayout>
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"

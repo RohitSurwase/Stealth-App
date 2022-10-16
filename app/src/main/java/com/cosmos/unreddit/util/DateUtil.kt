@@ -70,4 +70,8 @@ object DateUtil {
     fun getFormattedDate(pattern: String, date: Date): String {
         return SimpleDateFormat(pattern, Locale.getDefault()).format(date)
     }
+
+    fun getLocalizedTime(timeInMillis: Long): String {
+        return DateFormat.getTimeInstance(DateFormat.MEDIUM).format(Date(timeInMillis))
+    }
 }

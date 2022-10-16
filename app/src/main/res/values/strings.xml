@@ -238,4 +238,6 @@
     <string name="menu_search">Search</string>
     <string name="menu_sidebar">Sidebar</string>
     <string name="menu_refresh">Refresh</string>
+
+    <string name="last_refresh">Last refresh: %s</string>
 </resources>
