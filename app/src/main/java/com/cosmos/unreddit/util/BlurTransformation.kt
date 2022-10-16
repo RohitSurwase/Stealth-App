@@ -1,4 +1,4 @@
-@file:Suppress("unused")
+@file:Suppress("unused", "deprecation")
 
 package com.cosmos.unreddit.util
 

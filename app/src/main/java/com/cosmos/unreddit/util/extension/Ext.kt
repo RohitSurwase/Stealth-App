@@ -1,6 +1,5 @@
 package com.cosmos.unreddit.util.extension
 
-import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.content.res.Resources
@@ -9,7 +8,6 @@ import android.os.Build
 import android.util.TypedValue
 import android.view.View
 import android.view.ViewGroup
-import android.view.WindowManager
 import android.view.inputmethod.InputMethodManager
 import android.webkit.MimeTypeMap
 import android.widget.ImageView
@@ -42,16 +40,6 @@ import kotlinx.coroutines.flow.distinctUntilChangedBy
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.filter
 
-fun Double.getPercentageValue(start: Int, end: Int) = end * this + start * (1 - this)
-
-fun Activity.setStatusBarColor(color: Int) {
-    with(window) {
-        clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS)
-        addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
-        statusBarColor = color
-    }
-}
-
 fun View.showSoftKeyboard() {
     requestFocus()
     val inputMethodManager =
@@ -82,7 +70,7 @@ fun Fragment.setSortingListener(result: (Sorting?) -> Unit) {
         SortFragment.REQUEST_KEY_SORTING,
         viewLifecycleOwner
     ) { _, bundle ->
-        val sorting = bundle.getParcelable(SortFragment.BUNDLE_KEY_SORTING) as? Sorting
+        val sorting = bundle.parcelable<Sorting>(SortFragment.BUNDLE_KEY_SORTING)
         result(sorting)
     }
 }
@@ -96,8 +84,9 @@ fun Fragment.setCommentListener(result: (Comment.CommentEntity?) -> Unit) {
         CommentMenuFragment.REQUEST_KEY_COMMENT,
         viewLifecycleOwner
     ) { _, bundle ->
-        val comment = bundle.getParcelable(CommentMenuFragment.BUNDLE_KEY_COMMENT)
-                as? Comment.CommentEntity
+        val comment = bundle.parcelable<Comment.CommentEntity>(
+            CommentMenuFragment.BUNDLE_KEY_COMMENT
+        )
         result(comment)
     }
 }

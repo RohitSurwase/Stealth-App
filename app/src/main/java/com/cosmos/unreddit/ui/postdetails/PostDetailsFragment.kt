@@ -38,6 +38,7 @@ import com.cosmos.unreddit.util.extension.betterSmoothScrollToPosition
 import com.cosmos.unreddit.util.extension.clearCommentListener
 import com.cosmos.unreddit.util.extension.clearSortingListener
 import com.cosmos.unreddit.util.extension.launchRepeat
+import com.cosmos.unreddit.util.extension.parcelable
 import com.cosmos.unreddit.util.extension.setCommentListener
 import com.cosmos.unreddit.util.extension.setSortingListener
 import dagger.hilt.android.AndroidEntryPoint
@@ -124,7 +125,7 @@ class PostDetailsFragment : BaseFragment(),
         initAppBar()
         initRecyclerView()
 
-        val post = arguments?.getParcelable(KEY_POST_ENTITY) as? PostEntity
+        val post = arguments?.parcelable<PostEntity>(KEY_POST_ENTITY)
         post?.let {
             bindPost(it, true)
         }
@@ -262,7 +263,7 @@ class PostDetailsFragment : BaseFragment(),
             viewModel.setPermalink(permalink)
         } else {
             if (arguments?.containsKey(KEY_POST_ENTITY) == true) {
-                val post = arguments?.getParcelable(KEY_POST_ENTITY) as? PostEntity
+                val post = arguments?.parcelable<PostEntity>(KEY_POST_ENTITY)
                 post?.let {
                     viewModel.setSorting(it.suggestedSorting)
                     viewModel.setPermalink(it.permalink)

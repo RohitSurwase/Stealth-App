@@ -141,7 +141,7 @@ class UserFragment : BaseFragment() {
     private fun initAppBar() {
         with(binding) {
             sortCard.setOnClickListener { showSortDialog() }
-            backCard.setOnClickListener { activity?.onBackPressed() }
+            backCard.setOnClickListener { onBackPressed() }
         }
     }
 

@@ -34,6 +34,8 @@ import com.cosmos.unreddit.util.extension.betterSmoothScrollToPosition
 import com.cosmos.unreddit.util.extension.clearWindowInsetsListener
 import com.cosmos.unreddit.util.extension.getRecyclerView
 import com.cosmos.unreddit.util.extension.launchRepeat
+import com.cosmos.unreddit.util.extension.parcelableArrayList
+import com.cosmos.unreddit.util.extension.serializable
 import com.cosmos.unreddit.util.extension.showWithAlpha
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
@@ -211,14 +213,13 @@ class MediaViewerFragment : FullscreenBottomSheetFragment() {
         } else {
             arguments?.let { bundle ->
                 if (bundle.containsKey(BUNDLE_KEY_IMAGES)) {
-                    val images = bundle.getParcelableArrayList<GalleryMedia>(BUNDLE_KEY_IMAGES)
+                    val images = bundle.parcelableArrayList<GalleryMedia>(BUNDLE_KEY_IMAGES)
                     if (images != null) {
                         viewerViewModel.setMedia(images.toList())
                     }
                 } else if (bundle.containsKey(BUNDLE_KEY_LINK)) {
                     val link = bundle.getString(BUNDLE_KEY_LINK, "")
-                    val type = bundle.getSerializable(BUNDLE_KEY_TYPE) as? MediaType
-                        ?: MediaType.LINK
+                    val type = bundle.serializable(BUNDLE_KEY_TYPE) ?: MediaType.LINK
                     viewerViewModel.loadMedia(link, type)
                 }
                 isLegacyNavigation = true
@@ -309,7 +310,7 @@ class MediaViewerFragment : FullscreenBottomSheetFragment() {
             viewerViewModel.loadMedia(args.link!!, args.type, true)
         } else {
             val link = arguments?.getString(BUNDLE_KEY_LINK)
-            val type = arguments?.getSerializable(BUNDLE_KEY_TYPE) as? MediaType
+            val type = arguments?.serializable<MediaType>(BUNDLE_KEY_TYPE)
             if (link != null && type != null) {
                 viewerViewModel.loadMedia(link, type, true)
             }

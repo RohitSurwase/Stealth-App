@@ -154,7 +154,7 @@ class SubredditSearchFragment : BaseFragment(), PostListAdapter.PostClickListene
             subredditImage.loadSubredditIcon(args.icon)
             sortCard.setOnClickListener { showSortDialog() }
             cancelCard.setOnClickListener { cancelSearch() }
-            backCard.setOnClickListener { activity?.onBackPressed() }
+            backCard.setOnClickListener { onBackPressed() }
             label.setOnClickListener { showSearchInput(true) }
             root.setOnClickListener { showSearchInput(true) }
             searchInput.apply {
@@ -211,7 +211,7 @@ class SubredditSearchFragment : BaseFragment(), PostListAdapter.PostClickListene
             showSearchInput(false)
         } else {
             binding.appBar.searchInput.hideSoftKeyboard()
-            activity?.onBackPressed()
+            onBackPressed()
         }
     }
 

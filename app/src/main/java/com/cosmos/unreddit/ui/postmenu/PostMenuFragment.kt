@@ -12,6 +12,8 @@ import com.cosmos.unreddit.data.model.db.PostEntity
 import com.cosmos.unreddit.databinding.FragmentPostMenuBinding
 import com.cosmos.unreddit.util.extension.doAndDismiss
 import com.cosmos.unreddit.util.extension.openExternalLink
+import com.cosmos.unreddit.util.extension.parcelable
+import com.cosmos.unreddit.util.extension.serializable
 import com.cosmos.unreddit.util.extension.shareExternalLink
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 
@@ -32,10 +34,10 @@ class PostMenuFragment : BottomSheetDialogFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val type = arguments?.getSerializable(BUNDLE_KEY_TYPE) as? MenuType ?: MenuType.GENERAL
+        val type = arguments?.serializable(BUNDLE_KEY_TYPE) ?: MenuType.GENERAL
         binding.type = type
 
-        val post = arguments?.getParcelable(BUNDLE_KEY_POST) as? PostEntity
+        val post = arguments?.parcelable<PostEntity>(BUNDLE_KEY_POST)
         post?.let {
             binding.post = it
             initActions(it)

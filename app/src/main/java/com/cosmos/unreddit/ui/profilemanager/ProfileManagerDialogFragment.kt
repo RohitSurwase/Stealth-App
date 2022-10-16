@@ -21,6 +21,7 @@ import com.cosmos.unreddit.databinding.FragmentProfileManagerBinding
 import com.cosmos.unreddit.ui.common.CarouselPageTransformer
 import com.cosmos.unreddit.util.extension.doAndDismiss
 import com.cosmos.unreddit.util.extension.getRecyclerView
+import com.cosmos.unreddit.util.extension.parcelable
 import com.cosmos.unreddit.util.extension.text
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dagger.hilt.android.AndroidEntryPoint
@@ -40,7 +41,7 @@ class ProfileManagerDialogFragment : DialogFragment(), ProfileManagerAdapter.Pro
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        currentProfile = arguments?.getParcelable(KEY_CURRENT_PROFILE) as? Profile
+        currentProfile = arguments?.parcelable(KEY_CURRENT_PROFILE)
     }
 
     override fun onCreateView(

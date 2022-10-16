@@ -13,6 +13,8 @@ import com.cosmos.unreddit.data.model.Sort
 import com.cosmos.unreddit.data.model.Sorting
 import com.cosmos.unreddit.data.model.TimeSorting
 import com.cosmos.unreddit.databinding.FragmentSortBinding
+import com.cosmos.unreddit.util.extension.parcelable
+import com.cosmos.unreddit.util.extension.serializable
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.google.android.material.chip.Chip
 
@@ -36,10 +38,10 @@ class SortFragment : BottomSheetDialogFragment() {
     }
 
     private fun initChoices() {
-        val type = arguments?.getSerializable(BUNDLE_KEY_TYPE) as? SortType ?: SortType.GENERAL
+        val type = arguments?.serializable(BUNDLE_KEY_TYPE) ?: SortType.GENERAL
         binding.type = type
 
-        val sorting = arguments?.getParcelable(BUNDLE_KEY_SORTING) as? Sorting ?: return
+        val sorting = arguments?.parcelable<Sorting>(BUNDLE_KEY_SORTING) ?: return
         with(sorting) {
             when (generalSorting) {
                 Sort.HOT -> binding.chipHot.isChecked = true
@@ -83,7 +85,8 @@ class SortFragment : BottomSheetDialogFragment() {
             }
         }
 
-        binding.groupGeneral.setOnCheckedChangeListener { _, checkedId ->
+        binding.groupGeneral.setOnCheckedStateChangeListener { _, checkedIds ->
+            val checkedId = checkedIds.getOrNull(0) ?: return@setOnCheckedStateChangeListener
             when (checkedId) {
                 binding.chipHot.id, binding.chipNew.id, binding.chipRising.id, binding.chipBest.id,
                 binding.chipOld.id, binding.chipQa.id -> setChoice(false)
@@ -96,10 +99,14 @@ class SortFragment : BottomSheetDialogFragment() {
                         setChoice(false)
                     }
                 }
+                else -> {
+                    // Ignore
+                }
             }
         }
 
-        binding.groupTime.setOnCheckedChangeListener { group, checkedId ->
+        binding.groupTime.setOnCheckedStateChangeListener { group, checkedIds ->
+            val checkedId = checkedIds.getOrNull(0) ?: return@setOnCheckedStateChangeListener
             if (group.findViewById<Chip?>(checkedId)?.isChecked == true) {
                 setChoice(true)
             }
