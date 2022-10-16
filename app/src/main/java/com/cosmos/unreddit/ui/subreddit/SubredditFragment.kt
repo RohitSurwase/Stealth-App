@@ -8,7 +8,11 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.widget.PopupMenu
 import androidx.constraintlayout.widget.ConstraintSet
-import androidx.core.view.*
+import androidx.core.view.GravityCompat
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.isVisible
+import androidx.core.view.updatePadding
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.navigation.fragment.navArgs
@@ -22,11 +26,23 @@ import com.cosmos.unreddit.databinding.FragmentSubredditBinding
 import com.cosmos.unreddit.databinding.LayoutSubredditAboutBinding
 import com.cosmos.unreddit.databinding.LayoutSubredditContentBinding
 import com.cosmos.unreddit.ui.base.BaseFragment
+import com.cosmos.unreddit.ui.common.widget.PullToRefreshLayout
+import com.cosmos.unreddit.ui.common.widget.PullToRefreshView
 import com.cosmos.unreddit.ui.loadstate.NetworkLoadStateAdapter
 import com.cosmos.unreddit.ui.postlist.PostListAdapter
 import com.cosmos.unreddit.ui.postmenu.PostMenuFragment
 import com.cosmos.unreddit.ui.sort.SortFragment
-import com.cosmos.unreddit.util.extension.*
+import com.cosmos.unreddit.util.DateUtil
+import com.cosmos.unreddit.util.extension.addLoadStateListener
+import com.cosmos.unreddit.util.extension.applyWindowInsets
+import com.cosmos.unreddit.util.extension.betterSmoothScrollToPosition
+import com.cosmos.unreddit.util.extension.clearSortingListener
+import com.cosmos.unreddit.util.extension.clearWindowInsetsListener
+import com.cosmos.unreddit.util.extension.launchRepeat
+import com.cosmos.unreddit.util.extension.loadSubredditIcon
+import com.cosmos.unreddit.util.extension.onRefreshFromNetwork
+import com.cosmos.unreddit.util.extension.setSortingListener
+import com.cosmos.unreddit.util.extension.toPixels
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
@@ -34,7 +50,8 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class SubredditFragment : BaseFragment(), PopupMenu.OnMenuItemClickListener {
+class SubredditFragment : BaseFragment(), PopupMenu.OnMenuItemClickListener,
+    PullToRefreshLayout.OnRefreshListener {
 
     private var _binding: FragmentSubredditBinding? = null
     private val binding get() = _binding!!
@@ -180,12 +197,24 @@ class SubredditFragment : BaseFragment(), PopupMenu.OnMenuItemClickListener {
                     }
                 }
             }
+
+            launch {
+                viewModel.lastRefresh.collect {
+                    val time = getString(R.string.last_refresh, DateUtil.getLocalizedTime(it))
+                    (binding.subredditContent.pullRefresh.refreshView as? PullToRefreshView)
+                        ?.setLastRefresh(time)
+                }
+            }
         }
     }
 
     private fun initRecyclerView() {
         postListAdapter = PostListAdapter(repository, this, this).apply {
-            addLoadStateListener(bindingContent.listPost, bindingContent.loadingState) {
+            addLoadStateListener(
+                bindingContent.listPost,
+                bindingContent.loadingState,
+                bindingContent.pullRefresh
+            ) {
                 showRetryBar()
             }
         }
@@ -197,6 +226,8 @@ class SubredditFragment : BaseFragment(), PopupMenu.OnMenuItemClickListener {
                 footer = NetworkLoadStateAdapter { postListAdapter.retry() }
             )
         }
+
+        bindingContent.pullRefresh.setOnRefreshListener(this)
 
         launchRepeat(Lifecycle.State.STARTED) {
             postListAdapter.onRefreshFromNetwork {
@@ -332,6 +363,10 @@ class SubredditFragment : BaseFragment(), PopupMenu.OnMenuItemClickListener {
         return true
     }
 
+    override fun onRefresh() {
+        postListAdapter.refresh()
+    }
+
     override fun onBackPressed() {
         if (binding.drawerLayout.isDrawerOpen(GravityCompat.END)) {
             binding.drawerLayout.closeDrawer(GravityCompat.END)
@@ -342,6 +377,9 @@ class SubredditFragment : BaseFragment(), PopupMenu.OnMenuItemClickListener {
 
     override fun onDestroyView() {
         super.onDestroyView()
+
+        (binding.subredditContent.pullRefresh.refreshView as? PullToRefreshLayout.RefreshCallback)
+            ?.reset()
 
         // Save progress of MotionLayout to restore it in case of fragment recreation
         // currentState is not always properly updated
