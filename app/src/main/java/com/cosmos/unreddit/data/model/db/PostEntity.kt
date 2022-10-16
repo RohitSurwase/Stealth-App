@@ -131,7 +131,7 @@ data class PostEntity @JvmOverloads constructor(
     @ColumnInfo(name = "time")
     var time: Long = -1,
 
-    @ColumnInfo(name = "profile_id")
+    @ColumnInfo(name = "profile_id", index = true)
     var profileId: Int = -1,
 ) : Parcelable {
 
