@@ -254,6 +254,14 @@ class AboutFragment : BaseFragment() {
                     "https://github.com/PureWriter/FullDraggableDrawer",
                     CreditItem.Credit.LicenseType.APACHE_V2,
                     "https://github.com/PureWriter/FullDraggableDrawer/blob/master/LICENSE"
+                ),
+                CreditItem.Credit(
+                    "SSPullToRefresh",
+                    "Simform Solutions",
+                    "Pull to Refresh with custom animations.",
+                    "https://github.com/SimformSolutionsPvtLtd/SSPullToRefresh",
+                    CreditItem.Credit.LicenseType.MIT,
+                    "https://github.com/SimformSolutionsPvtLtd/SSPullToRefresh/blob/main/LICENSE"
                 )
             )
         }
