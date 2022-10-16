@@ -251,6 +251,8 @@ class SubredditFragment : BaseFragment(), PopupMenu.OnMenuItemClickListener,
             sortCard.setOnClickListener { showSortDialog() }
             backCard.setOnClickListener { onBackPressed() }
             moreCard.setOnClickListener { showMenu() }
+            subredditName.setOnClickListener { scrollToTop() }
+            subredditImage.setOnClickListener { scrollToTop() }
         }
     }
 
