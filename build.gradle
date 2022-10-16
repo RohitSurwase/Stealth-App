@@ -3,21 +3,21 @@ buildscript {
     ext {
         kotlin = '1.7.20'
         androidGradlePlugin = '7.3.1'
-        hiltGradlePlugin = '2.43.2'
+        hiltGradlePlugin = '2.44'
 
         hilt = '1.0.0'
 
-        core = '1.8.0'
-        appCompat = '1.5.0'
+        core = '1.9.0'
+        appCompat = '1.5.1'
         constraintLayout = '2.1.4'
         recyclerview = '1.2.1'
-        fragment = '1.5.2'
+        fragment = '1.5.3'
         lifecycle = '2.5.1'
         coordinatorlayout = '1.2.0'
         viewpager2 = '1.0.0'
         preference = '1.2.0'
 
-        navigation = '2.5.1'
+        navigation = '2.5.2'
 
         room = '2.4.3'
         datastore = '1.0.0'
@@ -38,13 +38,13 @@ buildscript {
 
         retrofit = '2.9.0'
 
-        moshi = '1.13.0'
+        moshi = '1.14.0'
 
         okio = '3.2.0'
 
         coil = '1.3.2'
 
-        jsoup = '1.14.3'
+        jsoup = '1.15.3'
 
         drawer = '1.0.3'
 
