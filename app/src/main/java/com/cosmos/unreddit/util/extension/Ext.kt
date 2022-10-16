@@ -35,6 +35,7 @@ import com.cosmos.unreddit.data.model.Sorting
 import com.cosmos.unreddit.databinding.IncludeLoadingStateBinding
 import com.cosmos.unreddit.databinding.ItemListContentBinding
 import com.cosmos.unreddit.ui.commentmenu.CommentMenuFragment
+import com.cosmos.unreddit.ui.common.widget.PullToRefreshLayout
 import com.cosmos.unreddit.ui.postdetails.PostDetailsFragment
 import com.cosmos.unreddit.ui.sort.SortFragment
 import kotlinx.coroutines.flow.distinctUntilChangedBy
@@ -172,15 +173,22 @@ fun PagingDataAdapter<out Any, out RecyclerView.ViewHolder>.isEmpty(): Boolean {
 fun PagingDataAdapter<out Any, out RecyclerView.ViewHolder>.addLoadStateListener(
     list: RecyclerView,
     binding: IncludeLoadingStateBinding,
+    pullToRefreshLayout: PullToRefreshLayout? = null,
     onError: () -> Unit
 ) {
     addLoadStateListener { loadState ->
-        list.visibility = when (loadState.source.refresh) {
-            is LoadState.NotLoading -> View.VISIBLE
-            else -> View.INVISIBLE // Set to INVISIBLE to keep MotionLayout gestures
-        }
+        val isLoading = loadState.source.refresh is LoadState.Loading
 
-        binding.loadingCradle.isVisible = loadState.source.refresh is LoadState.Loading
+        if (pullToRefreshLayout?.isRefreshing == false) {
+            list.visibility = when (loadState.source.refresh) {
+                is LoadState.NotLoading -> View.VISIBLE
+                else -> View.INVISIBLE // Set to INVISIBLE to keep MotionLayout gestures
+            }
+
+            binding.loadingCradle.isVisible = isLoading
+        } else {
+            pullToRefreshLayout?.setRefreshing(isLoading)
+        }
 
         val errorState = loadState.source.refresh as? LoadState.Error
         errorState?.let {

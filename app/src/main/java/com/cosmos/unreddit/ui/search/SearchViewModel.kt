@@ -30,11 +30,13 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.dropWhile
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.take
 import javax.inject.Inject
@@ -58,8 +60,17 @@ class SearchViewModel @Inject constructor(
     private val _query: MutableStateFlow<String> = MutableStateFlow("")
     val query: StateFlow<String> get() = _query
 
-    private val _page: MutableStateFlow<Int> = MutableStateFlow(0)
-    val page: StateFlow<Int> get() = _page
+    private val _lastRefreshPost: MutableStateFlow<Long> =
+        MutableStateFlow(System.currentTimeMillis())
+    val lastRefreshPost: StateFlow<Long> = _lastRefreshPost.asStateFlow()
+
+    private val _lastRefreshSubreddit: MutableStateFlow<Long> =
+        MutableStateFlow(System.currentTimeMillis())
+    val lastRefreshSubreddit: StateFlow<Long> = _lastRefreshSubreddit.asStateFlow()
+
+    private val _lastRefreshUser: MutableStateFlow<Long> =
+        MutableStateFlow(System.currentTimeMillis())
+    val lastRefreshUser: StateFlow<Long> = _lastRefreshUser.asStateFlow()
 
     val postDataFlow: Flow<PagingData<PostEntity>>
     val subredditDataFlow: Flow<PagingData<SubredditEntity>>
@@ -91,14 +102,17 @@ class SearchViewModel @Inject constructor(
     init {
         postDataFlow = data
             .flatMapLatest { data -> getPosts(data.first, data.second) }
+            .onEach { _lastRefreshPost.value = System.currentTimeMillis() }
             .cachedIn(viewModelScope)
 
         subredditDataFlow = data
             .flatMapLatest { data -> getSubreddits(data.first, data.second) }
+            .onEach { _lastRefreshSubreddit.value = System.currentTimeMillis() }
             .cachedIn(viewModelScope)
 
         userDataFlow = data
             .flatMapLatest { data -> getUsers(data.first, data.second) }
+            .onEach { _lastRefreshUser.value = System.currentTimeMillis() }
             .cachedIn(viewModelScope)
     }
 
@@ -144,10 +158,6 @@ class SearchViewModel @Inject constructor(
 
     fun setQuery(query: String) {
         _query.updateValue(query)
-    }
-
-    fun setPage(position: Int) {
-        _page.updateValue(position)
     }
 
     companion object {

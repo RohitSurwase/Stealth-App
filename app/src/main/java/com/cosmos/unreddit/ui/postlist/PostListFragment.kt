@@ -341,6 +341,8 @@ class PostListFragment : BaseFragment(), PullToRefreshLayout.OnRefreshListener {
     override fun onDestroyView() {
         super.onDestroyView()
 
+        (binding.pullRefresh.refreshView as? PullToRefreshLayout.RefreshCallback)?.reset()
+
         viewModel.isDrawerOpen = isDrawerOpen
 
         _binding = null

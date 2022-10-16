@@ -9,14 +9,19 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView.Adapter
 import androidx.recyclerview.widget.RecyclerView.Adapter.StateRestorationPolicy.PREVENT_WHEN_EMPTY
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
+import com.cosmos.unreddit.R
 import com.cosmos.unreddit.data.model.db.PostEntity
 import com.cosmos.unreddit.databinding.ItemListContentBinding
 import com.cosmos.unreddit.ui.base.BaseFragment
 import com.cosmos.unreddit.ui.common.PostDividerItemDecoration
+import com.cosmos.unreddit.ui.common.widget.PullToRefreshLayout
+import com.cosmos.unreddit.ui.common.widget.PullToRefreshView
+import com.cosmos.unreddit.util.DateUtil
 import com.cosmos.unreddit.util.extension.applyWindowInsets
 import com.cosmos.unreddit.util.extension.currentNavigationFragment
 
-abstract class ListFragment<T : Adapter<out ViewHolder>> : BaseFragment() {
+abstract class ListFragment<T : Adapter<out ViewHolder>> : BaseFragment(),
+    PullToRefreshLayout.OnRefreshListener {
 
     private var _binding: ItemListContentBinding? = null
     protected val binding get() = _binding!!
@@ -62,6 +67,13 @@ abstract class ListFragment<T : Adapter<out ViewHolder>> : BaseFragment() {
                 addItemDecoration(PostDividerItemDecoration(context))
             }
         }
+
+        binding.pullRefresh.setOnRefreshListener(this)
+    }
+
+    protected fun setRefreshTime(timeInMillis: Long) {
+        val time = getString(R.string.last_refresh, DateUtil.getLocalizedTime(timeInMillis))
+        (binding.pullRefresh.refreshView as? PullToRefreshView)?.setLastRefresh(time)
     }
 
     protected abstract fun createAdapter(): T
@@ -70,6 +82,10 @@ abstract class ListFragment<T : Adapter<out ViewHolder>> : BaseFragment() {
         if (!binding.loadingState.infoRetry.isVisible) {
             binding.loadingState.infoRetry.show()
         }
+    }
+
+    override fun onRefresh() {
+        // Not implemented
     }
 
     override fun onDestroyView() {

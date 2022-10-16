@@ -6,6 +6,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.paging.PagingData
 import androidx.paging.PagingDataAdapter
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
+import com.cosmos.unreddit.ui.common.widget.PullToRefreshLayout
 import com.cosmos.unreddit.ui.loadstate.NetworkLoadStateAdapter
 import com.cosmos.unreddit.util.extension.addLoadStateListener
 import com.cosmos.unreddit.util.extension.betterSmoothScrollToPosition
@@ -44,7 +45,9 @@ abstract class PagingListFragment<T : PagingDataAdapter<R, out ViewHolder>, R : 
 
     final override fun createAdapter(): T {
         return createPagingAdapter().apply {
-            addLoadStateListener(binding.listContent, binding.loadingState) { showRetryBar() }
+            addLoadStateListener(binding.listContent, binding.loadingState, binding.pullRefresh) {
+                showRetryBar()
+            }
             withLoadStateHeaderAndFooter(
                 header = NetworkLoadStateAdapter { adapter.retry() },
                 footer = NetworkLoadStateAdapter { adapter.retry() }
@@ -52,5 +55,14 @@ abstract class PagingListFragment<T : PagingDataAdapter<R, out ViewHolder>, R : 
         }
     }
 
+    override fun onRefresh() {
+        adapter.refresh()
+    }
+
     protected abstract fun createPagingAdapter(): T
+
+    override fun onDestroyView() {
+        (binding.pullRefresh.refreshView as? PullToRefreshLayout.RefreshCallback)?.reset()
+        super.onDestroyView()
+    }
 }
