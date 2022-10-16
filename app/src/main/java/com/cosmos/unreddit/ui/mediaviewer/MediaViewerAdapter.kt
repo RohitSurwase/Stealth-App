@@ -21,9 +21,8 @@ import com.cosmos.unreddit.util.extension.asBoolean
 import com.google.android.exoplayer2.PlaybackException
 import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.SimpleExoPlayer
+import com.google.android.exoplayer2.Tracks
 import com.google.android.exoplayer2.source.MergingMediaSource
-import com.google.android.exoplayer2.source.TrackGroupArray
-import com.google.android.exoplayer2.trackselection.TrackSelectionArray
 import com.google.android.exoplayer2.upstream.HttpDataSource
 import okhttp3.HttpUrl
 import java.net.HttpURLConnection
@@ -218,11 +217,8 @@ class MediaViewerAdapter(
                         }
                     }
 
-                    override fun onTracksChanged(
-                        trackGroups: TrackGroupArray,
-                        trackSelections: TrackSelectionArray
-                    ) {
-                        initAudioVolume(trackGroups)
+                    override fun onTracksChanged(tracks: Tracks) {
+                        initAudioVolume(tracks)
                     }
                 })
             } else {
@@ -260,8 +256,8 @@ class MediaViewerAdapter(
             return false
         }
 
-        private fun initAudioVolume(trackGroups: TrackGroupArray) {
-            if (hasAudio(trackGroups)) {
+        private fun initAudioVolume(tracks: Tracks) {
+            if (hasAudio(tracks)) {
                 muteAudio(muteVideo)
                 hasAudio.invoke(true)
             } else {
@@ -273,11 +269,12 @@ class MediaViewerAdapter(
             (binding.video.player as? SimpleExoPlayer)?.volume = if (shouldMute) 0F else 1F
         }
 
-        private fun hasAudio(trackGroups: TrackGroupArray): Boolean {
-            if (!trackGroups.isEmpty) {
-                for (arrayIndex in 0 until trackGroups.length) {
-                    for (groupIndex in 0 until trackGroups[arrayIndex].length) {
-                        val sampleMimeType = trackGroups[arrayIndex].getFormat(groupIndex)
+        private fun hasAudio(tracks: Tracks): Boolean {
+            val groups = tracks.groups
+            if (!groups.isEmpty()) {
+                for (arrayIndex in 0 until groups.size) {
+                    for (groupIndex in 0 until groups[arrayIndex].length) {
+                        val sampleMimeType = groups[arrayIndex].getTrackFormat(groupIndex)
                             .sampleMimeType
                         if (sampleMimeType != null && sampleMimeType.contains("audio")) {
                             return true
@@ -292,11 +289,8 @@ class MediaViewerAdapter(
             binding.infoRetry.show()
         }
 
-        override fun onTracksChanged(
-            trackGroups: TrackGroupArray,
-            trackSelections: TrackSelectionArray
-        ) {
-            initAudioVolume(trackGroups)
+        override fun onTracksChanged(tracks: Tracks) {
+            initAudioVolume(tracks)
         }
     }
 }
