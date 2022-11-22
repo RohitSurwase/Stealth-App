@@ -1,7 +1,6 @@
 package com.cosmos.unreddit.ui.mediaviewer
 
 import android.Manifest
-import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -9,7 +8,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.core.content.ContextCompat
+import androidx.annotation.RequiresApi
 import androidx.core.os.bundleOf
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
@@ -33,6 +32,7 @@ import com.cosmos.unreddit.ui.common.FullscreenBottomSheetFragment
 import com.cosmos.unreddit.util.extension.betterSmoothScrollToPosition
 import com.cosmos.unreddit.util.extension.clearWindowInsetsListener
 import com.cosmos.unreddit.util.extension.getRecyclerView
+import com.cosmos.unreddit.util.extension.isPermissionGranted
 import com.cosmos.unreddit.util.extension.launchRepeat
 import com.cosmos.unreddit.util.extension.parcelableArrayList
 import com.cosmos.unreddit.util.extension.serializable
@@ -60,7 +60,7 @@ class MediaViewerFragment : FullscreenBottomSheetFragment() {
     private lateinit var mediaAdapter: MediaViewerAdapter
     private lateinit var thumbnailAdapter: MediaViewerThumbnailAdapter
 
-    private val requestPermissionLauncher = registerForActivityResult(
+    private val requestStoragePermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { isGranted ->
         if (isGranted) {
@@ -72,6 +72,13 @@ class MediaViewerFragment : FullscreenBottomSheetFragment() {
                 Snackbar.LENGTH_SHORT
             ).show()
         }
+    }
+
+    private val requestNotificationPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) {
+        // Download media regardless of the result
+        downloadMedia()
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -248,7 +255,9 @@ class MediaViewerFragment : FullscreenBottomSheetFragment() {
     }
 
     private fun requestMediaDownload() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            requestNotificationPermission()
+        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             // No need to request storage permission on Android 10+
             downloadMedia()
         } else {
@@ -258,10 +267,7 @@ class MediaViewerFragment : FullscreenBottomSheetFragment() {
 
     private fun requestStoragePermission() {
         when {
-            ContextCompat.checkSelfPermission(
-                requireContext(),
-                Manifest.permission.WRITE_EXTERNAL_STORAGE
-            ) == PackageManager.PERMISSION_GRANTED -> {
+            isPermissionGranted(Manifest.permission.WRITE_EXTERNAL_STORAGE) -> {
                 downloadMedia()
             }
             shouldShowRequestPermissionRationale(Manifest.permission.WRITE_EXTERNAL_STORAGE) -> {
@@ -270,12 +276,24 @@ class MediaViewerFragment : FullscreenBottomSheetFragment() {
                     R.string.snackbar_permission_storage_request_message,
                     Snackbar.LENGTH_INDEFINITE
                 ).setAction(R.string.ok) {
-                    requestPermissionLauncher.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                    requestStoragePermissionLauncher
+                        .launch(Manifest.permission.WRITE_EXTERNAL_STORAGE)
                 }.show()
             }
             else -> {
-                requestPermissionLauncher.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                requestStoragePermissionLauncher.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE)
             }
+        }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
+    private fun requestNotificationPermission() {
+        if (!isPermissionGranted(Manifest.permission.POST_NOTIFICATIONS) ||
+            shouldShowRequestPermissionRationale(Manifest.permission.POST_NOTIFICATIONS)
+        ) {
+            requestNotificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+        } else {
+            downloadMedia()
         }
     }
 
