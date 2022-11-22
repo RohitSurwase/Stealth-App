@@ -1,5 +1,6 @@
 <resources>
     <string name="app_name">Stealth</string>
+    <string name="app_version_name" translatable="false">Blackbird</string>
     <string name="app_description">An account-free, privacy-oriented, feature-rich Reddit client</string>
 
     <string name="ok">OK</string>
