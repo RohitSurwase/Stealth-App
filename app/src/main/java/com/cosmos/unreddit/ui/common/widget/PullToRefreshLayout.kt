@@ -115,6 +115,8 @@ class PullToRefreshLayout @JvmOverloads constructor(
     var isRefreshing = false
         private set
 
+    var enablePullToRefresh = true
+
     init {
         val metrics = resources.displayMetrics
         mRefreshLayoutParams = ViewGroup.LayoutParams(
@@ -640,10 +642,16 @@ class PullToRefreshLayout @JvmOverloads constructor(
     }
 
     override fun onInterceptTouchEvent(ev: MotionEvent): Boolean {
+        if (!enablePullToRefresh) {
+            return false
+        }
+
         ensureTarget()
+
         if (mTarget == null) {
             return false
         }
+
         when (mRefreshStyle) {
             RefreshStyle.FLOAT -> {
                 if (!isEnabled || canChildScrollUp(mTarget) || isRefreshing ||

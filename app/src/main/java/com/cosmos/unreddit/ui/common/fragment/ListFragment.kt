@@ -30,6 +30,8 @@ abstract class ListFragment<T : Adapter<out ViewHolder>> : BaseFragment(),
 
     protected open val showItemDecoration: Boolean = false
 
+    protected open val enablePullToRefresh: Boolean = true
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -46,6 +48,7 @@ abstract class ListFragment<T : Adapter<out ViewHolder>> : BaseFragment(),
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         initRecyclerView()
+        binding.pullRefresh.enablePullToRefresh = enablePullToRefresh
     }
 
     override fun onClick(post: PostEntity) {

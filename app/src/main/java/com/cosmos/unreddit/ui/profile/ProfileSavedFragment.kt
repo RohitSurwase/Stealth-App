@@ -28,6 +28,9 @@ class ProfileSavedFragment : ListFragment<ProfileSavedAdapter>(),
 
     override val viewModel: ProfileViewModel by hiltNavGraphViewModels(R.id.profile)
 
+    override val enablePullToRefresh: Boolean
+        get() = false
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         updateContentView()
