@@ -318,6 +318,8 @@ class PostListFragment : BaseFragment(), PullToRefreshLayout.OnRefreshListener {
     private fun onProfileClick(profile: Profile) {
         viewModel.selectProfile(profile)
         closeProfileDrawer()
+        // Show app bar on profile change to prevent weird scrolling behaviors
+        binding.appBarLayout.setExpanded(true)
     }
 
     override fun onRefresh() {
