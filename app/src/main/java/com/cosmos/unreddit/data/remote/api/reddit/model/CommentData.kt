@@ -3,7 +3,7 @@ package com.cosmos.unreddit.data.remote.api.reddit.model
 import com.cosmos.unreddit.R
 import com.cosmos.unreddit.data.remote.api.reddit.adapter.Edited
 import com.cosmos.unreddit.data.remote.api.reddit.adapter.Replies
-import com.cosmos.unreddit.util.extension.fitToRange
+import com.cosmos.unreddit.util.extension.fitTo
 import com.cosmos.unreddit.util.extension.formatNumber
 import com.cosmos.unreddit.util.extension.toMillis
 import com.squareup.moshi.Json
@@ -100,7 +100,7 @@ class CommentData(
             return if (commentDepth in colorArray.indices) {
                 colorArray[commentDepth]
             } else {
-                colorArray[commentDepth.fitToRange(colorArray.indices)]
+                colorArray[commentDepth fitTo colorArray.indices]
             }
         }
 

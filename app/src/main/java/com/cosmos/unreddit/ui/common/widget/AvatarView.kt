@@ -7,7 +7,7 @@ import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import com.cosmos.unreddit.R
-import com.cosmos.unreddit.util.extension.fitToRange
+import com.cosmos.unreddit.util.extension.fitTo
 import com.cosmos.unreddit.util.extension.sum
 import com.google.android.material.imageview.ShapeableImageView
 
@@ -23,7 +23,7 @@ class AvatarView @JvmOverloads constructor(
     private var text: String? = null
 
     private val backgroundColor: Int
-        get() = text?.sum?.fitToRange(colorArray.indices)?.let { colorArray[it] } ?: colorArray[0]
+        get() = text?.sum?.fitTo(colorArray.indices)?.let { colorArray[it] } ?: colorArray[0]
 
     init {
         context.theme.obtainStyledAttributes(
