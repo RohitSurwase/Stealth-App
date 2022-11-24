@@ -15,6 +15,9 @@ import androidx.navigation.NavController
 import androidx.navigation.NavDestination
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupWithNavController
+import com.cosmos.unreddit.MainActivity.BottomNavigationState.LEFT_HANDED
+import com.cosmos.unreddit.MainActivity.BottomNavigationState.NOT_INITIALIZED
+import com.cosmos.unreddit.MainActivity.BottomNavigationState.RIGHT_HANDED
 import com.cosmos.unreddit.databinding.ActivityMainBinding
 import com.cosmos.unreddit.ui.postlist.PostListFragment
 import com.cosmos.unreddit.util.HideBottomViewBehavior
@@ -38,6 +41,8 @@ class MainActivity : AppCompatActivity(), NavController.OnDestinationChangedList
 
     private lateinit var navController: NavController
 
+    private var bottomNavigationState: BottomNavigationState = NOT_INITIALIZED
+
     override fun onCreate(savedInstanceState: Bundle?) {
         setTheme(unredditApplication.appTheme)
         super.onCreate(savedInstanceState)
@@ -58,7 +63,13 @@ class MainActivity : AppCompatActivity(), NavController.OnDestinationChangedList
             }
 
             launch {
-                viewModel.leftHandedMode.collect(this@MainActivity::initBottomNavigationView)
+                viewModel.leftHandedMode.collect { leftHandedMode ->
+                    when (bottomNavigationState) {
+                        NOT_INITIALIZED -> initBottomNavigationView(leftHandedMode)
+                        RIGHT_HANDED -> if (leftHandedMode) initBottomNavigationView(true)
+                        LEFT_HANDED -> if (!leftHandedMode) initBottomNavigationView(false)
+                    }
+                }
             }
         }
     }
@@ -140,6 +151,8 @@ class MainActivity : AppCompatActivity(), NavController.OnDestinationChangedList
         binding.bottomNavigation.post {
             showNavigation(viewModel.navigationVisibility.value, false)
         }
+
+        bottomNavigationState = if (leftHandedMode) LEFT_HANDED else RIGHT_HANDED
     }
 
     private fun showNavigation(show: Boolean, animate: Boolean = true) {
@@ -173,5 +186,14 @@ class MainActivity : AppCompatActivity(), NavController.OnDestinationChangedList
             }
             else -> viewModel.setNavigationVisibility(false)
         }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        bottomNavigationState = NOT_INITIALIZED
+    }
+
+    private enum class BottomNavigationState {
+        NOT_INITIALIZED, RIGHT_HANDED, LEFT_HANDED
     }
 }
