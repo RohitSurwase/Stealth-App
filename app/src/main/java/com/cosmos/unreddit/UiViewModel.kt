@@ -7,6 +7,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
 import javax.inject.Inject
 
 @HiltViewModel
@@ -14,7 +15,9 @@ class UiViewModel @Inject constructor(
     preferencesRepository: PreferencesRepository
 ) : ViewModel() {
 
-    val leftHandedMode: Flow<Boolean> = preferencesRepository.getLeftHandedMode()
+    val leftHandedMode: Flow<Boolean> = preferencesRepository
+        .getLeftHandedMode()
+        .distinctUntilChanged()
 
     private val _navigationVisibility = MutableStateFlow(true)
     val navigationVisibility: StateFlow<Boolean> = _navigationVisibility
