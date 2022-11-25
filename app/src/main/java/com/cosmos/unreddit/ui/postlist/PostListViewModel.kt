@@ -15,7 +15,6 @@ import com.cosmos.unreddit.data.repository.PreferencesRepository
 import com.cosmos.unreddit.di.DispatchersModule.DefaultDispatcher
 import com.cosmos.unreddit.ui.base.BaseViewModel
 import com.cosmos.unreddit.util.PostUtil
-import com.cosmos.unreddit.util.RedditUtil
 import com.cosmos.unreddit.util.extension.updateValue
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
@@ -51,25 +50,21 @@ class PostListViewModel
     private val _sorting: MutableStateFlow<Sorting> = MutableStateFlow(DEFAULT_SORTING)
     val sorting: StateFlow<Sorting> = _sorting
 
-    val subreddit: Flow<String> = subscriptionsNames.map {
-        if (it.isNotEmpty()) {
-            RedditUtil.joinSubredditList(it)
-        } else {
-            DEFAULT_SUBREDDIT
-        }
+    val subreddit: Flow<List<String>> = subscriptionsNames.map {
+        it.ifEmpty { listOf(DEFAULT_SUBREDDIT) }
     }.distinctUntilChanged()
 
     val postDataFlow: Flow<PagingData<PostEntity>>
 
-    val fetchData: StateFlow<Data.Fetch> = combine(
+    val fetchData: StateFlow<Data.FetchMultiple> = combine(
         subreddit,
         sorting
     ) { subreddit, sorting ->
-        Data.Fetch(subreddit, sorting)
+        Data.FetchMultiple(subreddit, sorting)
     }.stateIn(
         viewModelScope,
         SharingStarted.WhileSubscribed(5000),
-        Data.Fetch(DEFAULT_SUBREDDIT, DEFAULT_SORTING)
+        Data.FetchMultiple(listOf(DEFAULT_SUBREDDIT), DEFAULT_SORTING)
     )
 
     private val userData: Flow<Data.User> = combine(
@@ -94,7 +89,7 @@ class PostListViewModel
             .cachedIn(viewModelScope)
     }
 
-    private fun getPosts(data: Data.Fetch, user: Data.User): Flow<PagingData<PostEntity>> {
+    private fun getPosts(data: Data.FetchMultiple, user: Data.User): Flow<PagingData<PostEntity>> {
         return repository.getPosts(data.query, data.sorting)
             .map { pagingData ->
                 PostUtil.filterPosts(pagingData, user, postMapper, defaultDispatcher)
