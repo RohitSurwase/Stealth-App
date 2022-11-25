@@ -18,7 +18,6 @@ import com.cosmos.unreddit.data.model.CreditItem
 import com.cosmos.unreddit.databinding.FragmentAboutBinding
 import com.cosmos.unreddit.ui.base.BaseFragment
 import com.cosmos.unreddit.util.extension.applyWindowInsets
-import com.cosmos.unreddit.util.extension.openExternalLink
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -75,7 +74,7 @@ class AboutFragment : BaseFragment() {
             if (it is CreditItem.Credit) {
                 showCreditDialog(it)
             } else if (it is CreditItem.Contributor) {
-                openExternalLink(it.link)
+                openBrowser(it.link)
             }
         }
 
@@ -104,10 +103,10 @@ class AboutFragment : BaseFragment() {
             .setTitle(credit.title)
             .setMessage(credit.description)
             .setPositiveButton(R.string.dialog_credit_show_website) { _, _ ->
-                openExternalLink(credit.link)
+                openBrowser(credit.link)
             }
             .setNegativeButton(R.string.dialog_credit_show_license) { _, _ ->
-                openExternalLink(credit.licenseLink)
+                openBrowser(credit.licenseLink)
             }
             .setCancelable(true)
             .show()
