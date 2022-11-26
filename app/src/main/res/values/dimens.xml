@@ -127,6 +127,7 @@
 
     <dimen name="media_button_size">32dp</dimen>
     <dimen name="media_button_margin">16dp</dimen>
+    <dimen name="media_page_margin">8dp</dimen>
 
     <dimen name="exoplayer_margin_horizontal">8dp</dimen>
     <dimen name="exoplayer_button_size">56dp</dimen>
@@ -157,4 +158,12 @@
     <dimen name="backup_button_margin">16dp</dimen>
     <dimen name="backup_pick_image_size">150dp</dimen>
     <dimen name="backup_operation_card_height">84dp</dimen>
+
+    <dimen name="profile_home_size">36dp</dimen>
+    <dimen name="profile_home_app_bar_size">32dp</dimen>
+    <dimen name="profile_home_drawer_width">92dp</dimen>
+
+    <dimen name="profile_content_margin">48dp</dimen>
+
+    <dimen name="popup_radius">16dp</dimen>
 </resources>

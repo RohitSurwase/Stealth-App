@@ -20,13 +20,13 @@ import com.cosmos.unreddit.util.SearchUtil
 import com.cosmos.unreddit.util.extension.addLoadStateListener
 import com.cosmos.unreddit.util.extension.applyWindowInsets
 import com.cosmos.unreddit.util.extension.betterSmoothScrollToPosition
+import com.cosmos.unreddit.util.extension.clearSortingListener
 import com.cosmos.unreddit.util.extension.hideSoftKeyboard
 import com.cosmos.unreddit.util.extension.launchRepeat
 import com.cosmos.unreddit.util.extension.loadSubredditIcon
 import com.cosmos.unreddit.util.extension.onRefreshFromNetwork
 import com.cosmos.unreddit.util.extension.setSortingListener
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -154,7 +154,7 @@ class SubredditSearchFragment : BaseFragment(), PostListAdapter.PostClickListene
             subredditImage.loadSubredditIcon(args.icon)
             sortCard.setOnClickListener { showSortDialog() }
             cancelCard.setOnClickListener { cancelSearch() }
-            backCard.setOnClickListener { activity?.onBackPressed() }
+            backCard.setOnClickListener { onBackPressed() }
             label.setOnClickListener { showSearchInput(true) }
             root.setOnClickListener { showSearchInput(true) }
             searchInput.apply {
@@ -211,7 +211,7 @@ class SubredditSearchFragment : BaseFragment(), PostListAdapter.PostClickListene
             showSearchInput(false)
         } else {
             binding.appBar.searchInput.hideSoftKeyboard()
-            activity?.onBackPressed()
+            onBackPressed()
         }
     }
 
@@ -232,6 +232,7 @@ class SubredditSearchFragment : BaseFragment(), PostListAdapter.PostClickListene
 
     override fun onDestroyView() {
         super.onDestroyView()
+        clearSortingListener()
         _binding = null
     }
 

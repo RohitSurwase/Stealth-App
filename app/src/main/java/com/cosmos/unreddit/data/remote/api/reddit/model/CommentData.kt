@@ -3,12 +3,11 @@ package com.cosmos.unreddit.data.remote.api.reddit.model
 import com.cosmos.unreddit.R
 import com.cosmos.unreddit.data.remote.api.reddit.adapter.Edited
 import com.cosmos.unreddit.data.remote.api.reddit.adapter.Replies
+import com.cosmos.unreddit.util.extension.fitTo
 import com.cosmos.unreddit.util.extension.formatNumber
 import com.cosmos.unreddit.util.extension.toMillis
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
-import kotlin.math.abs
-import kotlin.math.truncate
 
 @JsonClass(generateAdapter = true)
 class CommentData(
@@ -101,10 +100,7 @@ class CommentData(
             return if (commentDepth in colorArray.indices) {
                 colorArray[commentDepth]
             } else {
-                val index = truncate(
-                    abs((colorArray.lastIndex - commentDepth) / colorArray.lastIndex).toDouble()
-                ).toInt()
-                colorArray[index]
+                colorArray[commentDepth fitTo colorArray.indices]
             }
         }
 

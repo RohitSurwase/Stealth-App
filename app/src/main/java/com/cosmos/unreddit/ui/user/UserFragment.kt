@@ -5,8 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.isVisible
-import androidx.fragment.app.FragmentTransaction
-import androidx.fragment.app.viewModels
+import androidx.hilt.navigation.fragment.hiltNavGraphViewModels
 import androidx.lifecycle.Lifecycle
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.RecyclerView
@@ -15,22 +14,18 @@ import coil.load
 import coil.size.Precision
 import coil.size.Scale
 import com.cosmos.unreddit.R
-import com.cosmos.unreddit.data.model.Comment.CommentEntity
 import com.cosmos.unreddit.data.model.Resource
 import com.cosmos.unreddit.data.model.User
 import com.cosmos.unreddit.data.model.db.PostEntity
-import com.cosmos.unreddit.data.repository.PostListRepository
 import com.cosmos.unreddit.databinding.FragmentUserBinding
 import com.cosmos.unreddit.ui.base.BaseFragment
-import com.cosmos.unreddit.ui.commentmenu.CommentMenuFragment
-import com.cosmos.unreddit.ui.postdetails.PostDetailsFragment
-import com.cosmos.unreddit.ui.postlist.PostListAdapter
+import com.cosmos.unreddit.ui.common.adapter.FragmentAdapter
 import com.cosmos.unreddit.ui.postmenu.PostMenuFragment
 import com.cosmos.unreddit.ui.sort.SortFragment
-import com.cosmos.unreddit.util.RecyclerViewStateAdapter
+import com.cosmos.unreddit.util.extension.clearCommentListener
+import com.cosmos.unreddit.util.extension.clearSortingListener
 import com.cosmos.unreddit.util.extension.getRecyclerView
 import com.cosmos.unreddit.util.extension.launchRepeat
-import com.cosmos.unreddit.util.extension.onRefreshFromNetwork
 import com.cosmos.unreddit.util.extension.scrollToTop
 import com.cosmos.unreddit.util.extension.setCommentListener
 import com.cosmos.unreddit.util.extension.setSortingListener
@@ -38,26 +33,17 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
 @AndroidEntryPoint
-class UserFragment : BaseFragment(), UserCommentsAdapter.CommentClickListener {
+class UserFragment : BaseFragment() {
 
     private var _binding: FragmentUserBinding? = null
     private val binding get() = _binding!!
 
-    override val viewModel: UserViewModel by viewModels()
+    override val viewModel: UserViewModel by hiltNavGraphViewModels(R.id.user)
 
     private val args: UserFragmentArgs by navArgs()
-
-    private lateinit var postListAdapter: PostListAdapter
-    private lateinit var commentListAdapter: UserCommentsAdapter
-
-    @Inject
-    lateinit var repository: PostListRepository
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -95,26 +81,8 @@ class UserFragment : BaseFragment(), UserCommentsAdapter.CommentClickListener {
             }
 
             launch {
-                viewModel.contentPreferences.collect {
-                    postListAdapter.contentPreferences = it
-                }
-            }
-
-            launch {
                 viewModel.sorting.collect {
                     binding.sortIcon.setSorting(it)
-                }
-            }
-
-            launch {
-                viewModel.postDataFlow.collectLatest {
-                    postListAdapter.submitData(it)
-                }
-            }
-
-            launch {
-                viewModel.commentDataFlow.collectLatest {
-                    commentListAdapter.submitData(it)
                 }
             }
 
@@ -133,22 +101,15 @@ class UserFragment : BaseFragment(), UserCommentsAdapter.CommentClickListener {
     }
 
     private fun initViewPager() {
-        postListAdapter = PostListAdapter(repository, this, this)
-        commentListAdapter = UserCommentsAdapter(requireContext(), this, this)
-
-        val tabs: List<RecyclerViewStateAdapter.Page> = listOf(
-            RecyclerViewStateAdapter.Page(R.string.tab_user_submitted, postListAdapter, true),
-            RecyclerViewStateAdapter.Page(R.string.tab_user_comments, commentListAdapter)
+        val fragments = listOf(
+            FragmentAdapter.Page(R.string.tab_user_submitted, UserPostFragment::class.java),
+            FragmentAdapter.Page(R.string.tab_user_comments, UserCommentFragment::class.java)
         )
 
-        val userStateAdapter = RecyclerViewStateAdapter {
-            showRetryBar()
-        }.apply {
-            submitList(tabs)
-        }
+        val fragmentAdapter = FragmentAdapter(this, fragments)
 
         binding.viewPager.apply {
-            adapter = userStateAdapter
+            adapter = fragmentAdapter
             getRecyclerView()?.overScrollMode = RecyclerView.OVER_SCROLL_NEVER
             registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
                 override fun onPageSelected(position: Int) {
@@ -173,28 +134,14 @@ class UserFragment : BaseFragment(), UserCommentsAdapter.CommentClickListener {
         })
 
         TabLayoutMediator(binding.tabs, binding.viewPager) { tab, position ->
-            tab.setText(tabs[position].title)
+            tab.setText(fragments[position].title)
         }.attach()
-
-        launchRepeat(Lifecycle.State.STARTED) {
-            launch {
-                postListAdapter.onRefreshFromNetwork {
-                    binding.viewPager.scrollToTop(0)
-                }
-            }
-
-            launch {
-                commentListAdapter.onRefreshFromNetwork {
-                    binding.viewPager.scrollToTop(1)
-                }
-            }
-        }
     }
 
     private fun initAppBar() {
         with(binding) {
             sortCard.setOnClickListener { showSortDialog() }
-            backCard.setOnClickListener { activity?.onBackPressed() }
+            backCard.setOnClickListener { onBackPressed() }
         }
     }
 
@@ -234,9 +181,6 @@ class UserFragment : BaseFragment(), UserCommentsAdapter.CommentClickListener {
         if (viewModel.about.value is Resource.Error) {
             viewModel.loadUserInfo(true)
         }
-        // TODO: Don't retry if not necessary
-        postListAdapter.retry()
-        commentListAdapter.retry()
     }
 
     private fun showRetryBar() {
@@ -275,27 +219,14 @@ class UserFragment : BaseFragment(), UserCommentsAdapter.CommentClickListener {
         PostMenuFragment.show(parentFragmentManager, post, PostMenuFragment.MenuType.USER)
     }
 
-    override fun onClick(comment: CommentEntity) {
-        parentFragmentManager.beginTransaction()
-            .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
-            .add(
-                R.id.fragment_container,
-                PostDetailsFragment.newInstance(comment.permalink),
-                PostDetailsFragment.TAG
-            )
-            .addToBackStack(null)
-            .commit()
-    }
-
-    override fun onLongClick(comment: CommentEntity) {
-        CommentMenuFragment.show(childFragmentManager, comment, CommentMenuFragment.MenuType.USER)
-    }
-
     override fun onDestroyView() {
         super.onDestroyView()
 
         // Save header state to restore it in case of fragment recreation
         viewModel.layoutState = binding.layoutRoot.currentState
+
+        clearSortingListener()
+        clearCommentListener()
 
         _binding = null
     }

@@ -18,6 +18,7 @@
         android:id="@+id/initials"
         android:layout_width="0dp"
         android:layout_height="0dp"
+        android:padding="4dp"
         app:layout_constraintStart_toStartOf="@id/avatar"
         app:layout_constraintEnd_toEndOf="@id/avatar"
         app:layout_constraintTop_toTopOf="@id/avatar"

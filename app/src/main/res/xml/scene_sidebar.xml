@@ -13,7 +13,10 @@
             android:id="@id/container"
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            motion:layout_constraintRight_toLeftOf="@+id/subreddit_about"
+            android:layout_marginRight="0dp"
+            android:scaleX="1.0"
+            android:scaleY="1.0"
+            motion:layout_constraintRight_toRightOf="parent"
             motion:layout_constraintTop_toTopOf="parent"
             motion:layout_constraintWidth_default="percent"
             motion:layout_constraintWidth_percent="1">

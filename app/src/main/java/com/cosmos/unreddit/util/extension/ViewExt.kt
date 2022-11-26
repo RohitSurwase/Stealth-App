@@ -4,20 +4,21 @@ import android.graphics.BlurMaskFilter
 import android.graphics.LinearGradient
 import android.graphics.Shader
 import android.view.View
+import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.annotation.ColorInt
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
-import androidx.core.view.WindowInsetsCompat.Type.InsetsType
-import androidx.core.view.WindowInsetsControllerCompat
+import androidx.core.view.isVisible
+import androidx.core.view.updateLayoutParams
 import androidx.core.view.updatePadding
 import coil.imageLoader
 import coil.request.ImageRequest
 import coil.size.Precision
 import coil.size.Scale
-import coil.transform.BlurTransformation
 import com.cosmos.unreddit.R
+import com.cosmos.unreddit.util.BlurTransformation
 import com.google.android.material.textfield.TextInputLayout
 
 fun TextView.applyGradient(text: String, @ColorInt colors: IntArray) {
@@ -87,28 +88,70 @@ fun View.applyWindowInsets(
         val paddingRight = if (right) insets.right else view.paddingRight
         val paddingBottom = if (bottom) insets.bottom else view.paddingBottom
 
-        view.updatePadding(
-            left = paddingLeft,
-            top = paddingTop,
-            right = paddingRight,
-            bottom = paddingBottom
-        )
+        view.run {
+            updatePadding(
+                left = paddingLeft,
+                top = paddingTop,
+                right = paddingRight,
+                bottom = paddingBottom
+            )
+
+            clearWindowInsetsListener()
+        }
 
         windowInsets
     }
 }
 
-fun View.showWindowInsets(
-    show: Boolean,
-    @InsetsType types: Int = WindowInsetsCompat.Type.systemBars(),
-    behavior: Int = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+fun View.clearWindowInsetsListener() {
+    ViewCompat.setOnApplyWindowInsetsListener(this, null)
+}
+
+fun View.applyMarginWindowInsets(
+    left: Boolean = true,
+    top: Boolean = true,
+    right: Boolean = true,
+    bottom: Boolean = true
 ) {
-    ViewCompat.getWindowInsetsController(this)?.let { windowInsetsController ->
-        windowInsetsController.systemBarsBehavior = behavior
-        if (show) {
-            windowInsetsController.show(types)
-        } else {
-            windowInsetsController.hide(types)
+    ViewCompat.setOnApplyWindowInsetsListener(this) { view, windowInsets ->
+        val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
+
+        view.run {
+            updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                if (left) leftMargin += insets.left
+                if (top) topMargin += insets.top
+                if (right) rightMargin += insets.right
+                if (bottom) bottomMargin += insets.bottom
+            }
+
+            clearWindowInsetsListener()
         }
+
+        windowInsets
     }
 }
+
+fun View.showWithAlpha(show: Boolean, duration: Long) {
+    val fromAlpha = if (show) 0F else 1F
+    val toAlpha = if (show) 1F else 0F
+
+    alpha = fromAlpha
+
+    animate()
+        .alpha(toAlpha)
+        .withStartAction {
+            if (show) {
+                isVisible = true
+            }
+        }
+        .withEndAction {
+            if (!show) {
+                isVisible = false
+            }
+        }
+        .setDuration(duration)
+        .start()
+}
+
+val Int.asBoolean: Boolean
+    get() = this == View.VISIBLE

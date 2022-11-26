@@ -26,6 +26,6 @@ data class Subscription (
     @ColumnInfo(name = "icon")
     val icon: String?,
 
-    @ColumnInfo(name = "profile_id")
+    @ColumnInfo(name = "profile_id", index = true)
     var profileId: Int = 1
 )

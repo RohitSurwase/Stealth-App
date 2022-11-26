@@ -15,14 +15,21 @@ import androidx.navigation.NavController
 import androidx.navigation.NavDestination
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupWithNavController
+import com.cosmos.unreddit.MainActivity.BottomNavigationState.LEFT_HANDED
+import com.cosmos.unreddit.MainActivity.BottomNavigationState.NOT_INITIALIZED
+import com.cosmos.unreddit.MainActivity.BottomNavigationState.RIGHT_HANDED
 import com.cosmos.unreddit.databinding.ActivityMainBinding
+import com.cosmos.unreddit.ui.postlist.PostListFragment
 import com.cosmos.unreddit.util.HideBottomViewBehavior
+import com.cosmos.unreddit.util.extension.clearWindowInsetsListener
+import com.cosmos.unreddit.util.extension.currentNavigationFragment
 import com.cosmos.unreddit.util.extension.launchRepeat
 import com.cosmos.unreddit.util.extension.unredditApplication
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.shape.CornerFamily
 import com.google.android.material.shape.MaterialShapeDrawable
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
@@ -33,6 +40,8 @@ class MainActivity : AppCompatActivity(), NavController.OnDestinationChangedList
     private val viewModel: UiViewModel by viewModels()
 
     private lateinit var navController: NavController
+
+    private var bottomNavigationState: BottomNavigationState = NOT_INITIALIZED
 
     override fun onCreate(savedInstanceState: Bundle?) {
         setTheme(unredditApplication.appTheme)
@@ -47,11 +56,20 @@ class MainActivity : AppCompatActivity(), NavController.OnDestinationChangedList
 
         launchRepeat(Lifecycle.State.STARTED) {
             launch {
-                viewModel.navigationVisibility.collect(this@MainActivity::showNavigation)
+                viewModel.navigationVisibility
+                    // Drop the first item to let initBottomNavigationView manage the visibility
+                    .drop(1)
+                    .collect(this@MainActivity::showNavigation)
             }
 
             launch {
-                viewModel.leftHandedMode.collect(this@MainActivity::initBottomNavigationView)
+                viewModel.leftHandedMode.collect { leftHandedMode ->
+                    when (bottomNavigationState) {
+                        NOT_INITIALIZED -> initBottomNavigationView(leftHandedMode)
+                        RIGHT_HANDED -> if (leftHandedMode) initBottomNavigationView(true)
+                        LEFT_HANDED -> if (!leftHandedMode) initBottomNavigationView(false)
+                    }
+                }
             }
         }
     }
@@ -63,16 +81,30 @@ class MainActivity : AppCompatActivity(), NavController.OnDestinationChangedList
             addOnDestinationChangedListener(this@MainActivity)
         }
 
-        binding.bottomNavigation.setupWithNavController(navController)
+        binding.bottomNavigation.run {
+            setupWithNavController(navController)
+            setOnItemReselectedListener {
+                when (it.itemId) {
+                    R.id.home -> (currentNavigationFragment as? PostListFragment)?.scrollToTop()
+                    else ->{
+                        // Ignore
+                    }
+                }
+            }
+        }
     }
 
     private fun initBottomNavigationView(leftHandedMode: Boolean) {
         ViewCompat.setOnApplyWindowInsetsListener(binding.bottomNavigation) { view, windowInsets ->
             val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
 
-            view.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-                bottomMargin = insets.bottom +
-                        resources.getDimension(R.dimen.bottom_navigation_margin).toInt()
+            view.run {
+                updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                    bottomMargin = insets.bottom +
+                            resources.getDimension(R.dimen.bottom_navigation_margin).toInt()
+                }
+
+                clearWindowInsetsListener()
             }
 
             windowInsets
@@ -114,21 +146,28 @@ class MainActivity : AppCompatActivity(), NavController.OnDestinationChangedList
 
             shapeAppearanceModel = builder.build()
         }
+
+        // Wait for the view to be ready to show/hide it (otherwise width could be 0)
+        binding.bottomNavigation.post {
+            showNavigation(viewModel.navigationVisibility.value, false)
+        }
+
+        bottomNavigationState = if (leftHandedMode) LEFT_HANDED else RIGHT_HANDED
     }
 
-    private fun showNavigation(show: Boolean) {
+    private fun showNavigation(show: Boolean, animate: Boolean = true) {
         val layoutParams = binding.bottomNavigation.layoutParams as CoordinatorLayout.LayoutParams
         val behavior = layoutParams.behavior as HideBottomViewBehavior?
 
         if (show) {
             behavior?.run {
                 enabled = true
-                slideIn(binding.bottomNavigation)
+                slideIn(binding.bottomNavigation, animate)
             }
         } else {
             behavior?.run {
                 enabled = false
-                slideOut(binding.bottomNavigation)
+                slideOut(binding.bottomNavigation, animate)
             }
         }
     }
@@ -139,10 +178,22 @@ class MainActivity : AppCompatActivity(), NavController.OnDestinationChangedList
         arguments: Bundle?
     ) {
         when (destination.id) {
-            R.id.home, R.id.subscriptions, R.id.profile, R.id.settings -> {
+            R.id.postListFragment,
+            R.id.subscriptionsFragment,
+            R.id.profileFragment,
+            R.id.preferencesFragment -> {
                 viewModel.setNavigationVisibility(true)
             }
             else -> viewModel.setNavigationVisibility(false)
         }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        bottomNavigationState = NOT_INITIALIZED
+    }
+
+    private enum class BottomNavigationState {
+        NOT_INITIALIZED, RIGHT_HANDED, LEFT_HANDED
     }
 }

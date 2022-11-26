@@ -120,6 +120,10 @@ class PostAdapter(
                         visibility = View.VISIBLE
                         setIcon(R.drawable.ic_play)
                     }
+                    post.type == PostType.LINK -> {
+                        isVisible = true
+                        setIcon(R.drawable.ic_link)
+                    }
                     else -> {
                         visibility = View.GONE
                     }

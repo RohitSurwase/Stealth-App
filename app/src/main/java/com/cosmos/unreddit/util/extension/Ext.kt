@@ -1,17 +1,22 @@
 package com.cosmos.unreddit.util.extension
 
-import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import android.content.res.Resources
 import android.net.Uri
+import android.os.Build
+import android.util.TypedValue
 import android.view.View
-import android.view.WindowManager
+import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
 import android.webkit.MimeTypeMap
 import android.widget.ImageView
+import androidx.annotation.DimenRes
+import androidx.core.view.children
 import androidx.core.view.isVisible
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.clearFragmentResultListener
 import androidx.fragment.app.setFragmentResultListener
 import androidx.navigation.NavOptions
 import androidx.paging.LoadState
@@ -28,22 +33,12 @@ import com.cosmos.unreddit.data.model.Sorting
 import com.cosmos.unreddit.databinding.IncludeLoadingStateBinding
 import com.cosmos.unreddit.databinding.ItemListContentBinding
 import com.cosmos.unreddit.ui.commentmenu.CommentMenuFragment
+import com.cosmos.unreddit.ui.common.widget.PullToRefreshLayout
 import com.cosmos.unreddit.ui.postdetails.PostDetailsFragment
 import com.cosmos.unreddit.ui.sort.SortFragment
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.distinctUntilChangedBy
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.filter
-
-fun Double.getPercentageValue(start: Int, end: Int) = end * this + start * (1 - this)
-
-fun Activity.setStatusBarColor(color: Int) {
-    with(window) {
-        clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS)
-        addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
-        statusBarColor = color
-    }
-}
 
 fun View.showSoftKeyboard() {
     requestFocus()
@@ -75,9 +70,13 @@ fun Fragment.setSortingListener(result: (Sorting?) -> Unit) {
         SortFragment.REQUEST_KEY_SORTING,
         viewLifecycleOwner
     ) { _, bundle ->
-        val sorting = bundle.getParcelable(SortFragment.BUNDLE_KEY_SORTING) as? Sorting
+        val sorting = bundle.parcelable<Sorting>(SortFragment.BUNDLE_KEY_SORTING)
         result(sorting)
     }
+}
+
+fun Fragment.clearSortingListener() {
+    childFragmentManager.clearFragmentResultListener(SortFragment.REQUEST_KEY_SORTING)
 }
 
 fun Fragment.setCommentListener(result: (Comment.CommentEntity?) -> Unit) {
@@ -85,10 +84,15 @@ fun Fragment.setCommentListener(result: (Comment.CommentEntity?) -> Unit) {
         CommentMenuFragment.REQUEST_KEY_COMMENT,
         viewLifecycleOwner
     ) { _, bundle ->
-        val comment = bundle.getParcelable(CommentMenuFragment.BUNDLE_KEY_COMMENT)
-                as? Comment.CommentEntity
+        val comment = bundle.parcelable<Comment.CommentEntity>(
+            CommentMenuFragment.BUNDLE_KEY_COMMENT
+        )
         result(comment)
     }
+}
+
+fun Fragment.clearCommentListener() {
+    childFragmentManager.clearFragmentResultListener(CommentMenuFragment.REQUEST_KEY_COMMENT)
 }
 
 fun Fragment.setNavigationListener(result: (Boolean) -> Unit) {
@@ -96,6 +100,10 @@ fun Fragment.setNavigationListener(result: (Boolean) -> Unit) {
         val showNavigation = bundle.getBoolean(PostDetailsFragment.BUNDLE_KEY_NAVIGATION)
         result(showNavigation)
     }
+}
+
+fun Fragment.clearNavigationListener() {
+    clearFragmentResultListener(PostDetailsFragment.REQUEST_KEY_NAVIGATION)
 }
 
 fun Fragment.openExternalLink(url: String) {
@@ -154,15 +162,22 @@ fun PagingDataAdapter<out Any, out RecyclerView.ViewHolder>.isEmpty(): Boolean {
 fun PagingDataAdapter<out Any, out RecyclerView.ViewHolder>.addLoadStateListener(
     list: RecyclerView,
     binding: IncludeLoadingStateBinding,
+    pullToRefreshLayout: PullToRefreshLayout? = null,
     onError: () -> Unit
 ) {
     addLoadStateListener { loadState ->
-        list.visibility = when (loadState.source.refresh) {
-            is LoadState.NotLoading -> View.VISIBLE
-            else -> View.INVISIBLE // Set to INVISIBLE to keep MotionLayout gestures
-        }
+        val isLoading = loadState.source.refresh is LoadState.Loading
 
-        binding.loadingCradle.isVisible = loadState.source.refresh is LoadState.Loading
+        if (pullToRefreshLayout?.isRefreshing == false) {
+            list.visibility = when (loadState.source.refresh) {
+                is LoadState.NotLoading -> View.VISIBLE
+                else -> View.INVISIBLE // Set to INVISIBLE to keep MotionLayout gestures
+            }
+
+            binding.loadingCradle.isVisible = isLoading
+        } else {
+            pullToRefreshLayout?.setRefreshing(isLoading)
+        }
 
         val errorState = loadState.source.refresh as? LoadState.Error
         errorState?.let {
@@ -187,11 +202,13 @@ fun ViewPager2.getItemView(position: Int): View? {
 }
 
 fun ViewPager2.getListContent(position: Int): ItemListContentBinding? {
-    return getItemView(position)?.let { ItemListContentBinding.bind(it) }
+    val viewGroup = getItemView(position) as? ViewGroup
+    return viewGroup?.children?.firstOrNull()?.let { ItemListContentBinding.bind(it) }
 }
 
 fun ViewPager2.scrollToTop(position: Int) {
-    getItemView(position)?.let {
+    val viewGroup = getItemView(position) as? ViewGroup
+    viewGroup?.children?.firstOrNull()?.let {
         ItemListContentBinding.bind(it).apply {
             listContent.betterSmoothScrollToPosition(0)
         }
@@ -239,4 +256,14 @@ fun Int?.formatNumber(): String {
 fun MimeTypeMap.getMimeTypeFromUrl(url: String): String? {
     val extension = MimeTypeMap.getFileExtensionFromUrl(url)
     return getMimeTypeFromExtension(extension)
+}
+
+fun Resources.getFloatValue(@DimenRes id: Int): Float {
+    return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+        getFloat(id)
+    } else {
+        val outValue = TypedValue()
+        getValue(id, outValue, true)
+        outValue.float
+    }
 }

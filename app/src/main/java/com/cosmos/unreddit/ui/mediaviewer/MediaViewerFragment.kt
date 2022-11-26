@@ -1,19 +1,23 @@
 package com.cosmos.unreddit.ui.mediaviewer
 
 import android.Manifest
-import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.core.content.ContextCompat
+import androidx.annotation.RequiresApi
 import androidx.core.os.bundleOf
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import androidx.core.view.isVisible
+import androidx.core.view.updateLayoutParams
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -22,25 +26,26 @@ import com.cosmos.unreddit.R
 import com.cosmos.unreddit.data.model.GalleryMedia
 import com.cosmos.unreddit.data.model.MediaType
 import com.cosmos.unreddit.data.model.Resource
-import com.cosmos.unreddit.data.repository.PreferencesRepository
 import com.cosmos.unreddit.data.worker.MediaDownloadWorker
 import com.cosmos.unreddit.databinding.FragmentMediaViewerBinding
-import com.cosmos.unreddit.ui.base.BaseFragment
+import com.cosmos.unreddit.ui.common.FullscreenBottomSheetFragment
 import com.cosmos.unreddit.util.extension.betterSmoothScrollToPosition
+import com.cosmos.unreddit.util.extension.clearWindowInsetsListener
 import com.cosmos.unreddit.util.extension.getRecyclerView
+import com.cosmos.unreddit.util.extension.isPermissionGranted
 import com.cosmos.unreddit.util.extension.launchRepeat
-import com.cosmos.unreddit.util.extension.showWindowInsets
+import com.cosmos.unreddit.util.extension.parcelableArrayList
+import com.cosmos.unreddit.util.extension.serializable
+import com.cosmos.unreddit.util.extension.showWithAlpha
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import javax.inject.Inject
 
 @AndroidEntryPoint
-class MediaViewerFragment : BaseFragment() {
+class MediaViewerFragment : FullscreenBottomSheetFragment() {
 
     private var _binding: FragmentMediaViewerBinding? = null
     private val binding get() = _binding!!
@@ -55,10 +60,7 @@ class MediaViewerFragment : BaseFragment() {
     private lateinit var mediaAdapter: MediaViewerAdapter
     private lateinit var thumbnailAdapter: MediaViewerThumbnailAdapter
 
-    @Inject
-    lateinit var preferencesRepository: PreferencesRepository
-
-    private val requestPermissionLauncher = registerForActivityResult(
+    private val requestStoragePermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { isGranted ->
         if (isGranted) {
@@ -72,9 +74,15 @@ class MediaViewerFragment : BaseFragment() {
         }
     }
 
+    private val requestNotificationPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) {
+        // Download media regardless of the result
+        downloadMedia()
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        lifecycleScope.launch { preferencesRepository.getMuteVideo(false).first() }
         handleArguments()
     }
 
@@ -90,16 +98,43 @@ class MediaViewerFragment : BaseFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        behavior?.skipCollapsed = true
+
         showSystemBars(false)
+
+        applyInsets()
 
         initRecyclerView()
         initViewPager()
         bindViewModel()
-        binding.infoRetry.setActionClickListener { retry() }
+        binding.run {
+            buttonDownload.setOnClickListener { requestMediaDownload() }
+            infoRetry.setActionClickListener { retry() }
+        }
     }
 
-    override fun applyInsets(view: View) {
-        // Don't apply any insets
+    private fun applyInsets() {
+        ViewCompat.setOnApplyWindowInsetsListener(binding.root) { rootView, windowInsets ->
+            windowInsets.displayCutout?.let { cutout ->
+                binding.run {
+                    infoRetry.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                        topMargin += cutout.safeInsetTop
+                    }
+
+                    controls.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                        topMargin += cutout.safeInsetTop
+                    }
+
+                    pageCounter.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                        topMargin += cutout.safeInsetTop
+                    }
+                }
+            }
+
+            rootView.clearWindowInsetsListener()
+
+            windowInsets
+        }
     }
 
     private fun bindViewModel() {
@@ -136,27 +171,34 @@ class MediaViewerFragment : BaseFragment() {
     }
 
     private fun initViewPager() {
-        val muteVideo = runBlocking { preferencesRepository.getMuteVideo(false).first() }
+        val muteVideo = runBlocking { viewerViewModel.isVideoMuted.first() }
 
         mediaAdapter = MediaViewerAdapter(
             requireContext(),
             muteVideo,
-            onMuteClick = {
-                lifecycleScope.launch { preferencesRepository.setMuteVideo(it) }
+            onMediaClick = {
+                viewerViewModel.hideControls = !viewerViewModel.hideControls
+                showControls(!binding.controls.isVisible)
             },
-            onDownloadClick = {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                    // No need to request storage permission on Android 10+
-                    downloadMedia()
-                } else {
-                    requestMediaDownload()
+            showControls = { show ->
+                if (!show || !viewerViewModel.hideControls) {
+                    showControls(show)
                 }
+            },
+            hasAudio = {
+                binding.buttonMute.isVisible = it
             }
         )
+
+        binding.buttonMute.run {
+            isChecked = muteVideo
+            setOnCheckedChangeListener { _, isMuted -> muteAudio(isMuted) }
+        }
 
         binding.viewPager.apply {
             adapter = mediaAdapter
             getRecyclerView()?.overScrollMode = RecyclerView.OVER_SCROLL_NEVER
+            getRecyclerView()?.isNestedScrollingEnabled = false
             registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
                 override fun onPageSelected(position: Int) {
                     super.onPageSelected(position)
@@ -178,14 +220,13 @@ class MediaViewerFragment : BaseFragment() {
         } else {
             arguments?.let { bundle ->
                 if (bundle.containsKey(BUNDLE_KEY_IMAGES)) {
-                    val images = bundle.getParcelableArrayList<GalleryMedia>(BUNDLE_KEY_IMAGES)
+                    val images = bundle.parcelableArrayList<GalleryMedia>(BUNDLE_KEY_IMAGES)
                     if (images != null) {
                         viewerViewModel.setMedia(images.toList())
                     }
                 } else if (bundle.containsKey(BUNDLE_KEY_LINK)) {
                     val link = bundle.getString(BUNDLE_KEY_LINK, "")
-                    val type = bundle.getSerializable(BUNDLE_KEY_TYPE) as? MediaType
-                        ?: MediaType.LINK
+                    val type = bundle.serializable(BUNDLE_KEY_TYPE) ?: MediaType.LINK
                     viewerViewModel.loadMedia(link, type)
                 }
                 isLegacyNavigation = true
@@ -197,21 +238,36 @@ class MediaViewerFragment : BaseFragment() {
         if (media.size > 1) {
             thumbnailAdapter.submitData(media)
             binding.textPageCount.text = media.size.toString()
-            binding.listThumbnails.visibility = View.VISIBLE
-            binding.flowPageCounter.visibility = View.VISIBLE
-        } else {
-            binding.listThumbnails.visibility = View.GONE
-            binding.flowPageCounter.visibility = View.GONE
         }
         mediaAdapter.submitData(media)
     }
 
+    private fun muteAudio(shouldMute: Boolean) {
+        val currentItemPosition = viewerViewModel.selectedPage.value
+        val videoViewHolder = binding.viewPager
+            .getRecyclerView()
+            ?.findViewHolderForAdapterPosition(currentItemPosition)
+                as? MediaViewerAdapter.VideoViewHolder
+
+        videoViewHolder?.muteAudio(shouldMute)
+
+        viewerViewModel.setMuted(shouldMute)
+    }
+
     private fun requestMediaDownload() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            requestNotificationPermission()
+        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            // No need to request storage permission on Android 10+
+            downloadMedia()
+        } else {
+            requestStoragePermission()
+        }
+    }
+
+    private fun requestStoragePermission() {
         when {
-            ContextCompat.checkSelfPermission(
-                requireContext(),
-                Manifest.permission.WRITE_EXTERNAL_STORAGE
-            ) == PackageManager.PERMISSION_GRANTED -> {
+            isPermissionGranted(Manifest.permission.WRITE_EXTERNAL_STORAGE) -> {
                 downloadMedia()
             }
             shouldShowRequestPermissionRationale(Manifest.permission.WRITE_EXTERNAL_STORAGE) -> {
@@ -220,12 +276,24 @@ class MediaViewerFragment : BaseFragment() {
                     R.string.snackbar_permission_storage_request_message,
                     Snackbar.LENGTH_INDEFINITE
                 ).setAction(R.string.ok) {
-                    requestPermissionLauncher.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                    requestStoragePermissionLauncher
+                        .launch(Manifest.permission.WRITE_EXTERNAL_STORAGE)
                 }.show()
             }
             else -> {
-                requestPermissionLauncher.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                requestStoragePermissionLauncher.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE)
             }
+        }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
+    private fun requestNotificationPermission() {
+        if (!isPermissionGranted(Manifest.permission.POST_NOTIFICATIONS) ||
+            shouldShowRequestPermissionRationale(Manifest.permission.POST_NOTIFICATIONS)
+        ) {
+            requestNotificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+        } else {
+            downloadMedia()
         }
     }
 
@@ -239,6 +307,12 @@ class MediaViewerFragment : BaseFragment() {
                 it.url,
                 it.type
             )
+
+            Toast.makeText(
+                requireContext(),
+                R.string.toast_download_started,
+                Toast.LENGTH_SHORT
+            ).show()
         }
     }
 
@@ -254,7 +328,7 @@ class MediaViewerFragment : BaseFragment() {
             viewerViewModel.loadMedia(args.link!!, args.type, true)
         } else {
             val link = arguments?.getString(BUNDLE_KEY_LINK)
-            val type = arguments?.getSerializable(BUNDLE_KEY_TYPE) as? MediaType
+            val type = arguments?.serializable<MediaType>(BUNDLE_KEY_TYPE)
             if (link != null && type != null) {
                 viewerViewModel.loadMedia(link, type, true)
             }
@@ -271,27 +345,48 @@ class MediaViewerFragment : BaseFragment() {
         MaterialAlertDialogBuilder(requireContext())
             .setTitle(R.string.dialog_media_not_found_title)
             .setMessage(R.string.dialog_media_not_found_body)
-            .setPositiveButton(R.string.dialog_ok) { _, _ -> onBackPressed() }
+            .setPositiveButton(R.string.dialog_ok) { _, _ -> dismiss() }
             .setCancelable(false)
             .show()
     }
 
     private fun showSystemBars(show: Boolean) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            activity?.window?.decorView?.showWindowInsets(show)
-        } else {
-            binding.root.showWindowInsets(show)
+        dialog?.window?.let { window ->
+            val windowInsetsController = WindowCompat.getInsetsController(window, window.decorView)
+
+            windowInsetsController.systemBarsBehavior =
+                WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+
+            if (show) {
+                windowInsetsController.show(WindowInsetsCompat.Type.systemBars())
+            } else {
+                windowInsetsController.hide(WindowInsetsCompat.Type.systemBars())
+            }
         }
     }
 
+    private fun showControls(show: Boolean) {
+        val duration = 250L
 
-    override fun onBackPressed() {
-        if (isLegacyNavigation) {
-            // Prevent onBackPressed event to be passed to PostDetailsFragment and show bottom nav
-            parentFragmentManager.popBackStack()
-        } else {
-            super.onBackPressed()
+        binding.run {
+            if (controls.isVisible != show) {
+                controls.showWithAlpha(show, duration)
+            }
+
+            if (viewerViewModel.isMultiMedia.value) {
+                if (pageCounter.isVisible != show) {
+                    pageCounter.showWithAlpha(show, duration)
+                }
+
+                if (listThumbnails.isVisible != show) {
+                    listThumbnails.showWithAlpha(show, duration)
+                }
+            }
         }
+    }
+
+    override fun getTheme(): Int {
+        return R.style.ThemeOverlay_App_BottomSheetDialog_MediaViewer
     }
 
     override fun onDestroyView() {

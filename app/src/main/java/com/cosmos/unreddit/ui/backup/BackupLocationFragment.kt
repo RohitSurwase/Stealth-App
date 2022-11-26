@@ -37,7 +37,7 @@ class BackupLocationFragment : BaseFragment() {
     )
 
     private val createDocument = registerForActivityResult(
-        ActivityResultContracts.CreateDocument(),
+        ActivityResultContracts.CreateDocument("application/json"),
         this::setUri
     )
 

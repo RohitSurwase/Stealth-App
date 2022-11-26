@@ -24,8 +24,8 @@ import com.cosmos.unreddit.data.model.db.Subscription
         PostEntity::class,
         Comment.CommentEntity::class
     ],
-    version = 2,
-    exportSchema = false
+    version = 3,
+    exportSchema = true
 )
 @TypeConverters(Converters::class)
 abstract class RedditDatabase : RoomDatabase() {
@@ -155,6 +155,15 @@ abstract class RedditDatabase : RoomDatabase() {
                     FOREIGN KEY(`profile_id`) REFERENCES `profile`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE 
                     )
                     """.trimIndent())
+            }
+        }
+
+        val MIGRATION_2_3 = object : Migration(2, 3) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                database.execSQL("CREATE INDEX IF NOT EXISTS `index_history_profile_id` ON `history` (`profile_id`)")
+                database.execSQL("CREATE INDEX IF NOT EXISTS `index_post_profile_id` ON `post` (`profile_id`)")
+                database.execSQL("CREATE INDEX IF NOT EXISTS `index_subscription_profile_id` ON `subscription` (`profile_id`)")
+                database.execSQL("CREATE INDEX IF NOT EXISTS `index_comment_profile_id` ON `comment` (`profile_id`)")
             }
         }
     }

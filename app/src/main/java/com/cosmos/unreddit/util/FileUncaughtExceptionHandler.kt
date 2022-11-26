@@ -27,6 +27,8 @@ class FileUncaughtExceptionHandler(
             uncaughtFolder.mkdir()
         }
 
+        throwable.printStackTrace()
+
         File(uncaughtFolder, filename).printWriter().use { pw ->
             throwable.printStackTrace(pw)
         }

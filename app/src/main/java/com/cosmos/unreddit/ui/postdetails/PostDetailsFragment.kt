@@ -3,11 +3,12 @@ package com.cosmos.unreddit.ui.postdetails
 import android.os.Bundle
 import android.view.Gravity
 import android.view.LayoutInflater
+import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
+import androidx.appcompat.widget.PopupMenu
 import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
-import androidx.fragment.app.FragmentTransaction
 import androidx.fragment.app.setFragmentResult
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
@@ -20,8 +21,6 @@ import androidx.transition.Slide
 import androidx.transition.TransitionManager
 import com.cosmos.unreddit.R
 import com.cosmos.unreddit.data.local.mapper.CommentMapper2
-import com.cosmos.unreddit.data.model.GalleryMedia
-import com.cosmos.unreddit.data.model.MediaType
 import com.cosmos.unreddit.data.model.Resource
 import com.cosmos.unreddit.data.model.db.PostEntity
 import com.cosmos.unreddit.data.repository.PostListRepository
@@ -33,11 +32,13 @@ import com.cosmos.unreddit.ui.base.BaseFragment
 import com.cosmos.unreddit.ui.commentmenu.CommentMenuFragment
 import com.cosmos.unreddit.ui.common.ElasticDragDismissFrameLayout
 import com.cosmos.unreddit.ui.loadstate.ResourceStateAdapter
-import com.cosmos.unreddit.ui.mediaviewer.MediaViewerFragment
 import com.cosmos.unreddit.ui.sort.SortFragment
 import com.cosmos.unreddit.util.extension.applyWindowInsets
 import com.cosmos.unreddit.util.extension.betterSmoothScrollToPosition
+import com.cosmos.unreddit.util.extension.clearCommentListener
+import com.cosmos.unreddit.util.extension.clearSortingListener
 import com.cosmos.unreddit.util.extension.launchRepeat
+import com.cosmos.unreddit.util.extension.parcelable
 import com.cosmos.unreddit.util.extension.setCommentListener
 import com.cosmos.unreddit.util.extension.setSortingListener
 import dagger.hilt.android.AndroidEntryPoint
@@ -50,9 +51,8 @@ import kotlinx.coroutines.runBlocking
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class PostDetailsFragment :
-    BaseFragment(),
-    ElasticDragDismissFrameLayout.ElasticDragDismissCallback {
+class PostDetailsFragment : BaseFragment(),
+    ElasticDragDismissFrameLayout.ElasticDragDismissCallback, PopupMenu.OnMenuItemClickListener {
 
     private var _binding: FragmentPostDetailsBinding? = null
     private val binding get() = _binding!!
@@ -125,7 +125,7 @@ class PostDetailsFragment :
         initAppBar()
         initRecyclerView()
 
-        val post = arguments?.getParcelable(KEY_POST_ENTITY) as? PostEntity
+        val post = arguments?.parcelable<PostEntity>(KEY_POST_ENTITY)
         post?.let {
             bindPost(it, true)
         }
@@ -220,6 +220,7 @@ class PostDetailsFragment :
         with(binding.appBar) {
             backCard.setOnClickListener { onBackPressed() }
             sortCard.setOnClickListener { showSortDialog() }
+            moreCard.setOnClickListener { showMenu() }
         }
     }
 
@@ -262,7 +263,7 @@ class PostDetailsFragment :
             viewModel.setPermalink(permalink)
         } else {
             if (arguments?.containsKey(KEY_POST_ENTITY) == true) {
-                val post = arguments?.getParcelable(KEY_POST_ENTITY) as? PostEntity
+                val post = arguments?.parcelable<PostEntity>(KEY_POST_ENTITY)
                 post?.let {
                     viewModel.setSorting(it.suggestedSorting)
                     viewModel.setPermalink(it.permalink)
@@ -299,16 +300,27 @@ class PostDetailsFragment :
         )
     }
 
-    private fun showMediaViewer(mediaViewerFragment: MediaViewerFragment) {
-        parentFragmentManager.beginTransaction()
-            .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
-            .add(R.id.fragment_container, mediaViewerFragment, MediaViewerFragment.TAG)
-            .addToBackStack(null)
-            .commit()
-    }
-
     private fun showNavigation(show: Boolean) {
         setFragmentResult(REQUEST_KEY_NAVIGATION, bundleOf(BUNDLE_KEY_NAVIGATION to show))
+    }
+
+    private fun showMenu() {
+        PopupMenu(requireContext(), binding.appBar.moreCard)
+            .apply {
+                menuInflater.inflate(R.menu.post_menu, this.menu)
+                setOnMenuItemClickListener(this@PostDetailsFragment)
+            }
+            .show()
+    }
+
+    override fun onMenuItemClick(item: MenuItem): Boolean {
+        when (item.itemId) {
+            R.id.refresh -> viewModel.loadPost(true)
+            else -> {
+                return false
+            }
+        }
+        return true
     }
 
     override fun onBackPressed() {
@@ -330,6 +342,8 @@ class PostDetailsFragment :
 
     override fun onDestroyView() {
         super.onDestroyView()
+        clearSortingListener()
+        clearCommentListener()
         _binding = null
         commentAdapter.cleanUp()
     }
@@ -346,14 +360,6 @@ class PostDetailsFragment :
 
     override fun onDragDismissed() {
         onBackPressed()
-    }
-
-    override fun openGallery(images: List<GalleryMedia>) {
-        showMediaViewer(MediaViewerFragment.newInstance(images))
-    }
-
-    override fun openMedia(link: String, mediaType: MediaType) {
-        showMediaViewer(MediaViewerFragment.newInstance(link, mediaType))
     }
 
     companion object {

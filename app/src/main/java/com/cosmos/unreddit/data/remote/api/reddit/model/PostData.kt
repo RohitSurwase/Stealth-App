@@ -126,8 +126,8 @@ data class PostData(
     @Json(name = "is_video")
     val isVideo: Boolean
 ) {
-    val mediaType: MediaType =
-        when {
+    val mediaType: MediaType
+        get() = when {
             isSelf -> MediaType.NO_MEDIA
             isRedditGallery == true -> MediaType.REDDIT_GALLERY
             isVideo -> {
@@ -176,8 +176,8 @@ data class PostData(
             else -> MediaType.LINK
         }
 
-    val mediaUrl: String =
-        when (mediaType) {
+    val mediaUrl: String
+        get() = when (mediaType) {
             MediaType.REDDIT_VIDEO, MediaType.REDDIT_GIF -> {
                 crossposts?.firstOrNull()?.mediaUrl
                     ?: media?.redditVideoPreview?.fallbackUrl
@@ -196,8 +196,8 @@ data class PostData(
             else -> url
         } ?: url
 
-    val postType: PostType =
-        when (mediaType) {
+    val postType: PostType
+        get() = when (mediaType) {
             MediaType.NO_MEDIA -> PostType.TEXT
 
             MediaType.REDDIT_VIDEO,
@@ -219,24 +219,25 @@ data class PostData(
             else -> PostType.LINK
         }
 
-    val previewUrl: String? =
-        mediaPreview?.images?.getOrNull(0)?.imageSource?.url
-            ?: mediaMetadata?.items?.getOrNull(0)?.image?.url
-            ?: mediaMetadata?.items?.getOrNull(0)?.previews?.lastOrNull()?.url
-            // Keep URL only if it's an image
-            ?: url.takeIf { postType != PostType.LINK || it.mimeType.startsWith("image") }
-
     // Reddit's API provides two lists of gallery items:
     // - gallery_data which is ordered but only contains IDs and captions
     // - media_metadata which contains all the URLs but is unordered
     // Therefore, we need to map the IDs from gallery_data with the URLs from media_metadata
     // to have an ordered list of items
-    val gallery: List<GalleryMedia> =
-        galleryData?.items?.mapNotNull { galleryDataItem ->
+    val gallery: List<GalleryMedia>
+        get() = galleryData?.items?.mapNotNull { galleryDataItem ->
             mediaMetadata?.items?.find { galleryItem ->
                 galleryItem.id == galleryDataItem.mediaId
             }?.let { item ->
                 item.image?.media
             }
         } ?: emptyList()
+
+    val previewUrl: String?
+        get() = mediaPreview?.images?.getOrNull(0)?.imageSource?.url
+            ?: gallery.firstOrNull()?.url
+            ?: mediaMetadata?.items?.getOrNull(0)?.image?.url
+            ?: mediaMetadata?.items?.getOrNull(0)?.previews?.lastOrNull()?.url
+            // Keep URL only if it's an image
+            ?: url.takeIf { postType != PostType.LINK || it.mimeType.startsWith("image") }
 }

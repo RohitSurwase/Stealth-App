@@ -23,6 +23,6 @@ data class History(
     @ColumnInfo(name = "time")
     val time: Long,
 
-    @ColumnInfo(name = "profile_id")
+    @ColumnInfo(name = "profile_id", index = true)
     val profileId: Int
 )

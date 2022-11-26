@@ -54,6 +54,10 @@ class CradleView @JvmOverloads constructor(
         unregisterCallback()
     }
 
+    fun reset() {
+        cradleDrawable?.setVisible(isVisible, true)
+    }
+
     private fun registerCallback() {
         cradleDrawable?.registerAnimationCallback(callback)
     }

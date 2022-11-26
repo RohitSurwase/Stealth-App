@@ -7,6 +7,7 @@ import androidx.activity.OnBackPressedCallback
 import androidx.activity.addCallback
 import androidx.browser.customtabs.CustomTabsIntent
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentManager
 import androidx.navigation.NavDirections
 import androidx.navigation.NavOptions
 import androidx.navigation.fragment.findNavController
@@ -17,6 +18,7 @@ import com.cosmos.unreddit.data.model.MediaType
 import com.cosmos.unreddit.data.model.db.PostEntity
 import com.cosmos.unreddit.ui.common.widget.RedditView
 import com.cosmos.unreddit.ui.linkmenu.LinkMenuFragment
+import com.cosmos.unreddit.ui.mediaviewer.MediaViewerFragment
 import com.cosmos.unreddit.ui.postdetails.PostDetailsFragment
 import com.cosmos.unreddit.ui.postlist.PostListAdapter
 import com.cosmos.unreddit.ui.postmenu.PostMenuFragment
@@ -69,7 +71,11 @@ open class BaseFragment : Fragment(), PostListAdapter.PostClickListener,
     }
 
     override fun onClick(post: PostEntity) {
-        parentFragmentManager.beginTransaction()
+        onClick(parentFragmentManager, post)
+    }
+
+    protected open fun onClick(fragmentManager: FragmentManager, post: PostEntity) {
+        fragmentManager.beginTransaction()
             .setCustomAnimations(
                 R.anim.nav_enter_anim,
                 R.anim.nav_exit_anim,
@@ -159,11 +165,15 @@ open class BaseFragment : Fragment(), PostListAdapter.PostClickListener,
     }
 
     open fun openGallery(images: List<GalleryMedia>) {
-        navigate(NavigationGraphDirections.openGallery(images.toTypedArray()))
+        MediaViewerFragment.newInstance(images).run {
+            show(this@BaseFragment.parentFragmentManager, MediaViewerFragment.TAG)
+        }
     }
 
     open fun openMedia(link: String, mediaType: MediaType) {
-        navigate(NavigationGraphDirections.openMedia(link, mediaType))
+        MediaViewerFragment.newInstance(link, mediaType).run {
+            show(this@BaseFragment.parentFragmentManager, MediaViewerFragment.TAG)
+        }
     }
 
     open fun openSubreddit(subreddit: String) {
@@ -175,7 +185,11 @@ open class BaseFragment : Fragment(), PostListAdapter.PostClickListener,
     }
 
     open fun openRedditLink(link: String) {
-        navigate(Uri.parse(link))
+        try {
+            navigate(Uri.parse(link))
+        } catch (e: IllegalArgumentException) {
+            openBrowser(link)
+        }
     }
 
     open fun openBrowser(link: String) {

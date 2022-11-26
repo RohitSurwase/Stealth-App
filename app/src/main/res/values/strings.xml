@@ -1,6 +1,11 @@
 <resources>
     <string name="app_name">Stealth</string>
+    <string name="app_version_name" translatable="false">Blackbird</string>
     <string name="app_description">An account-free, privacy-oriented, feature-rich Reddit client</string>
+
+    <string name="gitlab_link" translatable="false">https://gitlab.com/cosmosapps/stealth</string>
+    <string name="matrix_link" translatable="false">https://matrix.to/#/#stealth-app:matrix.org</string>
+    <string name="email" translatable="false">cosmos.dev@protonmail.com</string>
 
     <string name="ok">OK</string>
 
@@ -207,6 +212,8 @@
     <string name="snackbar_permission_storage_request_message">Permission to write to external storage is required</string>
     <string name="snackbar_permission_storage_denied_message">Permission to write to external storage was denied</string>
 
+    <string name="toast_download_started">Download in progress…</string>
+
     <string name="fragment_backup_label">Import/Export</string>
 
     <string name="backup_operation_backup">Backup</string>
@@ -232,4 +239,12 @@
 
     <string name="shelf_card_transition_name" translatable="false">shelf_transition_%1$d</string>
     <string name="post_list_transition_name" translatable="false">post_list_transition</string>
+
+    <string name="menu_search">Search</string>
+    <string name="menu_sidebar">Sidebar</string>
+    <string name="menu_refresh">Refresh</string>
+
+    <string name="last_refresh">Last refresh: %s</string>
+
+    <string name="toast_clipboard_copied_email">Email copied to clipboard</string>
 </resources>

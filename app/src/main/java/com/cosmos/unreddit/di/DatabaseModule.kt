@@ -20,6 +20,7 @@ object DatabaseModule {
         return Room.databaseBuilder(context, RedditDatabase::class.java, "reddit_db")
             .addCallback(RedditDatabase.Callback())
             .addMigrations(RedditDatabase.MIGRATION_1_2)
+            .addMigrations(RedditDatabase.MIGRATION_2_3)
             .build()
     }
 }

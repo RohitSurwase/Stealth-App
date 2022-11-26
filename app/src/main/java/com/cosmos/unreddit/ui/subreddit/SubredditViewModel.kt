@@ -25,13 +25,14 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.dropWhile
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.take
@@ -65,7 +66,8 @@ class SubredditViewModel @Inject constructor(
     private val _isDescriptionCollapsed = MutableStateFlow(true)
     val isDescriptionCollapsed: StateFlow<Boolean> = _isDescriptionCollapsed
 
-    var contentLayoutState: Int? = null
+    var contentLayoutProgress: Float? = null
+    var drawerContentLayoutProgress: Float? = null
 
     val isSubscribed: StateFlow<Boolean> = combine(
         _subreddit,
@@ -107,11 +109,15 @@ class SubredditViewModel @Inject constructor(
         Data.User(history, saved, prefs)
     }
 
+    private val _lastRefresh: MutableStateFlow<Long> = MutableStateFlow(System.currentTimeMillis())
+    val lastRefresh: StateFlow<Long> = _lastRefresh.asStateFlow()
+
     init {
         postDataFlow = searchData
             .dropWhile { it.query.isBlank() }
             .flatMapLatest { searchData -> userData.take(1).map { searchData to it } }
             .flatMapLatest { data -> getPosts(data.first, data.second) }
+            .onEach { _lastRefresh.value = System.currentTimeMillis() }
             .cachedIn(viewModelScope)
     }
 

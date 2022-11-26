@@ -27,4 +27,39 @@
         android:textAppearance="@style/TextAppearanceAppBarLabel"
         android:text="@string/fragment_about_label"/>
 
+    <ImageButton
+        android:id="@+id/button_gitlab"
+        android:layout_width="@dimen/app_bar_button_size"
+        android:layout_height="@dimen/app_bar_button_size"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginEnd="@dimen/app_bar_margin"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        app:srcCompat="@drawable/ic_gitlab"/>
+
+    <ImageButton
+        android:id="@+id/button_matrix"
+        android:layout_width="@dimen/app_bar_button_size"
+        android:layout_height="@dimen/app_bar_button_size"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/button_gitlab"
+        android:layout_marginEnd="@dimen/app_bar_margin"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        app:srcCompat="@drawable/ic_matrix"/>
+
+    <ImageButton
+        android:id="@+id/button_mail"
+        android:layout_width="@dimen/app_bar_button_size"
+        android:layout_height="@dimen/app_bar_button_size"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/button_matrix"
+        android:layout_marginEnd="@dimen/app_bar_margin"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        app:srcCompat="@drawable/ic_mail"/>
+
+    <!--  Mail  -->
+
 </androidx.constraintlayout.widget.ConstraintLayout>

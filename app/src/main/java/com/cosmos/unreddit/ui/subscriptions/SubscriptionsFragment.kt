@@ -10,18 +10,14 @@ import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.flowWithLifecycle
 import androidx.lifecycle.lifecycleScope
-import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.cosmos.unreddit.NavigationGraphDirections
-import com.cosmos.unreddit.R
-import com.cosmos.unreddit.UiViewModel
 import com.cosmos.unreddit.databinding.FragmentSubscriptionsBinding
 import com.cosmos.unreddit.ui.base.BaseFragment
 import com.cosmos.unreddit.util.SearchUtil
 import com.cosmos.unreddit.util.extension.applyWindowInsets
 import com.cosmos.unreddit.util.extension.hideSoftKeyboard
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
@@ -31,7 +27,6 @@ class SubscriptionsFragment : BaseFragment() {
     private val binding get() = _binding!!
 
     override val viewModel: SubscriptionsViewModel by activityViewModels()
-    private val uiViewModel: UiViewModel by activityViewModels()
 
     private lateinit var subscriptionsAdapter: SubscriptionsAdapter
 
@@ -46,12 +41,6 @@ class SubscriptionsFragment : BaseFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        findNavController().addOnDestinationChangedListener { _, destination, _ ->
-            when (destination.id) {
-                R.id.subscriptionsFragment -> uiViewModel.setNavigationVisibility(true)
-                else -> uiViewModel.setNavigationVisibility(false)
-            }
-        }
         initAppBar()
         initRecyclerView()
         bindViewModel()
@@ -121,7 +110,7 @@ class SubscriptionsFragment : BaseFragment() {
     private fun showSearchFragment(query: String) {
         binding.appBar.searchInput.hideSoftKeyboard()
 
-        navigate(SubscriptionsFragmentDirections.search(query))
+        navigate(SubscriptionsFragmentDirections.openSearch(query))
 
         binding.appBar.searchInput.clear()
     }

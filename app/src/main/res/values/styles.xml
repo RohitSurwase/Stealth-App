@@ -22,14 +22,15 @@
 
         <item name="materialAlertDialogTheme">@style/MaterialAlertDialogTheme</item>
         <item name="bottomSheetDialogTheme">@style/ThemeOverlay.App.BottomSheetDialog</item>
+        <item name="popupMenuStyle">@style/Widget.App.PopupMenu</item>
     </style>
 
     <style name="AppTheme" parent="BaseTheme"/>
 
-    <style name="AppTheme.Launcher">
-        <item name="android:windowTranslucentNavigation">true</item>
-        <item name="android:windowTranslucentStatus">true</item>
-        <item name="android:windowBackground">@drawable/launch_screen</item>
+    <style name="AppTheme.Launcher" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">@color/background</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/ic_launcher_foreground</item>
+        <item name="postSplashScreenTheme">@style/AppTheme</item>
     </style>
 
     <style name="CardStyle" parent="Widget.MaterialComponents.CardView">
@@ -51,14 +52,24 @@
         <item name="android:fontFamily">@font/stealth_medium</item>
     </style>
 
-    <!-- Post Details -->
     <style name="ThemeOverlay.App.BottomSheetDialog" parent="ThemeOverlay.MaterialComponents.BottomSheetDialog">
         <item name="bottomSheetStyle">@style/Widget.BottomSheetDialog</item>
+    </style>
+
+    <style name="ThemeOverlay.App.BottomSheetDialog.MediaViewer" parent="ThemeOverlay.App.BottomSheetDialog">
+        <item name="bottomSheetStyle">@style/Widget.BottomSheetDialog.MediaViewer</item>
+        <item name="paddingTopSystemWindowInsets">true</item>
+        <item name="paddingBottomSystemWindowInsets">false</item>
+        <item name="enableEdgeToEdge">false</item>
     </style>
 
     <style name="Widget.BottomSheetDialog" parent="Widget.MaterialComponents.BottomSheet.Modal">
         <item name="shapeAppearanceOverlay">@style/ShapeAppearance.BottomSheetDialog</item>
         <item name="backgroundTint">?attr/colorSurface</item>
+    </style>
+
+    <style name="Widget.BottomSheetDialog.MediaViewer" parent="Widget.BottomSheetDialog">
+        <item name="backgroundTint">@color/black</item>
     </style>
 
     <style name="ShapeAppearance.BottomSheetDialog" parent="ShapeAppearance.MaterialComponents.LargeComponent">
@@ -442,4 +453,17 @@
         <item name="android:textColor">@android:color/white</item>
     </style>
 
+    <style name="Widget.TextView.MediaCounter" parent="Widget.MaterialComponents.TextView">
+        <item name="android:textColor">@color/white</item>
+    </style>
+
+    <style name="Widget.App.PopupMenu" parent="Widget.MaterialComponents.PopupMenu">
+        <item name="android:popupBackground">@drawable/popup_menu_background</item>
+    </style>
+
+    <style name="Widget.TextView.Refresh" parent="Widget.MaterialComponents.TextView">
+        <item name="android:textSize">12sp</item>
+        <item name="android:textColor">@color/text_color_secondary</item>
+        <item name="android:gravity">center</item>
+    </style>
 </resources>

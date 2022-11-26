@@ -21,10 +21,10 @@ import com.cosmos.unreddit.databinding.FragmentProfileManagerBinding
 import com.cosmos.unreddit.ui.common.CarouselPageTransformer
 import com.cosmos.unreddit.util.extension.doAndDismiss
 import com.cosmos.unreddit.util.extension.getRecyclerView
+import com.cosmos.unreddit.util.extension.parcelable
 import com.cosmos.unreddit.util.extension.text
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
@@ -41,7 +41,7 @@ class ProfileManagerDialogFragment : DialogFragment(), ProfileManagerAdapter.Pro
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        currentProfile = arguments?.getParcelable(KEY_CURRENT_PROFILE) as? Profile
+        currentProfile = arguments?.parcelable(KEY_CURRENT_PROFILE)
     }
 
     override fun onCreateView(
@@ -86,7 +86,9 @@ class ProfileManagerDialogFragment : DialogFragment(), ProfileManagerAdapter.Pro
     }
 
     private fun showAddProfileDialog() {
-        val profileBinding = DialogAddProfileBinding.inflate(layoutInflater)
+        val profileBinding = DialogAddProfileBinding.inflate(
+            requireActivity().layoutInflater
+        )
         MaterialAlertDialogBuilder(requireContext())
             .setView(profileBinding.root)
             .setTitle(R.string.dialog_create_profile_title)
@@ -113,7 +115,9 @@ class ProfileManagerDialogFragment : DialogFragment(), ProfileManagerAdapter.Pro
     }
 
     private fun showRenameProfileDialog(profile: Profile) {
-        val profileBinding = DialogAddProfileBinding.inflate(layoutInflater).apply {
+        val profileBinding = DialogAddProfileBinding.inflate(
+            requireActivity().layoutInflater
+        ).apply {
             inputName.editText?.setText(profile.name)
         }
         MaterialAlertDialogBuilder(requireContext())

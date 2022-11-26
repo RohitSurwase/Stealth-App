@@ -16,6 +16,8 @@ import com.cosmos.unreddit.data.model.Comment
 import com.cosmos.unreddit.databinding.FragmentCommentMenuBinding
 import com.cosmos.unreddit.util.extension.doAndDismiss
 import com.cosmos.unreddit.util.extension.openExternalLink
+import com.cosmos.unreddit.util.extension.parcelable
+import com.cosmos.unreddit.util.extension.serializable
 import com.cosmos.unreddit.util.extension.shareExternalLink
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 
@@ -36,10 +38,10 @@ class CommentMenuFragment : BottomSheetDialogFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val type = arguments?.getSerializable(BUNDLE_KEY_TYPE) as? MenuType ?: MenuType.DETAILS
+        val type = arguments?.serializable(BUNDLE_KEY_TYPE) ?: MenuType.DETAILS
         binding.type = type
 
-        val comment = arguments?.getParcelable(BUNDLE_KEY_COMMENT) as? Comment.CommentEntity
+        val comment = arguments?.parcelable<Comment.CommentEntity>(BUNDLE_KEY_COMMENT)
         comment?.let {
             binding.comment = it
 

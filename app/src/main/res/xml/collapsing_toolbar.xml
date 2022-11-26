@@ -8,7 +8,7 @@
 
         <OnSwipe
             app:dragDirection="dragUp"
-            app:touchAnchorId="@id/list_post"
+            app:touchAnchorId="@id/pull_refresh"
             app:touchAnchorSide="top" />
 
     </Transition>

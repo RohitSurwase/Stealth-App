@@ -1,3 +1,25 @@
+# 2.0.0 - 2022/11/26
+
+This includes changes from previous alpha versions.
+
+### Added
+- Teddit API: choose between Reddit official API and Teddit API to fetch data (experimental)
+- Amoled theme
+- Import/Export feature: back up and restore data from Stealth or Reddit
+- Profile Switcher on home screen
+- Pull to refresh
+- Support for more than 100 subscriptions
+
+### Changed
+- Improved performances
+- Various UI improvements
+
+### Removed
+- In-app browser: replace with CustomTab
+
+### Fixed
+- Some crashes and UI bugs
+
 # 2.0.0-alpha04 - 2022/09/10
 
 ### Added

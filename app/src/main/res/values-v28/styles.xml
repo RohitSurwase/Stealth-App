@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="ThemeOverlay.App.BottomSheetDialog.MediaViewer" parent="ThemeOverlay.App.BottomSheetDialog">
+        <item name="bottomSheetStyle">@style/Widget.BottomSheetDialog.MediaViewer</item>
+        <item name="paddingTopSystemWindowInsets">true</item>
+        <item name="paddingBottomSystemWindowInsets">false</item>
+        <item name="enableEdgeToEdge">false</item>
+        <item name="android:windowLayoutInDisplayCutoutMode">shortEdges</item>
+    </style>
+</resources>

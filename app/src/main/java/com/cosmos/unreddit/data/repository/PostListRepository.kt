@@ -17,12 +17,15 @@ import com.cosmos.unreddit.data.remote.api.reddit.model.Listing
 import com.cosmos.unreddit.data.remote.api.reddit.model.MoreChildren
 import com.cosmos.unreddit.data.remote.api.reddit.source.CurrentSource
 import com.cosmos.unreddit.data.remote.datasource.CommentsDataSource
-import com.cosmos.unreddit.data.remote.datasource.PostListDataSource
 import com.cosmos.unreddit.data.remote.datasource.SearchPostDataSource
 import com.cosmos.unreddit.data.remote.datasource.SearchSubredditDataSource
 import com.cosmos.unreddit.data.remote.datasource.SearchUserDataSource
+import com.cosmos.unreddit.data.remote.datasource.SmartPostListDataSource
 import com.cosmos.unreddit.data.remote.datasource.SubredditSearchPostDataSource
 import com.cosmos.unreddit.data.remote.datasource.UserPostsDataSource
+import com.cosmos.unreddit.di.DispatchersModule.DefaultDispatcher
+import com.cosmos.unreddit.di.DispatchersModule.MainImmediateDispatcher
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flow
@@ -32,7 +35,9 @@ import javax.inject.Singleton
 @Singleton
 class PostListRepository @Inject constructor(
     private val source: CurrentSource,
-    private val redditDatabase: RedditDatabase
+    private val redditDatabase: RedditDatabase,
+    @DefaultDispatcher private val defaultDispatcher: CoroutineDispatcher,
+    @MainImmediateDispatcher private val mainImmediateDispatcher: CoroutineDispatcher
 ) {
 
     fun getPost(permalink: String, sorting: Sorting): Flow<List<Listing>> = flow {
@@ -51,7 +56,29 @@ class PostListRepository @Inject constructor(
         pageSize: Int = DEFAULT_LIMIT
     ): Flow<PagingData<Child>> {
         return Pager(PagingConfig(pageSize = pageSize)) {
-            PostListDataSource(source, subreddit, sorting)
+            SmartPostListDataSource(
+                source,
+                listOf(subreddit),
+                sorting,
+                defaultDispatcher,
+                mainImmediateDispatcher
+            )
+        }.flow
+    }
+
+    fun getPosts(
+        subreddit: List<String>,
+        sorting: Sorting,
+        pageSize: Int = DEFAULT_LIMIT
+    ): Flow<PagingData<Child>> {
+        return Pager(PagingConfig(pageSize = pageSize)) {
+            SmartPostListDataSource(
+                source,
+                subreddit,
+                sorting,
+                defaultDispatcher,
+                mainImmediateDispatcher
+            )
         }.flow
     }
 
