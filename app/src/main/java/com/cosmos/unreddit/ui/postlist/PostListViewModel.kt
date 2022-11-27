@@ -27,6 +27,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.distinctUntilChangedBy
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
@@ -50,9 +51,16 @@ class PostListViewModel
     private val _sorting: MutableStateFlow<Sorting> = MutableStateFlow(DEFAULT_SORTING)
     val sorting: StateFlow<Sorting> = _sorting
 
-    val subreddit: Flow<List<String>> = subscriptionsNames.map {
-        it.ifEmpty { listOf(DEFAULT_SUBREDDIT) }
-    }.distinctUntilChanged()
+    val subreddit: Flow<List<String>> = subscriptionsNames
+        .distinctUntilChanged()
+        .map { subscriptions ->
+            if (subscriptions.isNotEmpty()) {
+                subscriptions.shuffled()
+            } else {
+                listOf(DEFAULT_SUBREDDIT)
+            }
+        }
+        .flowOn(defaultDispatcher)
 
     val postDataFlow: Flow<PagingData<PostEntity>>
 
