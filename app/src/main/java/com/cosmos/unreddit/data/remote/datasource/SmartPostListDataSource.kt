@@ -112,6 +112,8 @@ class SmartPostListDataSource(
         return when(sorting.generalSorting) {
             // If sorting is set to NEW, simply flatten the lists and sort the posts by date
             Sort.NEW -> this.flatten().sortedByDescending { (it as PostChild).data.created }
+            // If sorting is set to TOP, simply flatten the lists and sort the posts by score
+            Sort.TOP -> this.flatten().sortedByDescending { (it as PostChild).data.score }
             // For all the other sorting methods, interlace the lists to have a consistent result
             // [['a', 'b', 'c'], ['e', 'f', 'g'], ['h', 'i']] ==> ['a', 'e', 'h', 'b', 'f', 'i', 'c', 'g']
             else -> this.interlace()
