@@ -11,7 +11,7 @@ import com.cosmos.unreddit.util.RedditUtil
 import com.cosmos.unreddit.util.extension.interlace
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.withContext
@@ -27,7 +27,7 @@ class SmartPostListDataSource(
     mainImmediateDispatcher: CoroutineDispatcher
 ) : PagingSource<List<String>, Child>() {
 
-    private val scope = CoroutineScope(mainImmediateDispatcher + Job())
+    private val scope = CoroutineScope(mainImmediateDispatcher + SupervisorJob())
 
     private val joinedQuery by lazy { RedditUtil.joinSubredditList(query) }
     private val chunkSize by lazy {
