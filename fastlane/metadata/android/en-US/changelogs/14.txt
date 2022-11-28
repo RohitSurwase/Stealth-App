@@ -1,0 +1,6 @@
+Changed
+- Better sorting when having more than 100 subscriptions
+
+Fixed
+- Endless loading in case of errors
+- Padding on home screen
