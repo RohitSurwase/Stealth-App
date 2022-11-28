@@ -29,6 +29,7 @@ import com.cosmos.unreddit.ui.loadstate.NetworkLoadStateAdapter
 import com.cosmos.unreddit.ui.sort.SortFragment
 import com.cosmos.unreddit.util.DateUtil
 import com.cosmos.unreddit.util.extension.applyMarginWindowInsets
+import com.cosmos.unreddit.util.extension.applyWindowInsets
 import com.cosmos.unreddit.util.extension.betterSmoothScrollToPosition
 import com.cosmos.unreddit.util.extension.clearNavigationListener
 import com.cosmos.unreddit.util.extension.clearSortingListener
@@ -251,6 +252,7 @@ class PostListFragment : BaseFragment(), PullToRefreshLayout.OnRefreshListener {
         }
 
         binding.listPost.apply {
+            applyWindowInsets(left = false, top = false, right = false)
             layoutManager = LinearLayoutManager(requireContext())
             adapter = postListAdapter.withLoadStateHeaderAndFooter(
                 header = NetworkLoadStateAdapter { postListAdapter.retry() },
