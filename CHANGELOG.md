@@ -1,3 +1,12 @@
+# 2.0.1 - 2022/11/28
+
+### Changed
+- Better sorting when having more than 100 subscriptions
+
+### Fixed
+- Endless loading in case of errors
+- Padding on home screen
+
 # 2.0.0 - 2022/11/26
 
 This includes changes from previous alpha versions.
