@@ -28,15 +28,16 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChangedBy
 import kotlinx.coroutines.flow.dropWhile
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.launch
 import retrofit2.HttpException
 import java.io.IOException
@@ -71,7 +72,7 @@ class UserViewModel @Inject constructor(
 
     private val savedCommentIds: Flow<List<String>> = currentProfile.flatMapLatest {
         repository.getSavedCommentIds(it.id)
-    }
+    }.shareIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 1)
 
     val postDataFlow: Flow<PagingData<PostEntity>>
     val commentDataFlow: Flow<PagingData<Comment>>
@@ -87,6 +88,8 @@ class UserViewModel @Inject constructor(
         Data.Fetch("", DEFAULT_SORTING)
     )
 
+    private var latestUser: Data.User? = null
+
     private val userData: Flow<Data.User> = combine(
         historyIds,
         savedPostIds,
@@ -94,11 +97,15 @@ class UserViewModel @Inject constructor(
         savedCommentIds
     ) { history, saved, prefs, savedComments ->
         Data.User(history, saved, prefs, savedComments)
+    }.onEach {
+        latestUser = it
+    }.distinctUntilChangedBy {
+        it.contentPreferences
     }
 
     val data: Flow<Pair<Data.Fetch, Data.User>> = searchData
         .dropWhile { it.query.isBlank() }
-        .flatMapLatest { searchData -> userData.take(1).map { searchData to it } }
+        .flatMapLatest { searchData -> userData.map { searchData to it } }
 
     init {
         postDataFlow = data
@@ -116,7 +123,7 @@ class UserViewModel @Inject constructor(
     ): Flow<PagingData<PostEntity>> {
         return repository.getUserPosts(data.query, data.sorting)
             .map { pagingData ->
-                PostUtil.filterPosts(pagingData, user, postMapper, defaultDispatcher)
+                PostUtil.filterPosts(pagingData, latestUser ?: user, postMapper, defaultDispatcher)
             }
     }
 
@@ -131,7 +138,7 @@ class UserViewModel @Inject constructor(
                     .map { comment ->
                         comment.apply {
                             (this as? Comment.CommentEntity)?.saved =
-                                user.savedComments?.contains(this.name) ?: false
+                                (latestUser ?: user).savedComments?.contains(this.name) ?: false
                         }
                     }
             }
