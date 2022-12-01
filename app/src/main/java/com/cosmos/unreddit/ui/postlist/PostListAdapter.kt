@@ -87,8 +87,7 @@ class PostListAdapter(
                 if (isLong) {
                     postClickListener.onLongClick(it)
                 } else {
-                    it.seen = true
-                    notifyItemChanged(position, it)
+                    setPostSeen(position, it)
                     postClickListener.onClick(it)
                 }
             }
@@ -96,6 +95,7 @@ class PostListAdapter(
 
         override fun onMediaClick(position: Int) {
             getItem(position)?.let {
+                setPostSeen(position, it)
                 when (it.type) {
                     PostType.IMAGE -> postClickListener.onImageClick(it)
                     PostType.LINK -> postClickListener.onLinkClick(it)
@@ -194,6 +194,11 @@ class PostListAdapter(
             val item = getItem(position) ?: return
             (holder as? PostViewHolder)?.update(item)
         }
+    }
+
+    private fun setPostSeen(position: Int, post: PostEntity) {
+        post.seen = true
+        notifyItemChanged(position, post)
     }
 
     companion object {
