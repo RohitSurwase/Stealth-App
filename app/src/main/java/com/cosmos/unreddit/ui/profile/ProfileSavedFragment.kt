@@ -17,6 +17,7 @@ import com.cosmos.unreddit.ui.commentmenu.CommentMenuFragment
 import com.cosmos.unreddit.ui.common.fragment.ListFragment
 import com.cosmos.unreddit.ui.postdetails.PostDetailsFragment
 import com.cosmos.unreddit.ui.user.UserCommentsAdapter
+import com.cosmos.unreddit.util.extension.currentNavigationFragment
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
@@ -68,15 +69,17 @@ class ProfileSavedFragment : ListFragment<ProfileSavedAdapter>(),
     }
 
     override fun onClick(comment: Comment.CommentEntity) {
-        parentFragmentManager.beginTransaction()
-            .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
-            .add(
+        activity?.currentNavigationFragment
+            ?.parentFragmentManager
+            ?.beginTransaction()
+            ?.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
+            ?.add(
                 R.id.fragment_container,
                 PostDetailsFragment.newInstance(comment.permalink),
                 PostDetailsFragment.TAG
             )
-            .addToBackStack(null)
-            .commit()
+            ?.addToBackStack(null)
+            ?.commit()
     }
 
     override fun onLongClick(comment: Comment.CommentEntity) {
