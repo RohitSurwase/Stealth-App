@@ -27,6 +27,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChangedBy
@@ -74,6 +75,14 @@ class UserViewModel @Inject constructor(
         repository.getSavedCommentIds(it.id)
     }.shareIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 1)
 
+    private val _lastRefreshPost: MutableStateFlow<Long> =
+        MutableStateFlow(System.currentTimeMillis())
+    val lastRefreshPost: StateFlow<Long> = _lastRefreshPost.asStateFlow()
+
+    private val _lastRefreshComment: MutableStateFlow<Long> =
+        MutableStateFlow(System.currentTimeMillis())
+    val lastRefreshComment: StateFlow<Long> = _lastRefreshComment.asStateFlow()
+
     val postDataFlow: Flow<PagingData<PostEntity>>
     val commentDataFlow: Flow<PagingData<Comment>>
 
@@ -110,10 +119,12 @@ class UserViewModel @Inject constructor(
     init {
         postDataFlow = data
             .flatMapLatest { data -> getPosts(data.first, data.second) }
+            .onEach { _lastRefreshPost.value = System.currentTimeMillis() }
             .cachedIn(viewModelScope)
 
         commentDataFlow = data
             .flatMapLatest { data -> getComments(data.first, data.second) }
+            .onEach { _lastRefreshComment.value = System.currentTimeMillis() }
             .cachedIn(viewModelScope)
     }
 
