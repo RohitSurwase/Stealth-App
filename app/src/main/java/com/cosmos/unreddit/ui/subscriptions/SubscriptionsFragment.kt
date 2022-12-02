@@ -128,6 +128,7 @@ class SubscriptionsFragment : BaseFragment() {
     override fun onBackPressed() {
         if (binding.appBar.searchInput.isVisible) {
             showSearchInput(false)
+            binding.appBar.searchInput.clear()
         } else {
             super.onBackPressed()
         }
