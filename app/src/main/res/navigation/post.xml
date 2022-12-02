@@ -41,6 +41,14 @@
             android:id="@+id/deepLinkShort2"
             app:uri="redd.it/{id}/"/>
 
+        <deepLink
+            android:id="@+id/deepLinkGallery"
+            app:uri=".*.reddit.com/gallery/{id}"/>
+
+        <deepLink
+            android:id="@+id/deepLinkGallery2"
+            app:uri=".*.reddit.com/gallery/{id}/"/>
+
         <argument
             android:name="subreddit"
             android:defaultValue="@null"
