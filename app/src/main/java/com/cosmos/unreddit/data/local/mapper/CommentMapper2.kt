@@ -12,6 +12,7 @@ import com.cosmos.unreddit.data.remote.api.reddit.model.MoreChild
 import com.cosmos.unreddit.data.remote.api.reddit.model.MoreData
 import com.cosmos.unreddit.data.remote.api.reddit.model.PostData
 import com.cosmos.unreddit.di.DispatchersModule
+import com.cosmos.unreddit.util.CommentUtil
 import com.cosmos.unreddit.util.HtmlParser
 import com.cosmos.unreddit.util.extension.toMillis
 import kotlinx.coroutines.CoroutineDispatcher
@@ -58,7 +59,7 @@ class CommentMapper2 @Inject constructor(
                 linkPermalink ?: parent?.permalink,
                 linkAuthor ?: parent?.author,
                 subreddit,
-                commentIndicator,
+                CommentUtil.getCommentIndicator(depth),
                 name,
                 depth ?: 0
             )
@@ -72,6 +73,7 @@ class CommentMapper2 @Inject constructor(
                 children,
                 id,
                 parentId,
+                CommentUtil.getCommentIndicator(depth),
                 name,
                 depth ?: 0
             )

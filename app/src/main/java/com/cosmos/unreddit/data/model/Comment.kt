@@ -17,6 +17,7 @@ sealed class Comment {
 
     abstract val name: String
     abstract val depth: Int
+    abstract val commentIndicator: Int?
 
     @Parcelize
     @Entity(
@@ -90,7 +91,7 @@ sealed class Comment {
         val subreddit: String,
 
         @Ignore
-        val commentIndicator: Int? = null,
+        override val commentIndicator: Int? = null,
 
         @ColumnInfo(name = "name")
         override val name: String,
@@ -138,6 +139,8 @@ sealed class Comment {
         val id: String,
 
         val parent: String,
+
+        override val commentIndicator: Int? = null,
 
         override val name: String,
 

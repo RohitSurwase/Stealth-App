@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.AnimationUtils
+import android.widget.ImageView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
@@ -27,7 +28,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
@@ -305,24 +305,7 @@ class CommentAdapter(
 
             binding.commentScore.blurText(comment.scoreHidden)
 
-            binding.commentColorIndicator.apply {
-                if (comment.depth == 0) {
-                    visibility = View.GONE
-                } else {
-                    visibility = View.VISIBLE
-                    comment.commentIndicator?.let {
-                        backgroundTintList = ColorStateList.valueOf(
-                            ContextCompat.getColor(context, it)
-                        )
-                    }
-                    val params = ConstraintLayout.LayoutParams(
-                        layoutParams as ConstraintLayout.LayoutParams
-                    ).apply {
-                        marginStart = (commentOffset * (comment.depth - 1)).toInt()
-                    }
-                    layoutParams = params
-                }
-            }
+            binding.commentColorIndicator.setCommentColor(comment)
 
             bindCommentHiddenIndicator(comment, false)
 
@@ -394,21 +377,31 @@ class CommentAdapter(
             binding.progress.isVisible = more.isLoading
             binding.textError.isVisible = more.isError
 
-            binding.commentBody.apply {
-                val params = ConstraintLayout.LayoutParams(
-                    layoutParams as ConstraintLayout.LayoutParams
-                ).apply {
-                    marginStart = if (more.depth > 0) {
-                        (commentOffset * more.depth).toInt()
-                    } else {
-                        0
-                    }
-                }
-                layoutParams = params
-            }
+            binding.commentColorIndicator.setCommentColor(more)
 
             itemView.setOnClickListener {
                 onCommentClick(bindingAdapterPosition)
+            }
+        }
+    }
+
+    private fun ImageView.setCommentColor(comment: Comment) {
+        this.apply {
+            if (comment.depth == 0) {
+                visibility = View.GONE
+            } else {
+                visibility = View.VISIBLE
+                comment.commentIndicator?.let {
+                    backgroundTintList = ColorStateList.valueOf(
+                        ContextCompat.getColor(context, it)
+                    )
+                }
+                val params = ConstraintLayout.LayoutParams(
+                    layoutParams as ConstraintLayout.LayoutParams
+                ).apply {
+                    marginStart = (commentOffset * (comment.depth - 1)).toInt()
+                }
+                layoutParams = params
             }
         }
     }
