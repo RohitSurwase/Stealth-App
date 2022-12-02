@@ -18,6 +18,10 @@ object LinkUtil {
 
     private const val REDDIT_SOUNDTRACK_NAME: String = "DASH_audio"
 
+    fun getImageIdFromImgurLink(link: String): String {
+        return link.toHttpUrlOrNull()?.pathSegments?.getOrNull(0) ?: ""
+    }
+
     fun getAlbumIdFromImgurLink(link: String): String {
         return link.toHttpUrlOrNull()?.pathSegments?.getOrNull(1) ?: ""
     }
@@ -28,7 +32,11 @@ object LinkUtil {
         } else {
             image.ext
         }
-        return "https://i.imgur.com/${image.hash}$ext"
+        return getUrlFromImgurId(image.hash, ext)
+    }
+
+    fun getUrlFromImgurId(hash: String, extension: String = ".jpeg"): String {
+        return "https://i.imgur.com/$hash$extension"
     }
 
     fun getImgurVideo(link: String): String {

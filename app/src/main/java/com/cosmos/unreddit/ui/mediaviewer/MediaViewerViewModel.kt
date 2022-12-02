@@ -78,8 +78,12 @@ class MediaViewerViewModel
     private fun retrieveMedia(link: String, mediaType: MediaType) {
         viewModelScope.launch {
             when (mediaType) {
-                MediaType.IMGUR_IMAGE, MediaType.IMGUR_LINK, MediaType.IMAGE -> {
+                MediaType.IMGUR_IMAGE, MediaType.IMAGE -> {
                     setMedia(GalleryMedia.singleton(Type.IMAGE, link))
+                }
+                MediaType.IMGUR_LINK -> {
+                    val id = LinkUtil.getImageIdFromImgurLink(link)
+                    setMedia(GalleryMedia.singleton(Type.IMAGE, LinkUtil.getUrlFromImgurId(id)))
                 }
                 MediaType.IMGUR_GIF -> {
                     setMedia(GalleryMedia.singleton(Type.VIDEO, LinkUtil.getImgurVideo(link)))
