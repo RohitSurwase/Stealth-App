@@ -72,6 +72,9 @@ class PostDetailsFragment : BaseFragment(),
     private lateinit var commentAdapter: CommentAdapter
     private lateinit var resourceStateAdapter: ResourceStateAdapter
 
+    private val isOnlyPostOpen: Boolean
+        get() = parentFragmentManager.fragments.count { it is PostDetailsFragment } == 1
+
     @Inject
     lateinit var repository: PostListRepository
 
@@ -324,7 +327,10 @@ class PostDetailsFragment : BaseFragment(),
     }
 
     override fun onBackPressed() {
-        showNavigation(true)
+        if (isOnlyPostOpen) {
+            showNavigation(true)
+        }
+
         if (isLegacyNavigation) {
             // Prevent onBackPressed event to be passed to PostDetailsFragment and show bottom nav
             parentFragmentManager.popBackStack()
