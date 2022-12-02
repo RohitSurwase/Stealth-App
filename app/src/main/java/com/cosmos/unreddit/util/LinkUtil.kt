@@ -8,6 +8,8 @@ object LinkUtil {
 
     const val USER_AGENT = "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:15.0) Gecko/20100101 Firefox/15.0.1"
 
+    private val HTTP_REGEX = Regex("^\\bhttp\\b")
+
     private val GIF_REGEX = Regex("gif(v)?")
     private val REDDIT_VIDEO_REGEX = Regex("DASH_(\\d+)")
 
@@ -17,6 +19,9 @@ object LinkUtil {
     private val REDDIT_LINK = Regex("(.+?)\\.reddit\\.com")
 
     private const val REDDIT_SOUNDTRACK_NAME: String = "DASH_audio"
+
+    val String.https: String
+        get() = this.replace(HTTP_REGEX, "https")
 
     fun getImageIdFromImgurLink(link: String): String {
         return link.toHttpUrlOrNull()?.pathSegments?.getOrNull(0) ?: ""
