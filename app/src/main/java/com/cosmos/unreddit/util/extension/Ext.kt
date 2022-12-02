@@ -169,7 +169,7 @@ fun PagingDataAdapter<out Any, out RecyclerView.ViewHolder>.addLoadStateListener
         val isLoading = loadState.source.refresh is LoadState.Loading
 
         if (pullToRefreshLayout?.isRefreshing == false) {
-            list.visibility = when (loadState.source.refresh) {
+            pullToRefreshLayout.visibility = when (loadState.source.refresh) {
                 is LoadState.NotLoading -> View.VISIBLE
                 else -> View.INVISIBLE // Set to INVISIBLE to keep MotionLayout gestures
             }
