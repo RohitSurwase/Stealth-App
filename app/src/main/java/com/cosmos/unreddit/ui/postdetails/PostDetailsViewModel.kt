@@ -23,6 +23,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.onStart
@@ -79,7 +80,7 @@ class PostDetailsViewModel @Inject constructor(
                 }
             }
         }
-    }.flowOn(defaultDispatcher)
+    }.distinctUntilChanged().flowOn(defaultDispatcher)
 
     private suspend fun getComments(list: List<Comment>, depthLimit: Int): List<Comment> =
         withContext(defaultDispatcher) {
