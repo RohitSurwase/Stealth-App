@@ -157,6 +157,10 @@
 
     <string name="preference_about">About</string>
 
+    <string name="redirect_mode_on">ON</string>
+    <string name="redirect_mode_off">OFF</string>
+    <string name="redirect_mode_ask">Always Ask</string>
+
     <string name="fragment_about_label">About</string>
 
     <string name="about_section_credits">Credits</string>
