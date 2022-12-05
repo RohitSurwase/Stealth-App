@@ -74,7 +74,7 @@ class AboutFragment : BaseFragment() {
             if (it is CreditItem.Credit) {
                 showCreditDialog(it)
             } else if (it is CreditItem.Contributor) {
-                openBrowser(it.link)
+                linkHandler.openBrowser(it.link)
             }
         }
 
@@ -92,8 +92,8 @@ class AboutFragment : BaseFragment() {
     private fun initAppBar() {
         binding.appBar.run {
             backCard.setOnClickListener { onBackPressed() }
-            buttonGitlab.setOnClickListener { openBrowser(gitlabLink) }
-            buttonMatrix.setOnClickListener { openBrowser(matrixLink) }
+            buttonGitlab.setOnClickListener { linkHandler.openBrowser(gitlabLink) }
+            buttonMatrix.setOnClickListener { linkHandler.openBrowser(matrixLink) }
             buttonMail.setOnClickListener { sendEmail() }
         }
     }
@@ -103,10 +103,10 @@ class AboutFragment : BaseFragment() {
             .setTitle(credit.title)
             .setMessage(credit.description)
             .setPositiveButton(R.string.dialog_credit_show_website) { _, _ ->
-                openBrowser(credit.link)
+                linkHandler.openBrowser(credit.link)
             }
             .setNegativeButton(R.string.dialog_credit_show_license) { _, _ ->
-                openBrowser(credit.licenseLink)
+                linkHandler.openBrowser(credit.licenseLink)
             }
             .setCancelable(true)
             .show()

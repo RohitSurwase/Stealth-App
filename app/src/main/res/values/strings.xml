@@ -191,6 +191,9 @@
     <string name="dialog_yes">Yes</string>
     <string name="dialog_no">No</string>
 
+    <string name="dialog_privacy_enhancer_title">Privacy Enhancer</string>
+    <string name="dialog_privacy_enhancer_message">Would you like to redirect %1$s to %2$s?</string>
+
     <string name="profile_name_length_error">Profile name must be between 3 and 20 characters</string>
     <string name="profile_already_exists_error">Profile already exists</string>
     <string name="profile_blank_error">Profile name cannot be blank</string>
