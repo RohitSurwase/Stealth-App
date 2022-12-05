@@ -1,0 +1,40 @@
+[
+  {
+    "service": "reddit",
+    "pattern": "(.*?\\.)?redd((\\.?it)|(it\\.com))",
+    "redirect": [
+      {
+        "name": "teddit",
+        "instances": [
+          "teddit.net",
+          "teddit.ggc-project.de",
+          "teddit.zaggy.nl",
+          "teddit.namazso.eu",
+          "teddit.tinfoil-hat.net",
+          "teddit.domain.glass",
+          "snoo.ioens.is",
+          "teddit.httpjames.space",
+          "incogsnoo.com",
+          "teddit.pussthecat.org",
+          "reddit.lol",
+          "teddit.sethforprivacy.com",
+          "teddit.totaldarkness.net",
+          "teddit.adminforge.de",
+          "teddit.bus-hit.me",
+          "teddit.froth.zone",
+          "rdt.trom.tf",
+          "teddit.encrypted-data.xyz",
+          "i.opnxng.com",
+          "teddit.tokhmi.xyz",
+          "teddit.garudalinux.org",
+          "tedd.it",
+          "wiki.privacytools.io",
+          "td.vern.cc",
+          "teddit.rawbit.ninja",
+          "teddit.artemislena.eu",
+          "teddit.manasiwibi.com"
+        ]
+      }
+    ]
+  }
+]

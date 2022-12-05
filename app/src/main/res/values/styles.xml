@@ -117,6 +117,10 @@
         <item name="switchPreferenceCompatStyle">@style/PreferenceSwitch</item>
     </style>
 
+    <style name="PrivacyPreferenceTheme" parent="PreferenceTheme">
+        <item name="android:layout">@layout/layout_privacy_enhancer</item>
+    </style>
+
     <style name="Preference" parent="Preference.Material">
         <item name="layout">@layout/layout_preference</item>
     </style>

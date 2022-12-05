@@ -43,6 +43,7 @@ class PreferencesFragment : PreferenceFragmentCompat() {
     private var showSpoilerPreviewPreference: SwitchPreferenceCompat? = null
     private var backupPreference: Preference? = null
     private var sourcePreference: Preference? = null
+    private var privacyEnhancerPreference: Preference? = null
     private var aboutPreference: Preference? = null
 
     private val navOptions: NavOptions by lazy { getNavOptions() }
@@ -146,6 +147,15 @@ class PreferencesFragment : PreferenceFragmentCompat() {
             }
         }
 
+        privacyEnhancerPreference = findPreference<Preference?>(
+            DataPreferences.PreferencesKeys.PRIVACY_ENHANCER.name
+        )?.apply {
+            setOnPreferenceClickListener {
+                openPrivacyEnhancer()
+                true
+            }
+        }
+
         aboutPreference = findPreference<Preference>("about")?.apply {
             setOnPreferenceClickListener {
                 openAbout()
@@ -197,6 +207,16 @@ class PreferencesFragment : PreferenceFragmentCompat() {
                             R.array.pref_reddit_source_labels
                         )
                         sourcePreference?.summary = redditSourceArray.getOrNull(value)
+                    }
+                }
+            }
+
+            launch {
+                viewModel.privacyEnhancerEnabled.collect { enabled ->
+                    privacyEnhancerPreference?.summary = if (enabled) {
+                        getString(R.string.preference_privacy_enhancer_enabled)
+                    } else {
+                        getString(R.string.preference_privacy_enhancer_disabled)
                     }
                 }
             }
@@ -272,6 +292,13 @@ class PreferencesFragment : PreferenceFragmentCompat() {
 
     private fun openAbout() {
         findNavController().navigate(PreferencesFragmentDirections.openAbout(), navOptions)
+    }
+
+    private fun openPrivacyEnhancer() {
+        findNavController().navigate(
+            PreferencesFragmentDirections.openPrivacyEnhancer(),
+            navOptions
+        )
     }
 
     override fun onDestroyView() {
