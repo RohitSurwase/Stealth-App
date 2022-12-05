@@ -84,7 +84,7 @@ class ProfileSavedFragment : ListFragment<ProfileSavedAdapter>(),
 
     override fun onLongClick(comment: Comment.CommentEntity) {
         CommentMenuFragment.show(
-            childFragmentManager,
+            parentFragmentManager,
             comment,
             CommentMenuFragment.MenuType.DETAILS
         )
