@@ -19,12 +19,17 @@ import com.cosmos.unreddit.data.remote.api.reddit.model.CommentChild
 import com.cosmos.unreddit.data.remote.api.reddit.model.MoreChild
 import com.cosmos.unreddit.data.remote.api.reddit.model.PostChild
 import com.cosmos.unreddit.data.remote.api.streamable.StreamableApi
+import com.cosmos.unreddit.data.repository.PreferencesRepository
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.adapters.PolymorphicJsonAdapterFactory
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.runBlocking
+import okhttp3.HttpUrl
+import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
@@ -147,10 +152,24 @@ object NetworkModule {
     @Singleton
     fun provideTedditApi(
         @RedditMoshi moshi: Moshi,
-        @TedditOkHttp okHttpClient: OkHttpClient
+        @TedditOkHttp okHttpClient: OkHttpClient,
+        preferencesRepository: PreferencesRepository
     ): TedditApi {
+        // Get the saved instance unless it's empty, then take Teddit's default instance
+        val url = runBlocking {
+            preferencesRepository
+                .getRedditSourceInstance()
+                .firstOrNull()
+                .takeUnless { it.isNullOrEmpty() }
+                ?: TedditApi.BASE_URL
+        }
+
+        // toHttpUrlOrNull will return null if the instance does not have a scheme, in this case
+        // `https` needs to be added to the URL
+        val httpUrl = url.toHttpUrlOrNull() ?: HttpUrl.Builder().scheme("https").host(url).build()
+
         return Retrofit.Builder()
-            .baseUrl(TedditApi.BASE_URL)
+            .baseUrl(httpUrl.toString())
             .addConverterFactory(MoshiConverterFactory.create(moshi))
             .addConverterFactory(SortingConverterFactory())
             .client(okHttpClient)

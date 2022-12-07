@@ -163,6 +163,9 @@
 
     <string name="preference_privacy_enhancer_service_summary">%1$s - %2$s</string>
 
+    <string name="instance_hint">Instance</string>
+    <string name="instance_empty_error">Instance cannot be empty</string>
+
     <string name="redirect_mode_on">ON</string>
     <string name="redirect_mode_off">OFF</string>
     <string name="redirect_mode_ask">Always Ask</string>
@@ -199,6 +202,10 @@
 
     <string name="dialog_privacy_enhancer_title">Privacy Enhancer</string>
     <string name="dialog_privacy_enhancer_message">Would you like to redirect %1$s to %2$s?</string>
+
+    <string name="dialog_restart_required_title">Restart Required</string>
+    <string name="dialog_restart_required_message">A restart of the app is required to take the change into account.\nWould you like to restart now?</string>
+    <string name="dialog_restart_required_later">Maybe Later</string>
 
     <string name="profile_name_length_error">Profile name must be between 3 and 20 characters</string>
     <string name="profile_already_exists_error">Profile already exists</string>

@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="16dp">
+
+    <RadioGroup
+        android:id="@+id/radio_group"
+        android:checkedButton="@+id/radio_button_1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+        <RadioButton
+            android:id="@+id/radio_reddit"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:text="@string/preference_reddit_source_reddit"/>
+        <RadioButton
+            android:id="@+id/radio_teddit"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:text="@string/preference_reddit_source_teddit"/>
+    </RadioGroup>
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/list_instances"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/radio_group"
+        android:visibility="gone"
+        tools:visibility="visible">
+
+        <AutoCompleteTextView
+            android:id="@+id/text_list_instances"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/instance_hint"
+            android:inputType="textNoSuggestions"/>
+
+    </com.google.android.material.textfield.TextInputLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
