@@ -102,11 +102,20 @@ class PrivacyEnhancerServiceDialog : DialogFragment(), OnShowListener {
     }
 
     private fun save() {
-        redirect.run {
-            redirect = binding.textListInstances.text.toString()
-            pattern = this@PrivacyEnhancerServiceDialog.service.pattern
-            mode = this@PrivacyEnhancerServiceDialog.mode
+        val selectedMode = mode
+        val instance = binding.textListInstances.text.toString()
+
+        if (selectedMode.isEnabled && instance.isBlank()) {
+            binding.listInstances.error = getString(R.string.instance_empty_error)
+            return
         }
+
+        redirect.run {
+            redirect = instance.ifEmpty { adapter.getItem(0) as String }
+            pattern = this@PrivacyEnhancerServiceDialog.service.pattern
+            mode = selectedMode
+        }
+
         doAndDismiss {
             setFragmentResult(
                 REQUEST_KEY_REDIRECT,
