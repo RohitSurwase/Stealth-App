@@ -93,7 +93,7 @@
   },
   {
     "service": "medium",
-    "pattern": "",
+    "pattern": "(?:.*\\.)*(?<!(link\\.|cdn\\-images\\-\\d+\\.))medium\\.com",
     "redirect": [
       {
         "name": "scribe",
