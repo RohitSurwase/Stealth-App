@@ -82,6 +82,8 @@ class PrivacyEnhancerFragment : PreferenceFragmentCompat() {
 
         initResultListener()
         bindServices()
+
+        binding.appBar.backCard.setOnClickListener { findNavController().popBackStack() }
     }
 
     private fun initPreferences() {

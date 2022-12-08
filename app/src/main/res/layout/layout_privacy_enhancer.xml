@@ -8,7 +8,7 @@
 
     <include
         android:id="@+id/app_bar"
-        layout="@layout/layout_appbar_preferences"/>
+        layout="@layout/layout_appbar_privacy_enhancer"/>
 
     <FrameLayout
         android:id="@android:id/list_container"
