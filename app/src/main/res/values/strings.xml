@@ -158,6 +158,7 @@
     <string name="preference_about">About</string>
 
     <string name="preference_privacy_enhancer">Privacy Enhancer</string>
+    <string name="preference_privacy_enhancer_summary">Redirect links to privacy-friendly frontends</string>
     <string name="preference_privacy_enhancer_enabled">Enabled</string>
     <string name="preference_privacy_enhancer_disabled">Disabled</string>
 
