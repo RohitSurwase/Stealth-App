@@ -3,6 +3,9 @@ package com.cosmos.unreddit.util.extension
 import android.webkit.MimeTypeMap
 import java.util.Locale
 
+val String.extension: String
+    get() = MimeTypeMap.getFileExtensionFromUrl(this)
+
 val String.mimeType: String
     get() = MimeTypeMap.getSingleton().getMimeTypeFromUrl(this) ?: ""
 

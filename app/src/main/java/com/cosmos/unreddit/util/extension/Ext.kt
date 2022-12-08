@@ -254,8 +254,7 @@ fun Int?.formatNumber(): String {
 }
 
 fun MimeTypeMap.getMimeTypeFromUrl(url: String): String? {
-    val extension = MimeTypeMap.getFileExtensionFromUrl(url)
-    return getMimeTypeFromExtension(extension)
+    return getMimeTypeFromExtension(url.extension)
 }
 
 fun Resources.getFloatValue(@DimenRes id: Int): Float {
