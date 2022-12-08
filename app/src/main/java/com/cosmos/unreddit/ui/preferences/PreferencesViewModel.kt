@@ -38,7 +38,7 @@ class PreferencesViewModel @Inject constructor(
 
     val redditSource: SharedFlow<Pair<Int, String>> = combine(
         preferencesRepository.getRedditSource(),
-        preferencesRepository.getRedditSourceInstance()
+        preferencesRepository.getRedditSourceInstance("teddit.net")
     ) { source, instance ->
         Pair(source, instance)
     }.shareIn(viewModelScope, SharingStarted.WhileSubscribed(), 1)
