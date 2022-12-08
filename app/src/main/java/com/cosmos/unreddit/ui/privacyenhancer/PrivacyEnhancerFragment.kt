@@ -17,6 +17,7 @@ import androidx.preference.SwitchPreferenceCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.cosmos.unreddit.R
 import com.cosmos.unreddit.data.model.Resource
+import com.cosmos.unreddit.data.model.ServiceExternal
 import com.cosmos.unreddit.data.model.db.Redirect
 import com.cosmos.unreddit.data.model.preferences.DataPreferences
 import com.cosmos.unreddit.databinding.LayoutPrivacyEnhancerBinding
@@ -173,13 +174,13 @@ class PrivacyEnhancerFragment : PreferenceFragmentCompat() {
         }
     }
 
-    private fun addServicePreferences(services: List<String>) {
+    private fun addServicePreferences(services: List<ServiceExternal>) {
         val servicesCategory = findPreference<PreferenceCategory>("services")
         servicesCategory?.let {
             for (service in services) {
                 val servicePreference = Preference(requireContext()).apply {
-                    key = service
-                    title = service.titlecase
+                    key = service.service
+                    title = service.name ?: service.service.titlecase
                     isPersistent = false
                     summary = getString(R.string.redirect_mode_off)
                     setOnPreferenceClickListener {
@@ -192,12 +193,9 @@ class PrivacyEnhancerFragment : PreferenceFragmentCompat() {
         }
     }
 
-    private fun openServicePreferences(service: String) {
-        val savedRedirect = viewModel.redirects.latest?.find { it.service == service }
-        val serviceExternal = viewModel.instances.value.dataValue?.firstOrNull { it.service == service }
-        serviceExternal?.let {
-            PrivacyEnhancerServiceDialog.show(childFragmentManager, it, savedRedirect)
-        }
+    private fun openServicePreferences(service: ServiceExternal) {
+        val savedRedirect = viewModel.redirects.latest?.find { it.service == service.service }
+        PrivacyEnhancerServiceDialog.show(childFragmentManager, service, savedRedirect)
     }
 
     private fun showLoading(loading: Boolean) {

@@ -9,6 +9,9 @@
         <variable
             name="redirect"
             type="com.cosmos.unreddit.data.model.db.Redirect" />
+        <variable
+            name="service"
+            type="com.cosmos.unreddit.data.model.ServiceExternal" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -24,7 +27,7 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             android:textSize="24sp"
-            android:text="@{StringExtKt.getTitlecase(redirect.service)}"
+            android:text="@{service.name != null ? service.name : StringExtKt.getTitlecase(redirect.service)}"
             tools:text="Reddit"/>
 
         <androidx.appcompat.widget.SwitchCompat

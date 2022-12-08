@@ -1,6 +1,7 @@
 [
   {
     "service": "fandom",
+    "name": "Fandom",
     "pattern": "(?:[a-zA-Z0-9-]+\\.)?(?:fandom|wikia)\\.com",
     "redirect": [
       {
@@ -17,6 +18,7 @@
   },
   {
     "service": "imdb",
+    "name": "IMDb",
     "pattern": "(?:www\\.|m\\.|)imdb\\.com",
     "redirect": [
       {
@@ -34,6 +36,7 @@
   },
   {
     "service": "imgur",
+    "name": "imgur",
     "pattern": "([im]\\.)?(stack\\.)?imgur\\.(com|io)",
     "redirect": [
       {
@@ -56,6 +59,7 @@
   },
   {
     "service": "instagram",
+    "name": "Instagram",
     "pattern": "(www\\.)?instagram\\.com",
     "redirect": [
       {
@@ -72,6 +76,7 @@
   },
   {
     "service": "lbry",
+    "name": "LBRY",
     "pattern": "(odysee\\.com|lbry\\.tv)",
     "redirect": [
       {
@@ -93,6 +98,7 @@
   },
   {
     "service": "medium",
+    "name": "Medium",
     "pattern": "(?:.*\\.)*(?<!(link\\.|cdn\\-images\\-\\d+\\.))medium\\.com",
     "redirect": [
       {
@@ -113,6 +119,7 @@
   },
   {
     "service": "quora",
+    "name": "Quora",
     "pattern": "([a-zA-Z0-9-]+\\.)*quora\\.com",
     "redirect": [
       {
@@ -133,6 +140,7 @@
   },
   {
     "service": "reddit",
+    "name": "Reddit",
     "pattern": "(.*?\\.)?redd((\\.?it)|(it\\.com))",
     "redirect": [
       {
@@ -220,6 +228,7 @@
   },
   {
     "service": "reuters",
+    "name": "Reuters",
     "pattern": "(www\\.|)reuters\\.com",
     "redirect": [
       {
@@ -232,6 +241,7 @@
   },
   {
     "service": "tiktok",
+    "name": "TikTok",
     "pattern": "(www\\.|)tiktok\\.com",
     "redirect": [
       {
@@ -253,6 +263,7 @@
   },
   {
     "service": "twitter",
+    "name": "Twitter",
     "pattern": "(www\\.|mobile\\.|)twitter\\.com",
     "redirect": [
       {
@@ -347,6 +358,7 @@
   },
   {
     "service": "wikipedia",
+    "name": "Wikipedia",
     "pattern": "(?:[a-z]+\\.)*wikipedia\\.org",
     "redirect": [
       {
@@ -372,6 +384,7 @@
   },
   {
     "service": "youtube",
+    "name": "YouTube",
     "pattern": "(?:www\\.)?youtu(?:be\\.com|\\.be)",
     "redirect": [
       {
@@ -446,6 +459,7 @@
   },
   {
     "service": "youtubeMusic",
+    "name": "YouTube Music",
     "pattern": "music\\.youtube\\.com",
     "redirect": [
       {

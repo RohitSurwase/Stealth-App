@@ -74,6 +74,7 @@ class PrivacyEnhancerServiceDialog : DialogFragment(), OnShowListener {
     private fun initView() {
         binding.run {
             this.redirect = this@PrivacyEnhancerServiceDialog.redirect
+            this.service = this@PrivacyEnhancerServiceDialog.service
 
             switchEnabled.setOnCheckedChangeListener { _, isChecked ->
                 listInstances.isEnabled = isChecked

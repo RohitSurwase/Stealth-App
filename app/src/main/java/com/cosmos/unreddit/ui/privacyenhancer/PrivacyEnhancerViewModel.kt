@@ -49,10 +49,10 @@ class PrivacyEnhancerViewModel @Inject constructor(
     val instances: StateFlow<Resource<List<ServiceExternal>>>
         get() = _instances.asStateFlow()
 
-    val services: Flow<List<String>> = _instances
+    val services: Flow<List<ServiceExternal>> = _instances
         .filter { instance -> instance is Resource.Success }
-        .map { instance -> (instance as Resource.Success).data.map { it.service } }
-        .map { it.sorted() }
+        .map { instance -> (instance as Resource.Success).data }
+        .map { services -> services.sortedBy { it.service } }
         .flowOn(defaultDispatcher)
 
     init {
