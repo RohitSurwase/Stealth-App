@@ -14,7 +14,7 @@ import com.cosmos.unreddit.ui.base.BaseFragment
 import com.cosmos.unreddit.ui.mediaviewer.MediaViewerFragment
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dagger.hilt.android.scopes.FragmentScoped
-import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
+import okhttp3.HttpUrl
 import javax.inject.Inject
 
 @FragmentScoped
@@ -61,48 +61,47 @@ class LinkHandler @Inject constructor(
             MediaType.IMAGE,
             MediaType.VIDEO -> openMedia(link, mediaType)
 
-            else -> {
-                if (linkRedirector.isPrivacyEnhancerOn) {
-                    val redirectLink = linkRedirector.getRedirectLink(link)
-                    redirectLink?.let {
-                        handleLink(link, it.first, it.second)
-                    } ?: run {
-                        openBrowser(link)
-                    }
-                } else {
-                    openBrowser(link)
-                }
+            else -> openLink(link)
+        }
+    }
+
+    private fun openLink(link: String) {
+        if (linkRedirector.isPrivacyEnhancerOn) {
+            val redirectLink = linkRedirector.getRedirectLink(link)
+            redirectLink?.let {
+                handleLink(it.original, it.redirect, it.mode)
+            } ?: run {
+                openBrowser(link)
             }
+        } else {
+            openBrowser(link)
         }
     }
 
     private fun handleLink(
-        originalLink: String,
-        redirectLink: String,
+        originalLink: HttpUrl,
+        redirectLink: HttpUrl,
         mode: Redirect.RedirectMode
     ) {
         when (mode) {
-            ON -> openBrowser(redirectLink)
-            OFF -> openBrowser(originalLink)
+            ON -> openBrowser(redirectLink.toString())
+            OFF -> openBrowser(originalLink.toString())
             ALWAYS_ASK -> displayAskRedirectDialog(originalLink, redirectLink)
         }
     }
 
-    private fun displayAskRedirectDialog(originalLink: String, redirectLink: String) {
-        val originalHost = originalLink.toHttpUrlOrNull()?.host ?: originalLink
-        val redirectHost = redirectLink.toHttpUrlOrNull()?.host ?: redirectLink
-
+    private fun displayAskRedirectDialog(originalLink: HttpUrl, redirectLink: HttpUrl) {
         MaterialAlertDialogBuilder(fragment.requireContext())
             .setTitle(R.string.dialog_privacy_enhancer_title)
             .setMessage(
                 fragment.getString(
                     R.string.dialog_privacy_enhancer_message,
-                    originalHost,
-                    redirectHost
+                    originalLink.host,
+                    redirectLink.host
                 )
             )
-            .setPositiveButton(R.string.dialog_yes) { _, _ -> openBrowser(redirectLink) }
-            .setNegativeButton(R.string.dialog_no) { _, _ -> openBrowser(originalLink) }
+            .setPositiveButton(R.string.dialog_yes) { _, _ -> openBrowser(redirectLink.toString()) }
+            .setNegativeButton(R.string.dialog_no) { _, _ -> openBrowser(originalLink.toString()) }
             .setNeutralButton(R.string.dialog_cancel) { dialog, _ -> dialog.dismiss() }
             .setCancelable(false)
             .show()

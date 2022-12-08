@@ -31,12 +31,13 @@ class LinkRedirector @Inject constructor(
         preferencesRepository.getAllRedirects().first().getRedirects()
     }
 
-    fun getRedirectLink(link: String): Pair<String, Redirect.RedirectMode>? {
+    fun getRedirectLink(link: String): LinkRedirect? {
         val url = link.toHttpUrlOrNull() ?: return null
         val redirect = toRedirect.firstNotNullOfOrNull { entry ->
             entry.value.takeIf { it.mode.isEnabled && url.host.matches(entry.key) }
         }
-        return redirect?.run { getRedirectLink(url) to mode }
+        val redirectUrl = redirect?.getRedirectLink(url)
+        return redirectUrl?.let { LinkRedirect(url, it, redirect.mode) }
     }
 
     suspend fun setPrivacyEnhancerEnabled(enable: Boolean) {
@@ -51,11 +52,17 @@ class LinkRedirector @Inject constructor(
         }
     }
 
-    private fun Redirect.getRedirectLink(url: HttpUrl): String {
-        return url.newBuilder().host(redirect).build().toString()
+    private fun Redirect.getRedirectLink(url: HttpUrl): HttpUrl {
+        return url.newBuilder().host(redirect).build()
     }
 
     private suspend fun List<Redirect>.getRedirects(): Map<Regex, Redirect> {
         return withContext(defaultDispatcher) { associateBy { Regex(it.pattern) } }
     }
+
+    data class LinkRedirect(
+        val original: HttpUrl,
+        val redirect: HttpUrl,
+        val mode: Redirect.RedirectMode
+    )
 }
