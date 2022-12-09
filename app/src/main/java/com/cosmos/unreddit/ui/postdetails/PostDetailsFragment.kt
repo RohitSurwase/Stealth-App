@@ -216,6 +216,12 @@ class PostDetailsFragment : BaseFragment(),
                     binding.singleThreadLayout.isVisible = isSingleThread
                 }
             }
+
+            launch {
+                viewModel.savedCommentIds.collect { savedCommentIds ->
+                    commentAdapter.savedIds = savedCommentIds
+                }
+            }
         }
     }
 

@@ -47,6 +47,8 @@ class CommentAdapter(
 
     var postEntity: PostEntity? = null
 
+    var savedIds: List<String> = emptyList()
+
     private val scope = CoroutineScope(Job() + mainImmediateDispatcher)
 
     private val commentOffset by lazy {
@@ -180,6 +182,7 @@ class CommentAdapter(
                         linkTitle = linkTitle ?: post.title
                         linkPermalink = linkPermalink ?: post.permalink
                         linkAuthor = linkAuthor ?: post.author
+                        saved = savedIds.contains(comment.name)
                     }
                 }
 
@@ -226,7 +229,10 @@ class CommentAdapter(
     private fun onCommentLongClick(position: Int) {
         val comment = getItem(position)
         if (comment is CommentEntity) {
-            onCommentLongClick.invoke(comment)
+            comment.run {
+                saved = savedIds.contains(name)
+                onCommentLongClick.invoke(this)
+            }
         }
     }
 

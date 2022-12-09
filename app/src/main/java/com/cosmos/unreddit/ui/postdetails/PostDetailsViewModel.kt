@@ -51,7 +51,7 @@ class PostDetailsViewModel @Inject constructor(
     private val _singleThread: MutableStateFlow<Boolean> = MutableStateFlow(false)
     val singleThread: StateFlow<Boolean> = _singleThread
 
-    private val savedCommentIds: Flow<List<String>> = currentProfile.flatMapLatest {
+    val savedCommentIds: Flow<List<String>> = currentProfile.flatMapLatest {
         repository.getSavedCommentIds(it.id)
     }
 
