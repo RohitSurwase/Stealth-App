@@ -80,13 +80,13 @@ sealed class Comment {
         val posterType: PosterType,
 
         @ColumnInfo(name = "link_title")
-        val linkTitle: String?,
+        var linkTitle: String?,
 
         @ColumnInfo(name = "link_permalink")
-        val linkPermalink: String?,
+        var linkPermalink: String?,
 
         @ColumnInfo(name = "link_author")
-        val linkAuthor: String?,
+        var linkAuthor: String?,
 
         val subreddit: String,
 

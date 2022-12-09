@@ -18,6 +18,7 @@ import com.cosmos.unreddit.data.local.mapper.CommentMapper2
 import com.cosmos.unreddit.data.model.Comment
 import com.cosmos.unreddit.data.model.Comment.CommentEntity
 import com.cosmos.unreddit.data.model.Comment.MoreEntity
+import com.cosmos.unreddit.data.model.db.PostEntity
 import com.cosmos.unreddit.data.repository.PostListRepository
 import com.cosmos.unreddit.databinding.ItemCommentBinding
 import com.cosmos.unreddit.databinding.ItemMoreBinding
@@ -44,7 +45,7 @@ class CommentAdapter(
     private val onCommentLongClick: (CommentEntity) -> Unit
 ) : ListAdapter<Comment, RecyclerView.ViewHolder>(COMMENT_COMPARATOR) {
 
-    var linkId: String? = null
+    var postEntity: PostEntity? = null
 
     private val scope = CoroutineScope(Job() + mainImmediateDispatcher)
 
@@ -148,7 +149,7 @@ class CommentAdapter(
         newList: MutableList<Comment>,
         comment: MoreEntity
     ) {
-        val link = linkId ?: return
+        val post = postEntity ?: return
 
         val containsMoreComments = comment.more.size > LOAD_MORE_LIMIT
 
@@ -161,7 +162,7 @@ class CommentAdapter(
             }
         }
 
-        repository.getMoreChildren(children, link)
+        repository.getMoreChildren(children, post.id)
             .map {
                 commentMapper.dataToEntities(it.json.data.things, null)
             }
@@ -173,6 +174,14 @@ class CommentAdapter(
             }
             .map { comments ->
                 comment.apply { isLoading = false; isError = false }
+
+                comments.forEach { comment ->
+                    (comment as? CommentEntity)?.run {
+                        linkTitle = linkTitle ?: post.title
+                        linkPermalink = linkPermalink ?: post.permalink
+                        linkAuthor = linkAuthor ?: post.author
+                    }
+                }
 
                 if (comment.depth > 0) {
                     val parentComment = newList.find { it.name == comment.parent }

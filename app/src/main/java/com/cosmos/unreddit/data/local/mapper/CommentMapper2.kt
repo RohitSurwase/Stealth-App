@@ -39,7 +39,7 @@ class CommentMapper2 @Inject constructor(
             Comment.CommentEntity(
                 totalAwards,
                 linkId,
-                dataToEntities(replies?.data?.children, null),
+                dataToEntities(replies?.data?.children, parent),
                 author,
                 scoreString,
                 awardings.sortedByDescending { it.count }.map { Award(it.count, it.getIcon()) },
