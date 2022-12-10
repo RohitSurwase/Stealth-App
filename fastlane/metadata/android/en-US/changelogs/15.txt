@@ -1,0 +1,2 @@
+Fixed
+- Crashes with blank profile names

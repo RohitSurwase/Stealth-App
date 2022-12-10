@@ -62,7 +62,9 @@ class AvatarView @JvmOverloads constructor(
     }
 
     private fun textToInitials(): String? {
-        return text?.split(SPACE_REGEX)?.joinToString("") { it.first().uppercase() }
+        return text?.split(SPACE_REGEX)?.joinToString("") {
+            it.firstOrNull()?.uppercase() ?: ""
+        }
     }
 
     companion object {
