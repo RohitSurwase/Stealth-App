@@ -1,3 +1,8 @@
+# 2.0.2 - 2022/12/10
+
+### Fixed
+- Crashes with blank profile names
+
 # 2.0.1 - 2022/11/28
 
 ### Changed
