@@ -102,10 +102,10 @@ class ProfileManagerDialogFragment : DialogFragment(), ProfileManagerAdapter.Pro
             .show()
             .apply {
                 getButton(DialogInterface.BUTTON_POSITIVE).setOnClickListener {
-                    val name = profileBinding.inputName.text()
+                    val name = profileBinding.inputName.text().toString()
                     val errorMessage = validateProfile(name)
                     if (errorMessage == null) {
-                        name?.let { viewModel.addProfile(it) }
+                        name.let { viewModel.addProfile(it) }
                         this.dismiss()
                     } else {
                         profileBinding.inputName.error = errorMessage
@@ -133,10 +133,10 @@ class ProfileManagerDialogFragment : DialogFragment(), ProfileManagerAdapter.Pro
             .show()
             .apply {
                 getButton(DialogInterface.BUTTON_POSITIVE).setOnClickListener {
-                    val name = profileBinding.inputName.text()
+                    val name = profileBinding.inputName.text().toString()
                     val errorMessage = validateProfile(name)
                     if (errorMessage == null) {
-                        name?.let { viewModel.renameProfile(profile, it) }
+                        name.let { viewModel.renameProfile(profile, it) }
                         this.dismiss()
                     } else {
                         profileBinding.inputName.error = errorMessage
@@ -145,15 +145,18 @@ class ProfileManagerDialogFragment : DialogFragment(), ProfileManagerAdapter.Pro
             }
     }
 
-    private fun validateProfile(text: String?): String? {
+    private fun validateProfile(text: String): String? {
         return when {
-            text?.length !in PROFILE_NAME_MIN..PROFILE_NAME_MAX -> {
+            text.length !in PROFILE_NAME_MIN..PROFILE_NAME_MAX -> {
                 getString(R.string.profile_name_length_error)
             }
             profileAdapter.currentList.any {
                 it is ProfileItem.UserProfile && it.profile.name.equals(text, true)
             } -> {
                 getString(R.string.profile_already_exists_error)
+            }
+            text.isBlank() -> {
+                getString(R.string.profile_blank_error)
             }
             else -> {
                 null
