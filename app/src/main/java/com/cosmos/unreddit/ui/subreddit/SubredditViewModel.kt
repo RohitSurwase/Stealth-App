@@ -69,6 +69,8 @@ class SubredditViewModel @Inject constructor(
     var contentLayoutProgress: Float? = null
     var drawerContentLayoutProgress: Float? = null
 
+    var isSubredditReachable: Boolean = false
+
     val isSubscribed: StateFlow<Boolean> = combine(
         _subreddit,
         subscriptionsNames

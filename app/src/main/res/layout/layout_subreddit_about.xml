@@ -94,6 +94,7 @@
             android:layout_marginTop="@dimen/subreddit_drawer_margin_vertical"
             style="@style/ButtonStyle"
             android:text="@string/subreddit_button_subscribe"
+            android:enabled="false"
             android:visibility="gone"
             tools:visibility="visible"/>
 
