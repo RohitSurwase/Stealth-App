@@ -1,0 +1,2 @@
+Fixed
+- Fix unselectable backup files when using the import feature
