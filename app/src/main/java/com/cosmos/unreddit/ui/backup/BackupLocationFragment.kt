@@ -1,6 +1,7 @@
 package com.cosmos.unreddit.ui.backup
 
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -46,6 +47,22 @@ class BackupLocationFragment : BaseFragment() {
                 "_" +
                 DateUtil.getFormattedDate(getString(R.string.file_date_format), Date()) +
                 ".json"
+
+    private val mimeType: Array<String>
+        get() {
+            val type = backupViewModel.backupType.value?.mime ?: return arrayOf("*/*")
+
+            if (
+                type.contains("application/json") &&
+                Build.VERSION.SDK_INT <= Build.VERSION_CODES.P
+            ) {
+                // application/json is not support on API <= 28, so application/octet-stream is used
+                // as a fallback
+                return arrayOf(*type, "application/octet-stream")
+            }
+
+            return type
+        }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -108,8 +125,7 @@ class BackupLocationFragment : BaseFragment() {
                 createDocument.launch(filename)
             }
             else -> {
-                val type = backupViewModel.backupType.value?.mime ?: arrayOf("*/*")
-                openDocument.launch(type)
+                openDocument.launch(mimeType)
             }
         }
     }
