@@ -1,144 +1,151 @@
-apply plugin: 'com.android.application'
-apply plugin: 'kotlin-android'
-apply plugin: 'kotlin-parcelize'
-apply plugin: 'kotlin-kapt'
-apply plugin: 'dagger.hilt.android.plugin'
-apply plugin: "androidx.navigation.safeargs.kotlin"
+import java.io.FileInputStream
+import java.util.Properties
 
-def keystorePropertiesFile = rootProject.file("keystore.properties")
-def keystoreProperties = new Properties()
+plugins {
+    id("com.android.application")
+    kotlin("android")
+    id("kotlin-parcelize")
+    kotlin("kapt")
+    id("dagger.hilt.android.plugin")
+    id("androidx.navigation.safeargs.kotlin")
+}
+
+val keystorePropertiesFile = file("../keystore.properties")
+val keystoreProperties = Properties()
 
 if (keystorePropertiesFile.exists()) {
-    keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
+    keystoreProperties.load(FileInputStream(keystorePropertiesFile))
 } else {
-    keystoreProperties['storeFile'] = 'keystore.jks'
+    keystoreProperties["storeFile"] = "keystore.jks"
 }
 
 android {
-    namespace "com.cosmos.unreddit"
+    namespace = Config.namespace
 
-    compileSdkVersion 33
+    compileSdk = Config.compileSdk
 
     defaultConfig {
-        applicationId "com.cosmos.unreddit"
-        minSdkVersion 21
-        targetSdkVersion 33
-        versionCode 16
-        versionName "2.0.3"
+        applicationId = Config.applicationId
 
-        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        minSdk = Config.minSdk
+        targetSdk = Config.targetSdk
+
+        versionCode = Config.versionCode
+        versionName = Config.versionName
+
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
         vectorDrawables.useSupportLibrary = true
 
         javaCompileOptions {
             annotationProcessorOptions {
-                arguments += ["room.schemaLocation": "$projectDir/schemas".toString()]
+                compilerArgumentProviders(RoomSchemaArgProvider(File(projectDir, "schemas")))
             }
         }
     }
 
     signingConfigs {
-        release {
-            keyAlias keystoreProperties['keyAlias']
-            keyPassword keystoreProperties['keyPassword']
-            storeFile file(keystoreProperties['storeFile'])
-            storePassword keystoreProperties['storePassword']
+        create("release") {
+            keyAlias = keystoreProperties.getProperty("keyAlias", "")
+            keyPassword = keystoreProperties.getProperty("keyPassword", "")
+            storeFile = file(keystoreProperties["storeFile"] as String)
+            storePassword = keystoreProperties.getProperty("storePassword", "")
         }
     }
 
     buildTypes {
-        release {
-            minifyEnabled true
-            shrinkResources true
-            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-            signingConfig signingConfigs.release
+        getByName("release") {
+            isMinifyEnabled = true
+            isShrinkResources = true
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
+            signingConfig = signingConfigs.getByName("release")
         }
-        debug {
-            applicationIdSuffix ".dev"
-            debuggable true
+        getByName("debug") {
+            applicationIdSuffix = ".dev"
+            isDebuggable = true
         }
     }
 
     buildFeatures {
-        viewBinding true
-        dataBinding true
+        viewBinding = true
+        dataBinding = true
     }
 
     compileOptions {
-        sourceCompatibility 1.8
-        targetCompatibility 1.8
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
     }
 
     kotlinOptions {
         jvmTarget = "1.8"
-        freeCompilerArgs += ["-opt-in=kotlinx.coroutines.ExperimentalCoroutinesApi"]
+        freeCompilerArgs = listOf("-opt-in=kotlinx.coroutines.ExperimentalCoroutinesApi")
     }
 }
 
 dependencies {
-    implementation fileTree(dir: "libs", include: ["*.jar"])
+    implementation("com.google.dagger:hilt-android:${Dependencies.Versions.hiltGradlePlugin}")
+    kapt("com.google.dagger:hilt-android-compiler:${Dependencies.Versions.hiltGradlePlugin}")
+    kapt("androidx.hilt:hilt-compiler:${Dependencies.Versions.hilt}")
 
-    implementation "com.google.dagger:hilt-android:$rootProject.hiltGradlePlugin"
-    kapt "com.google.dagger:hilt-android-compiler:$rootProject.hiltGradlePlugin"
-    kapt "androidx.hilt:hilt-compiler:$rootProject.hilt"
+    implementation("androidx.hilt:hilt-navigation-fragment:${Dependencies.Versions.hilt}")
+    implementation("androidx.hilt:hilt-work:${Dependencies.Versions.hilt}")
 
-    implementation "androidx.hilt:hilt-navigation-fragment:$rootProject.hilt"
-    implementation "androidx.hilt:hilt-work:$rootProject.hilt"
+    implementation("androidx.core:core-ktx:${Dependencies.Versions.core}")
+    implementation("androidx.appcompat:appcompat:${Dependencies.Versions.appCompat}")
+    implementation("androidx.constraintlayout:constraintlayout:${Dependencies.Versions.constraintLayout}")
+    implementation("androidx.recyclerview:recyclerview:${Dependencies.Versions.recyclerview}")
+    implementation("androidx.fragment:fragment-ktx:${Dependencies.Versions.fragment}")
+    implementation("androidx.lifecycle:lifecycle-livedata-ktx:${Dependencies.Versions.lifecycle}")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:${Dependencies.Versions.lifecycle}")
+    implementation("androidx.lifecycle:lifecycle-runtime-ktx:${Dependencies.Versions.lifecycle}")
+    implementation("androidx.coordinatorlayout:coordinatorlayout:${Dependencies.Versions.coordinatorlayout}")
+    implementation("androidx.viewpager2:viewpager2:${Dependencies.Versions.viewpager2}")
+    implementation("androidx.preference:preference-ktx:${Dependencies.Versions.preference}")
 
-    implementation "androidx.core:core-ktx:$rootProject.core"
-    implementation "androidx.appcompat:appcompat:$rootProject.appCompat"
-    implementation "androidx.constraintlayout:constraintlayout:$rootProject.constraintLayout"
-    implementation "androidx.recyclerview:recyclerview:$rootProject.recyclerview"
-    implementation "androidx.fragment:fragment-ktx:$rootProject.fragment"
-    implementation "androidx.lifecycle:lifecycle-livedata-ktx:$rootProject.lifecycle"
-    implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$rootProject.lifecycle"
-    implementation "androidx.lifecycle:lifecycle-runtime-ktx:$rootProject.lifecycle"
-    implementation "androidx.coordinatorlayout:coordinatorlayout:$rootProject.coordinatorlayout"
-    implementation "androidx.viewpager2:viewpager2:$rootProject.viewpager2"
-    implementation "androidx.preference:preference-ktx:$rootProject.preference"
+    implementation("androidx.navigation:navigation-fragment-ktx:${Dependencies.Versions.navigation}")
+    implementation("androidx.navigation:navigation-ui-ktx:${Dependencies.Versions.navigation}")
 
-    implementation "androidx.navigation:navigation-fragment-ktx:$rootProject.navigation"
-    implementation "androidx.navigation:navigation-ui-ktx:$rootProject.navigation"
+    implementation("androidx.room:room-runtime:${Dependencies.Versions.room}")
+    kapt("androidx.room:room-compiler:${Dependencies.Versions.room}")
+    implementation("androidx.room:room-ktx:${Dependencies.Versions.room}")
+    implementation("androidx.datastore:datastore-preferences:${Dependencies.Versions.datastore}")
 
-    implementation "androidx.room:room-runtime:$rootProject.room"
-    kapt "androidx.room:room-compiler:$rootProject.room"
-    implementation "androidx.room:room-ktx:$rootProject.room"
-    implementation "androidx.datastore:datastore-preferences:$rootProject.datastore"
+    implementation("androidx.paging:paging-runtime-ktx:${Dependencies.Versions.paging}")
 
-    implementation "androidx.paging:paging-runtime-ktx:$rootProject.paging"
+    implementation("androidx.work:work-runtime-ktx:${Dependencies.Versions.work}")
 
-    implementation "androidx.work:work-runtime-ktx:$rootProject.work"
+    implementation("com.google.android.material:material:${Dependencies.Versions.material}")
 
-    implementation "com.google.android.material:material:$rootProject.material"
+    implementation("androidx.browser:browser:${Dependencies.Versions.browser}")
 
-    implementation "androidx.browser:browser:$rootProject.browser"
+    implementation("androidx.core:core-splashscreen:${Dependencies.Versions.splashscreen}")
 
-    implementation "androidx.core:core-splashscreen:$rootProject.splashscreen"
+    implementation("com.squareup.retrofit2:retrofit:${Dependencies.Versions.retrofit}")
+    implementation("com.squareup.retrofit2:converter-moshi:${Dependencies.Versions.retrofit}")
 
-    implementation "com.squareup.retrofit2:retrofit:$rootProject.retrofit"
-    implementation "com.squareup.retrofit2:converter-moshi:$rootProject.retrofit"
+    implementation("com.squareup.moshi:moshi:${Dependencies.Versions.moshi}")
+    kapt("com.squareup.moshi:moshi-kotlin-codegen:${Dependencies.Versions.moshi}")
+    implementation("com.squareup.moshi:moshi-adapters:${Dependencies.Versions.moshi}")
 
-    implementation "com.squareup.moshi:moshi:$rootProject.moshi"
-    kapt "com.squareup.moshi:moshi-kotlin-codegen:$rootProject.moshi"
-    implementation("com.squareup.moshi:moshi-adapters:$rootProject.moshi")
+    implementation("com.squareup.okio:okio:${Dependencies.Versions.moshi}")
 
-    implementation("com.squareup.okio:okio:$rootProject.okio")
+    implementation("io.coil-kt:coil:${Dependencies.Versions.coil}")
+    implementation("io.coil-kt:coil-gif:${Dependencies.Versions.coil}")
 
-    implementation "io.coil-kt:coil:$rootProject.coil"
-    implementation "io.coil-kt:coil-gif:$rootProject.coil"
+    implementation("com.github.MikeOrtiz:TouchImageView:${Dependencies.Versions.touchImageView}")
 
-    implementation "com.github.MikeOrtiz:TouchImageView:$rootProject.touchImageView"
+    implementation("com.google.android.exoplayer:exoplayer:${Dependencies.Versions.exoPlayer}")
 
-    implementation "com.google.android.exoplayer:exoplayer:$rootProject.exoPlayer"
+    implementation("org.jsoup:jsoup:${Dependencies.Versions.jsoup}")
 
-    implementation "org.jsoup:jsoup:$rootProject.jsoup"
+    implementation("com.drakeet.drawer:drawer:${Dependencies.Versions.drawer}")
 
-    implementation "com.drakeet.drawer:drawer:$rootProject.drawer"
+    testImplementation("junit:junit:${Dependencies.Versions.jUnit}")
 
-    testImplementation "junit:junit:$rootProject.jUnit"
-
-    androidTestImplementation "androidx.test:runner:$rootProject.testRunner"
-    androidTestImplementation "androidx.test.ext:junit:$rootProject.test"
-    androidTestImplementation "androidx.test.espresso:espresso-core:$rootProject.espresso"
-
+    androidTestImplementation("androidx.test:runner:${Dependencies.Versions.testRunner}")
+    androidTestImplementation("androidx.test.ext:junit:${Dependencies.Versions.test}")
+    androidTestImplementation("androidx.test.espresso:espresso-core:${Dependencies.Versions.espresso}")
 }
