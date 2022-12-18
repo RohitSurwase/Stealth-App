@@ -99,7 +99,7 @@
   {
     "service": "medium",
     "name": "Medium",
-    "pattern": "(?:.*\\.)*(?<!(link\\.|cdn\\-images\\-\\d+\\.))medium\\.com",
+    "pattern": "(.*\\.)*medium\\.com",
     "redirect": [
       {
         "name": "scribe",
