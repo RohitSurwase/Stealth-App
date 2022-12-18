@@ -56,6 +56,7 @@ class LinkHandler @Inject constructor(
             MediaType.IMGUR_VIDEO,
             MediaType.IMGUR_IMAGE,
             MediaType.IMGUR_LINK,
+            MediaType.GFYCAT,
             MediaType.REDGIFS,
             MediaType.STREAMABLE,
             MediaType.IMAGE,
