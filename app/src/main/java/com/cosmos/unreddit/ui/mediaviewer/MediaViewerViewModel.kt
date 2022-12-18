@@ -153,6 +153,12 @@ class MediaViewerViewModel
                             )
                         }
                     }
+                    .map {
+                        // Some Imgur galleries are empty and actually point to a single image
+                        it.ifEmpty {
+                            GalleryMedia.singleton(Type.IMAGE, LinkUtil.getUrlFromImgurId(albumId))
+                        }
+                    }
                     .flowOn(defaultDispatcher)
                     .onStart {
                         _media.value = Resource.Loading()

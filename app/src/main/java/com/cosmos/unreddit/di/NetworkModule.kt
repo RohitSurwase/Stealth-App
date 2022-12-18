@@ -4,6 +4,7 @@ import com.cosmos.unreddit.data.remote.RawJsonInterceptor
 import com.cosmos.unreddit.data.remote.TargetRedditInterceptor
 import com.cosmos.unreddit.data.remote.api.gfycat.GfycatApi
 import com.cosmos.unreddit.data.remote.api.imgur.ImgurApi
+import com.cosmos.unreddit.data.remote.api.imgur.adapter.AlbumDataAdapter
 import com.cosmos.unreddit.data.remote.api.reddit.RedditApi
 import com.cosmos.unreddit.data.remote.api.reddit.SortingConverterFactory
 import com.cosmos.unreddit.data.remote.api.reddit.TedditApi
@@ -53,6 +54,10 @@ object NetworkModule {
 
     @Qualifier
     @Retention(AnnotationRetention.BINARY)
+    annotation class ImgurMoshi
+
+    @Qualifier
+    @Retention(AnnotationRetention.BINARY)
     annotation class Gfycat
 
     @Qualifier
@@ -94,6 +99,15 @@ object NetworkModule {
     @Singleton
     fun provideBasicMoshi(): Moshi {
         return Moshi.Builder()
+            .build()
+    }
+
+    @ImgurMoshi
+    @Provides
+    @Singleton
+    fun provideImgurMoshi(): Moshi {
+        return Moshi.Builder()
+            .add(AlbumDataAdapter())
             .build()
     }
 
@@ -180,7 +194,7 @@ object NetworkModule {
     @Provides
     @Singleton
     fun provideImgurApi(
-        @BasicMoshi moshi: Moshi,
+        @ImgurMoshi moshi: Moshi,
         @GenericOkHttp okHttpClient: OkHttpClient
     ): ImgurApi {
         return Retrofit.Builder()
