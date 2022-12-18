@@ -11,27 +11,27 @@
         tools:layout="@layout/fragment_post_details">
         <deepLink
             android:id="@+id/deepLinkPost"
-            app:uri=".*.reddit.com/r/{subreddit}/comments/{id}"/>
+            app:uri=".*.reddit.com/{type}/{name}/comments/{id}"/>
 
         <deepLink
             android:id="@+id/deepLinkPost2"
-            app:uri=".*.reddit.com/r/{subreddit}/comments/{id}/"/>
+            app:uri=".*.reddit.com/{type}/{name}/comments/{id}/"/>
 
         <deepLink
             android:id="@+id/deepLinkPostTitle"
-            app:uri=".*.reddit.com/r/{subreddit}/comments/{id}/{title}"/>
+            app:uri=".*.reddit.com/{type}/{name}/comments/{id}/{title}"/>
 
         <deepLink
             android:id="@+id/deepLinkPostTitle2"
-            app:uri=".*.reddit.com/r/{subreddit}/comments/{id}/{title}/"/>
+            app:uri=".*.reddit.com/{type}/{name}/comments/{id}/{title}/"/>
 
         <deepLink
             android:id="@+id/deepLinkPostThread"
-            app:uri=".*.reddit.com/r/{subreddit}/comments/{id}/{title}/{comment}"/>
+            app:uri=".*.reddit.com/{type}/{name}/comments/{id}/{title}/{comment}"/>
 
         <deepLink
             android:id="@+id/deepLinkPostThread2"
-            app:uri=".*.reddit.com/r/{subreddit}/comments/{id}/{title}/{comment}/"/>
+            app:uri=".*.reddit.com/{type}/{name}/comments/{id}/{title}/{comment}/"/>
 
         <deepLink
             android:id="@+id/deepLinkShort"
@@ -50,7 +50,12 @@
             app:uri=".*.reddit.com/gallery/{id}/"/>
 
         <argument
-            android:name="subreddit"
+            android:name="type"
+            android:defaultValue="@null"
+            app:argType="string"
+            app:nullable="true" />
+        <argument
+            android:name="name"
             android:defaultValue="@null"
             app:argType="string"
             app:nullable="true" />

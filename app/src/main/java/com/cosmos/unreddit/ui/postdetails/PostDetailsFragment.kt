@@ -103,7 +103,7 @@ class PostDetailsFragment : BaseFragment(),
             handleArguments()
         }
 
-        isLegacyNavigation = (args.subreddit == null || args.id == null)
+        isLegacyNavigation = (args.name == null || args.id == null)
     }
 
     override fun onCreateView(
@@ -252,10 +252,11 @@ class PostDetailsFragment : BaseFragment(),
 
     private fun handleArguments() {
         if (args.id != null) {
-            val permalink = if (args.subreddit != null) {
+            val permalink = if (args.name != null) {
                 // Full URL
                 val stringBuilder = StringBuilder().apply {
-                    append("/r/").append(args.subreddit).append("/comments/").append(args.id)
+                    append("/").append(args.type).append("/").append(args.name).append("/comments/")
+                        .append(args.id)
                 }
 
                 if (args.title != null && args.comment != null) {
