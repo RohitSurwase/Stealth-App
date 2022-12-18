@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 4,
-    "identityHash": "95cd8d938b4450d05f9b72ec7f225946",
+    "identityHash": "53c3318cbc7eaf3a2a7d4d28d81b9429",
     "entities": [
       {
         "tableName": "subscription",
@@ -516,7 +516,7 @@
       },
       {
         "tableName": "redirect",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`pattern` TEXT NOT NULL, `redirect` TEXT NOT NULL, `service` TEXT NOT NULL, `mode` INTEGER NOT NULL, PRIMARY KEY(`pattern`, `service`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`pattern` TEXT NOT NULL, `redirect` TEXT NOT NULL, `service` TEXT NOT NULL, `mode` INTEGER NOT NULL, PRIMARY KEY(`service`))",
         "fields": [
           {
             "fieldPath": "pattern",
@@ -545,7 +545,6 @@
         ],
         "primaryKey": {
           "columnNames": [
-            "pattern",
             "service"
           ],
           "autoGenerate": false
@@ -557,7 +556,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '95cd8d938b4450d05f9b72ec7f225946')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '53c3318cbc7eaf3a2a7d4d28d81b9429')"
     ]
   }
 }

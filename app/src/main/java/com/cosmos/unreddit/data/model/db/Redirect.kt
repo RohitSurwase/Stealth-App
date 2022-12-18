@@ -9,7 +9,7 @@ import kotlinx.parcelize.Parcelize
 @Parcelize
 @Entity(
     tableName = "redirect",
-    primaryKeys = ["pattern", "service"]
+    primaryKeys = ["service"]
 )
 data class Redirect(
     var pattern: String,

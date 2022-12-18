@@ -180,7 +180,7 @@ abstract class RedditDatabase : RoomDatabase() {
                         `redirect` TEXT NOT NULL, 
                         `service` TEXT NOT NULL, 
                         `mode` INTEGER NOT NULL, 
-                        PRIMARY KEY(`pattern`, `service`)
+                        PRIMARY KEY(`service`)
                     )
                     """.trimIndent())
             }
