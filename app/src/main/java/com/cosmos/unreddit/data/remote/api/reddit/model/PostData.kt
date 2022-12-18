@@ -191,7 +191,7 @@ data class PostData(
             }
             MediaType.IMGUR_LINK -> {
                 crossposts?.firstOrNull()?.mediaUrl
-                    ?: mediaPreview?.images?.getOrNull(0)?.imageSource?.url
+                    ?: url
             }
             else -> url
         } ?: url
