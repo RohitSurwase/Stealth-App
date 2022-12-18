@@ -235,9 +235,9 @@ data class PostData(
 
     val previewUrl: String?
         get() = mediaPreview?.images?.getOrNull(0)?.imageSource?.url
-            ?: gallery.firstOrNull()?.url
             ?: mediaMetadata?.items?.getOrNull(0)?.image?.url
             ?: mediaMetadata?.items?.getOrNull(0)?.previews?.lastOrNull()?.url
+            ?: gallery.firstOrNull()?.url
             // Keep URL only if it's an image
             ?: url.takeIf { postType != PostType.LINK || it.mimeType.startsWith("image") }
 }
