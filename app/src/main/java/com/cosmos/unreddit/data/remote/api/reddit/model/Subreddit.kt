@@ -6,7 +6,7 @@ import com.squareup.moshi.JsonClass
 @JsonClass(generateAdapter = true)
 data class Subreddit(
     @Json(name = "banner_img")
-    val bannerImg: String,
+    val bannerImg: String?,
 
     @Json(name = "community_icon")
     val communityIcon: String?,
