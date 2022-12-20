@@ -85,7 +85,6 @@ class SmartPostListDataSource(
             responses
                 .map { it.data.children }
                 .sort(sorting)
-                .distinctBy { (it as PostChild).data.name }
         }
 
         // Step 6: Retrieve the `after` key for each response and create a list out of them
