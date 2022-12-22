@@ -251,6 +251,8 @@ class MediaViewerFragment : FullscreenBottomSheetFragment() {
 
         videoViewHolder?.muteAudio(shouldMute)
 
+        mediaAdapter.muteVideo = shouldMute
+
         viewerViewModel.setMuted(shouldMute)
     }
 

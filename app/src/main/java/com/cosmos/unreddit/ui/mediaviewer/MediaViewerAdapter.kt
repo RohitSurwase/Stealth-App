@@ -29,7 +29,7 @@ import java.net.HttpURLConnection
 
 class MediaViewerAdapter(
     context: Context,
-    private val muteVideo: Boolean,
+    var muteVideo: Boolean,
     private val onMediaClick: () -> Unit,
     private val showControls: (Boolean) -> Unit,
     private val hasAudio: (Boolean) -> Unit
