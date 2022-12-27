@@ -13,7 +13,7 @@ class LinkValidator(link: String) {
     init {
         val builder = StringBuilder()
 
-        if (!link.startsWith("http:", ignoreCase = true) ||
+        if (!link.startsWith("http:", ignoreCase = true) &&
             !link.startsWith("https:", ignoreCase = true)) {
             builder.append("https://")
         }
