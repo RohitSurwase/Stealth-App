@@ -166,6 +166,7 @@
 
     <string name="instance_hint">Instance</string>
     <string name="instance_empty_error">Instance cannot be empty</string>
+    <string name="instance_invalid_error">Instance URL is invalid</string>
 
     <string name="redirect_mode_on">ON</string>
     <string name="redirect_mode_off">OFF</string>

@@ -14,6 +14,7 @@ import com.cosmos.unreddit.data.model.ServiceExternal
 import com.cosmos.unreddit.data.model.ServiceRedirect
 import com.cosmos.unreddit.data.model.db.Redirect
 import com.cosmos.unreddit.databinding.FragmentPrivacyEnhancerServiceBinding
+import com.cosmos.unreddit.util.LinkValidator
 import com.cosmos.unreddit.util.extension.doAndDismiss
 import com.cosmos.unreddit.util.extension.parcelable
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -105,9 +106,20 @@ class PrivacyEnhancerServiceDialog : DialogFragment(), OnShowListener {
     private fun save() {
         val selectedMode = mode
         val instance = binding.textListInstances.text.toString()
+        val linkValidator = LinkValidator(instance)
 
-        if (selectedMode.isEnabled && instance.isBlank()) {
-            binding.listInstances.error = getString(R.string.instance_empty_error)
+        var errorMessage: String? = null
+
+        if (selectedMode.isEnabled) {
+            errorMessage = when {
+                instance.isBlank() -> getString(R.string.instance_empty_error)
+                !linkValidator.isValid -> getString(R.string.instance_invalid_error)
+                else -> null
+            }
+        }
+
+        if (errorMessage != null) {
+            binding.listInstances.error = errorMessage
             return
         }
 

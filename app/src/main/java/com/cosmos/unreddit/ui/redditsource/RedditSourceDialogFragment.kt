@@ -14,6 +14,7 @@ import androidx.fragment.app.setFragmentResult
 import com.cosmos.unreddit.R
 import com.cosmos.unreddit.data.model.preferences.DataPreferences
 import com.cosmos.unreddit.databinding.FragmentRedditSourceBinding
+import com.cosmos.unreddit.util.LinkValidator
 import com.cosmos.unreddit.util.extension.doAndDismiss
 import com.cosmos.unreddit.util.extension.serializable
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -90,9 +91,20 @@ class RedditSourceDialogFragment : DialogFragment(), OnShowListener {
             else -> DataPreferences.RedditSource.REDDIT
         }
         val instance = binding.textListInstances.text.toString()
+        val linkValidator = LinkValidator(instance)
 
-        if (source == DataPreferences.RedditSource.TEDDIT && instance.isBlank()) {
-            binding.listInstances.error = getString(R.string.instance_empty_error)
+        var errorMessage: String? = null
+
+        if (source == DataPreferences.RedditSource.TEDDIT) {
+            errorMessage = when {
+                instance.isBlank() -> getString(R.string.instance_empty_error)
+                !linkValidator.isValid -> getString(R.string.instance_invalid_error)
+                else -> null
+            }
+        }
+
+        if (errorMessage != null) {
+            binding.listInstances.error = errorMessage
             return
         }
 
@@ -101,7 +113,7 @@ class RedditSourceDialogFragment : DialogFragment(), OnShowListener {
                 REQUEST_KEY_SOURCE,
                 bundleOf(
                     KEY_SOURCE to source,
-                    KEY_INSTANCE to instance
+                    KEY_INSTANCE to linkValidator.validUrl?.host?.ifEmpty { "" }
                 )
             )
         }
