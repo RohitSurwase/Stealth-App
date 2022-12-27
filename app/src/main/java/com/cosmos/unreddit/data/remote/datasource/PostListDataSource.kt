@@ -7,6 +7,7 @@ import com.cosmos.unreddit.data.model.Sorting
 import com.cosmos.unreddit.data.remote.api.reddit.model.Child
 import com.cosmos.unreddit.data.remote.api.reddit.model.Listing
 import com.cosmos.unreddit.data.remote.api.reddit.source.CurrentSource
+import com.squareup.moshi.JsonDataException
 import retrofit2.HttpException
 import java.io.IOException
 
@@ -29,6 +30,8 @@ open class PostListDataSource(
             LoadResult.Error(exception)
         } catch (exception: HttpException) {
             Log.e("PostListDataSource", "Error", exception)
+            LoadResult.Error(exception)
+        } catch (exception: JsonDataException) {
             LoadResult.Error(exception)
         }
     }

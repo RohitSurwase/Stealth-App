@@ -9,6 +9,7 @@ import com.cosmos.unreddit.data.remote.api.reddit.model.PostChild
 import com.cosmos.unreddit.data.remote.api.reddit.source.CurrentSource
 import com.cosmos.unreddit.util.RedditUtil
 import com.cosmos.unreddit.util.extension.interlace
+import com.squareup.moshi.JsonDataException
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
@@ -43,6 +44,8 @@ class SmartPostListDataSource(
         } catch (exception: IOException) {
             LoadResult.Error(exception)
         } catch (exception: HttpException) {
+            LoadResult.Error(exception)
+        } catch (exception: JsonDataException) {
             LoadResult.Error(exception)
         }
     }
