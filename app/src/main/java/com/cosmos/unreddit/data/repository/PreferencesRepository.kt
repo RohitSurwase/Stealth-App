@@ -4,6 +4,8 @@ import androidx.appcompat.app.AppCompatDelegate
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.emptyPreferences
+import com.cosmos.unreddit.data.local.RedditDatabase
+import com.cosmos.unreddit.data.model.db.Redirect
 import com.cosmos.unreddit.data.model.preferences.ContentPreferences
 import com.cosmos.unreddit.data.model.preferences.DataPreferences
 import com.cosmos.unreddit.data.model.preferences.MediaPreferences
@@ -20,7 +22,8 @@ import javax.inject.Singleton
 
 @Singleton
 class PreferencesRepository @Inject constructor(
-    private val preferencesDatastore: DataStore<Preferences>
+    private val preferencesDatastore: DataStore<Preferences>,
+    private val redditDatabase: RedditDatabase
 ) {
 
     //region Ui
@@ -102,6 +105,42 @@ class PreferencesRepository @Inject constructor(
             DataPreferences.PreferencesKeys.REDDIT_SOURCE,
             defaultValue
         )
+    }
+
+    suspend fun setRedditSourceInstance(instance: String) {
+        preferencesDatastore.setValue(
+            DataPreferences.PreferencesKeys.REDDIT_SOURCE_INSTANCE,
+            instance
+        )
+    }
+
+    fun getRedditSourceInstance(defaultValue: String = ""): Flow<String> {
+        return preferencesDatastore.getValue(
+            DataPreferences.PreferencesKeys.REDDIT_SOURCE_INSTANCE,
+            defaultValue
+        )
+    }
+
+    suspend fun setPrivacyEnhancerEnabled(enablePrivacyEnhancer: Boolean) {
+        preferencesDatastore.setValue(
+            DataPreferences.PreferencesKeys.PRIVACY_ENHANCER,
+            enablePrivacyEnhancer
+        )
+    }
+
+    fun getPrivacyEnhancerEnabled(defaultValue: Boolean = false): Flow<Boolean> {
+        return preferencesDatastore.getValue(
+            DataPreferences.PreferencesKeys.PRIVACY_ENHANCER,
+            defaultValue
+        )
+    }
+
+    fun getAllRedirects(): Flow<List<Redirect>> {
+        return redditDatabase.redirectDao().getAllRedirects()
+    }
+
+    suspend fun updateRedirect(redirect: Redirect) {
+        redditDatabase.redirectDao().upsert(redirect)
     }
 
     fun getContentPreferences(): Flow<ContentPreferences> {

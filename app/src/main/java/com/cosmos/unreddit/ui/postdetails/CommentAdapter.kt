@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.AnimationUtils
+import android.widget.ImageView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
@@ -17,6 +18,7 @@ import com.cosmos.unreddit.data.local.mapper.CommentMapper2
 import com.cosmos.unreddit.data.model.Comment
 import com.cosmos.unreddit.data.model.Comment.CommentEntity
 import com.cosmos.unreddit.data.model.Comment.MoreEntity
+import com.cosmos.unreddit.data.model.db.PostEntity
 import com.cosmos.unreddit.data.repository.PostListRepository
 import com.cosmos.unreddit.databinding.ItemCommentBinding
 import com.cosmos.unreddit.databinding.ItemMoreBinding
@@ -27,7 +29,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
@@ -44,7 +45,9 @@ class CommentAdapter(
     private val onCommentLongClick: (CommentEntity) -> Unit
 ) : ListAdapter<Comment, RecyclerView.ViewHolder>(COMMENT_COMPARATOR) {
 
-    var linkId: String? = null
+    var postEntity: PostEntity? = null
+
+    var savedIds: List<String> = emptyList()
 
     private val scope = CoroutineScope(Job() + mainImmediateDispatcher)
 
@@ -148,7 +151,7 @@ class CommentAdapter(
         newList: MutableList<Comment>,
         comment: MoreEntity
     ) {
-        val link = linkId ?: return
+        val post = postEntity ?: return
 
         val containsMoreComments = comment.more.size > LOAD_MORE_LIMIT
 
@@ -161,7 +164,7 @@ class CommentAdapter(
             }
         }
 
-        repository.getMoreChildren(children, link)
+        repository.getMoreChildren(children, post.id)
             .map {
                 commentMapper.dataToEntities(it.json.data.things, null)
             }
@@ -173,6 +176,15 @@ class CommentAdapter(
             }
             .map { comments ->
                 comment.apply { isLoading = false; isError = false }
+
+                comments.forEach { comment ->
+                    (comment as? CommentEntity)?.run {
+                        linkTitle = linkTitle ?: post.title
+                        linkPermalink = linkPermalink ?: post.permalink
+                        linkAuthor = linkAuthor ?: post.author
+                        saved = savedIds.contains(comment.name)
+                    }
+                }
 
                 if (comment.depth > 0) {
                     val parentComment = newList.find { it.name == comment.parent }
@@ -217,7 +229,10 @@ class CommentAdapter(
     private fun onCommentLongClick(position: Int) {
         val comment = getItem(position)
         if (comment is CommentEntity) {
-            onCommentLongClick.invoke(comment)
+            comment.run {
+                saved = savedIds.contains(name)
+                onCommentLongClick.invoke(this)
+            }
         }
     }
 
@@ -305,24 +320,7 @@ class CommentAdapter(
 
             binding.commentScore.blurText(comment.scoreHidden)
 
-            binding.commentColorIndicator.apply {
-                if (comment.depth == 0) {
-                    visibility = View.GONE
-                } else {
-                    visibility = View.VISIBLE
-                    comment.commentIndicator?.let {
-                        backgroundTintList = ColorStateList.valueOf(
-                            ContextCompat.getColor(context, it)
-                        )
-                    }
-                    val params = ConstraintLayout.LayoutParams(
-                        layoutParams as ConstraintLayout.LayoutParams
-                    ).apply {
-                        marginStart = (commentOffset * (comment.depth - 1)).toInt()
-                    }
-                    layoutParams = params
-                }
-            }
+            binding.commentColorIndicator.setCommentColor(comment)
 
             bindCommentHiddenIndicator(comment, false)
 
@@ -394,21 +392,31 @@ class CommentAdapter(
             binding.progress.isVisible = more.isLoading
             binding.textError.isVisible = more.isError
 
-            binding.commentBody.apply {
-                val params = ConstraintLayout.LayoutParams(
-                    layoutParams as ConstraintLayout.LayoutParams
-                ).apply {
-                    marginStart = if (more.depth > 0) {
-                        (commentOffset * more.depth).toInt()
-                    } else {
-                        0
-                    }
-                }
-                layoutParams = params
-            }
+            binding.commentColorIndicator.setCommentColor(more)
 
             itemView.setOnClickListener {
                 onCommentClick(bindingAdapterPosition)
+            }
+        }
+    }
+
+    private fun ImageView.setCommentColor(comment: Comment) {
+        this.apply {
+            if (comment.depth == 0) {
+                visibility = View.GONE
+            } else {
+                visibility = View.VISIBLE
+                comment.commentIndicator?.let {
+                    backgroundTintList = ColorStateList.valueOf(
+                        ContextCompat.getColor(context, it)
+                    )
+                }
+                val params = ConstraintLayout.LayoutParams(
+                    layoutParams as ConstraintLayout.LayoutParams
+                ).apply {
+                    marginStart = (commentOffset * (comment.depth - 1)).toInt()
+                }
+                layoutParams = params
             }
         }
     }

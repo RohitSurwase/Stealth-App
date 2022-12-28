@@ -236,7 +236,7 @@ class PostListFragment : BaseFragment(), PullToRefreshLayout.OnRefreshListener {
 
                 binding.run {
                     if (!pullRefresh.isRefreshing) {
-                        listPost.isVisible = loadState.source.refresh is LoadState.NotLoading
+                        pullRefresh.isVisible = loadState.source.refresh is LoadState.NotLoading
 
                         loadingCradle.isVisible = isLoading
                     } else {

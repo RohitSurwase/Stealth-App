@@ -1,5 +1,6 @@
 package com.cosmos.unreddit.ui.subreddit
 
+import android.content.DialogInterface
 import android.graphics.Color
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -68,6 +69,12 @@ class SubredditFragment : BaseFragment(), PopupMenu.OnMenuItemClickListener,
 
     private lateinit var postListAdapter: PostListAdapter
 
+    private var isSubscribeEnabled: Boolean
+        get() = bindingAbout.subredditSubscribeButton.isEnabled
+        set(value) {
+            bindingAbout.subredditSubscribeButton.isEnabled = value
+        }
+
     @Inject
     lateinit var repository: PostListRepository
 
@@ -97,7 +104,7 @@ class SubredditFragment : BaseFragment(), PopupMenu.OnMenuItemClickListener,
         initRecyclerView()
         initDrawer()
         bindViewModel()
-        bindingAbout.subredditSubscribeButton.setOnClickListener { viewModel.toggleSubscription() }
+        bindingAbout.subredditSubscribeButton.setOnClickListener { toggleSubscription() }
         bindingContent.loadingState.infoRetry.setActionClickListener { retry() }
 
         viewModel.contentLayoutProgress?.let { bindingContent.layoutRoot.progress = it }
@@ -261,6 +268,7 @@ class SubredditFragment : BaseFragment(), PopupMenu.OnMenuItemClickListener,
     }
 
     private fun bindInfo(about: SubredditEntity) {
+        viewModel.isSubredditReachable = true
         with(about) {
             bindingContent.subreddit = this
             bindingAbout.subreddit = this
@@ -275,19 +283,29 @@ class SubredditFragment : BaseFragment(), PopupMenu.OnMenuItemClickListener,
             } else {
                 bindingAbout.subredditPublicDescription.visibility = View.GONE
             }
+
             if (description.isNotEmpty()) {
                 bindingAbout.subredditDescription.apply {
                     setText(description)
                     setOnLinkClickListener(this@SubredditFragment)
                 }
             }
+
+            isSubscribeEnabled = true
         }
     }
 
     private fun handleError(code: Int?) {
+        isSubscribeEnabled = true
         when (code) {
-            403 -> showUnauthorizedDialog()
-            404 -> showNotFoundDialog()
+            403 -> {
+                viewModel.isSubredditReachable = false
+                showUnauthorizedDialog()
+            }
+            404 -> {
+                viewModel.isSubredditReachable = false
+                showNotFoundDialog()
+            }
             else -> showRetryBar()
         }
     }
@@ -327,7 +345,7 @@ class SubredditFragment : BaseFragment(), PopupMenu.OnMenuItemClickListener,
         MaterialAlertDialogBuilder(requireContext())
             .setTitle(R.string.dialog_subreddit_not_found_title)
             .setMessage(R.string.dialog_subreddit_not_found_body)
-            .setPositiveButton(R.string.dialog_ok) { _, _ -> onBackPressed() }
+            .setPositiveButton(R.string.dialog_ok) { dialog, _ -> dialog.handleUserAcknowledgement() }
             .setCancelable(false)
             .show()
     }
@@ -336,9 +354,16 @@ class SubredditFragment : BaseFragment(), PopupMenu.OnMenuItemClickListener,
         MaterialAlertDialogBuilder(requireContext())
             .setTitle(R.string.dialog_subreddit_unauthorized_title)
             .setMessage(R.string.dialog_subreddit_unauthorized_body)
-            .setPositiveButton(R.string.dialog_ok) { _, _ -> onBackPressed() }
+            .setPositiveButton(R.string.dialog_ok) { dialog, _ -> dialog.handleUserAcknowledgement() }
             .setCancelable(false)
             .show()
+    }
+
+    private fun toggleSubscription() {
+        if (!viewModel.isSubredditReachable) {
+            isSubscribeEnabled = false
+        }
+        viewModel.toggleSubscription()
     }
 
     private fun showMenu() {
@@ -352,6 +377,15 @@ class SubredditFragment : BaseFragment(), PopupMenu.OnMenuItemClickListener,
 
     private fun openDrawer() {
         binding.drawerLayout.openDrawer(GravityCompat.END)
+    }
+
+    private fun DialogInterface.handleUserAcknowledgement() {
+        if (viewModel.isSubscribed.value) {
+            // Allow the user to unsubscribe
+            dismiss()
+        } else {
+            onBackPressed()
+        }
     }
 
     override fun onMenuItemClick(menuItem: MenuItem): Boolean {

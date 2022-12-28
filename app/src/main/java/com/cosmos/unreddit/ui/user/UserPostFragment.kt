@@ -36,6 +36,12 @@ class UserPostFragment : PagingListFragment<PostListAdapter, PostEntity>() {
                     adapter.contentPreferences = it
                 }
             }
+
+            launch {
+                viewModel.lastRefreshPost.collect {
+                    setRefreshTime(it)
+                }
+            }
         }
     }
 

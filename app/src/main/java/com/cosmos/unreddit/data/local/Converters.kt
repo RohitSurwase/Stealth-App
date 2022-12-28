@@ -6,6 +6,7 @@ import com.cosmos.unreddit.data.model.PosterType
 import com.cosmos.unreddit.data.model.Sort
 import com.cosmos.unreddit.data.model.Sorting
 import com.cosmos.unreddit.data.model.TimeSorting
+import com.cosmos.unreddit.data.model.db.Redirect
 
 class Converters {
     @TypeConverter
@@ -44,5 +45,15 @@ class Converters {
         return sorting?.let {
             listOfNotNull(it.generalSorting.name, it.timeSorting?.name).joinToString(";")
         }
+    }
+
+    @TypeConverter
+    fun fromRedirectModeInt(mode: Int?): Redirect.RedirectMode {
+        return mode?.let { Redirect.RedirectMode.toMode(it) } ?: Redirect.RedirectMode.OFF
+    }
+
+    @TypeConverter
+    fun toRedirectModeInt(redirectMode: Redirect.RedirectMode?): Int {
+        return redirectMode?.mode ?: Redirect.RedirectMode.OFF.mode
     }
 }

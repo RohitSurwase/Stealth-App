@@ -191,7 +191,7 @@ data class PostData(
             }
             MediaType.IMGUR_LINK -> {
                 crossposts?.firstOrNull()?.mediaUrl
-                    ?: mediaPreview?.images?.getOrNull(0)?.imageSource?.url
+                    ?: url
             }
             else -> url
         } ?: url
@@ -235,7 +235,9 @@ data class PostData(
 
     val previewUrl: String?
         get() = mediaPreview?.images?.getOrNull(0)?.imageSource?.url
-            ?: gallery.firstOrNull()?.url
+            ?: gallery.firstOrNull()?.url?.takeUnless {
+                it.mimeType.run { contains("gif") || contains("video") }
+            }
             ?: mediaMetadata?.items?.getOrNull(0)?.image?.url
             ?: mediaMetadata?.items?.getOrNull(0)?.previews?.lastOrNull()?.url
             // Keep URL only if it's an image

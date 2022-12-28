@@ -72,6 +72,9 @@ class PostDetailsFragment : BaseFragment(),
     private lateinit var commentAdapter: CommentAdapter
     private lateinit var resourceStateAdapter: ResourceStateAdapter
 
+    private val isOnlyPostOpen: Boolean
+        get() = parentFragmentManager.fragments.count { it is PostDetailsFragment } == 1
+
     @Inject
     lateinit var repository: PostListRepository
 
@@ -100,7 +103,7 @@ class PostDetailsFragment : BaseFragment(),
             handleArguments()
         }
 
-        isLegacyNavigation = (args.subreddit == null || args.id == null)
+        isLegacyNavigation = (args.name == null || args.id == null)
     }
 
     override fun onCreateView(
@@ -213,6 +216,12 @@ class PostDetailsFragment : BaseFragment(),
                     binding.singleThreadLayout.isVisible = isSingleThread
                 }
             }
+
+            launch {
+                viewModel.savedCommentIds.collect { savedCommentIds ->
+                    commentAdapter.savedIds = savedCommentIds
+                }
+            }
         }
     }
 
@@ -237,16 +246,17 @@ class PostDetailsFragment : BaseFragment(),
     private fun bindPost(post: PostEntity, fromCache: Boolean) {
         binding.appBar.label.text = post.title
         postAdapter.setPost(post, fromCache)
-        commentAdapter.linkId = post.id
+        commentAdapter.postEntity = post
         viewModel.insertPostInHistory(post.id)
     }
 
     private fun handleArguments() {
         if (args.id != null) {
-            val permalink = if (args.subreddit != null) {
+            val permalink = if (args.name != null) {
                 // Full URL
                 val stringBuilder = StringBuilder().apply {
-                    append("/r/").append(args.subreddit).append("/comments/").append(args.id)
+                    append("/").append(args.type).append("/").append(args.name).append("/comments/")
+                        .append(args.id)
                 }
 
                 if (args.title != null && args.comment != null) {
@@ -324,7 +334,10 @@ class PostDetailsFragment : BaseFragment(),
     }
 
     override fun onBackPressed() {
-        showNavigation(true)
+        if (isOnlyPostOpen) {
+            showNavigation(true)
+        }
+
         if (isLegacyNavigation) {
             // Prevent onBackPressed event to be passed to PostDetailsFragment and show bottom nav
             parentFragmentManager.popBackStack()

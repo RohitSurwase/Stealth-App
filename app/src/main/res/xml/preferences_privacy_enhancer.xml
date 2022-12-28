@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <SwitchPreferenceCompat
+        app:key="privacy_enhancer"
+        app:title="@string/preference_privacy_enhancer"
+        app:summary="@string/preference_privacy_enhancer_summary"
+        app:persistent="false"/>
+
+    <PreferenceCategory
+        app:key="services"
+        app:dependency="privacy_enhancer"/>
+
+</PreferenceScreen>

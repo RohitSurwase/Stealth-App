@@ -16,6 +16,7 @@ import com.cosmos.unreddit.data.repository.PreferencesRepository
 import com.cosmos.unreddit.data.repository.StreamableRepository
 import com.cosmos.unreddit.di.DispatchersModule.DefaultDispatcher
 import com.cosmos.unreddit.util.LinkUtil
+import com.cosmos.unreddit.util.LinkUtil.https
 import com.cosmos.unreddit.util.PostUtil
 import com.cosmos.unreddit.util.extension.updateValue
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -32,6 +33,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import retrofit2.HttpException
 import java.io.IOException
 import javax.inject.Inject
@@ -71,106 +73,117 @@ class MediaViewerViewModel
 
     fun loadMedia(link: String, mediaType: MediaType, forceUpdate: Boolean = false) {
         if (_media.value !is Resource.Success || forceUpdate) {
-            retrieveMedia(link, mediaType)
+            viewModelScope.launch {
+                val httpsLink = withContext(defaultDispatcher) { link.https }
+                retrieveMedia(httpsLink, mediaType)
+            }
         }
     }
 
-    private fun retrieveMedia(link: String, mediaType: MediaType) {
-        viewModelScope.launch {
-            when (mediaType) {
-                MediaType.IMGUR_IMAGE, MediaType.IMGUR_LINK, MediaType.IMAGE -> {
-                    setMedia(GalleryMedia.singleton(Type.IMAGE, link))
-                }
-                MediaType.IMGUR_GIF -> {
-                    setMedia(GalleryMedia.singleton(Type.VIDEO, LinkUtil.getImgurVideo(link)))
-                }
-                MediaType.REDDIT_GIF, MediaType.IMGUR_VIDEO, MediaType.VIDEO -> {
-                    setMedia(GalleryMedia.singleton(Type.VIDEO, link))
-                }
-                MediaType.REDDIT_VIDEO -> {
-                    setMedia(
-                        GalleryMedia.singleton(Type.VIDEO, link, LinkUtil.getRedditSoundTrack(link))
-                    )
-                }
-                MediaType.GFYCAT -> {
-                    val id = LinkUtil.getGfycatId(link)
+    private suspend fun retrieveMedia(link: String, mediaType: MediaType) {
+        when (mediaType) {
+            MediaType.IMGUR_IMAGE, MediaType.IMAGE -> {
+                setMedia(GalleryMedia.singleton(Type.IMAGE, link))
+            }
+            MediaType.IMGUR_LINK -> {
+                val id = LinkUtil.getImageIdFromImgurLink(link)
+                setMedia(GalleryMedia.singleton(Type.IMAGE, LinkUtil.getUrlFromImgurId(id)))
+            }
+            MediaType.IMGUR_GIF -> {
+                setMedia(GalleryMedia.singleton(Type.VIDEO, LinkUtil.getImgurVideo(link)))
+            }
+            MediaType.REDDIT_GIF, MediaType.IMGUR_VIDEO, MediaType.VIDEO -> {
+                setMedia(GalleryMedia.singleton(Type.VIDEO, link))
+            }
+            MediaType.REDDIT_VIDEO -> {
+                setMedia(
+                    GalleryMedia.singleton(Type.VIDEO, link, LinkUtil.getRedditSoundTrack(link))
+                )
+            }
+            MediaType.GFYCAT -> {
+                val id = LinkUtil.getGfycatId(link)
 
-                    gfycatRepository.getGfycatGif(id)
-                        .onStart {
-                            _media.value = Resource.Loading()
-                        }
-                        .catch {
-                            catchError(it)
-                        }
-                        .map {
-                            GalleryMedia.singleton(Type.VIDEO, it.gfyItem.contentUrls.mp4.url)
-                        }
-                        .collect {
-                            setMedia(it)
-                        }
-                }
-                MediaType.REDGIFS -> {
-                    gfycatRepository.parseRedgifsLink(link)
-                        .onStart {
-                            _media.value = Resource.Loading()
-                        }
-                        .catch {
-                            catchError(it)
-                        }
-                        .collect {
-                            setMedia(it)
-                        }
-                }
-                MediaType.STREAMABLE -> {
-                    val shortcode = LinkUtil.getStreamableShortcode(link)
-                    streamableRepository.getVideo(shortcode).onStart {
+                gfycatRepository.getGfycatGif(id)
+                    .onStart {
                         _media.value = Resource.Loading()
-                    }.catch {
+                    }
+                    .catch {
                         catchError(it)
-                    }.map { video ->
-                        GalleryMedia.singleton(Type.VIDEO, video.files.mp4.url)
-                    }.collect {
+                    }
+                    .map {
+                        GalleryMedia.singleton(Type.VIDEO, it.gfyItem.contentUrls.mp4.url)
+                    }
+                    .collect {
                         setMedia(it)
                     }
-                }
-                MediaType.IMGUR_ALBUM, MediaType.IMGUR_GALLERY -> {
-                    val albumId = LinkUtil.getAlbumIdFromImgurLink(link)
-                    imgurRepository.getAlbum(albumId)
-                        .map { album ->
-                            album.data.images.map { image ->
-                                GalleryMedia(
-                                    if (image.preferVideo) Type.VIDEO else Type.IMAGE,
-                                    LinkUtil.getUrlFromImgurImage(image),
-                                    description = image.description
-                                )
-                            }
-                        }
-                        .flowOn(defaultDispatcher)
-                        .onStart {
-                            _media.value = Resource.Loading()
-                        }
-                        .catch {
-                            catchError(it)
-                        }
-                        .collect {
-                            setMedia(it)
-                        }
-                }
-                MediaType.REDDIT_GALLERY -> {
-                    val permalink = LinkUtil.getPermalinkFromMediaUrl(link)
-                    postListRepository.getPost(permalink, Sorting(Sort.BEST)).onStart {
+            }
+            MediaType.REDGIFS -> {
+                gfycatRepository.parseRedgifsLink(link)
+                    .onStart {
                         _media.value = Resource.Loading()
-                    }.catch {
+                    }
+                    .catch {
                         catchError(it)
-                    }.map { listings ->
-                        postMapper.dataToEntity(PostUtil.getPostData(listings)).gallery
-                    }.collect {
+                    }
+                    .collect {
                         setMedia(it)
                     }
+            }
+            MediaType.STREAMABLE -> {
+                val shortcode = LinkUtil.getStreamableShortcode(link)
+                streamableRepository.getVideo(shortcode).onStart {
+                    _media.value = Resource.Loading()
+                }.catch {
+                    catchError(it)
+                }.map { video ->
+                    GalleryMedia.singleton(Type.VIDEO, video.files.mp4.url)
+                }.collect {
+                    setMedia(it)
                 }
-                else -> {
-                    _media.value = Resource.Error()
+            }
+            MediaType.IMGUR_ALBUM, MediaType.IMGUR_GALLERY -> {
+                val albumId = LinkUtil.getAlbumIdFromImgurLink(link)
+                imgurRepository.getAlbum(albumId)
+                    .map { album ->
+                        album.data.images.map { image ->
+                            GalleryMedia(
+                                if (image.preferVideo) Type.VIDEO else Type.IMAGE,
+                                LinkUtil.getUrlFromImgurImage(image),
+                                description = image.description
+                            )
+                        }
+                    }
+                    .map {
+                        // Some Imgur galleries are empty and actually point to a single image
+                        it.ifEmpty {
+                            GalleryMedia.singleton(Type.IMAGE, LinkUtil.getUrlFromImgurId(albumId))
+                        }
+                    }
+                    .flowOn(defaultDispatcher)
+                    .onStart {
+                        _media.value = Resource.Loading()
+                    }
+                    .catch {
+                        catchError(it)
+                    }
+                    .collect {
+                        setMedia(it)
+                    }
+            }
+            MediaType.REDDIT_GALLERY -> {
+                val permalink = LinkUtil.getPermalinkFromMediaUrl(link)
+                postListRepository.getPost(permalink, Sorting(Sort.BEST)).onStart {
+                    _media.value = Resource.Loading()
+                }.catch {
+                    catchError(it)
+                }.map { listings ->
+                    postMapper.dataToEntity(PostUtil.getPostData(listings)).gallery
+                }.collect {
+                    setMedia(it)
                 }
+            }
+            else -> {
+                _media.value = Resource.Error()
             }
         }
     }

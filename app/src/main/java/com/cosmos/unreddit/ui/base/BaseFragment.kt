@@ -5,7 +5,6 @@ import android.os.Bundle
 import android.view.View
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.addCallback
-import androidx.browser.customtabs.CustomTabsIntent
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.navigation.NavDirections
@@ -13,18 +12,18 @@ import androidx.navigation.NavOptions
 import androidx.navigation.fragment.findNavController
 import com.cosmos.unreddit.NavigationGraphDirections
 import com.cosmos.unreddit.R
-import com.cosmos.unreddit.data.model.GalleryMedia
-import com.cosmos.unreddit.data.model.MediaType
 import com.cosmos.unreddit.data.model.db.PostEntity
 import com.cosmos.unreddit.ui.common.widget.RedditView
 import com.cosmos.unreddit.ui.linkmenu.LinkMenuFragment
-import com.cosmos.unreddit.ui.mediaviewer.MediaViewerFragment
 import com.cosmos.unreddit.ui.postdetails.PostDetailsFragment
 import com.cosmos.unreddit.ui.postlist.PostListAdapter
 import com.cosmos.unreddit.ui.postmenu.PostMenuFragment
-import com.cosmos.unreddit.util.LinkUtil
+import com.cosmos.unreddit.util.LinkHandler
 import com.cosmos.unreddit.util.extension.applyWindowInsets
+import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
+@AndroidEntryPoint
 open class BaseFragment : Fragment(), PostListAdapter.PostClickListener,
     RedditView.OnLinkClickListener {
 
@@ -40,6 +39,9 @@ open class BaseFragment : Fragment(), PostListAdapter.PostClickListener,
             .setPopExitAnim(R.anim.nav_exit_anim)
             .build()
     }
+
+    @Inject
+    lateinit var linkHandler: LinkHandler
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -100,60 +102,26 @@ open class BaseFragment : Fragment(), PostListAdapter.PostClickListener,
     }
 
     override fun onImageClick(post: PostEntity) {
+        viewModel?.insertPostInHistory(post.id)
         if (post.gallery.isNotEmpty()) {
-            openGallery(post.gallery)
+            linkHandler.openGallery(post.gallery)
         } else {
-            openMedia(post.mediaUrl, post.mediaType)
+            linkHandler.openMedia(post.mediaUrl, post.mediaType)
         }
     }
 
     override fun onVideoClick(post: PostEntity) {
-        openMedia(post.mediaUrl, post.mediaType)
+        viewModel?.insertPostInHistory(post.id)
+        linkHandler.openMedia(post.mediaUrl, post.mediaType)
     }
 
     override fun onLinkClick(post: PostEntity) {
+        viewModel?.insertPostInHistory(post.id)
         onLinkClick(post.url)
     }
 
     override fun onLinkClick(link: String) {
-        onLinkClick(link, LinkUtil.getLinkType(link))
-    }
-
-    open fun onLinkClick(link: String, mediaType: MediaType) {
-        when (mediaType) {
-            MediaType.REDDIT_SUBREDDIT -> {
-                val subreddit = link.removePrefix("/r/")
-                openSubreddit(subreddit)
-            }
-
-            MediaType.REDDIT_USER -> {
-                val user = link.removePrefix("/u/")
-                openUser(user)
-            }
-
-            MediaType.REDDIT_LINK -> openRedditLink(link)
-
-            MediaType.REDDIT_WIKI -> openBrowser(link)
-
-            MediaType.REDDIT_POLL -> openBrowser(link)
-
-            MediaType.REDDIT_PERMALINK -> {
-                val post = "https://www.reddit.com$link"
-                openRedditLink(post)
-            }
-
-            MediaType.IMGUR_ALBUM,
-            MediaType.IMGUR_GALLERY,
-            MediaType.IMGUR_GIF,
-            MediaType.IMGUR_VIDEO,
-            MediaType.IMGUR_IMAGE,
-            MediaType.REDGIFS,
-            MediaType.STREAMABLE,
-            MediaType.IMAGE,
-            MediaType.VIDEO -> openMedia(link, mediaType)
-
-            else -> openBrowser(link)
-        }
+        linkHandler.handleLink(link)
     }
 
     override fun onLinkLongClick(link: String) {
@@ -162,18 +130,6 @@ open class BaseFragment : Fragment(), PostListAdapter.PostClickListener,
 
     override fun onSaveClick(post: PostEntity) {
         viewModel?.toggleSavePost(post)
-    }
-
-    open fun openGallery(images: List<GalleryMedia>) {
-        MediaViewerFragment.newInstance(images).run {
-            show(this@BaseFragment.parentFragmentManager, MediaViewerFragment.TAG)
-        }
-    }
-
-    open fun openMedia(link: String, mediaType: MediaType) {
-        MediaViewerFragment.newInstance(link, mediaType).run {
-            show(this@BaseFragment.parentFragmentManager, MediaViewerFragment.TAG)
-        }
     }
 
     open fun openSubreddit(subreddit: String) {
@@ -188,15 +144,7 @@ open class BaseFragment : Fragment(), PostListAdapter.PostClickListener,
         try {
             navigate(Uri.parse(link))
         } catch (e: IllegalArgumentException) {
-            openBrowser(link)
+            linkHandler.openBrowser(link)
         }
-    }
-
-    open fun openBrowser(link: String) {
-        CustomTabsIntent.Builder()
-            .setShowTitle(true)
-            .setShareState(CustomTabsIntent.SHARE_STATE_ON)
-            .build()
-            .launchUrl(requireContext(), Uri.parse(link))
     }
 }

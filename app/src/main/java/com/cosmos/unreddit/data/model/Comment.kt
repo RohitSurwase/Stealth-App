@@ -17,6 +17,7 @@ sealed class Comment {
 
     abstract val name: String
     abstract val depth: Int
+    abstract val commentIndicator: Int?
 
     @Parcelize
     @Entity(
@@ -79,18 +80,18 @@ sealed class Comment {
         val posterType: PosterType,
 
         @ColumnInfo(name = "link_title")
-        val linkTitle: String?,
+        var linkTitle: String?,
 
         @ColumnInfo(name = "link_permalink")
-        val linkPermalink: String?,
+        var linkPermalink: String?,
 
         @ColumnInfo(name = "link_author")
-        val linkAuthor: String?,
+        var linkAuthor: String?,
 
         val subreddit: String,
 
         @Ignore
-        val commentIndicator: Int? = null,
+        override val commentIndicator: Int? = null,
 
         @ColumnInfo(name = "name")
         override val name: String,
@@ -138,6 +139,8 @@ sealed class Comment {
         val id: String,
 
         val parent: String,
+
+        override val commentIndicator: Int? = null,
 
         override val name: String,
 

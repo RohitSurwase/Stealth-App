@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+        <import type="com.cosmos.unreddit.data.model.db.Redirect.RedirectMode"/>
+        <import type="com.cosmos.unreddit.util.extension.StringExtKt"/>
+        <variable
+            name="redirect"
+            type="com.cosmos.unreddit.data.model.db.Redirect" />
+        <variable
+            name="service"
+            type="com.cosmos.unreddit.data.model.ServiceExternal" />
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingHorizontal="24dp"
+        android:paddingTop="24dp">
+
+        <TextView
+            android:id="@+id/text_service"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            android:textSize="24sp"
+            android:text="@{service.name != null ? service.name : StringExtKt.getTitlecase(redirect.service)}"
+            tools:text="Reddit"/>
+
+        <androidx.appcompat.widget.SwitchCompat
+            android:id="@+id/switch_enabled"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toTopOf="@id/text_service"
+            app:layout_constraintBottom_toBottomOf="@id/text_service"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:checked="@{redirect.mode.enabled}"/>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/list_instances"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/text_service"
+            android:enabled="@{redirect.mode.enabled}">
+
+            <AutoCompleteTextView
+                android:id="@+id/text_list_instances"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/instance_hint"
+                android:inputType="textNoSuggestions"/>
+
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.checkbox.MaterialCheckBox
+            android:id="@+id/checkbox_ask"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toBottomOf="@id/list_instances"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:checked="@{redirect.mode == RedirectMode.ALWAYS_ASK}"
+            android:enabled="@{redirect.mode.enabled}"
+            android:text="@string/redirect_mode_ask"/>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>

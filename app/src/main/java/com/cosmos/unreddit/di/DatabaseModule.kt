@@ -21,6 +21,7 @@ object DatabaseModule {
             .addCallback(RedditDatabase.Callback())
             .addMigrations(RedditDatabase.MIGRATION_1_2)
             .addMigrations(RedditDatabase.MIGRATION_2_3)
+            .addMigrations(RedditDatabase.MIGRATION_3_4)
             .build()
     }
 }

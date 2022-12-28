@@ -23,11 +23,12 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChangedBy
 import kotlinx.coroutines.flow.dropWhile
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.flow.take
 import javax.inject.Inject
 
 @HiltViewModel
@@ -63,18 +64,22 @@ class SubredditSearchViewModel @Inject constructor(
         Data.Fetch("", DEFAULT_SORTING)
     )
 
+    private var latestUser: Data.User? = null
+
     private val userData: Flow<Data.User> = combine(
-        historyIds,
-        savedPostIds,
-        contentPreferences
+        historyIds, savedPostIds, contentPreferences
     ) { history, saved, prefs ->
         Data.User(history, saved, prefs)
+    }.onEach {
+        latestUser = it
+    }.distinctUntilChangedBy {
+        it.contentPreferences
     }
 
     init {
         postDataFlow = searchData
             .dropWhile { it.query.isBlank() }
-            .flatMapLatest { searchData -> userData.take(1).map { searchData to it } }
+            .flatMapLatest { searchData -> userData.map { searchData to it } }
             .flatMapLatest { data -> getPosts(data.first, data.second) }
             .cachedIn(viewModelScope)
     }
@@ -86,7 +91,7 @@ class SubredditSearchViewModel @Inject constructor(
         // TODO: Check subreddit value is not blank
         return repository.searchInSubreddit(data.query, subreddit.value, data.sorting)
             .map { pagingData ->
-                PostUtil.filterPosts(pagingData, user, postMapper, defaultDispatcher)
+                PostUtil.filterPosts(pagingData, latestUser ?: user, postMapper, defaultDispatcher)
             }
     }
 

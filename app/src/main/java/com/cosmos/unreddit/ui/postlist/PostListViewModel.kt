@@ -75,13 +75,17 @@ class PostListViewModel
         Data.FetchMultiple(listOf(DEFAULT_SUBREDDIT), DEFAULT_SORTING)
     )
 
+    private var latestUser: Data.User? = null
+
     private val userData: Flow<Data.User> = combine(
-        historyIds,
-        savedPostIds,
-        contentPreferences
+        historyIds, savedPostIds, contentPreferences
     ) { history, saved, prefs ->
         Data.User(history, saved, prefs)
-    }.distinctUntilChangedBy { it.contentPreferences }
+    }.onEach {
+        latestUser = it
+    }.distinctUntilChangedBy {
+        it.contentPreferences
+    }
 
     private val _lastRefresh: MutableStateFlow<Long> = MutableStateFlow(System.currentTimeMillis())
     val lastRefresh: StateFlow<Long> = _lastRefresh.asStateFlow()
@@ -100,7 +104,7 @@ class PostListViewModel
     private fun getPosts(data: Data.FetchMultiple, user: Data.User): Flow<PagingData<PostEntity>> {
         return repository.getPosts(data.query, data.sorting)
             .map { pagingData ->
-                PostUtil.filterPosts(pagingData, user, postMapper, defaultDispatcher)
+                PostUtil.filterPosts(pagingData, latestUser ?: user, postMapper, defaultDispatcher)
             }
     }
 

@@ -42,6 +42,14 @@ open class BaseViewModel(
         postListRepository.getSavedPostIds(it.id)
     }
 
+    fun insertPostInHistory(postId: String) {
+        viewModelScope.launch {
+            currentProfile.latest?.let {
+                postListRepository.insertPostInHistory(postId, it.id)
+            }
+        }
+    }
+
     fun toggleSavePost(post: PostEntity) {
         viewModelScope.launch {
             currentProfile.latest?.let {

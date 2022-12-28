@@ -4,6 +4,7 @@ import com.cosmos.unreddit.data.remote.RawJsonInterceptor
 import com.cosmos.unreddit.data.remote.TargetRedditInterceptor
 import com.cosmos.unreddit.data.remote.api.gfycat.GfycatApi
 import com.cosmos.unreddit.data.remote.api.imgur.ImgurApi
+import com.cosmos.unreddit.data.remote.api.imgur.adapter.AlbumDataAdapter
 import com.cosmos.unreddit.data.remote.api.reddit.RedditApi
 import com.cosmos.unreddit.data.remote.api.reddit.SortingConverterFactory
 import com.cosmos.unreddit.data.remote.api.reddit.TedditApi
@@ -19,12 +20,17 @@ import com.cosmos.unreddit.data.remote.api.reddit.model.CommentChild
 import com.cosmos.unreddit.data.remote.api.reddit.model.MoreChild
 import com.cosmos.unreddit.data.remote.api.reddit.model.PostChild
 import com.cosmos.unreddit.data.remote.api.streamable.StreamableApi
+import com.cosmos.unreddit.data.repository.PreferencesRepository
+import com.cosmos.unreddit.util.LinkValidator
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.adapters.PolymorphicJsonAdapterFactory
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.runBlocking
+import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
@@ -45,6 +51,10 @@ object NetworkModule {
     @Qualifier
     @Retention(AnnotationRetention.BINARY)
     annotation class BasicMoshi
+
+    @Qualifier
+    @Retention(AnnotationRetention.BINARY)
+    annotation class ImgurMoshi
 
     @Qualifier
     @Retention(AnnotationRetention.BINARY)
@@ -89,6 +99,15 @@ object NetworkModule {
     @Singleton
     fun provideBasicMoshi(): Moshi {
         return Moshi.Builder()
+            .build()
+    }
+
+    @ImgurMoshi
+    @Provides
+    @Singleton
+    fun provideImgurMoshi(): Moshi {
+        return Moshi.Builder()
+            .add(AlbumDataAdapter())
             .build()
     }
 
@@ -147,10 +166,22 @@ object NetworkModule {
     @Singleton
     fun provideTedditApi(
         @RedditMoshi moshi: Moshi,
-        @TedditOkHttp okHttpClient: OkHttpClient
+        @TedditOkHttp okHttpClient: OkHttpClient,
+        preferencesRepository: PreferencesRepository
     ): TedditApi {
+        // Get the saved instance unless it's empty, then take Teddit's default instance
+        val url = runBlocking {
+            preferencesRepository
+                .getRedditSourceInstance()
+                .firstOrNull()
+                .takeUnless { it.isNullOrEmpty() }
+                ?: TedditApi.BASE_URL
+        }
+
+        val httpUrl = LinkValidator(url).validUrl ?: TedditApi.BASE_URL.toHttpUrl()
+
         return Retrofit.Builder()
-            .baseUrl(TedditApi.BASE_URL)
+            .baseUrl(httpUrl)
             .addConverterFactory(MoshiConverterFactory.create(moshi))
             .addConverterFactory(SortingConverterFactory())
             .client(okHttpClient)
@@ -161,7 +192,7 @@ object NetworkModule {
     @Provides
     @Singleton
     fun provideImgurApi(
-        @BasicMoshi moshi: Moshi,
+        @ImgurMoshi moshi: Moshi,
         @GenericOkHttp okHttpClient: OkHttpClient
     ): ImgurApi {
         return Retrofit.Builder()

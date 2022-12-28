@@ -14,7 +14,6 @@ import com.cosmos.unreddit.data.repository.PreferencesRepository
 import com.cosmos.unreddit.di.DispatchersModule.DefaultDispatcher
 import com.cosmos.unreddit.ui.base.BaseViewModel
 import com.cosmos.unreddit.util.PostUtil
-import com.cosmos.unreddit.util.extension.latest
 import com.cosmos.unreddit.util.extension.updateValue
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
@@ -23,8 +22,8 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.onStart
@@ -52,7 +51,7 @@ class PostDetailsViewModel @Inject constructor(
     private val _singleThread: MutableStateFlow<Boolean> = MutableStateFlow(false)
     val singleThread: StateFlow<Boolean> = _singleThread
 
-    private val savedCommentIds: Flow<List<String>> = currentProfile.flatMapLatest {
+    val savedCommentIds: Flow<List<String>> = currentProfile.flatMapLatest {
         repository.getSavedCommentIds(it.id)
     }
 
@@ -81,7 +80,7 @@ class PostDetailsViewModel @Inject constructor(
                 }
             }
         }
-    }.flowOn(defaultDispatcher)
+    }.distinctUntilChanged().flowOn(defaultDispatcher)
 
     private suspend fun getComments(list: List<Comment>, depthLimit: Int): List<Comment> =
         withContext(defaultDispatcher) {
@@ -151,14 +150,6 @@ class PostDetailsViewModel @Inject constructor(
                     _post.value = Resource.Success(post.await())
                     _comments.value = Resource.Success(comments.await())
                 }
-        }
-    }
-
-    fun insertPostInHistory(postId: String) {
-        viewModelScope.launch {
-            currentProfile.latest?.let {
-                repository.insertPostInHistory(postId, it.id)
-            }
         }
     }
 

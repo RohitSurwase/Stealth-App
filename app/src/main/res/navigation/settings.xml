@@ -17,11 +17,19 @@
         <action
             android:id="@+id/openBackup"
             app:destination="@id/backup"/>
+
+        <action
+            android:id="@+id/openPrivacyEnhancer"
+            app:destination="@id/privacyEnhancerFragment"/>
     </fragment>
 
     <fragment
         android:id="@+id/aboutFragment"
         android:name="com.cosmos.unreddit.ui.about.AboutFragment"
         tools:layout="@layout/fragment_about"/>
+
+    <fragment
+        android:id="@+id/privacyEnhancerFragment"
+        android:name="com.cosmos.unreddit.ui.privacyenhancer.PrivacyEnhancerFragment"/>
 
 </navigation>

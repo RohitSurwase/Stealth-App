@@ -49,6 +49,11 @@
             app:persistent="false"/>
 
         <Preference
+            app:key="privacy_enhancer"
+            app:title="@string/preference_privacy_enhancer"
+            app:persistent="false"/>
+
+        <Preference
             app:key="backup"
             app:title="@string/preference_backup"
             app:persistent="false"/>

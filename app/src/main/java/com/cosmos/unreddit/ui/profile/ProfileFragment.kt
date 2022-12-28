@@ -106,7 +106,6 @@ class ProfileFragment : BaseFragment() {
                 override fun onPageSelected(position: Int) {
                     super.onPageSelected(position)
                     viewModel.setPage(position)
-                    registerScrollListener(position)
                 }
             })
         }
@@ -136,6 +135,14 @@ class ProfileFragment : BaseFragment() {
                 .flowWithLifecycle(viewLifecycleOwner.lifecycle, Lifecycle.State.STARTED)
                 .collect {
                     binding.profile = it
+                }
+        }
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.page
+                .flowWithLifecycle(viewLifecycleOwner.lifecycle, Lifecycle.State.RESUMED)
+                .collect { page ->
+                    registerScrollListener(page)
                 }
         }
     }

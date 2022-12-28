@@ -9,11 +9,13 @@ import com.cosmos.unreddit.data.local.dao.CommentDao
 import com.cosmos.unreddit.data.local.dao.HistoryDao
 import com.cosmos.unreddit.data.local.dao.PostDao
 import com.cosmos.unreddit.data.local.dao.ProfileDao
+import com.cosmos.unreddit.data.local.dao.RedirectDao
 import com.cosmos.unreddit.data.local.dao.SubscriptionDao
 import com.cosmos.unreddit.data.model.Comment
 import com.cosmos.unreddit.data.model.db.History
 import com.cosmos.unreddit.data.model.db.PostEntity
 import com.cosmos.unreddit.data.model.db.Profile
+import com.cosmos.unreddit.data.model.db.Redirect
 import com.cosmos.unreddit.data.model.db.Subscription
 
 @Database(
@@ -22,9 +24,10 @@ import com.cosmos.unreddit.data.model.db.Subscription
         History::class,
         Profile::class,
         PostEntity::class,
-        Comment.CommentEntity::class
+        Comment.CommentEntity::class,
+        Redirect::class
     ],
-    version = 3,
+    version = 4,
     exportSchema = true
 )
 @TypeConverters(Converters::class)
@@ -39,6 +42,8 @@ abstract class RedditDatabase : RoomDatabase() {
     abstract fun postDao(): PostDao
 
     abstract fun commentDao(): CommentDao
+
+    abstract fun redirectDao(): RedirectDao
 
     class Callback : RoomDatabase.Callback() {
         override fun onCreate(db: SupportSQLiteDatabase) {
@@ -164,6 +169,20 @@ abstract class RedditDatabase : RoomDatabase() {
                 database.execSQL("CREATE INDEX IF NOT EXISTS `index_post_profile_id` ON `post` (`profile_id`)")
                 database.execSQL("CREATE INDEX IF NOT EXISTS `index_subscription_profile_id` ON `subscription` (`profile_id`)")
                 database.execSQL("CREATE INDEX IF NOT EXISTS `index_comment_profile_id` ON `comment` (`profile_id`)")
+            }
+        }
+
+        val MIGRATION_3_4 = object : Migration(3, 4) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                database.execSQL("""
+                    CREATE TABLE IF NOT EXISTS `redirect` (
+                        `pattern` TEXT NOT NULL, 
+                        `redirect` TEXT NOT NULL, 
+                        `service` TEXT NOT NULL, 
+                        `mode` INTEGER NOT NULL, 
+                        PRIMARY KEY(`service`)
+                    )
+                    """.trimIndent())
             }
         }
     }

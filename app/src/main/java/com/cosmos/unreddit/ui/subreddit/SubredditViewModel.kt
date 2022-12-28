@@ -28,6 +28,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChangedBy
 import kotlinx.coroutines.flow.dropWhile
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOn
@@ -35,7 +36,6 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.launch
 import retrofit2.HttpException
 import java.io.IOException
@@ -69,6 +69,8 @@ class SubredditViewModel @Inject constructor(
     var contentLayoutProgress: Float? = null
     var drawerContentLayoutProgress: Float? = null
 
+    var isSubredditReachable: Boolean = false
+
     val isSubscribed: StateFlow<Boolean> = combine(
         _subreddit,
         subscriptionsNames
@@ -101,12 +103,16 @@ class SubredditViewModel @Inject constructor(
         Data.Fetch("", DEFAULT_SORTING)
     )
 
+    private var latestUser: Data.User? = null
+
     private val userData: Flow<Data.User> = combine(
-        historyIds,
-        savedPostIds,
-        contentPreferences
+        historyIds, savedPostIds, contentPreferences
     ) { history, saved, prefs ->
         Data.User(history, saved, prefs)
+    }.onEach {
+        latestUser = it
+    }.distinctUntilChangedBy {
+        it.contentPreferences
     }
 
     private val _lastRefresh: MutableStateFlow<Long> = MutableStateFlow(System.currentTimeMillis())
@@ -115,7 +121,7 @@ class SubredditViewModel @Inject constructor(
     init {
         postDataFlow = searchData
             .dropWhile { it.query.isBlank() }
-            .flatMapLatest { searchData -> userData.take(1).map { searchData to it } }
+            .flatMapLatest { searchData -> userData.map { searchData to it } }
             .flatMapLatest { data -> getPosts(data.first, data.second) }
             .onEach { _lastRefresh.value = System.currentTimeMillis() }
             .cachedIn(viewModelScope)
@@ -127,7 +133,7 @@ class SubredditViewModel @Inject constructor(
     ): Flow<PagingData<PostEntity>> {
         return repository.getPosts(data.query, data.sorting)
             .map { pagingData ->
-                PostUtil.filterPosts(pagingData, user, postMapper, defaultDispatcher)
+                PostUtil.filterPosts(pagingData, latestUser ?: user, postMapper, defaultDispatcher)
             }
     }
 

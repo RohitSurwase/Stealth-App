@@ -98,7 +98,7 @@
             app:layout_constraintTop_toBottomOf="@id/subreddit_active_users"
             app:layout_constraintBottom_toBottomOf="@id/subreddit_metrics_header"/>
         <Constraint
-            android:id="@id/list_post">
+            android:id="@id/pull_refresh">
             <PropertySet
                 android:visibility="visible"
                 app:visibilityMode="ignore" />
@@ -201,7 +201,7 @@
             android:scaleY="0.0"
             android:alpha="0"/>
         <Constraint
-            android:id="@id/list_post">
+            android:id="@id/pull_refresh">
             <PropertySet
                 android:visibility="visible"
                 app:visibilityMode="ignore" />
