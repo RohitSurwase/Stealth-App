@@ -1,3 +1,15 @@
+# 2.1.0 - 2022/12/28
+
+### Added
+- Privacy Enhancer: redirect services to privacy-friendly frontends
+- More Teddit instances
+
+### Changed
+- Automatically upgrade media links to HTTPS
+
+### Fixed
+- Various bugs
+
 # 2.0.3 - 2022/12/13
 
 ### Fixed

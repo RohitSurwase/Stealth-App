@@ -1,0 +1,9 @@
+Added
+- Privacy Enhancer: redirect services to privacy-friendly frontends
+- More Teddit instances
+
+Changed
+- Automatically upgrade media links to HTTPS
+
+Fixed
+- Various bugs
