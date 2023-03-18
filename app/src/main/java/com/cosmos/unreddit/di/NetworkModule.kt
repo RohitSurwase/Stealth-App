@@ -19,6 +19,7 @@ import com.cosmos.unreddit.data.remote.api.reddit.model.ChildType
 import com.cosmos.unreddit.data.remote.api.reddit.model.CommentChild
 import com.cosmos.unreddit.data.remote.api.reddit.model.MoreChild
 import com.cosmos.unreddit.data.remote.api.reddit.model.PostChild
+import com.cosmos.unreddit.data.remote.api.redgifs.RedgifsApi
 import com.cosmos.unreddit.data.remote.api.streamable.StreamableApi
 import com.cosmos.unreddit.data.repository.PreferencesRepository
 import com.cosmos.unreddit.util.LinkValidator
@@ -55,14 +56,6 @@ object NetworkModule {
     @Qualifier
     @Retention(AnnotationRetention.BINARY)
     annotation class ImgurMoshi
-
-    @Qualifier
-    @Retention(AnnotationRetention.BINARY)
-    annotation class Gfycat
-
-    @Qualifier
-    @Retention(AnnotationRetention.BINARY)
-    annotation class Redgifs
 
     @Qualifier
     @Retention(AnnotationRetention.BINARY)
@@ -217,7 +210,6 @@ object NetworkModule {
             .create(StreamableApi::class.java)
     }
 
-    @Gfycat
     @Provides
     @Singleton
     fun provideGfycatApi(
@@ -232,18 +224,17 @@ object NetworkModule {
             .create(GfycatApi::class.java)
     }
 
-    @Redgifs
     @Provides
     @Singleton
     fun provideRedgifsApi(
         @BasicMoshi moshi: Moshi,
         @GenericOkHttp okHttpClient: OkHttpClient
-    ): GfycatApi {
+    ): RedgifsApi {
         return Retrofit.Builder()
-            .baseUrl(GfycatApi.BASE_URL_REDGIFS)
+            .baseUrl(RedgifsApi.BASE_URL)
             .addConverterFactory(MoshiConverterFactory.create(moshi))
             .client(okHttpClient)
             .build()
-            .create(GfycatApi::class.java)
+            .create(RedgifsApi::class.java)
     }
 }

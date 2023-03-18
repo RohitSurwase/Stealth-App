@@ -11,6 +11,5 @@ interface GfycatApi {
 
     companion object {
         const val BASE_URL_GFYCAT = "https://api.gfycat.com/v1/"
-        const val BASE_URL_REDGIFS = "https://api.redgifs.com/v1/"
     }
 }
