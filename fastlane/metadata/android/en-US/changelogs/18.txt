@@ -1,0 +1,5 @@
+Added
+- More Teddit API endpoints
+
+Fixed
+- Redgifs videos
