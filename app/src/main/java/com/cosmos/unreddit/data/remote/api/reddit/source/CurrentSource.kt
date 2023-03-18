@@ -38,8 +38,7 @@ class CurrentSource @Inject constructor(
     }
 
     override suspend fun getSubredditInfo(subreddit: String): Child {
-        // TODO: Replace by source when an endpoint is available for Teddit
-        return redditSource.getSubredditInfo(subreddit)
+        return source.getSubredditInfo(subreddit)
     }
 
     override suspend fun searchInSubreddit(
@@ -49,13 +48,11 @@ class CurrentSource @Inject constructor(
         timeSorting: TimeSorting?,
         after: String?
     ): Listing {
-        // TODO: Replace by source when an endpoint is available for Teddit
-        return redditSource.searchInSubreddit(subreddit, query, sort, timeSorting, after)
+        return source.searchInSubreddit(subreddit, query, sort, timeSorting, after)
     }
 
     override suspend fun getPost(permalink: String, limit: Int?, sort: Sort): List<Listing> {
-        // TODO: Replace by source when an endpoint is available for Teddit
-        return redditSource.getPost(permalink, limit, sort)
+        return source.getPost(permalink, limit, sort)
     }
 
     override suspend fun getMoreChildren(children: String, linkId: String): MoreChildren {
@@ -111,8 +108,7 @@ class CurrentSource @Inject constructor(
         timeSorting: TimeSorting?,
         after: String?
     ): Listing {
-        // TODO: Replace by source when an endpoint is available for Teddit
-        return redditSource.searchSubreddit(query, sort, timeSorting, after)
+        return source.searchSubreddit(query, sort, timeSorting, after)
     }
 
     suspend fun setRedditSource(value: Int) {

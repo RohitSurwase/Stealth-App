@@ -22,7 +22,7 @@ class TedditSource @Inject constructor(private val tedditApi: TedditApi) : BaseR
     }
 
     override suspend fun getSubredditInfo(subreddit: String): Child {
-        throw UnsupportedOperationException("No API endpoint")
+        return tedditApi.getSubredditInfo(subreddit)
     }
 
     override suspend fun searchInSubreddit(
@@ -32,11 +32,11 @@ class TedditSource @Inject constructor(private val tedditApi: TedditApi) : BaseR
         timeSorting: TimeSorting?,
         after: String?
     ): Listing {
-        throw UnsupportedOperationException("No API endpoint")
+        return tedditApi.searchInSubreddit(subreddit, query, sort, timeSorting, after)
     }
 
     override suspend fun getPost(permalink: String, limit: Int?, sort: Sort): List<Listing> {
-        throw UnsupportedOperationException("No API endpoint")
+        return tedditApi.getPost(permalink, limit, sort)
     }
 
     override suspend fun getMoreChildren(children: String, linkId: String): MoreChildren {
@@ -89,6 +89,6 @@ class TedditSource @Inject constructor(private val tedditApi: TedditApi) : BaseR
         timeSorting: TimeSorting?,
         after: String?
     ): Listing {
-        throw UnsupportedOperationException("No API endpoint")
+        return tedditApi.searchSubreddit(query, sort, timeSorting, after)
     }
 }
