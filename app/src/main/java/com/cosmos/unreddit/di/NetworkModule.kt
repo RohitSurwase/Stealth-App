@@ -5,6 +5,7 @@ import com.cosmos.unreddit.data.remote.TargetRedditInterceptor
 import com.cosmos.unreddit.data.remote.api.gfycat.GfycatApi
 import com.cosmos.unreddit.data.remote.api.imgur.ImgurApi
 import com.cosmos.unreddit.data.remote.api.imgur.adapter.AlbumDataAdapter
+import com.cosmos.unreddit.data.remote.api.reddit.JsonInterceptor
 import com.cosmos.unreddit.data.remote.api.reddit.RedditApi
 import com.cosmos.unreddit.data.remote.api.reddit.SortingConverterFactory
 import com.cosmos.unreddit.data.remote.api.reddit.TedditApi
@@ -110,6 +111,7 @@ object NetworkModule {
     fun provideRedditOkHttpClient(): OkHttpClient {
         return OkHttpClient.Builder()
             .addInterceptor(RawJsonInterceptor())
+            .addInterceptor(JsonInterceptor())
             .connectTimeout(TIMEOUT.first, TIMEOUT.second)
             .readTimeout(TIMEOUT.first, TIMEOUT.second)
             .writeTimeout(TIMEOUT.first, TIMEOUT.second)
