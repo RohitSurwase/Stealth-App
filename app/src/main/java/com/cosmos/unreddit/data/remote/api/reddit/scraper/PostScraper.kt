@@ -129,6 +129,9 @@ class PostScraper(
         val galleryData = expando?.toGalleryData()
         val mediaMetadata = expando?.toMediaMetadata()
 
+        val selfTextHtml = selectFirst("div.usertext-body")
+            ?.selectFirst("div.md")?.outerHtml()
+
         val tagline = getTagline()
 
         val postData = PostData(
@@ -149,7 +152,7 @@ class PostScraper(
             isSelf,
             null,
             domain,
-            selfTextHtml = null,
+            selfTextHtml,
             null,
             false,
             isOver18,
