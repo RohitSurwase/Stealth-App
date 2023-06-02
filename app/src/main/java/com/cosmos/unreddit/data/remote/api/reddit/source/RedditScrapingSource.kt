@@ -5,8 +5,8 @@ import com.cosmos.unreddit.data.model.TimeSorting
 import com.cosmos.unreddit.data.remote.api.reddit.RedditApi
 import com.cosmos.unreddit.data.remote.api.reddit.model.Child
 import com.cosmos.unreddit.data.remote.api.reddit.model.Listing
-import com.cosmos.unreddit.data.remote.api.reddit.model.ListingData
 import com.cosmos.unreddit.data.remote.api.reddit.model.MoreChildren
+import com.cosmos.unreddit.data.remote.api.reddit.scraper.CommentScraper
 import com.cosmos.unreddit.data.remote.api.reddit.scraper.PostScraper
 import com.cosmos.unreddit.di.DispatchersModule.IoDispatcher
 import com.cosmos.unreddit.di.DispatchersModule.MainImmediateDispatcher
@@ -52,13 +52,15 @@ class RedditScrapingSource @Inject constructor(
     }
 
     override suspend fun getPost(permalink: String, limit: Int?, sort: Sort): List<Listing> {
+        val response = redditApi.getPost(permalink, limit, sort)
+        val body = response.string()
+
         val post = scope.async {
-            val response = redditApi.getPost(permalink, limit, sort)
-            PostScraper(response.string(), ioDispatcher).scrap()
+            PostScraper(body, ioDispatcher).scrap()
         }
 
         val comments = scope.async {
-            Listing("t1", ListingData(null, null, emptyList(), null, null))
+            CommentScraper(body, ioDispatcher).scrap()
         }
 
         return listOf(post.await(), comments.await())

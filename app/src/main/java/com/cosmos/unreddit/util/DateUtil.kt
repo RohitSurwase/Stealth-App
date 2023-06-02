@@ -74,4 +74,9 @@ object DateUtil {
     fun getLocalizedTime(timeInMillis: Long): String {
         return DateFormat.getTimeInstance(DateFormat.MEDIUM).format(Date(timeInMillis))
     }
+
+    fun getDateFromString(pattern: String, string: String): Date? {
+        val formatter = SimpleDateFormat(pattern, Locale.getDefault())
+        return formatter.parse(string)
+    }
 }

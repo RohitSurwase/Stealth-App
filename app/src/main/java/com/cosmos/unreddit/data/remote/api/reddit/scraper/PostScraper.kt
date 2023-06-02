@@ -1,6 +1,5 @@
 package com.cosmos.unreddit.data.remote.api.reddit.scraper
 
-import com.cosmos.unreddit.data.remote.api.reddit.model.Awarding
 import com.cosmos.unreddit.data.remote.api.reddit.model.GalleryData
 import com.cosmos.unreddit.data.remote.api.reddit.model.GalleryDataItem
 import com.cosmos.unreddit.data.remote.api.reddit.model.GalleryImage
@@ -12,7 +11,6 @@ import com.cosmos.unreddit.data.remote.api.reddit.model.MediaMetadata
 import com.cosmos.unreddit.data.remote.api.reddit.model.PostChild
 import com.cosmos.unreddit.data.remote.api.reddit.model.PostData
 import com.cosmos.unreddit.data.remote.api.reddit.model.RedditVideoPreview
-import com.cosmos.unreddit.data.remote.api.reddit.model.RichText
 import com.cosmos.unreddit.util.extension.toSeconds
 import kotlinx.coroutines.CoroutineDispatcher
 import org.jsoup.Jsoup
@@ -47,37 +45,15 @@ class PostScraper(
         // subreddit
         val subreddit = attr("data-subreddit")
 
-
         val titleParagraph = selectFirst("p.title")
         // title
         val title = titleParagraph?.selectFirst("a")?.text().orEmpty()
-
-        // link_flair_richtext
-        val flairRichText = titleParagraph
-            ?.selectFirst("span.flairrichtext")
-            ?.toFlair()
-            ?: emptyList()
 
         // subreddit_name_prefixed
         val prefixedSubreddit = attr("data-subreddit-prefixed")
 
         // name
         val name = attr("data-fullname")
-
-        val awardings = selectFirst("span.awardings-bar")
-        val awards = awardings
-            ?.select("a.awarding-link")
-            ?.map { award -> award.toAwarding() }
-            ?: emptyList()
-
-        val moreAwards = awardings
-            ?.selectFirst("a.awarding-show-more-link")
-            ?.text()
-            ?.run { MORE_AWARDS_REGEX.find(this)?.value?.toIntOrNull() }
-            ?: 0
-
-        // total_awards_received
-        val totalAwards = awards.sumOf { it.count }.plus(moreAwards) ?: 0
 
         // is_original_content
         val isOC = attr("data-oc").toBoolean()
@@ -99,18 +75,6 @@ class PostScraper(
 
         // locked
         val isLocked = hasClass("locked")
-
-        // author
-        val authorClass = document?.selectFirst("a.author")
-        val author = authorClass?.text() ?: "[deleted]"
-
-        // distinguished
-        val distinguished = when {
-            authorClass == null -> "regular"
-            authorClass.hasClass("moderator") -> "moderator"
-            authorClass.hasClass("admin") -> "admin"
-            else -> "regular"
-        }
 
         // num_comments
         val commentsNumber = attr("data-comments-count").toIntOrNull() ?: 0
@@ -165,15 +129,17 @@ class PostScraper(
         val galleryData = expando?.toGalleryData()
         val mediaMetadata = expando?.toMediaMetadata()
 
+        val tagline = getTagline()
+
         val postData = PostData(
             subreddit,
-            flairRichText,
+            tagline.flairRichText,
             authorFlairRichText = null,
             title,
             prefixedSubreddit,
             name,
             null,
-            totalAwards,
+            tagline.totalAwards,
             isOC,
             null,
             null,
@@ -188,11 +154,11 @@ class PostScraper(
             false,
             isOver18,
             null,
-            awards,
+            tagline.awardings,
             isSpoiler,
             isLocked,
-            distinguished,
-            author,
+            tagline.distinguished,
+            tagline.author,
             commentsNumber,
             permalink,
             isStickied,
@@ -207,29 +173,6 @@ class PostScraper(
         }
 
         return PostChild(postData)
-    }
-
-    private fun Element.toFlair(): List<RichText> {
-        return children().map { flair ->
-            when {
-                flair.hasClass("flairemoji") -> {
-                    val style = flair.attr("style")
-                    val url = URL_REGEX.find(style)?.groups?.get(1)?.value
-                    RichText(null, url)
-                }
-
-                else -> {
-                    RichText(flair.text(), null)
-                }
-            }
-        }
-    }
-
-    private fun Element.toAwarding(): Awarding {
-        val count = attr("data-count").toIntOrNull() ?: 0
-        val url = selectFirst("img")?.attr("src").orEmpty()
-
-        return Awarding(url, emptyList(), count)
     }
 
     private fun Document.toMedia(): Media? {
@@ -284,8 +227,5 @@ class PostScraper(
 
     companion object {
         private const val KIND = "t3"
-
-        private val URL_REGEX = Regex("url\\((.*?)\\)")
-        private val MORE_AWARDS_REGEX = Regex("\\d+")
     }
 }
