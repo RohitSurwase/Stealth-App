@@ -5,9 +5,6 @@ import com.squareup.moshi.JsonClass
 
 @JsonClass(generateAdapter = true)
 data class RichText(
-    @Json(name = "e")
-    val e: String,
-
     @Json(name = "t")
     val t: String?,
 

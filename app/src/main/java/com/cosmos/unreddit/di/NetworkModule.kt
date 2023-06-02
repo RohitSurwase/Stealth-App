@@ -70,6 +70,14 @@ object NetworkModule {
     @Retention(AnnotationRetention.BINARY)
     annotation class GenericOkHttp
 
+    @Qualifier
+    @Retention(AnnotationRetention.BINARY)
+    annotation class RedditOfficial
+
+    @Qualifier
+    @Retention(AnnotationRetention.BINARY)
+    annotation class RedditScrap
+
     @RedditMoshi
     @Provides
     @Singleton
@@ -142,6 +150,7 @@ object NetworkModule {
             .build()
     }
 
+    @RedditOfficial
     @Provides
     @Singleton
     fun provideRedditApi(
@@ -150,6 +159,22 @@ object NetworkModule {
     ): RedditApi {
         return Retrofit.Builder()
             .baseUrl(RedditApi.BASE_URL)
+            .addConverterFactory(MoshiConverterFactory.create(moshi))
+            .addConverterFactory(SortingConverterFactory())
+            .client(okHttpClient)
+            .build()
+            .create(RedditApi::class.java)
+    }
+
+    @RedditScrap
+    @Provides
+    @Singleton
+    fun provideRedditScrapingApi(
+        @RedditMoshi moshi: Moshi,
+        @GenericOkHttp okHttpClient: OkHttpClient
+    ): RedditApi {
+        return Retrofit.Builder()
+            .baseUrl(RedditApi.BASE_URL_OLD)
             .addConverterFactory(MoshiConverterFactory.create(moshi))
             .addConverterFactory(SortingConverterFactory())
             .client(okHttpClient)

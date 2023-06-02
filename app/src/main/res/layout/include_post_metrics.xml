@@ -45,7 +45,6 @@
             app:layout_constraintStart_toEndOf="@id/text_post_vote"
             android:layout_marginStart="@dimen/post_margin_horizontal"
             android:textColor="@color/text_color_secondary"
-            android:text="@{@string/post_ratio(post.ratio)}"
             tools:text="50%"/>
 
         <ImageView

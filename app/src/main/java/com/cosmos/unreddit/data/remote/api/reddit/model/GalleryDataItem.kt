@@ -8,7 +8,5 @@ data class GalleryDataItem(
     @Json(name = "caption")
     val caption: String?,
     @Json(name = "media_id")
-    val mediaId: String,
-    @Json(name = "id")
-    val id: Int
+    val mediaId: String
 )

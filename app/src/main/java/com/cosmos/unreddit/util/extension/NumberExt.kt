@@ -13,6 +13,10 @@ fun Long.toMillis(): Long {
     return TimeUnit.SECONDS.toMillis(this)
 }
 
+fun Long.toSeconds(): Long {
+    return TimeUnit.MILLISECONDS.toSeconds(this)
+}
+
 infix fun Int.fitTo(range: IntRange): Int {
     val last = range.last + 1
     return (this - (floor((this / last).toDouble()) * last) + range.first).toInt()

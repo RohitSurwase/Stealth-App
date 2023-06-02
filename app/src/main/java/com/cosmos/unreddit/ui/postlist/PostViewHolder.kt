@@ -9,7 +9,12 @@ import com.cosmos.unreddit.R
 import com.cosmos.unreddit.data.model.MediaType
 import com.cosmos.unreddit.data.model.db.PostEntity
 import com.cosmos.unreddit.data.model.preferences.ContentPreferences
-import com.cosmos.unreddit.databinding.*
+import com.cosmos.unreddit.databinding.IncludePostFlairsBinding
+import com.cosmos.unreddit.databinding.IncludePostInfoBinding
+import com.cosmos.unreddit.databinding.IncludePostMetricsBinding
+import com.cosmos.unreddit.databinding.ItemPostImageBinding
+import com.cosmos.unreddit.databinding.ItemPostLinkBinding
+import com.cosmos.unreddit.databinding.ItemPostTextBinding
 import com.cosmos.unreddit.ui.common.widget.AwardView
 import com.cosmos.unreddit.util.ClickableMovementMethod
 import com.cosmos.unreddit.util.extension.load
@@ -58,6 +63,15 @@ abstract class PostViewHolder(
             setTextColor(ContextCompat.getColor(context, postEntity.textColor))
         }
 
+        postEntity.ratio.takeUnless { it == -1 }?.let { ratio ->
+            postMetricsBinding.textPostRatio.run {
+                isVisible = true
+                text = context.getString(R.string.post_ratio, ratio)
+            }
+        } ?: run {
+            postMetricsBinding.textPostRatio.isVisible = false
+        }
+
         awards.apply {
             if (postEntity.awards.isNotEmpty()) {
                 visibility = View.VISIBLE
@@ -84,9 +98,11 @@ abstract class PostViewHolder(
                     }
                 }
             }
+
             postEntity.isSelf -> {
                 postFlairsBinding.root.visibility = View.GONE
             }
+
             else -> {
                 postFlairsBinding.postFlair.visibility = View.GONE
             }
@@ -145,6 +161,7 @@ abstract class PostViewHolder(
                         visibility = View.VISIBLE
                         setIcon(R.drawable.ic_gallery)
                     }
+
                     else -> {
                         visibility = View.GONE
                     }

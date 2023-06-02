@@ -18,7 +18,8 @@ interface RedditApi {
         @Path("subreddit") subreddit: String,
         @Path("sort") sort: Sort,
         @Query("t") timeSorting: TimeSorting?,
-        @Query("after") after: String? = null
+        @Query("after") after: String? = null,
+        @Query("geo_filter") geoFilter: String? = "GLOBAL"
     ): ResponseBody
 
     @GET("/r/{subreddit}/about")

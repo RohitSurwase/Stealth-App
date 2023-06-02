@@ -13,9 +13,6 @@ data class PostData(
     @Json(name = "subreddit")
     val subreddit: String,
 
-    @Json(name = "selftext")
-    val selfText: String?,
-
     @Json(name = "link_flair_richtext")
     val linkFlairRichText: List<RichText>,
 
@@ -32,7 +29,7 @@ data class PostData(
     val name: String,
 
     @Json(name = "upvote_ratio")
-    val ratio: Double,
+    val ratio: Double?,
 
     @Json(name = "total_awards_received")
     val totalAwards: Int,
@@ -73,9 +70,6 @@ data class PostData(
 
     @Json(name = "archived")
     val isArchived: Boolean,
-
-    @Json(name = "pinned")
-    val isPinned: Boolean,
 
     @Json(name = "over_18")
     val isOver18: Boolean,
@@ -126,6 +120,8 @@ data class PostData(
     @Json(name = "is_video")
     val isVideo: Boolean
 ) {
+    var thumbnail: String? = null
+
     val mediaType: MediaType
         get() = when {
             isSelf -> MediaType.NO_MEDIA
@@ -137,6 +133,7 @@ data class PostData(
                     MediaType.REDDIT_VIDEO
                 }
             }
+
             domain == "imgur.com" || domain == "m.imgur.com" -> {
                 when {
                     url.contains("imgur.com/a/") -> MediaType.IMGUR_ALBUM
@@ -146,6 +143,7 @@ data class PostData(
                     else -> MediaType.IMGUR_LINK
                 }
             }
+
             domain == "i.imgur.com" -> {
                 when {
                     url.endsWith(".gifv") || url.endsWith(".gif") -> MediaType.IMGUR_GIF
@@ -153,6 +151,7 @@ data class PostData(
                     else -> MediaType.IMGUR_IMAGE
                 }
             }
+
             domain == "gfycat.com" -> MediaType.GFYCAT
             domain == "redgifs.com" -> MediaType.REDGIFS
             domain == "streamable.com" -> MediaType.STREAMABLE
@@ -163,6 +162,7 @@ data class PostData(
                     MediaType.REDDIT_VIDEO
                 }
             }
+
             media?.redditVideoPreview != null ||
                     mediaPreview?.videoPreview != null ||
                     url.endsWith(".gif") ||
@@ -171,6 +171,7 @@ data class PostData(
                     url.endsWith(".webm") -> {
                 MediaType.VIDEO
             }
+
             domain == "i.redd.it" -> MediaType.IMAGE
             hint?.contains("image") == true -> MediaType.IMAGE
             else -> MediaType.LINK
@@ -183,16 +184,19 @@ data class PostData(
                     ?: media?.redditVideoPreview?.fallbackUrl
                     ?: mediaPreview?.videoPreview?.fallbackUrl
             }
+
             MediaType.VIDEO -> {
                 crossposts?.firstOrNull()?.mediaUrl
                     ?: media?.redditVideoPreview?.fallbackUrl
                     ?: mediaPreview?.videoPreview?.fallbackUrl
                     ?: mediaPreview?.images?.getOrNull(0)?.variants?.mp4?.imageSource?.url
             }
+
             MediaType.IMGUR_LINK -> {
                 crossposts?.firstOrNull()?.mediaUrl
                     ?: url
             }
+
             else -> url
         } ?: url
 
@@ -241,5 +245,10 @@ data class PostData(
             ?: mediaMetadata?.items?.getOrNull(0)?.image?.url
             ?: mediaMetadata?.items?.getOrNull(0)?.previews?.lastOrNull()?.url
             // Keep URL only if it's an image
-            ?: url.takeIf { postType != PostType.LINK || it.mimeType.startsWith("image") }
+            ?: url.takeIf {
+                postType != PostType.LINK && it.mimeType.run {
+                    startsWith("image") && !contains("gif") && !contains("video")
+                }
+            }
+            ?: thumbnail
 }

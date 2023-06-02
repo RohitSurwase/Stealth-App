@@ -17,7 +17,7 @@ import javax.inject.Singleton
 @Singleton
 class CurrentSource @Inject constructor(
     private val preferencesRepository: PreferencesRepository,
-    private val redditSource: RedditSource,
+    private val redditSource: RedditScrapingSource,
     private val tedditSource: TedditSource
 ) : BaseRedditSource {
 

@@ -12,6 +12,7 @@ import com.cosmos.unreddit.data.remote.api.reddit.model.MoreChildren
 import com.cosmos.unreddit.data.remote.api.reddit.model.MoreChildrenJsonAdapter
 import com.cosmos.unreddit.di.DispatchersModule.IoDispatcher
 import com.cosmos.unreddit.di.NetworkModule.RedditMoshi
+import com.cosmos.unreddit.di.NetworkModule.RedditOfficial
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.Types
 import kotlinx.coroutines.CoroutineDispatcher
@@ -22,7 +23,7 @@ import javax.inject.Singleton
 
 @Singleton
 class RedditSource @Inject constructor(
-    private val redditApi: RedditApi,
+    @RedditOfficial private val redditApi: RedditApi,
     @RedditMoshi moshi: Moshi,
     @IoDispatcher private val ioDispatcher: CoroutineDispatcher
 ) : BaseRedditSource {
