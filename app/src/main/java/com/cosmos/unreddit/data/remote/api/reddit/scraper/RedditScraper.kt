@@ -112,7 +112,7 @@ abstract class RedditScraper<Result>(
                 }
 
                 else -> {
-                    RichText(flair.text(), null)
+                    RichText(flair.wholeText(), null)
                 }
             }
         }
