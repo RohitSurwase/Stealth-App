@@ -36,7 +36,7 @@ class SubredditSearchScraper(
 
         val title = selectFirst("a.search-title")?.text().orEmpty()
 
-        val over18 = selectFirst("span.stamp nsfw-stamp") != null
+        val over18 = selectFirst("span.nsfw-stamp") != null
 
         val link = selectFirst("a.search-subreddit-link")?.attr("href").orEmpty()
 
