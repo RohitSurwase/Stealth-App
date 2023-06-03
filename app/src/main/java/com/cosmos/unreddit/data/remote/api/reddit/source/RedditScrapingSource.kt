@@ -4,7 +4,10 @@ import com.cosmos.unreddit.data.model.Sort
 import com.cosmos.unreddit.data.model.TimeSorting
 import com.cosmos.unreddit.data.remote.api.reddit.RedditApi
 import com.cosmos.unreddit.data.remote.api.reddit.model.Child
+import com.cosmos.unreddit.data.remote.api.reddit.model.Data
+import com.cosmos.unreddit.data.remote.api.reddit.model.JsonMore
 import com.cosmos.unreddit.data.remote.api.reddit.model.Listing
+import com.cosmos.unreddit.data.remote.api.reddit.model.ListingData
 import com.cosmos.unreddit.data.remote.api.reddit.model.MoreChildren
 import com.cosmos.unreddit.data.remote.api.reddit.scraper.CommentScraper
 import com.cosmos.unreddit.data.remote.api.reddit.scraper.Over18Scraper
@@ -59,7 +62,8 @@ class RedditScrapingSource @Inject constructor(
         timeSorting: TimeSorting?,
         after: String?
     ): Listing {
-        TODO("Not yet implemented")
+        // TODO
+        return Listing("t3", ListingData(null, null, emptyList(), null, null))
     }
 
     override suspend fun getPost(permalink: String, limit: Int?, sort: Sort): List<Listing> {
@@ -77,7 +81,8 @@ class RedditScrapingSource @Inject constructor(
     }
 
     override suspend fun getMoreChildren(children: String, linkId: String): MoreChildren {
-        TODO("Not yet implemented")
+        // TODO
+        return MoreChildren(JsonMore(Data(emptyList())))
     }
 
     override suspend fun getUserInfo(user: String): Child {
@@ -114,7 +119,8 @@ class RedditScrapingSource @Inject constructor(
         timeSorting: TimeSorting?,
         after: String?
     ): Listing {
-        TODO("Not yet implemented")
+        // TODO
+        return Listing("t3", ListingData(null, null, emptyList(), null, null))
     }
 
     override suspend fun searchUser(
@@ -123,7 +129,8 @@ class RedditScrapingSource @Inject constructor(
         timeSorting: TimeSorting?,
         after: String?
     ): Listing {
-        TODO("Not yet implemented")
+        // TODO
+        return Listing("t2", ListingData(null, null, emptyList(), null, null))
     }
 
     override suspend fun searchSubreddit(
