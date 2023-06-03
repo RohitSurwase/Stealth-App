@@ -64,7 +64,8 @@ class PostMapper2 @Inject constructor(
                 mediaUrl,
                 gallery,
                 seen = false,
-                saved = false
+                saved = false,
+                crosspostScrap = crosspost
             )
         }
     }

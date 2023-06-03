@@ -54,9 +54,14 @@ abstract class PostViewHolder(
         postEntity: PostEntity,
         contentPreferences: ContentPreferences
     ) {
-        postInfoBinding.post = postEntity
         postMetricsBinding.post = postEntity
         postFlairsBinding.post = postEntity
+
+        postInfoBinding.run {
+            this.post = postEntity
+            textPostAuthor.text = postEntity.author
+            textSubreddit.text = postEntity.subreddit
+        }
 
         title.apply {
             text = postEntity.title
@@ -108,12 +113,20 @@ abstract class PostViewHolder(
             }
         }
 
-        postEntity.crosspost?.let {
-            postInfoBinding.groupCrosspost.isVisible = true
-            postInfoBinding.textCrosspostSubreddit.text = it.subreddit
-            postInfoBinding.textCrosspostAuthor.text = it.author
-        } ?: run {
-            postInfoBinding.groupCrosspost.isVisible = false
+        when {
+            postEntity.crosspost != null -> {
+                postInfoBinding.groupCrosspost.isVisible = true
+                postInfoBinding.textCrosspostSubreddit.text = postEntity.crosspost.subreddit
+                postInfoBinding.textCrosspostAuthor.text = postEntity.crosspost.author
+            }
+
+            postEntity.crosspostScrap != null -> {
+                postInfoBinding.groupCrosspost.isVisible = true
+                postInfoBinding.textCrosspostSubreddit.text = postEntity.crosspostScrap?.subreddit
+                postInfoBinding.textCrosspostAuthor.text = postEntity.crosspostScrap?.author
+            }
+
+            else -> postInfoBinding.groupCrosspost.isVisible = false
         }
 
         postMetricsBinding.buttonSave.isChecked = postEntity.saved

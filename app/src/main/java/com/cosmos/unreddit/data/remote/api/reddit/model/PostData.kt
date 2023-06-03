@@ -121,6 +121,7 @@ data class PostData(
     val isVideo: Boolean
 ) {
     var thumbnail: String? = null
+    var crosspost: Crosspost? = null
 
     val mediaType: MediaType
         get() = when {

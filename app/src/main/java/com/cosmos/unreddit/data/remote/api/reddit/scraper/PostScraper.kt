@@ -1,5 +1,6 @@
 package com.cosmos.unreddit.data.remote.api.reddit.scraper
 
+import com.cosmos.unreddit.data.remote.api.reddit.model.Crosspost
 import com.cosmos.unreddit.data.remote.api.reddit.model.GalleryData
 import com.cosmos.unreddit.data.remote.api.reddit.model.GalleryDataItem
 import com.cosmos.unreddit.data.remote.api.reddit.model.GalleryImage
@@ -75,6 +76,18 @@ class PostScraper(
 
         // is_self
         val isSelf = hasClass("self")
+
+        // crosspost_parent_list
+        val crosspostTitle = attr("data-crosspost-root-title")
+        val crosspostAuthor = attr("data-crosspost-root-author")
+        val crosspostSubredditPrefixed = attr("data-crosspost-root-subreddit-prefixed")
+        val crosspostTime = attr("data-crosspost-root-time") // TODO: format = 1 year ago
+
+        val crosspost = crosspostAuthor
+            .takeIf { it.isNotBlank() }
+            ?.run {
+                Crosspost(crosspostAuthor, crosspostSubredditPrefixed, crosspostTitle, null)
+            }
 
         // over_18
         val isOver18 = attr("data-nsfw").toBoolean()
@@ -182,6 +195,7 @@ class PostScraper(
             isVideo
         ).apply {
             this.thumbnail = thumbnail
+            this.crosspost = crosspost
         }
 
         return PostChild(postData)

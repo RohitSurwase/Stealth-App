@@ -23,7 +23,6 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             android:textAppearance="@style/TextAppearancePostAuthor"
-            android:text="@{post.author}"
             android:textColor="@color/colorPrimary"
             tools:text="author"/>
 
@@ -50,7 +49,6 @@
             app:layout_constraintTop_toBottomOf="@id/text_post_author"
             android:textColor="@null"
             android:textAppearance="@style/TextAppearancePostInfo"
-            android:text="@{post.subreddit}"
             tools:text="/r/reddit" />
 
         <TextView
