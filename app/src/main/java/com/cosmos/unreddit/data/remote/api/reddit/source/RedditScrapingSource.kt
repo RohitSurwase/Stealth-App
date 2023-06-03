@@ -12,6 +12,7 @@ import com.cosmos.unreddit.data.remote.api.reddit.scraper.PostScraper
 import com.cosmos.unreddit.data.remote.api.reddit.scraper.RedditScraper
 import com.cosmos.unreddit.data.remote.api.reddit.scraper.SubredditScraper
 import com.cosmos.unreddit.data.remote.api.reddit.scraper.SubredditSearchScraper
+import com.cosmos.unreddit.data.remote.api.reddit.scraper.UserScaper
 import com.cosmos.unreddit.di.DispatchersModule.IoDispatcher
 import com.cosmos.unreddit.di.DispatchersModule.MainImmediateDispatcher
 import com.cosmos.unreddit.di.NetworkModule.RedditScrap
@@ -80,7 +81,9 @@ class RedditScrapingSource @Inject constructor(
     }
 
     override suspend fun getUserInfo(user: String): Child {
-        TODO("Not yet implemented")
+        return consentOver18(UserScaper(ioDispatcher)) {
+            redditApi.getUserPosts(user, Sort.HOT, null)
+        }
     }
 
     override suspend fun getUserPosts(
@@ -89,7 +92,9 @@ class RedditScrapingSource @Inject constructor(
         timeSorting: TimeSorting?,
         after: String?
     ): Listing {
-        TODO("Not yet implemented")
+        return consentOver18(PostScraper(ioDispatcher)) {
+            redditApi.getUserPosts(user, sort, timeSorting, after)
+        }
     }
 
     override suspend fun getUserComments(
@@ -98,7 +103,9 @@ class RedditScrapingSource @Inject constructor(
         timeSorting: TimeSorting?,
         after: String?
     ): Listing {
-        TODO("Not yet implemented")
+        return consentOver18(CommentScraper(ioDispatcher)) {
+            redditApi.getUserComments(user, sort, timeSorting, after)
+        }
     }
 
     override suspend fun searchPost(

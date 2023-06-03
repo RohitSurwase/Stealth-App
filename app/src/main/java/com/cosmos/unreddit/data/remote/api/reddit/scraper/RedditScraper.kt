@@ -120,7 +120,7 @@ abstract class RedditScraper<Result>(
         return Awarding(url, emptyList(), count)
     }
 
-    private fun Element.toTimeInSeconds(): Long {
+    protected fun Element.toTimeInSeconds(): Long {
         val datetime = attr("datetime")
         val time = DateUtil.getDateFromString("yyyy-MM-dd'T'HH:mm:ss", datetime)?.time
             ?: System.currentTimeMillis()

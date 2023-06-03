@@ -1,5 +1,6 @@
 package com.cosmos.unreddit.data.remote.api.reddit.scraper
 
+import com.cosmos.unreddit.data.remote.api.reddit.model.Child
 import com.cosmos.unreddit.data.remote.api.reddit.model.CommentChild
 import com.cosmos.unreddit.data.remote.api.reddit.model.CommentData
 import com.cosmos.unreddit.data.remote.api.reddit.model.Listing
@@ -22,16 +23,29 @@ class CommentScraper(
 
         linkId = post.orEmpty()
 
-        val siteTable = document.selectFirst("div.commentarea")
-            ?.selectFirst("div.sitetable")
+        val after = getNextKey()
+
+        val siteTable = document.selectFirst("div.sitetable.nestedlisting")
+            ?: document.selectFirst("div.sitetable.linklisting")
 
         return siteTable
             ?.run { getComments(0) }
-            ?: Listing(KIND, ListingData(null, null, emptyList(), null, null))
+            .run {
+                Listing(
+                    KIND,
+                    ListingData(
+                        null,
+                        null,
+                        this ?: emptyList(),
+                        after,
+                        null
+                    )
+                )
+            }
     }
 
-    private fun Element.getComments(depth: Int, parentName: String? = null): Listing {
-        val comments = children()
+    private fun Element.getComments(depth: Int, parentName: String? = null): List<Child> {
+        return children()
             .filter { element -> element.hasClass("thing") }
             .mapNotNull { comment ->
                 when {
@@ -40,17 +54,6 @@ class CommentScraper(
                     else -> null
                 }
             }
-
-        return Listing(
-            KIND,
-            ListingData(
-                null,
-                null,
-                comments,
-                null,
-                null
-            )
-        )
     }
 
     private fun Element.toComment(depth: Int): CommentChild {
@@ -60,8 +63,16 @@ class CommentScraper(
 
         val name = attr("data-fullname")
 
+        val parent = selectFirst("p.parent")
+        val parentTitle = parent?.selectFirst("a.title")
+        val linkTitle = parentTitle?.text()
+        val linkPermalink = parentTitle?.attr("href")
+        val linkAuthor = parent?.selectFirst("a.author")?.text()
+
         val children = selectFirst("div.sitetable")
-        val comments = children?.run { this.getComments(depth + 1, name) }
+        val comments = children
+            ?.run { this.getComments(depth + 1, name) }
+            ?.run { Listing(KIND, ListingData(null, null, this, null, null)) }
 
         val permalink = attr("data-permalink")
 
@@ -93,9 +104,9 @@ class CommentScraper(
             depth,
             tagline.distinguished,
             subreddit,
-            null,
-            null,
-            null
+            linkTitle,
+            linkPermalink,
+            linkAuthor
         )
 
         return CommentChild(data)
