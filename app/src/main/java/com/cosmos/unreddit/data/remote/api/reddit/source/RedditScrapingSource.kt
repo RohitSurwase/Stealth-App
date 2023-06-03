@@ -8,6 +8,7 @@ import com.cosmos.unreddit.data.remote.api.reddit.model.Listing
 import com.cosmos.unreddit.data.remote.api.reddit.model.MoreChildren
 import com.cosmos.unreddit.data.remote.api.reddit.scraper.CommentScraper
 import com.cosmos.unreddit.data.remote.api.reddit.scraper.PostScraper
+import com.cosmos.unreddit.data.remote.api.reddit.scraper.SubredditSearchScraper
 import com.cosmos.unreddit.di.DispatchersModule.IoDispatcher
 import com.cosmos.unreddit.di.DispatchersModule.MainImmediateDispatcher
 import com.cosmos.unreddit.di.NetworkModule.RedditScrap
@@ -116,6 +117,7 @@ class RedditScrapingSource @Inject constructor(
         timeSorting: TimeSorting?,
         after: String?
     ): Listing {
-        TODO("Not yet implemented")
+        val response = redditApi.searchSubreddit(query, sort, timeSorting, after)
+        return SubredditSearchScraper(response.string(), ioDispatcher).scrap()
     }
 }

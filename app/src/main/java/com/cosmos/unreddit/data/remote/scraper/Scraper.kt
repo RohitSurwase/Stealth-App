@@ -13,7 +13,6 @@ abstract class Scraper<Result>(
     protected var document: Document? = null
 
     open suspend fun scrap(): Result = withContext(ioDispatcher) {
-        println(body)
         val document = Jsoup.parse(body)
         this@Scraper.document = document
         scrap(document)
