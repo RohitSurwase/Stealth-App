@@ -10,6 +10,7 @@ import com.cosmos.unreddit.data.remote.api.reddit.scraper.CommentScraper
 import com.cosmos.unreddit.data.remote.api.reddit.scraper.Over18Scraper
 import com.cosmos.unreddit.data.remote.api.reddit.scraper.PostScraper
 import com.cosmos.unreddit.data.remote.api.reddit.scraper.RedditScraper
+import com.cosmos.unreddit.data.remote.api.reddit.scraper.SubredditScraper
 import com.cosmos.unreddit.data.remote.api.reddit.scraper.SubredditSearchScraper
 import com.cosmos.unreddit.di.DispatchersModule.IoDispatcher
 import com.cosmos.unreddit.di.DispatchersModule.MainImmediateDispatcher
@@ -45,7 +46,9 @@ class RedditScrapingSource @Inject constructor(
     }
 
     override suspend fun getSubredditInfo(subreddit: String): Child {
-        TODO("Not yet implemented")
+        return consentOver18(SubredditScraper(ioDispatcher)) {
+            redditApi.getSubreddit(subreddit, Sort.HOT, null)
+        }
     }
 
     override suspend fun searchInSubreddit(

@@ -54,7 +54,6 @@ class SubredditSearchScraper(
             null,
             null,
             null,
-            null,
             subscribers,
             null,
             null,
