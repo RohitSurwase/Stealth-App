@@ -9,11 +9,10 @@ import org.jsoup.nodes.Document
 import org.jsoup.nodes.Element
 
 class SubredditSearchScraper(
-    body: String,
     ioDispatcher: CoroutineDispatcher
-) : RedditScraper<Listing>(body, ioDispatcher) {
+) : RedditScraper<Listing>(ioDispatcher) {
 
-    override suspend fun scrap(document: Document): Listing {
+    override suspend fun scrapDocument(document: Document): Listing {
         val subreddits = document.select("div.search-result-subreddit")
 
         val children = subreddits.map { it.toSubreddit() }

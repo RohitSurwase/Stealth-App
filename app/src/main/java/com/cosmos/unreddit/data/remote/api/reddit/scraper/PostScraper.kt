@@ -18,11 +18,10 @@ import org.jsoup.nodes.Document
 import org.jsoup.nodes.Element
 
 class PostScraper(
-    body: String,
     ioDispatcher: CoroutineDispatcher
-) : RedditScraper<Listing>(body, ioDispatcher) {
+) : RedditScraper<Listing>(ioDispatcher) {
 
-    override suspend fun scrap(document: Document): Listing {
+    override suspend fun scrapDocument(document: Document): Listing {
         val posts = document.select("div[id~=thing_t3_\\w*]")
             .filter { element -> !element.attr("data-promoted").toBoolean() }
 

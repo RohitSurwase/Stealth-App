@@ -35,7 +35,7 @@ class RedditScrapingSource @Inject constructor(
         after: String?
     ): Listing {
         val response = redditApi.getSubreddit(subreddit, sort, timeSorting, after)
-        return PostScraper(response.string(), ioDispatcher).scrap()
+        return PostScraper(ioDispatcher).scrap(response.string())
     }
 
     override suspend fun getSubredditInfo(subreddit: String): Child {
@@ -57,11 +57,11 @@ class RedditScrapingSource @Inject constructor(
         val body = response.string()
 
         val post = scope.async {
-            PostScraper(body, ioDispatcher).scrap()
+            PostScraper(ioDispatcher).scrap(body)
         }
 
         val comments = scope.async {
-            CommentScraper(body, ioDispatcher).scrap()
+            CommentScraper(ioDispatcher).scrap(body)
         }
 
         return listOf(post.await(), comments.await())
@@ -118,6 +118,6 @@ class RedditScrapingSource @Inject constructor(
         after: String?
     ): Listing {
         val response = redditApi.searchSubreddit(query, sort, timeSorting, after)
-        return SubredditSearchScraper(response.string(), ioDispatcher).scrap()
+        return SubredditSearchScraper(ioDispatcher).scrap(response.string())
     }
 }

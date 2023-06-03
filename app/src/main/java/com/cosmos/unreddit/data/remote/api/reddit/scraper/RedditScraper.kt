@@ -11,9 +11,8 @@ import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import org.jsoup.nodes.Element
 
 abstract class RedditScraper<Result>(
-    body: String,
     ioDispatcher: CoroutineDispatcher
-) : Scraper<Result>(body, ioDispatcher) {
+) : Scraper<Result>(ioDispatcher) {
 
     protected fun getNextKey(): String? {
         return document?.selectFirst("span.next-button")

@@ -11,13 +11,12 @@ import org.jsoup.nodes.Document
 import org.jsoup.nodes.Element
 
 class CommentScraper(
-    body: String,
     ioDispatcher: CoroutineDispatcher
-) : RedditScraper<Listing>(body, ioDispatcher) {
+) : RedditScraper<Listing>(ioDispatcher) {
 
     private var linkId: String = ""
 
-    override suspend fun scrap(document: Document): Listing {
+    override suspend fun scrapDocument(document: Document): Listing {
         val post = document.selectFirst("div[id~=thing_t3_\\w*]")
             ?.attr("data-fullname")
 
