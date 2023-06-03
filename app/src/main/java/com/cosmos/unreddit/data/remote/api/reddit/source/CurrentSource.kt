@@ -17,7 +17,8 @@ import javax.inject.Singleton
 @Singleton
 class CurrentSource @Inject constructor(
     private val preferencesRepository: PreferencesRepository,
-    private val redditSource: RedditScrapingSource,
+    private val redditSource: RedditSource,
+    private val redditScrapingSource: RedditScrapingSource,
     private val tedditSource: TedditSource
 ) : BaseRedditSource {
 
@@ -121,6 +122,7 @@ class CurrentSource @Inject constructor(
         return when(DataPreferences.RedditSource.fromValue(value)) {
             DataPreferences.RedditSource.REDDIT -> redditSource
             DataPreferences.RedditSource.TEDDIT -> tedditSource
+            DataPreferences.RedditSource.REDDIT_SCRAP -> redditScrapingSource
         }
     }
 }

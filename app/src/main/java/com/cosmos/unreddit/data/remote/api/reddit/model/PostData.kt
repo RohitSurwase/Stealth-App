@@ -120,7 +120,9 @@ data class PostData(
     @Json(name = "is_video")
     val isVideo: Boolean
 ) {
+    @Transient
     var thumbnail: String? = null
+    @Transient
     var crosspost: Crosspost? = null
 
     val mediaType: MediaType
