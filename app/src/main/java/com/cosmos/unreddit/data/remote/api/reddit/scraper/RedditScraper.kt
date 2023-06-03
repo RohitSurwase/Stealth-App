@@ -8,6 +8,7 @@ import com.cosmos.unreddit.util.DateUtil
 import com.cosmos.unreddit.util.extension.toSeconds
 import kotlinx.coroutines.CoroutineDispatcher
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
+import org.jsoup.nodes.Document
 import org.jsoup.nodes.Element
 
 abstract class RedditScraper<Result>(
@@ -125,6 +126,14 @@ abstract class RedditScraper<Result>(
             ?: System.currentTimeMillis()
 
         return time.toSeconds()
+    }
+
+    suspend fun scrap(document: Document?, body: String?): Result {
+        return when {
+            body != null -> scrap(body)
+            document != null -> scrap(document)
+            else -> error("Document cannot be null")
+        }
     }
 
     companion object {

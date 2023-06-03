@@ -3,9 +3,12 @@ package com.cosmos.unreddit.data.remote.api.reddit
 import com.cosmos.unreddit.data.model.Sort
 import com.cosmos.unreddit.data.model.TimeSorting
 import com.cosmos.unreddit.data.remote.api.reddit.model.Child
+import okhttp3.RequestBody
 import okhttp3.ResponseBody
 import retrofit2.Call
+import retrofit2.http.Body
 import retrofit2.http.GET
+import retrofit2.http.POST
 import retrofit2.http.Path
 import retrofit2.http.Query
 
@@ -100,6 +103,9 @@ interface RedditApi {
         @Query("t") timeSorting: TimeSorting?,
         @Query("after") after: String? = null
     ): ResponseBody
+
+    @POST("/over18")
+    suspend fun consentOver18(@Body body: RequestBody, @Query("dest") dest: String): ResponseBody
 
     //endregion
 

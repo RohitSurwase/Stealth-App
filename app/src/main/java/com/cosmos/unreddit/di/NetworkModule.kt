@@ -7,6 +7,7 @@ import com.cosmos.unreddit.data.remote.api.imgur.ImgurApi
 import com.cosmos.unreddit.data.remote.api.imgur.adapter.AlbumDataAdapter
 import com.cosmos.unreddit.data.remote.api.reddit.JsonInterceptor
 import com.cosmos.unreddit.data.remote.api.reddit.RedditApi
+import com.cosmos.unreddit.data.remote.api.reddit.RedditCookieJar
 import com.cosmos.unreddit.data.remote.api.reddit.SortingConverterFactory
 import com.cosmos.unreddit.data.remote.api.reddit.TedditApi
 import com.cosmos.unreddit.data.remote.api.reddit.adapter.EditedAdapter
@@ -69,6 +70,10 @@ object NetworkModule {
     @Qualifier
     @Retention(AnnotationRetention.BINARY)
     annotation class GenericOkHttp
+
+    @Qualifier
+    @Retention(AnnotationRetention.BINARY)
+    annotation class RedditScrapOkHttp
 
     @Qualifier
     @Retention(AnnotationRetention.BINARY)
@@ -150,6 +155,18 @@ object NetworkModule {
             .build()
     }
 
+    @RedditScrapOkHttp
+    @Provides
+    @Singleton
+    fun provideRedditScrapOkHttpClient(): OkHttpClient {
+        return OkHttpClient.Builder()
+            .connectTimeout(TIMEOUT.first, TIMEOUT.second)
+            .readTimeout(TIMEOUT.first, TIMEOUT.second)
+            .writeTimeout(TIMEOUT.first, TIMEOUT.second)
+            .cookieJar(RedditCookieJar())
+            .build()
+    }
+
     @RedditOfficial
     @Provides
     @Singleton
@@ -171,7 +188,7 @@ object NetworkModule {
     @Singleton
     fun provideRedditScrapingApi(
         @RedditMoshi moshi: Moshi,
-        @GenericOkHttp okHttpClient: OkHttpClient
+        @RedditScrapOkHttp okHttpClient: OkHttpClient
     ): RedditApi {
         return Retrofit.Builder()
             .baseUrl(RedditApi.BASE_URL_OLD)
