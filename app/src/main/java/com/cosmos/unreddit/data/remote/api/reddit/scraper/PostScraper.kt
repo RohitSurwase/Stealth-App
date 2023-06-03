@@ -48,6 +48,16 @@ class PostScraper(
         // title
         val title = titleParagraph?.selectFirst("a")?.text().orEmpty()
 
+        // link_flair_richtext
+        val flairRichText = titleParagraph
+            ?.selectFirst("span.flairrichtext")
+            ?.toFlair()
+            ?: emptyList()
+
+        val flair = titleParagraph
+            ?.selectFirst("span.linkflairlabel")
+            ?.text()
+
         // subreddit_name_prefixed
         val prefixedSubreddit = attr("data-subreddit-prefixed")
 
@@ -135,7 +145,7 @@ class PostScraper(
 
         val postData = PostData(
             subreddit,
-            tagline.flairRichText,
+            flairRichText,
             authorFlairRichText = null,
             title,
             prefixedSubreddit,
@@ -143,7 +153,7 @@ class PostScraper(
             null,
             tagline.totalAwards,
             isOC,
-            null,
+            flair,
             null,
             galleryData,
             score,

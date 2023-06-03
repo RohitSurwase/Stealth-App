@@ -58,6 +58,10 @@ abstract class RedditScraper<Result>(
             ?.toFlair()
             ?: emptyList()
 
+        val flair = tagline
+            ?.selectFirst("span.flair")
+            ?.text()
+
         val score = tagline
             ?.selectFirst("span.score.unvoted")
             ?.attr("title")
@@ -93,11 +97,12 @@ abstract class RedditScraper<Result>(
             isStickied,
             awards,
             totalAwards,
-            flairRichText
+            flairRichText,
+            flair
         )
     }
 
-    private fun Element.toFlair(): List<RichText> {
+    protected fun Element.toFlair(): List<RichText> {
         return children().map { flair ->
             when {
                 flair.hasClass("flairemoji") -> {

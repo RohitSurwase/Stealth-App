@@ -21,5 +21,7 @@ data class Tagline(
 
     val totalAwards: Int,
 
-    val flairRichText: List<RichText>
+    val flairRichText: List<RichText>,
+
+    val flair: String?
 )

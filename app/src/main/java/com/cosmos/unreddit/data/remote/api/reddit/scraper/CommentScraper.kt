@@ -100,7 +100,7 @@ class CommentScraper(
             name,
             tagline.created,
             controversiality,
-            null,
+            tagline.flair,
             depth,
             tagline.distinguished,
             subreddit,
