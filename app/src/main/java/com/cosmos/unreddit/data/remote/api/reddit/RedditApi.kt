@@ -3,10 +3,12 @@ package com.cosmos.unreddit.data.remote.api.reddit
 import com.cosmos.unreddit.data.model.Sort
 import com.cosmos.unreddit.data.model.TimeSorting
 import com.cosmos.unreddit.data.remote.api.reddit.model.Child
-import com.cosmos.unreddit.data.remote.api.reddit.model.Listing
-import com.cosmos.unreddit.data.remote.api.reddit.model.MoreChildren
+import okhttp3.RequestBody
+import okhttp3.ResponseBody
 import retrofit2.Call
+import retrofit2.http.Body
 import retrofit2.http.GET
+import retrofit2.http.POST
 import retrofit2.http.Path
 import retrofit2.http.Query
 
@@ -14,96 +16,101 @@ interface RedditApi {
 
     //region Subreddit
 
-    @GET("/r/{subreddit}/{sort}.json")
+    @GET("/r/{subreddit}/{sort}")
     suspend fun getSubreddit(
         @Path("subreddit") subreddit: String,
         @Path("sort") sort: Sort,
         @Query("t") timeSorting: TimeSorting?,
-        @Query("after") after: String? = null
-    ): Listing
+        @Query("after") after: String? = null,
+        @Query("geo_filter") geoFilter: String? = "GLOBAL"
+    ): ResponseBody
 
-    @GET("/r/{subreddit}/about.json")
-    suspend fun getSubredditInfo(@Path("subreddit") subreddit: String): Child
+    @GET("/r/{subreddit}/about")
+    suspend fun getSubredditInfo(@Path("subreddit") subreddit: String): ResponseBody
 
-    @GET("/r/{subreddit}/search.json?restrict_sr=1&include_over_18=1")
+    @GET("/r/{subreddit}/search?restrict_sr=1&include_over_18=1")
     suspend fun searchInSubreddit(
         @Path("subreddit") subreddit: String,
         @Query("q") query: String,
         @Query("sort") sort: Sort?,
         @Query("t") timeSorting: TimeSorting?,
         @Query("after") after: String? = null
-    ): Listing
+    ): ResponseBody
 
-    @GET("/r/{subreddit}/about/rules.json")
+    @GET("/r/{subreddit}/about/rules")
     fun getSubredditRules(@Path("subreddit") subreddit: String): Call<Child>
 
     //endregion
 
-    @GET("{permalink}.json")
+    @GET("{permalink}")
     suspend fun getPost(
         @Path("permalink", encoded = true) permalink: String,
         @Query("limit") limit: Int? = null,
         @Query("sort") sort: Sort
-    ): List<Listing>
+    ): ResponseBody
 
-    @GET("/api/morechildren.json?api_type=json")
+    @GET("/api/morechildren?api_type=json")
     suspend fun getMoreChildren(
         @Query("children") children: String,
         @Query("link_id") linkId: String
-    ): MoreChildren
+    ): ResponseBody
 
     //region User
 
-    @GET("/user/{user}/about.json")
-    suspend fun getUserInfo(@Path("user") user: String): Child
+    @GET("/user/{user}/about")
+    suspend fun getUserInfo(@Path("user") user: String): ResponseBody
 
-    @GET("/user/{user}/submitted/.json")
+    @GET("/user/{user}/submitted/")
     suspend fun getUserPosts(
         @Path("user") user: String,
         @Query("sort") sort: Sort,
         @Query("t") timeSorting: TimeSorting?,
         @Query("after") after: String? = null
-    ): Listing
+    ): ResponseBody
 
-    @GET("/user/{user}/comments/.json")
+    @GET("/user/{user}/comments/")
     suspend fun getUserComments(
         @Path("user") user: String,
         @Query("sort") sort: Sort,
         @Query("t") timeSorting: TimeSorting?,
         @Query("after") after: String? = null
-    ): Listing
+    ): ResponseBody
 
     //endregion
 
     //region Search
 
-    @GET("/search.json?type=link&include_over_18=1")
+    @GET("/search?type=link&include_over_18=1")
     suspend fun searchPost(
         @Query("q") query: String,
         @Query("sort") sort: Sort?,
         @Query("t") timeSorting: TimeSorting?,
         @Query("after") after: String? = null
-    ): Listing
+    ): ResponseBody
 
-    @GET("/search.json?type=user&include_over_18=1")
+    @GET("/search?type=user&include_over_18=1")
     suspend fun searchUser(
         @Query("q") query: String,
         @Query("sort") sort: Sort?,
         @Query("t") timeSorting: TimeSorting?,
         @Query("after") after: String? = null
-    ): Listing
+    ): ResponseBody
 
-    @GET("/search.json?type=sr&include_over_18=1")
+    @GET("/search?type=sr&include_over_18=1")
     suspend fun searchSubreddit(
         @Query("q") query: String,
         @Query("sort") sort: Sort?,
         @Query("t") timeSorting: TimeSorting?,
         @Query("after") after: String? = null
-    ): Listing
+    ): ResponseBody
+
+    @POST("/over18")
+    suspend fun consentOver18(@Body body: RequestBody, @Query("dest") dest: String): ResponseBody
 
     //endregion
 
     companion object {
         const val BASE_URL = "https://www.reddit.com/"
+        const val BASE_URL_OLD = "https://old.reddit.com/"
     }
 }

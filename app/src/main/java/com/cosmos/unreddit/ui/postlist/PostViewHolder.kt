@@ -9,7 +9,12 @@ import com.cosmos.unreddit.R
 import com.cosmos.unreddit.data.model.MediaType
 import com.cosmos.unreddit.data.model.db.PostEntity
 import com.cosmos.unreddit.data.model.preferences.ContentPreferences
-import com.cosmos.unreddit.databinding.*
+import com.cosmos.unreddit.databinding.IncludePostFlairsBinding
+import com.cosmos.unreddit.databinding.IncludePostInfoBinding
+import com.cosmos.unreddit.databinding.IncludePostMetricsBinding
+import com.cosmos.unreddit.databinding.ItemPostImageBinding
+import com.cosmos.unreddit.databinding.ItemPostLinkBinding
+import com.cosmos.unreddit.databinding.ItemPostTextBinding
 import com.cosmos.unreddit.ui.common.widget.AwardView
 import com.cosmos.unreddit.util.ClickableMovementMethod
 import com.cosmos.unreddit.util.extension.load
@@ -49,13 +54,27 @@ abstract class PostViewHolder(
         postEntity: PostEntity,
         contentPreferences: ContentPreferences
     ) {
-        postInfoBinding.post = postEntity
         postMetricsBinding.post = postEntity
         postFlairsBinding.post = postEntity
+
+        postInfoBinding.run {
+            this.post = postEntity
+            textPostAuthor.text = postEntity.author
+            textSubreddit.text = postEntity.subreddit
+        }
 
         title.apply {
             text = postEntity.title
             setTextColor(ContextCompat.getColor(context, postEntity.textColor))
+        }
+
+        postEntity.ratio.takeUnless { it == -1 }?.let { ratio ->
+            postMetricsBinding.textPostRatio.run {
+                isVisible = true
+                text = context.getString(R.string.post_ratio, ratio)
+            }
+        } ?: run {
+            postMetricsBinding.textPostRatio.isVisible = false
         }
 
         awards.apply {
@@ -84,20 +103,30 @@ abstract class PostViewHolder(
                     }
                 }
             }
+
             postEntity.isSelf -> {
                 postFlairsBinding.root.visibility = View.GONE
             }
+
             else -> {
                 postFlairsBinding.postFlair.visibility = View.GONE
             }
         }
 
-        postEntity.crosspost?.let {
-            postInfoBinding.groupCrosspost.isVisible = true
-            postInfoBinding.textCrosspostSubreddit.text = it.subreddit
-            postInfoBinding.textCrosspostAuthor.text = it.author
-        } ?: run {
-            postInfoBinding.groupCrosspost.isVisible = false
+        when {
+            postEntity.crosspost != null -> {
+                postInfoBinding.groupCrosspost.isVisible = true
+                postInfoBinding.textCrosspostSubreddit.text = postEntity.crosspost.subreddit
+                postInfoBinding.textCrosspostAuthor.text = postEntity.crosspost.author
+            }
+
+            postEntity.crosspostScrap != null -> {
+                postInfoBinding.groupCrosspost.isVisible = true
+                postInfoBinding.textCrosspostSubreddit.text = postEntity.crosspostScrap?.subreddit
+                postInfoBinding.textCrosspostAuthor.text = postEntity.crosspostScrap?.author
+            }
+
+            else -> postInfoBinding.groupCrosspost.isVisible = false
         }
 
         postMetricsBinding.buttonSave.isChecked = postEntity.saved
@@ -145,6 +174,7 @@ abstract class PostViewHolder(
                         visibility = View.VISIBLE
                         setIcon(R.drawable.ic_gallery)
                     }
+
                     else -> {
                         visibility = View.GONE
                     }

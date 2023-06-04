@@ -32,7 +32,7 @@ class PostMapper2 @Inject constructor(
                 name,
                 prefixedSubreddit,
                 title,
-                round(ratio * 100).toInt(),
+                ratio?.run { round(ratio * 100).toInt() } ?: -1,
                 totalAwards,
                 isOC,
                 flair,
@@ -64,7 +64,8 @@ class PostMapper2 @Inject constructor(
                 mediaUrl,
                 gallery,
                 seen = false,
-                saved = false
+                saved = false,
+                crosspostScrap = crosspost
             )
         }
     }

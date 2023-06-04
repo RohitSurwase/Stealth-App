@@ -28,9 +28,6 @@ data class AboutData(
     @Json(name = "icon_img")
     val iconImg: String?,
 
-    @Json(name = "accounts_active")
-    val activeAccounts: Int?,
-
     @Json(name = "subscribers")
     val subscribers: Int?,
 

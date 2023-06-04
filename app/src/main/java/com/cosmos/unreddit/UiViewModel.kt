@@ -19,6 +19,10 @@ class UiViewModel @Inject constructor(
         .getLeftHandedMode()
         .distinctUntilChanged()
 
+    val policyDisclaimerShown: Flow<Boolean> = preferencesRepository
+        .getPolicyDisclaimerShown(false)
+        .distinctUntilChanged()
+
     private val _navigationVisibility = MutableStateFlow(true)
     val navigationVisibility: StateFlow<Boolean> = _navigationVisibility
 

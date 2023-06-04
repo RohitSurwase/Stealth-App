@@ -5,7 +5,9 @@ import com.cosmos.unreddit.data.remote.TargetRedditInterceptor
 import com.cosmos.unreddit.data.remote.api.gfycat.GfycatApi
 import com.cosmos.unreddit.data.remote.api.imgur.ImgurApi
 import com.cosmos.unreddit.data.remote.api.imgur.adapter.AlbumDataAdapter
+import com.cosmos.unreddit.data.remote.api.reddit.JsonInterceptor
 import com.cosmos.unreddit.data.remote.api.reddit.RedditApi
+import com.cosmos.unreddit.data.remote.api.reddit.RedditCookieJar
 import com.cosmos.unreddit.data.remote.api.reddit.SortingConverterFactory
 import com.cosmos.unreddit.data.remote.api.reddit.TedditApi
 import com.cosmos.unreddit.data.remote.api.reddit.adapter.EditedAdapter
@@ -69,6 +71,18 @@ object NetworkModule {
     @Retention(AnnotationRetention.BINARY)
     annotation class GenericOkHttp
 
+    @Qualifier
+    @Retention(AnnotationRetention.BINARY)
+    annotation class RedditScrapOkHttp
+
+    @Qualifier
+    @Retention(AnnotationRetention.BINARY)
+    annotation class RedditOfficial
+
+    @Qualifier
+    @Retention(AnnotationRetention.BINARY)
+    annotation class RedditScrap
+
     @RedditMoshi
     @Provides
     @Singleton
@@ -110,6 +124,7 @@ object NetworkModule {
     fun provideRedditOkHttpClient(): OkHttpClient {
         return OkHttpClient.Builder()
             .addInterceptor(RawJsonInterceptor())
+            .addInterceptor(JsonInterceptor())
             .connectTimeout(TIMEOUT.first, TIMEOUT.second)
             .readTimeout(TIMEOUT.first, TIMEOUT.second)
             .writeTimeout(TIMEOUT.first, TIMEOUT.second)
@@ -140,6 +155,19 @@ object NetworkModule {
             .build()
     }
 
+    @RedditScrapOkHttp
+    @Provides
+    @Singleton
+    fun provideRedditScrapOkHttpClient(): OkHttpClient {
+        return OkHttpClient.Builder()
+            .connectTimeout(TIMEOUT.first, TIMEOUT.second)
+            .readTimeout(TIMEOUT.first, TIMEOUT.second)
+            .writeTimeout(TIMEOUT.first, TIMEOUT.second)
+            .cookieJar(RedditCookieJar())
+            .build()
+    }
+
+    @RedditOfficial
     @Provides
     @Singleton
     fun provideRedditApi(
@@ -148,6 +176,22 @@ object NetworkModule {
     ): RedditApi {
         return Retrofit.Builder()
             .baseUrl(RedditApi.BASE_URL)
+            .addConverterFactory(MoshiConverterFactory.create(moshi))
+            .addConverterFactory(SortingConverterFactory())
+            .client(okHttpClient)
+            .build()
+            .create(RedditApi::class.java)
+    }
+
+    @RedditScrap
+    @Provides
+    @Singleton
+    fun provideRedditScrapingApi(
+        @RedditMoshi moshi: Moshi,
+        @RedditScrapOkHttp okHttpClient: OkHttpClient
+    ): RedditApi {
+        return Retrofit.Builder()
+            .baseUrl(RedditApi.BASE_URL_OLD)
             .addConverterFactory(MoshiConverterFactory.create(moshi))
             .addConverterFactory(SortingConverterFactory())
             .client(okHttpClient)

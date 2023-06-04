@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.view.View
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.addCallback
+import androidx.annotation.StringRes
 import androidx.core.view.children
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Lifecycle
@@ -18,9 +19,11 @@ import com.cosmos.unreddit.R
 import com.cosmos.unreddit.data.model.preferences.ContentPreferences.PreferencesKeys
 import com.cosmos.unreddit.data.model.preferences.DataPreferences
 import com.cosmos.unreddit.data.model.preferences.DataPreferences.RedditSource.REDDIT
+import com.cosmos.unreddit.data.model.preferences.DataPreferences.RedditSource.REDDIT_SCRAP
 import com.cosmos.unreddit.data.model.preferences.DataPreferences.RedditSource.TEDDIT
 import com.cosmos.unreddit.data.model.preferences.UiPreferences
 import com.cosmos.unreddit.databinding.LayoutPreferenceListBinding
+import com.cosmos.unreddit.ui.policydisclaimer.PolicyDisclaimerDialogFragment
 import com.cosmos.unreddit.ui.redditsource.RedditSourceDialogFragment
 import com.cosmos.unreddit.util.extension.applyWindowInsets
 import com.cosmos.unreddit.util.extension.getNavOptions
@@ -50,6 +53,7 @@ class PreferencesFragment : PreferenceFragmentCompat() {
     private var sourcePreference: Preference? = null
     private var privacyEnhancerPreference: Preference? = null
     private var aboutPreference: Preference? = null
+    private var policyDisclaimerPreference: Preference? = null
 
     private val navOptions: NavOptions by lazy { getNavOptions() }
 
@@ -168,6 +172,13 @@ class PreferencesFragment : PreferenceFragmentCompat() {
                 true
             }
         }
+
+        policyDisclaimerPreference = findPreference<Preference>("policy_disclaimer")?.apply {
+            setOnPreferenceClickListener {
+                showPolicyDisclaimer()
+                true
+            }
+        }
     }
 
     private fun initResultListener() {
@@ -184,9 +195,23 @@ class PreferencesFragment : PreferenceFragmentCompat() {
                     // Update value without asking for confirmation
                     updateRedditSource(source.value)
                 }
+
                 TEDDIT -> {
                     // Show disclaimer to user
-                    showRedditSourceDisclaimer(source, instance)
+                    showRedditSourceDisclaimer(
+                        R.string.dialog_reddit_source_disclaimer_body,
+                        source,
+                        instance,
+                        true
+                    )
+                }
+
+                REDDIT_SCRAP -> {
+                    showRedditSourceDisclaimer(
+                        R.string.dialog_reddit_source_scrap_disclaimer_body,
+                        source,
+                        null
+                    )
                 }
             }
         }
@@ -234,6 +259,11 @@ class PreferencesFragment : PreferenceFragmentCompat() {
                     DataPreferences.RedditSource.fromValue(value.first).let {
                         val summary = when (it) {
                             REDDIT -> getString(R.string.preference_reddit_source_reddit)
+
+                            REDDIT_SCRAP -> {
+                                getString(R.string.preference_reddit_source_reddit_scrap)
+                            }
+
                             TEDDIT -> {
                                 String.format(
                                     "%s - %s",
@@ -287,12 +317,14 @@ class PreferencesFragment : PreferenceFragmentCompat() {
     }
 
     private fun showRedditSourceDisclaimer(
+        @StringRes message: Int,
         source: DataPreferences.RedditSource,
-        instance: String?
+        instance: String?,
+        restartRequired: Boolean = false
     ) {
         MaterialAlertDialogBuilder(requireContext())
             .setTitle(R.string.dialog_reddit_source_disclaimer_title)
-            .setMessage(R.string.dialog_reddit_source_disclaimer_body)
+            .setMessage(message)
             .setPositiveButton(R.string.ok) { _, _ ->
                 // Ignore
             }
@@ -304,7 +336,9 @@ class PreferencesFragment : PreferenceFragmentCompat() {
             .apply {
                 getButton(DialogInterface.BUTTON_POSITIVE).setOnClickListener {
                     updateRedditSource(source.value, instance)
-                    showRestartRequiredDialog()
+                    if (restartRequired) {
+                        showRestartRequiredDialog()
+                    }
                     dismiss()
                 }
             }
@@ -340,6 +374,10 @@ class PreferencesFragment : PreferenceFragmentCompat() {
 
     private fun openAbout() {
         findNavController().navigate(PreferencesFragmentDirections.openAbout(), navOptions)
+    }
+
+    private fun showPolicyDisclaimer() {
+        PolicyDisclaimerDialogFragment.show(parentFragmentManager)
     }
 
     private fun openPrivacyEnhancer() {

@@ -61,11 +61,13 @@ class RedditSourceDialogFragment : DialogFragment(), OnShowListener {
 
     private fun initView() {
         binding.run {
-            val isReddit = source == DataPreferences.RedditSource.REDDIT
-            radioReddit.isChecked = isReddit
-            radioTeddit.isChecked = !isReddit
+            radioReddit.isChecked = source == DataPreferences.RedditSource.REDDIT
+            radioRedditScrap.isChecked = source == DataPreferences.RedditSource.REDDIT_SCRAP
 
-            listInstances.isVisible = !isReddit
+            val isTeddit = source == DataPreferences.RedditSource.TEDDIT
+
+            radioTeddit.isChecked = isTeddit
+            listInstances.isVisible = isTeddit
 
             radioGroup.setOnCheckedChangeListener { _, checkedId ->
                 listInstances.isVisible = checkedId == R.id.radio_teddit
@@ -87,6 +89,7 @@ class RedditSourceDialogFragment : DialogFragment(), OnShowListener {
     private fun save() {
         val source = when (binding.radioGroup.checkedRadioButtonId) {
             R.id.radio_reddit -> DataPreferences.RedditSource.REDDIT
+            R.id.radio_reddit_scrap -> DataPreferences.RedditSource.REDDIT_SCRAP
             R.id.radio_teddit -> DataPreferences.RedditSource.TEDDIT
             else -> DataPreferences.RedditSource.REDDIT
         }

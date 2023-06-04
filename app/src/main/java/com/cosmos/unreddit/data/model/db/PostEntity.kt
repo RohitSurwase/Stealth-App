@@ -15,6 +15,7 @@ import com.cosmos.unreddit.data.model.PosterType
 import com.cosmos.unreddit.data.model.RedditText
 import com.cosmos.unreddit.data.model.Sorting
 import com.cosmos.unreddit.data.model.preferences.ContentPreferences
+import com.cosmos.unreddit.data.remote.api.reddit.model.Crosspost
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
@@ -133,6 +134,9 @@ data class PostEntity @JvmOverloads constructor(
 
     @ColumnInfo(name = "profile_id", index = true)
     var profileId: Int = -1,
+
+    @Ignore
+    var crosspostScrap: Crosspost? = null
 ) : Parcelable {
 
     val textColor: Int

@@ -66,7 +66,12 @@ class PostAdapter(
         fun bind(post: PostEntity) {
             binding.includePostMetrics.post = post
             binding.includePostFlairs.post = post
-            binding.includePostInfo.post = post
+
+            binding.includePostInfo.run {
+                this.post = post
+                textPostAuthor.text = post.author
+                textSubreddit.text = post.subreddit
+            }
 
             binding.textPostTitle.text = post.title
 
@@ -138,16 +143,31 @@ class PostAdapter(
                 postClickListener.onSaveClick(post)
             }
 
-            post.crosspost?.let { crosspost ->
-                binding.includeCrosspost.run {
-                    root.isVisible = true
-                    root.setOnClickListener { postClickListener.onClick(crosspost) }
-                    title.text = crosspost.title
-                    includePostInfo.post = crosspost
-                    includePostInfo.groupCrosspost.isVisible = false
+            when {
+                post.crosspost != null -> {
+                    binding.includeCrosspost.run {
+                        root.isVisible = true
+                        root.setOnClickListener { postClickListener.onClick(post.crosspost) }
+                        title.text = post.crosspost.title
+                        includePostInfo.post = post.crosspost
+                        includePostInfo.textPostAuthor.text = post.crosspost.author
+                        includePostInfo.textSubreddit.text = post.crosspost.subreddit
+                        includePostInfo.groupCrosspost.isVisible = false
+                    }
                 }
-            } ?: run {
-                binding.includeCrosspost.root.isVisible = false
+
+                post.crosspostScrap != null -> {
+                    binding.includeCrosspost.run {
+                        root.isVisible = true
+                        title.text = post.crosspostScrap?.title
+                        includePostInfo.textPostAuthor.text = post.crosspostScrap?.author
+                        includePostInfo.textSubreddit.text = post.crosspostScrap?.subreddit
+                        includePostInfo.textPostDate.isVisible = false
+                        includePostInfo.groupCrosspost.isVisible = false
+                    }
+                }
+
+                else -> binding.includeCrosspost.root.isVisible = false
             }
 
             binding.includePostMetrics.buttonSave.isChecked = post.saved
