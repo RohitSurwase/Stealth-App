@@ -4,6 +4,7 @@ import com.cosmos.unreddit.data.remote.api.reddit.model.AboutChild
 import com.cosmos.unreddit.data.remote.api.reddit.model.AboutData
 import com.cosmos.unreddit.data.remote.api.reddit.model.Listing
 import com.cosmos.unreddit.data.remote.api.reddit.model.ListingData
+import com.cosmos.unreddit.data.remote.scraper.Scraper
 import kotlinx.coroutines.CoroutineDispatcher
 import org.jsoup.nodes.Document
 import org.jsoup.nodes.Element
@@ -32,13 +33,15 @@ class SubredditSearchScraper(
 
     private fun Element.toSubreddit(): AboutChild {
         val subscribeButton = selectFirst("span.search-subscribe-button")
-        val name = subscribeButton?.attr("data-sr_name").orEmpty()
+        val name = subscribeButton?.attr(Selector.Attr.SR_NAME).orEmpty()
 
         val title = selectFirst("a.search-title")?.text().orEmpty()
 
         val over18 = selectFirst("span.nsfw-stamp") != null
 
-        val link = selectFirst("a.search-subreddit-link")?.attr("href").orEmpty()
+        val link = selectFirst("a.search-subreddit-link")
+            ?.attr(Scraper.Selector.Attr.HREF)
+            .orEmpty()
 
         val subscribers = selectFirst("span.search-subscribers")
             ?.text()

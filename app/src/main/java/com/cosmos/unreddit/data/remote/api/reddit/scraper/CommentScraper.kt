@@ -7,6 +7,7 @@ import com.cosmos.unreddit.data.remote.api.reddit.model.Listing
 import com.cosmos.unreddit.data.remote.api.reddit.model.ListingData
 import com.cosmos.unreddit.data.remote.api.reddit.model.MoreChild
 import com.cosmos.unreddit.data.remote.api.reddit.model.MoreData
+import com.cosmos.unreddit.data.remote.scraper.Scraper
 import kotlinx.coroutines.CoroutineDispatcher
 import org.jsoup.nodes.Document
 import org.jsoup.nodes.Element
@@ -18,15 +19,15 @@ class CommentScraper(
     private var linkId: String = ""
 
     override suspend fun scrapDocument(document: Document): Listing {
-        val post = document.selectFirst("div[id~=thing_t3_\\w*]")
-            ?.attr("data-fullname")
+        val post = document.selectFirst(Selector.POST)
+            ?.attr(Selector.Attr.FULLNAME)
 
         linkId = post.orEmpty()
 
         val after = getNextKey()
 
-        val siteTable = document.selectFirst("div.sitetable.nestedlisting")
-            ?: document.selectFirst("div.sitetable.linklisting")
+        val siteTable = document.selectFirst(Selector.SITETABLE_NESTED)
+            ?: document.selectFirst(Selector.SITETABLE_LINK)
 
         return siteTable
             ?.run { getComments(0) }
@@ -46,11 +47,13 @@ class CommentScraper(
 
     private fun Element.getComments(depth: Int, parentName: String? = null): List<Child> {
         return children()
-            .filter { element -> element.hasClass("thing") }
+            .filter { element -> element.hasClass(Selector.Class.THING) }
             .mapNotNull { comment ->
                 when {
-                    comment.hasClass("morechildren") -> comment.toMore(depth, parentName)
-                    !comment.hasClass("morerecursion") -> comment.toComment(depth)
+                    comment.hasClass(Selector.Class.MORE_CHILDREN) -> {
+                        comment.toMore(depth, parentName)
+                    }
+                    !comment.hasClass(Selector.Class.MORE_RECURSION) -> comment.toComment(depth)
                     else -> null
                 }
             }
@@ -59,26 +62,26 @@ class CommentScraper(
     private fun Element.toComment(depth: Int): CommentChild {
         val entry = selectFirst("div.entry")
 
-        val bodyHtml = entry?.selectFirst("div.md")?.outerHtml().orEmpty()
+        val bodyHtml = entry?.selectFirst(Selector.MD)?.outerHtml().orEmpty()
 
-        val name = attr("data-fullname")
+        val name = attr(Selector.Attr.FULLNAME)
 
         val parent = selectFirst("p.parent")
         val parentTitle = parent?.selectFirst("a.title")
         val linkTitle = parentTitle?.text()
-        val linkPermalink = parentTitle?.attr("href")
+        val linkPermalink = parentTitle?.attr(Scraper.Selector.Attr.HREF)
         val linkAuthor = parent?.selectFirst("a.author")?.text()
 
-        val children = selectFirst("div.sitetable")
+        val children = selectFirst(Selector.SITETABLE)
         val comments = children
             ?.run { this.getComments(depth + 1, name) }
             ?.run { Listing(KIND, ListingData(null, null, this, null, null)) }
 
-        val permalink = attr("data-permalink")
+        val permalink = attr(Selector.Attr.PERMALINK)
 
-        val controversiality = if (hasClass("controversial")) 1 else 0
+        val controversiality = if (hasClass(Selector.Class.CONTROVERSIAL)) 1 else 0
 
-        val subreddit = attr("data-subreddit")
+        val subreddit = attr(Selector.Attr.SUBREDDIT)
 
         val tagline = getTagline()
 
@@ -114,13 +117,13 @@ class CommentScraper(
 
     private fun Element.toMore(depth: Int, parentName: String?): MoreChild {
         val moreComments = selectFirst("span.morecomments")
-            ?.selectFirst("a")
+            ?.selectFirst(Scraper.Selector.Tag.A)
             ?.attr("onclick")
             ?.run { MORE_REGEX.find(this)?.groups?.get(1)?.value }
             ?.run { split(',') }
             ?: emptyList()
 
-        val name = attr("data-fullname")
+        val name = attr(Selector.Attr.FULLNAME)
 
         val data = MoreData(
             moreComments.size,

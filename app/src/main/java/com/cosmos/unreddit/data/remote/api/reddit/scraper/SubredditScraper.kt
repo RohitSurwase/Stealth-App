@@ -3,6 +3,7 @@ package com.cosmos.unreddit.data.remote.api.reddit.scraper
 import com.cosmos.unreddit.data.remote.api.reddit.model.AboutChild
 import com.cosmos.unreddit.data.remote.api.reddit.model.AboutData
 import com.cosmos.unreddit.data.remote.api.reddit.model.Child
+import com.cosmos.unreddit.data.remote.scraper.Scraper
 import kotlinx.coroutines.CoroutineDispatcher
 import org.jsoup.nodes.Document
 
@@ -11,33 +12,29 @@ class SubredditScraper(
 ) : RedditScraper<Child>(ioDispatcher) {
 
     override suspend fun scrapDocument(document: Document): Child {
-        val title = document.selectFirst("title")?.text().orEmpty()
+        val title = document.selectFirst(Scraper.Selector.Tag.TITLE)?.text().orEmpty()
 
         val redditName = document.selectFirst("h1.redditname")
-            ?.selectFirst("a")
+            ?.selectFirst(Scraper.Selector.Tag.A)
 
         val name = redditName?.text().orEmpty()
-        val link = redditName?.attr("href").orEmpty()
+        val link = redditName?.attr(Scraper.Selector.Attr.HREF).orEmpty()
 
         val communityIcon = document.selectFirst("img[id=header-img]")
-            ?.attr("src")
-            ?.run { "https:$this" }
+            ?.attr(Scraper.Selector.Attr.SRC)
+            ?.toValidLink()
             .orEmpty()
 
         val subscribers = document.selectFirst("span.subscribers")
-            ?.selectFirst("span.number")
-            ?.text()
-            ?.run { replace(",", "") }
-            ?.run { toIntOrNull() }
+            ?.selectFirst(Selector.NUMBER)
+            ?.toInt()
 
         val activeUsers = document.selectFirst("p.users-online")
-            ?.selectFirst("span.number")
-            ?.text()
-            ?.run { replace(",", "") }
-            ?.run { toIntOrNull() }
+            ?.selectFirst(Selector.NUMBER)
+            ?.toInt()
 
         val descriptionHtml = document.selectFirst("div.titlebox")
-            ?.selectFirst("div.md")
+            ?.selectFirst(Selector.MD)
             ?.outerHtml()
 
         val data = AboutData(

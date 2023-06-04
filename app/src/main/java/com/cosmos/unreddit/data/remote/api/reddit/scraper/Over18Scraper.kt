@@ -1,5 +1,6 @@
 package com.cosmos.unreddit.data.remote.api.reddit.scraper
 
+import com.cosmos.unreddit.data.remote.scraper.Scraper
 import kotlinx.coroutines.CoroutineDispatcher
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import org.jsoup.nodes.Document
@@ -14,7 +15,7 @@ class Over18Scraper(
         if (over18Interstitial.isEmpty()) return null
 
         val rel = document.selectFirst("link[rel=canonical]")
-            ?.attr("href")
+            ?.attr(Scraper.Selector.Attr.HREF)
 
         return rel?.toHttpUrlOrNull()?.queryParameter("dest").orEmpty()
     }

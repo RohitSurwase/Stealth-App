@@ -3,6 +3,7 @@ package com.cosmos.unreddit.data.remote.api.reddit.scraper
 import com.cosmos.unreddit.data.remote.api.reddit.model.AboutUserChild
 import com.cosmos.unreddit.data.remote.api.reddit.model.AboutUserData
 import com.cosmos.unreddit.data.remote.api.reddit.model.Child
+import com.cosmos.unreddit.data.remote.scraper.Scraper
 import kotlinx.coroutines.CoroutineDispatcher
 import org.jsoup.nodes.Document
 
@@ -12,20 +13,16 @@ class UserScaper(
 
     override suspend fun scrapDocument(document: Document): Child {
         val name = document.selectFirst("div.titlebox")
-            ?.selectFirst("h1")
+            ?.selectFirst(Scraper.Selector.Tag.H1)
             ?.text()
             .orEmpty()
 
         val postKarma = document.selectFirst("span.karma")
-            ?.text()
-            ?.run { replace(",", "") }
-            ?.run { toIntOrNull() }
+            ?.toInt()
             ?: 0
 
         val commentKarma = document.selectFirst("span.karma.comment-karma")
-            ?.text()
-            ?.run { replace(",", "") }
-            ?.run { toIntOrNull() }
+            ?.toInt()
             ?: 0
 
         val created = document.selectFirst("span.age")

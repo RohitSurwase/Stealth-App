@@ -12,6 +12,7 @@ import com.cosmos.unreddit.data.remote.api.reddit.model.MediaMetadata
 import com.cosmos.unreddit.data.remote.api.reddit.model.PostChild
 import com.cosmos.unreddit.data.remote.api.reddit.model.PostData
 import com.cosmos.unreddit.data.remote.api.reddit.model.RedditVideoPreview
+import com.cosmos.unreddit.data.remote.scraper.Scraper
 import com.cosmos.unreddit.util.extension.toSeconds
 import kotlinx.coroutines.CoroutineDispatcher
 import org.jsoup.Jsoup
@@ -23,8 +24,8 @@ class PostScraper(
 ) : RedditScraper<Listing>(ioDispatcher) {
 
     override suspend fun scrapDocument(document: Document): Listing {
-        val posts = document.select("div[id~=thing_t3_\\w*]")
-            .filter { element -> !element.attr("data-promoted").toBoolean() }
+        val posts = document.select(Selector.POST)
+            .filter { element -> !element.attr(Selector.Attr.PROMOTED).toBoolean() }
 
         val children = posts.map { it.toPost() }
         val after = getNextKey()
@@ -43,16 +44,15 @@ class PostScraper(
 
     private fun Element.toPost(): PostChild {
         // subreddit
-        val subreddit = attr("data-subreddit")
+        val subreddit = attr(Selector.Attr.SUBREDDIT)
 
         val titleParagraph = selectFirst("p.title")
         // title
-        val title = titleParagraph?.selectFirst("a")?.text().orEmpty()
+        val title = titleParagraph?.selectFirst(Scraper.Selector.Tag.A)?.text().orEmpty()
 
         // link_flair_richtext
         val flairRichText = titleParagraph
-            ?.selectFirst("span.flairrichtext")
-            ?.toFlair()
+            ?.toRichFlairText()
             ?: emptyList()
 
         val flair = titleParagraph
@@ -60,28 +60,28 @@ class PostScraper(
             ?.text()
 
         // subreddit_name_prefixed
-        val prefixedSubreddit = attr("data-subreddit-prefixed")
+        val prefixedSubreddit = attr(Selector.Attr.SUBREDDIT_PREFIXED)
 
         // name
-        val name = attr("data-fullname")
+        val name = attr(Selector.Attr.FULLNAME)
 
         // is_original_content
-        val isOC = attr("data-oc").toBoolean()
+        val isOC = attr(Selector.Attr.OC).toBoolean()
 
         // score
-        val score = attr("data-score").toIntOrNull() ?: 0
+        val score = attr(Selector.Attr.SCORE).toIntOrNull() ?: 0
 
         // domain
-        val domain = attr("data-domain")
+        val domain = attr(Selector.Attr.DOMAIN)
 
         // is_self
-        val isSelf = hasClass("self")
+        val isSelf = hasClass(Selector.Class.SELF)
 
         // crosspost_parent_list
-        val crosspostTitle = attr("data-crosspost-root-title")
-        val crosspostAuthor = attr("data-crosspost-root-author")
-        val crosspostSubredditPrefixed = attr("data-crosspost-root-subreddit-prefixed")
-        val crosspostTime = attr("data-crosspost-root-time") // TODO: format = 1 year ago
+        val crosspostTitle = attr(Selector.Attr.CROSSPOST_ROOT_TITLE)
+        val crosspostAuthor = attr(Selector.Attr.CROSSPOST_ROOT_AUTHOR)
+        val crosspostSubredditPrefixed = attr(Selector.Attr.CROSSPOST_ROOT_SUBREDDIT_PREFIXED)
+        val crosspostTime = attr(Selector.Attr.CROSSPOST_ROOT_TIME) // TODO: format = 1 year ago
 
         val crosspost = crosspostAuthor
             .takeIf { it.isNotBlank() }
@@ -90,42 +90,42 @@ class PostScraper(
             }
 
         // over_18
-        val isOver18 = attr("data-nsfw").toBoolean()
+        val isOver18 = attr(Selector.Attr.NSFW).toBoolean()
 
         // spoiler
-        val isSpoiler = attr("data-spoiler").toBoolean()
+        val isSpoiler = attr(Selector.Attr.SPOILER).toBoolean()
 
         // locked
-        val isLocked = hasClass("locked")
+        val isLocked = hasClass(Selector.Class.LOCKED)
 
         // num_comments
-        val commentsNumber = attr("data-comments-count").toIntOrNull() ?: 0
+        val commentsNumber = attr(Selector.Attr.COMMENT_COUNT).toIntOrNull() ?: 0
 
         // permalink
-        val permalink = attr("data-permalink")
+        val permalink = attr(Selector.Attr.PERMALINK)
 
         // stickied
-        val isStickied = hasClass("stickied")
+        val isStickied = hasClass(Selector.Class.STICKIED)
 
         // url
-        val url = attr("data-url")
+        val url = attr(Selector.Attr.URL)
 
         // created_utc
-        val created = attr("data-timestamp").toLongOrNull()?.toSeconds() ?: 0L
+        val created = attr(Selector.Attr.TIMESTAMP).toLongOrNull()?.toSeconds() ?: 0L
 
         // is_gallery
-        val isRedditGallery = attr("data-is-gallery").toBoolean()
+        val isRedditGallery = attr(Selector.Attr.IS_GALLERY).toBoolean()
 
         val thumbnailClass = selectFirst("a.thumbnail")
         // is_video
         val isVideo = thumbnailClass?.selectFirst("div.duration-overlay")?.let { true } ?: false
         val thumbnail = thumbnailClass
-            ?.selectFirst("img")
-            ?.attr("src")
-            ?.run { "https:$this" }
+            ?.selectFirst(Scraper.Selector.Tag.IMG)
+            ?.attr(Scraper.Selector.Attr.SRC)
+            ?.toValidLink()
 
         val expando = selectFirst("div.expando")
-            ?.attr("data-cachedhtml")
+            ?.attr(Selector.Attr.CACHED_HTML)
             ?.run { Jsoup.parse(this) }
 
         val media = when {
@@ -152,7 +152,7 @@ class PostScraper(
         val mediaMetadata = expando?.toMediaMetadata()
 
         val selfTextHtml = selectFirst("div.usertext-body")
-            ?.selectFirst("div.md")?.outerHtml()
+            ?.selectFirst(Selector.MD)?.outerHtml()
 
         val tagline = getTagline()
 
@@ -206,7 +206,7 @@ class PostScraper(
 
         return when (source.attr("type")) {
             "video/mp4" -> {
-                val src = source.attr("src")
+                val src = source.attr(Scraper.Selector.Attr.SRC)
 
                 Media(
                     null,
@@ -228,7 +228,7 @@ class PostScraper(
     private fun Document.toGalleryData(): GalleryData {
         val items = select("div.gallery-tile")
             .map {
-                val id = it.attr("data-media-id")
+                val id = it.attr(Selector.Attr.MEDIA_ID)
                 GalleryDataItem(null, id)
             }
 
@@ -238,10 +238,10 @@ class PostScraper(
     private fun Document.toMediaMetadata(): MediaMetadata? {
         val items = select("div.gallery-preview")
             .map {
-                val id = it.attr("id").substringAfterLast("-")
+                val id = it.attr(Scraper.Selector.Attr.ID).substringAfterLast("-")
                 val src = it.selectFirst("div.media-preview-content")
-                    ?.selectFirst("a")
-                    ?.attr("href")
+                    ?.selectFirst(Scraper.Selector.Tag.A)
+                    ?.attr(Scraper.Selector.Attr.HREF)
 
                 val image = GalleryImage(0, 0, src, null)
 

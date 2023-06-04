@@ -23,4 +23,19 @@ abstract class Scraper<Result>(
     }
 
     protected abstract suspend fun scrapDocument(document: Document): Result
+
+    protected object Selector {
+        object Attr {
+            const val HREF = "href"
+            const val SRC = "src"
+            const val ID = "id"
+        }
+
+        object Tag {
+            const val A = "a"
+            const val IMG = "img"
+            const val TITLE = "title"
+            const val H1 = "h1"
+        }
+    }
 }

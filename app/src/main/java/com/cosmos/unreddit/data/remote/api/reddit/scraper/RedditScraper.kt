@@ -18,7 +18,7 @@ abstract class RedditScraper<Result>(
     protected fun getNextKey(): String? {
         return document?.selectFirst("span.next-button")
             ?.selectFirst("a[href]")
-            ?.attr("href")
+            ?.attr(Scraper.Selector.Attr.HREF)
             ?.toHttpUrlOrNull()
             ?.queryParameter("after")
     }
@@ -54,8 +54,7 @@ abstract class RedditScraper<Result>(
 
         // link_flair_richtext
         val flairRichText = tagline
-            ?.selectFirst("span.flairrichtext")
-            ?.toFlair()
+            ?.toRichFlairText()
             ?: emptyList()
 
         val flair = tagline
@@ -102,8 +101,10 @@ abstract class RedditScraper<Result>(
         )
     }
 
-    protected fun Element.toFlair(): List<RichText> {
-        return children().map { flair ->
+    protected fun Element.toRichFlairText(): List<RichText> {
+        val flairRichText = selectFirst(Selector.FLAIR_RICH_TEXT)
+
+        return flairRichText?.children()?.map { flair ->
             when {
                 flair.hasClass("flairemoji") -> {
                     val style = flair.attr("style")
@@ -115,22 +116,32 @@ abstract class RedditScraper<Result>(
                     RichText(flair.wholeText(), null)
                 }
             }
-        }
+        } ?: emptyList()
     }
 
     private fun Element.toAwarding(): Awarding {
-        val count = attr("data-count").toIntOrNull() ?: 0
-        val url = selectFirst("img")?.attr("src").orEmpty()
+        val count = attr(Selector.Attr.COUNT).toIntOrNull() ?: 0
+        val url = selectFirst(Scraper.Selector.Tag.IMG)?.attr(Scraper.Selector.Attr.SRC).orEmpty()
 
         return Awarding(url, emptyList(), count)
     }
 
     protected fun Element.toTimeInSeconds(): Long {
         val datetime = attr("datetime")
-        val time = DateUtil.getDateFromString("yyyy-MM-dd'T'HH:mm:ss", datetime)?.time
+        val time = DateUtil.getDateFromString(DATETIME_FORMAT, datetime)?.time
             ?: System.currentTimeMillis()
 
         return time.toSeconds()
+    }
+
+    protected fun Element.toInt(): Int? {
+        return text()
+            .run { replace(",", "") }
+            .run { toIntOrNull() }
+    }
+
+    protected fun String.toValidLink(): String {
+        return "https:$this"
     }
 
     suspend fun scrap(document: Document?, body: String?): Result {
@@ -140,9 +151,61 @@ abstract class RedditScraper<Result>(
             else -> error("Document cannot be null")
         }
     }
+    
+    protected object Selector {
+        object Class {
+            const val THING = "thing"
+            const val MORE_CHILDREN = "morechildren"
+            const val MORE_RECURSION = "morerecursion"
+            const val CONTROVERSIAL = "controversial"
+            const val SELF = "self"
+            const val LOCKED = "locked"
+            const val STICKIED = "stickied"
+        }
+
+        object Attr {
+            const val FULLNAME = "data-fullname"
+            const val PERMALINK = "data-permalink"
+            const val SUBREDDIT = "data-subreddit"
+            const val SUBREDDIT_PREFIXED = "data-subreddit-prefixed"
+            const val PROMOTED = "data-promoted"
+            const val OC = "data-oc"
+            const val SCORE = "data-score"
+            const val DOMAIN = "data-domain"
+            const val NSFW = "data-nsfw"
+            const val SPOILER = "data-spoiler"
+            const val COMMENT_COUNT = "data-comments-count"
+            const val URL = "data-url"
+            const val TIMESTAMP = "data-timestamp"
+            const val IS_GALLERY = "data-is-gallery"
+            const val CACHED_HTML = "data-cachedhtml"
+            const val MEDIA_ID = "data-media-id"
+            const val CROSSPOST_ROOT_TITLE = "data-crosspost-root-title"
+            const val CROSSPOST_ROOT_AUTHOR = "data-crosspost-root-author"
+            const val CROSSPOST_ROOT_SUBREDDIT_PREFIXED = "data-crosspost-root-subreddit-prefixed"
+            const val CROSSPOST_ROOT_TIME = "data-crosspost-root-time"
+            const val SR_NAME = "data-sr_name"
+            const val COUNT = "data-count"
+        }
+        
+        const val POST = "div[id~=thing_t3_\\w*]"
+
+        const val MD = "div.md"
+
+        const val SITETABLE = "div.sitetable"
+
+        const val SITETABLE_NESTED = "div.sitetable.nestedlisting"
+        const val SITETABLE_LINK = "div.sitetable.linklisting"
+
+        const val FLAIR_RICH_TEXT = "span.flairrichtext"
+
+        const val NUMBER = "span.number"
+    }
 
     companion object {
         private val MORE_AWARDS_REGEX = Regex("\\d+")
         private val URL_REGEX = Regex("url\\((.*?)\\)")
+
+        private const val DATETIME_FORMAT = "yyyy-MM-dd'T'HH:mm:ss"
     }
 }
