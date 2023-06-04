@@ -23,6 +23,8 @@
         <item name="materialAlertDialogTheme">@style/MaterialAlertDialogTheme</item>
         <item name="bottomSheetDialogTheme">@style/ThemeOverlay.App.BottomSheetDialog</item>
         <item name="popupMenuStyle">@style/Widget.App.PopupMenu</item>
+        <item name="snackbarButtonStyle">@style/Widget.App.SnackbarButton</item>
+        <item name="snackbarTextViewStyle">@style/Widget.App.SnackbarTextView</item>
     </style>
 
     <style name="AppTheme" parent="BaseTheme"/>
@@ -470,4 +472,13 @@
         <item name="android:textColor">@color/text_color_secondary</item>
         <item name="android:gravity">center</item>
     </style>
+
+    <style name="Widget.App.SnackbarButton" parent="Widget.MaterialComponents.Button.TextButton.Snackbar">
+        <item name="android:textColor">@color/white</item>
+    </style>
+
+    <style name="Widget.App.SnackbarTextView" parent="Widget.MaterialComponents.Snackbar.TextView">
+        <item name="android:textColor">@color/white</item>
+    </style>
+
 </resources>
