@@ -1,0 +1,3 @@
+Added
+- Web Scraping source (based on old.reddit.com)
+- Disclaimer for Reddit's API policy change

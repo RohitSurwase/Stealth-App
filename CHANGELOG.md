@@ -1,3 +1,9 @@
+# 2.2.0 - 2023/06/04
+
+### Added
+- Web Scraping source (based on old.reddit.com)
+- Disclaimer for Reddit's API policy change
+
 # 2.1.1 - 2023/03/18
 
 ### Added
