@@ -16,6 +16,7 @@ import com.cosmos.unreddit.databinding.ItemPostHeaderBinding
 import com.cosmos.unreddit.ui.common.widget.RedditView
 import com.cosmos.unreddit.ui.postlist.PostListAdapter
 import com.cosmos.unreddit.util.extension.load
+import com.cosmos.unreddit.util.extension.setRatio
 
 class PostAdapter(
     private val contentPreferences: ContentPreferences,
@@ -74,6 +75,8 @@ class PostAdapter(
             }
 
             binding.textPostTitle.text = post.title
+
+            binding.includePostMetrics.setRatio(post.ratio)
 
             binding.includePostInfo.groupCrosspost.isVisible = false
             binding.includePostInfo.textPostAuthor.apply {

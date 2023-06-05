@@ -18,6 +18,7 @@ import com.cosmos.unreddit.databinding.ItemPostTextBinding
 import com.cosmos.unreddit.ui.common.widget.AwardView
 import com.cosmos.unreddit.util.ClickableMovementMethod
 import com.cosmos.unreddit.util.extension.load
+import com.cosmos.unreddit.util.extension.setRatio
 
 abstract class PostViewHolder(
     itemView: View,
@@ -68,14 +69,7 @@ abstract class PostViewHolder(
             setTextColor(ContextCompat.getColor(context, postEntity.textColor))
         }
 
-        postEntity.ratio.takeUnless { it == -1 }?.let { ratio ->
-            postMetricsBinding.textPostRatio.run {
-                isVisible = true
-                text = context.getString(R.string.post_ratio, ratio)
-            }
-        } ?: run {
-            postMetricsBinding.textPostRatio.isVisible = false
-        }
+        postMetricsBinding.setRatio(postEntity.ratio)
 
         awards.apply {
             if (postEntity.awards.isNotEmpty()) {
