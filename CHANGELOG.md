@@ -1,3 +1,8 @@
+# 2.2.1 - 2023/06/05
+
+### Fixed
+- Missing ratio in post details
+
 # 2.2.0 - 2023/06/04
 
 ### Added
