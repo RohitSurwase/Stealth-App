@@ -1,3 +1,8 @@
+# 2.2.2 - 2023/07/30
+
+### Fixed
+- Missing audio in Reddit videos
+
 # 2.2.1 - 2023/06/05
 
 ### Fixed
