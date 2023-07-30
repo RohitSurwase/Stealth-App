@@ -24,7 +24,7 @@ object LinkUtil {
     private val REDGIFS_LINK = Regex("(.+?\\.)?redgifs\\.com")
     private val STREAMABLE_LINK = Regex("(.+?)\\.streamable\\.com")
 
-    private const val REDDIT_SOUNDTRACK_NAME: String = "DASH_audio"
+    private const val REDDIT_SOUNDTRACK_NAME: String = "DASH_AUDIO_128"
 
     val String.https: String
         get() = this.replace(HTTP_REGEX, "https")
