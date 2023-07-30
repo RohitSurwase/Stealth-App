@@ -1,0 +1,2 @@
+Fixed
+- Missing audio in Reddit videos
