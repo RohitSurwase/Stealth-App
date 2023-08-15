@@ -3,7 +3,7 @@ object Config {
 
     const val applicationId = "com.cosmos.unreddit"
 
-    const val minSdk = 21
+    const val minSdk = 23
     const val compileSdk = 33
     const val targetSdk = 33
 
