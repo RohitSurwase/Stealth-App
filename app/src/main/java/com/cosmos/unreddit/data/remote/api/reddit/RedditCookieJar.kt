@@ -6,15 +6,23 @@ import okhttp3.HttpUrl
 
 class RedditCookieJar : CookieJar {
 
-    private val cookies = mutableSetOf<Cookie>()
+    private val cookies = listOf(OVER_18)
 
     override fun loadForRequest(url: HttpUrl): List<Cookie> {
-        return cookies.toList()
+        return cookies
     }
 
     override fun saveFromResponse(url: HttpUrl, cookies: List<Cookie>) {
-        cookies
-            .find { it.name == "over18" }
-            ?.let { this.cookies.add(it) }
+        // ignore
+    }
+
+    companion object {
+        private val OVER_18 = Cookie.Builder()
+            .name("over18")
+            .value("1")
+            .domain("reddit.com")
+            .path("/")
+            .secure()
+            .build()
     }
 }
