@@ -4,6 +4,7 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -114,8 +115,8 @@ class AboutFragment : BaseFragment() {
 
     private fun sendEmail() {
         val intent = Intent(Intent.ACTION_SENDTO).apply {
-            type = "*/*"
-            putExtra(Intent.EXTRA_EMAIL, email)
+            data = Uri.parse("mailto:")
+            putExtra(Intent.EXTRA_EMAIL, arrayOf(email))
         }
 
         val packageManager = activity?.packageManager ?: return

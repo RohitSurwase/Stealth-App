@@ -10,9 +10,7 @@ import com.cosmos.unreddit.data.remote.api.reddit.model.Listing
 import com.cosmos.unreddit.data.remote.api.reddit.model.ListingData
 import com.cosmos.unreddit.data.remote.api.reddit.model.MoreChildren
 import com.cosmos.unreddit.data.remote.api.reddit.scraper.CommentScraper
-import com.cosmos.unreddit.data.remote.api.reddit.scraper.Over18Scraper
 import com.cosmos.unreddit.data.remote.api.reddit.scraper.PostScraper
-import com.cosmos.unreddit.data.remote.api.reddit.scraper.RedditScraper
 import com.cosmos.unreddit.data.remote.api.reddit.scraper.SubredditScraper
 import com.cosmos.unreddit.data.remote.api.reddit.scraper.SubredditSearchScraper
 import com.cosmos.unreddit.data.remote.api.reddit.scraper.UserScaper
@@ -23,9 +21,6 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.async
-import okhttp3.FormBody
-import okhttp3.ResponseBody
-import org.jsoup.nodes.Document
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -44,15 +39,13 @@ class RedditScrapingSource @Inject constructor(
         timeSorting: TimeSorting?,
         after: String?
     ): Listing {
-        return consentOver18(PostScraper(ioDispatcher)) {
-            redditApi.getSubreddit(subreddit, sort, timeSorting, after)
-        }
+        val response = redditApi.getSubreddit(subreddit, sort, timeSorting, after)
+        return PostScraper(ioDispatcher).scrap(response.string())
     }
 
     override suspend fun getSubredditInfo(subreddit: String): Child {
-        return consentOver18(SubredditScraper(ioDispatcher)) {
-            redditApi.getSubreddit(subreddit, Sort.HOT, null)
-        }
+        val response = redditApi.getSubreddit(subreddit, Sort.HOT, null)
+        return SubredditScraper(ioDispatcher).scrap(response.string())
     }
 
     override suspend fun searchInSubreddit(
@@ -67,17 +60,18 @@ class RedditScrapingSource @Inject constructor(
     }
 
     override suspend fun getPost(permalink: String, limit: Int?, sort: Sort): List<Listing> {
-        return consentOver18(redditApi.getPost(permalink, limit, sort)) { document, body ->
-            val post = scope.async {
-                PostScraper(ioDispatcher).scrap(document, body)
-            }
+        val response = redditApi.getPost(permalink, limit, sort)
+        val body = response.string()
 
-            val comments = scope.async {
-                CommentScraper(ioDispatcher).scrap(document, body)
-            }
-
-            listOf(post.await(), comments.await())
+        val post = scope.async {
+            PostScraper(ioDispatcher).scrap(body)
         }
+
+        val comments = scope.async {
+            CommentScraper(ioDispatcher).scrap(body)
+        }
+
+        return listOf(post.await(), comments.await())
     }
 
     override suspend fun getMoreChildren(children: String, linkId: String): MoreChildren {
@@ -86,9 +80,8 @@ class RedditScrapingSource @Inject constructor(
     }
 
     override suspend fun getUserInfo(user: String): Child {
-        return consentOver18(UserScaper(ioDispatcher)) {
-            redditApi.getUserPosts(user, Sort.HOT, null)
-        }
+        val response = redditApi.getUserPosts(user, Sort.HOT, null)
+        return UserScaper(ioDispatcher).scrap(response.string())
     }
 
     override suspend fun getUserPosts(
@@ -97,9 +90,8 @@ class RedditScrapingSource @Inject constructor(
         timeSorting: TimeSorting?,
         after: String?
     ): Listing {
-        return consentOver18(PostScraper(ioDispatcher)) {
-            redditApi.getUserPosts(user, sort, timeSorting, after)
-        }
+        val response = redditApi.getUserPosts(user, sort, timeSorting, after)
+        return PostScraper(ioDispatcher).scrap(response.string())
     }
 
     override suspend fun getUserComments(
@@ -108,9 +100,8 @@ class RedditScrapingSource @Inject constructor(
         timeSorting: TimeSorting?,
         after: String?
     ): Listing {
-        return consentOver18(CommentScraper(ioDispatcher)) {
-            redditApi.getUserComments(user, sort, timeSorting, after)
-        }
+        val response = redditApi.getUserComments(user, sort, timeSorting, after)
+        return CommentScraper(ioDispatcher).scrap(response.string())
     }
 
     override suspend fun searchPost(
@@ -139,39 +130,7 @@ class RedditScrapingSource @Inject constructor(
         timeSorting: TimeSorting?,
         after: String?
     ): Listing {
-        return consentOver18(SubredditSearchScraper(ioDispatcher)) {
-            redditApi.searchSubreddit(query, sort, timeSorting, after)
-        }
-    }
-
-    private suspend fun <T> consentOver18(
-        response: ResponseBody,
-        result: suspend (Document?, String?) -> T
-    ): T {
-        val over18Scraper = Over18Scraper(ioDispatcher)
-
-        val dest = over18Scraper.scrap(response.string())
-
-        if (dest == null) {
-            val document = over18Scraper.document ?: error("Document cannot be null")
-            return result.invoke(document, null)
-        }
-
-        val requestBody = FormBody.Builder()
-            .add("over18", "yes")
-            .build()
-
-        val consentResponse = redditApi.consentOver18(requestBody, dest)
-
-        return result.invoke(null, consentResponse.string())
-    }
-
-    private suspend fun <T> consentOver18(
-        scraper: RedditScraper<T>,
-        request: suspend () -> ResponseBody
-    ): T {
-        return consentOver18(request.invoke()) { document, body ->
-            scraper.scrap(document, body)
-        }
+        val response = redditApi.searchSubreddit(query, sort, timeSorting, after)
+        return SubredditSearchScraper(ioDispatcher).scrap(response.string())
     }
 }

@@ -84,6 +84,7 @@
             <set>
                 <!-- Placeholder animator to make the animation run smoothly on older APIs -->
                 <objectAnimator
+                    android:propertyName="translateX"
                     android:duration="200"
                     android:valueFrom="0"
                     android:valueTo="0" />

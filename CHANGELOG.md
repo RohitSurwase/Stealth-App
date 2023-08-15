@@ -1,3 +1,18 @@
+# 2.3.0 - 2023/08/15
+
+This version is only compatible with Android 6.0 onwards.
+
+### Added
+- Monochrome icon
+
+### Changed
+- Improve NSFW consent when scraping
+- Minimum Android version (now Android 6.0)
+
+### Fixed
+- App not starting on Android 14
+- Email intent on About page
+
 # 2.2.2 - 2023/07/30
 
 ### Fixed
