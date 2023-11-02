@@ -484,7 +484,6 @@
     </style>
 
     <style name="Widget.FloatingActionButton" parent="Widget.MaterialComponents.FloatingActionButton">
-        <item name="fabCustomSize">48dp</item>
         <item name="elevation">@dimen/fab_elevation</item>
         <item name="shapeAppearanceOverlay">@style/ShapeAppearance.FloatingActionButton</item>
     </style>
