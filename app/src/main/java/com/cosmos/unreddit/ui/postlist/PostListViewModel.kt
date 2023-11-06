@@ -12,6 +12,7 @@ import com.cosmos.unreddit.data.model.Service
 import com.cosmos.unreddit.data.model.ServiceQuery
 import com.cosmos.unreddit.data.model.db.FeedItem
 import com.cosmos.unreddit.data.model.db.Profile
+import com.cosmos.unreddit.data.model.db.Subscription
 import com.cosmos.unreddit.data.model.preferences.ContentPreferences
 import com.cosmos.unreddit.data.repository.DatabaseRepository
 import com.cosmos.unreddit.data.repository.PreferencesRepository
@@ -36,6 +37,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 @HiltViewModel
@@ -60,17 +62,7 @@ class PostListViewModel
         .distinctUntilChanged()
         .map { subscriptions ->
             if (subscriptions.isNotEmpty()) {
-                subscriptions
-                    .groupBy { it.service }
-                    .map { entry ->
-                        ServiceQuery(
-                            Service(
-                                entry.key,
-                                entry.value.firstNotNullOfOrNull { it.instance }
-                            ),
-                            entry.value.map { it.name }
-                        )
-                    }
+                getServiceQueries(subscriptions)
             } else {
                 DEFAULT_QUERY
             }
@@ -132,6 +124,38 @@ class PostListViewModel
         viewModelScope.launch {
             preferencesRepository.setCurrentProfile(profile.id)
         }
+    }
+
+    private suspend fun getServiceQueries(
+        subscriptions: List<Subscription>
+    ): List<ServiceQuery> = withContext(defaultDispatcher) {
+        val services = mutableMapOf<ServiceName, MutableMap<String, MutableList<String>>>()
+
+        // Group subscriptions by service, then by instance
+        subscriptions.forEach { subscription ->
+            val service = services[subscription.service] ?: mutableMapOf()
+            val queries = service[subscription.instance] ?: mutableListOf()
+
+            queries.add(subscription.name)
+
+            service[subscription.instance] = queries
+            services[subscription.service] = service
+        }
+
+        val serviceQueries = mutableListOf<ServiceQuery>()
+
+        services.forEach { serviceEntry ->
+            val serviceName = serviceEntry.key
+
+            serviceEntry.value.forEach { instanceEntry ->
+                val service = Service(serviceName, instanceEntry.key)
+                val serviceQuery = ServiceQuery(service, instanceEntry.value.toList())
+
+                serviceQueries.add(serviceQuery)
+            }
+        }
+
+        serviceQueries.toList()
     }
 
     companion object {
