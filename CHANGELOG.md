@@ -1,3 +1,11 @@
+# 3.0.0-alpha03 - 2025/06/01
+
+### Changed
+- FAB style
+
+### Fixed
+- Multi-instance queries
+
 # 2.3.1 - 2025/06/01
 
 ### Fixed
