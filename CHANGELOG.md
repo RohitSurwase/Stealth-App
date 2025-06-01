@@ -1,3 +1,8 @@
+# 2.3.1 - 2025/06/01
+
+### Fixed
+- Redgifs videos
+
 # 3.0.0-alpha02 - 2023/10/28
 
 ### Fixed

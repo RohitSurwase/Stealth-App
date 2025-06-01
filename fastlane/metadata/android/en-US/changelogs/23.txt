@@ -1,5 +1,2 @@
-First preview version of Stealth's new content aggregation.
-
-Changed
-- Move to Stealth API for content
-- Various UI improvements
+Fixed
+- Redgifs videos

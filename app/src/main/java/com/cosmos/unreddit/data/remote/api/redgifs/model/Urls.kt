@@ -11,9 +11,6 @@ data class Urls(
     @Json(name = "thumbnail")
     val thumbnail: String,
 
-    @Json(name = "vthumbnail")
-    val vthumbnail: String,
-
     @Json(name = "hd")
     val hd: String,
 
