@@ -1,3 +1,8 @@
+# 2.3.1 - 2025/06/01
+
+### Fixed
+- Redgifs videos
+
 # 2.3.0 - 2023/08/15
 
 This version is only compatible with Android 6.0 onwards.
