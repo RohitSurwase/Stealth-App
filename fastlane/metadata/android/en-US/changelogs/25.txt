@@ -1,0 +1,5 @@
+Changed
+- FAB style
+
+Fixed
+- Multi-instance queries
