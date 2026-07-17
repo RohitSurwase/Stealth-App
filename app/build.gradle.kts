@@ -19,6 +19,22 @@ if (keystorePropertiesFile.exists()) {
     keystoreProperties["storeFile"] = "keystore.jks"
 }
 
+// kapt on JDK 16+ needs --add-exports/--add-opens to access internal javac
+// classes (KT-45545). Remove only if switching to KSP or JDK <= 15.
+kapt {
+    javacOptions {
+        option("-Xss4m")
+        option("-J--add-exports=jdk.compiler/com.sun.tools.javac.main=ALL-UNNAMED")
+        option("-J--add-opens=jdk.compiler/com.sun.tools.javac.main=ALL-UNNAMED")
+        option("-J--add-exports=jdk.compiler/com.sun.tools.javac.tree=ALL-UNNAMED")
+        option("-J--add-opens=jdk.compiler/com.sun.tools.javac.tree=ALL-UNNAMED")
+        option("-J--add-exports=jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED")
+        option("-J--add-opens=jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED")
+        option("-J--add-exports=jdk.compiler/com.sun.tools.javac.code=ALL-UNNAMED")
+        option("-J--add-opens=jdk.compiler/com.sun.tools.javac.code=ALL-UNNAMED")
+    }
+}
+
 android {
     namespace = Config.namespace
 
