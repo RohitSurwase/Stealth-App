@@ -7,6 +7,10 @@ import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.ImageDecoder
 import android.media.MediaScannerConnection
+import android.media.MediaCodec
+import android.media.MediaExtractor
+import android.media.MediaFormat
+import android.media.MediaMuxer
 import android.net.Uri
 import android.os.Build
 import android.os.Environment
@@ -46,6 +50,7 @@ import okio.buffer
 import okio.sink
 import java.io.File
 import java.util.Date
+import java.nio.ByteBuffer
 
 @HiltWorker
 class MediaDownloadWorker @AssistedInject constructor (
@@ -67,6 +72,8 @@ class MediaDownloadWorker @AssistedInject constructor (
         val type = inputData.getInt(KEY_TYPE, -1).let {
             GalleryMedia.Type.fromValue(it)
         } ?: return Result.failure()
+        val sound = inputData.getString(KEY_SOUND)
+        val soundType = GalleryMedia.Type.AUDIO
 
         val builder = createDownloadManagerBuilder()
             .setProgress(0, 0, true)
@@ -76,14 +83,50 @@ class MediaDownloadWorker @AssistedInject constructor (
 
         val extension = MimeTypeMap.getFileExtensionFromUrl(url)
         val mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension) ?: ""
-        val name = "$filename.$extension"
+        val name = when {
+            sound == null -> "${filename}.$extension"
+            else -> "${filename}_video.$extension"
+        }
 
-        val uri = withContext(NonCancellable) {
+        var uri = withContext(NonCancellable) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                 downloadMedia(url, type, name, mimeType)
             } else {
                 downloadMediaLegacy(url, type, name, mimeType)
             }
+        }
+
+        if (sound != null) {
+            val soundMimeType = "audio/${extension}"
+            val soundName = "${filename}_audio"
+            // val soundExtension = MimeTypeMap.getFileExtensionFromUrl(sound)
+
+            val soundUri = withContext(NonCancellable) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                    downloadMedia(sound, soundType, soundName, soundMimeType)
+                } else {
+                    downloadMediaLegacy(sound, soundType, soundName, soundMimeType)
+                }
+            }
+
+            val finalName = "${filename}.${extension}"
+
+            val mergedUri =
+                if (
+                    Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q &&
+                    uri != null &&
+                    soundUri != null
+                ) {
+                    muxAudioVideo(uri, soundUri, finalName)
+                } else {
+                    null
+                }
+            if (mergedUri != null && uri != null && soundUri != null) {
+                applicationContext.contentResolver.delete(uri, null, null)
+                applicationContext.contentResolver.delete(soundUri, null, null)
+            }
+
+            uri = mergedUri
         }
 
         builder
@@ -159,8 +202,11 @@ class MediaDownloadWorker @AssistedInject constructor (
             GalleryMedia.Type.VIDEO -> {
                 MediaStore.Video.Media.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY)
             }
-        }
 
+            GalleryMedia.Type.AUDIO -> {
+                MediaStore.Audio.Media.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY)
+            }
+        }
         withContext(ioDispatcher) {
             runCatching {
                 val response = OkHttpClient().newCall(Request.Builder().url(url).build()).execute()
@@ -188,7 +234,8 @@ class MediaDownloadWorker @AssistedInject constructor (
 
                         if (!isStopped) {
                             values.clear()
-                            values.put(MediaStore.Video.Media.IS_PENDING, 0)
+//                            values.put(MediaStore.Video.Media.IS_PENDING, 0)
+                            values.put(MediaStore.MediaColumns.IS_PENDING, 0)
 
                             resolver.update(it, values, null, null)
                         } else {
@@ -221,6 +268,10 @@ class MediaDownloadWorker @AssistedInject constructor (
                 Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES)
             }
             GalleryMedia.Type.VIDEO -> {
+                Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MOVIES)
+            }
+
+            GalleryMedia.Type.AUDIO -> {
                 Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MOVIES)
             }
         }
@@ -332,14 +383,16 @@ class MediaDownloadWorker @AssistedInject constructor (
 
         private const val KEY_URL = "KEY_URL"
         private const val KEY_TYPE = "KEY_TYPE"
+        private const val KEY_SOUND = "KEY_SOUND"
 
-        fun enqueueWork(context: Context, url: String, type: GalleryMedia.Type) {
+        fun enqueueWork(context: Context, url: String, type: GalleryMedia.Type, sound: String?) {
             val downloadRequest = OneTimeWorkRequestBuilder<MediaDownloadWorker>()
                 .addTag(WORK_TAG)
                 .setInputData(
                     workDataOf(
                         KEY_URL to url,
-                        KEY_TYPE to type.value
+                        KEY_TYPE to type.value,
+                        KEY_SOUND to sound
                     )
                 )
                 .build()
@@ -350,5 +403,145 @@ class MediaDownloadWorker @AssistedInject constructor (
         fun cancelWork(context: Context) {
             context.cancelAllWorkByTag(WORK_TAG)
         }
+    }
+    @RequiresApi(Build.VERSION_CODES.Q)
+    private fun muxAudioVideo(
+        videoUri: Uri,
+        audioUri: Uri,
+        outputName: String
+    ): Uri? {
+
+        val resolver = applicationContext.contentResolver
+
+        val values = ContentValues().apply {
+            put(MediaStore.MediaColumns.DISPLAY_NAME, outputName)
+            put(MediaStore.MediaColumns.MIME_TYPE, "video/mp4")
+            put(MediaStore.MediaColumns.IS_PENDING, 1)
+        }
+
+        val outputCollection =
+            MediaStore.Video.Media.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY)
+
+        val outputUri = resolver.insert(outputCollection, values) ?: return null
+
+        try {
+
+            val parcelFileDescriptor =
+                resolver.openFileDescriptor(outputUri, "rw") ?: return null
+
+            val muxer = MediaMuxer(
+                parcelFileDescriptor.fileDescriptor,
+                MediaMuxer.OutputFormat.MUXER_OUTPUT_MPEG_4
+            )
+
+            val videoExtractor = MediaExtractor()
+            videoExtractor.setDataSource(applicationContext, videoUri, null)
+
+            val audioExtractor = MediaExtractor()
+            audioExtractor.setDataSource(applicationContext, audioUri, null)
+
+            var videoTrackIndex = -1
+            var audioTrackIndex = -1
+
+            var muxerVideoTrack = -1
+            var muxerAudioTrack = -1
+
+            for (i in 0 until videoExtractor.trackCount) {
+                val format = videoExtractor.getTrackFormat(i)
+                val mime = format.getString(MediaFormat.KEY_MIME) ?: ""
+
+                if (mime.startsWith("video/")) {
+                    videoTrackIndex = i
+                    muxerVideoTrack = muxer.addTrack(format)
+                }
+            }
+
+            for (i in 0 until audioExtractor.trackCount) {
+                val format = audioExtractor.getTrackFormat(i)
+                val mime = format.getString(MediaFormat.KEY_MIME) ?: ""
+
+                if (mime.startsWith("audio/")) {
+                    audioTrackIndex = i
+                    muxerAudioTrack = muxer.addTrack(format)
+                }
+            }
+
+            if (videoTrackIndex == -1 || audioTrackIndex == -1) {
+                muxer.release()
+                return null
+            }
+
+            muxer.start()
+
+            copyTrack(videoExtractor, muxer, videoTrackIndex, muxerVideoTrack)
+            copyTrack(audioExtractor, muxer, audioTrackIndex, muxerAudioTrack)
+
+            muxer.stop()
+            muxer.release()
+
+            videoExtractor.release()
+            audioExtractor.release()
+
+            values.clear()
+            values.put(MediaStore.MediaColumns.IS_PENDING, 0)
+
+            resolver.update(outputUri, values, null, null)
+
+            return outputUri
+
+        } catch (e: Exception) {
+            resolver.delete(outputUri, null, null)
+            return null
+        }
+    }
+
+    private fun copyTrack(
+        extractor: MediaExtractor,
+        muxer: MediaMuxer,
+        extractorTrack: Int,
+        muxerTrack: Int
+    ) {
+
+        extractor.selectTrack(extractorTrack)
+
+        val buffer = ByteBuffer.allocate(1024 * 1024)
+
+        val bufferInfo = MediaCodec.BufferInfo()
+
+        while (true) {
+
+            bufferInfo.offset = 0
+
+            bufferInfo.size = extractor.readSampleData(buffer, 0)
+
+            if (bufferInfo.size < 0) {
+                bufferInfo.size = 0
+                break
+            }
+
+            bufferInfo.presentationTimeUs = extractor.sampleTime
+
+            var flags = 0
+
+            if ((extractor.sampleFlags and MediaExtractor.SAMPLE_FLAG_SYNC) != 0) {
+                flags = flags or MediaCodec.BUFFER_FLAG_KEY_FRAME
+            }
+
+            if ((extractor.sampleFlags and MediaExtractor.SAMPLE_FLAG_PARTIAL_FRAME) != 0) {
+                flags = flags or MediaCodec.BUFFER_FLAG_PARTIAL_FRAME
+            }
+
+            bufferInfo.flags = flags
+
+            muxer.writeSampleData(
+                muxerTrack,
+                buffer,
+                bufferInfo
+            )
+
+            extractor.advance()
+        }
+
+        extractor.unselectTrack(extractorTrack)
     }
 }

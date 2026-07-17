@@ -307,7 +307,8 @@ class MediaViewerFragment : FullscreenBottomSheetFragment() {
             MediaDownloadWorker.enqueueWork(
                 requireContext().applicationContext,
                 it.url,
-                it.type
+                it.type,
+                it.sound
             )
 
             Toast.makeText(
