@@ -9,5 +9,5 @@ enum class BackupType(
     val mime: Array<String>
 ) {
     STEALTH("Stealth", R.drawable.ic_stealth, arrayOf("application/json")),
-    REDDIT("Reddit", R.drawable.ic_reddit, arrayOf("application/json"))
+    REDDIT("Reddit", R.drawable.icon_reddit_placeholder, arrayOf("application/json"))
 }
