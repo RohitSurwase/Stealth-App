@@ -10,7 +10,7 @@ plugins {
     id("androidx.navigation.safeargs.kotlin")
 }
 
-val keystorePropertiesFile = file("../keystore.properties")
+val keystorePropertiesFile = file("../keys/keystore.properties")
 val keystoreProperties = Properties()
 
 if (keystorePropertiesFile.exists()) {
