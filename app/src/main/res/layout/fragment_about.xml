@@ -70,6 +70,21 @@
         android:textColor="@color/text_color_secondary"
         android:text="@string/app_description"/>
 
+    <TextView
+        android:id="@+id/fork_attribution"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/app_description"
+        android:layout_marginTop="4dp"
+        android:layout_marginHorizontal="32dp"
+        android:gravity="center"
+        android:textColor="@color/text_color_secondary"
+        android:textSize="12sp"
+        android:autoLink="web"
+        tools:text="Original project: https://gitlab.com/cosmosapps/stealth"/>
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/list_about"
         android:layout_width="match_parent"

@@ -1,11 +1,13 @@
 <resources>
     <string name="app_name">Stealth</string>
     <string name="app_version_name" translatable="false">Blackbird</string>
-    <string name="app_description">An account-free, privacy-oriented, feature-rich Reddit client</string>
+    <string name="app_description">An account-free, privacy-oriented, feature-rich browser for Reddit</string>
 
+    <string name="github_link" translatable="false">https://github.com/RohitSurwase/Stealth-App</string>
     <string name="gitlab_link" translatable="false">https://gitlab.com/cosmosapps/stealth</string>
     <string name="matrix_link" translatable="false">https://matrix.to/#/#stealth-app:matrix.org</string>
     <string name="email" translatable="false">cosmos.dev@protonmail.com</string>
+    <string name="about_fork_attribution">Original project: %1$s</string>
 
     <string name="ok">OK</string>
 
@@ -275,7 +277,7 @@
     <string name="toast_clipboard_copied_email">Email copied to clipboard</string>
 
     <string name="dialog_policy_disclaimer_title">Reddit\'s API Policy Change</string>
-    <string name="dialog_policy_disclaimer_message">In the coming weeks, a new policy regarding Reddit\'s API will come into effect. Reddit will stop providing a free API (among other things), thus putting a stop to most third-party apps, including Stealth.\n\nTo try to circumvent that issue, a new source for the content has been implemented (available in the preferences, under Reddit Source) based on old.reddit.com. It might not work for long after the policy change, or even at all, but at least it does not rely on any API.\n\nYou can find more information about the new policy <a href="https://www.reddit.com/r/reddit/comments/12qwagm/an_update_regarding_reddits_api/">here</a>.\n\nPlease feel free to use the contact information available in the About section (email, GitLab, or the Matrix channel) if you have any questions.</string>
+    <string name="dialog_policy_disclaimer_message">In the coming weeks, a new policy regarding Reddit\'s API will come into effect. Reddit will stop providing a free API (among other things), thus putting a stop to most third-party apps, including Stealth.\n\nTo keep the app usable, an alternative content source has been implemented (available in the preferences, under Reddit Source) based on old.reddit.com. It might not work for long after the policy change, or even at all, but at least it does not rely on any API.\n\nYou can find more information about the new policy <a href="https://www.reddit.com/r/reddit/comments/12qwagm/an_update_regarding_reddits_api/">here</a>.\n\nPlease feel free to use the contact information available in the About section (email, GitHub, or the Matrix channel) if you have any questions.</string>
 
     <string name="snackbar_policy_disclaimer_message">%1$s might stop working soon</string>
     <string name="snackbar_policy_disclaimer_action">Learn More</string>

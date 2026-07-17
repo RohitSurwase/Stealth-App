@@ -33,7 +33,7 @@ class AboutFragment : BaseFragment() {
 
     private lateinit var creditAdapter: CreditAdapter
 
-    private val gitlabLink by lazy { getString(R.string.gitlab_link) }
+    private val projectLink by lazy { getString(R.string.github_link) }
     private val matrixLink by lazy { getString(R.string.matrix_link) }
     private val email by lazy { getString(R.string.email) }
 
@@ -88,12 +88,13 @@ class AboutFragment : BaseFragment() {
 
     private fun initAboutSection() {
         binding.appVersion.text = BuildConfig.VERSION_NAME
+        binding.forkAttribution.text = getString(R.string.about_fork_attribution, getString(R.string.gitlab_link))
     }
 
     private fun initAppBar() {
         binding.appBar.run {
             backCard.setOnClickListener { onBackPressed() }
-            buttonGitlab.setOnClickListener { linkHandler.openBrowser(gitlabLink) }
+            buttonGithub.setOnClickListener { linkHandler.openBrowser(projectLink) }
             buttonMatrix.setOnClickListener { linkHandler.openBrowser(matrixLink) }
             buttonMail.setOnClickListener { sendEmail() }
         }
