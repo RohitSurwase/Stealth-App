@@ -70,6 +70,7 @@ class MediaViewerAdapter(
         return when (media[position].type) {
             GalleryMedia.Type.IMAGE -> GalleryMedia.Type.IMAGE.value
             GalleryMedia.Type.VIDEO -> GalleryMedia.Type.VIDEO.value
+            GalleryMedia.Type.AUDIO -> GalleryMedia.Type.AUDIO.value
         }
     }
 

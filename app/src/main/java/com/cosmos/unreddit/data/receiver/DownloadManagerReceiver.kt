@@ -13,6 +13,7 @@ class DownloadManagerReceiver : BroadcastReceiver() {
 
     override fun onReceive(context: Context, intent: Intent) {
         val url = intent.extras?.getString(KEY_URL) ?: return
+        val sound = intent.extras?.getString(KEY_SOUND) ?: return
 
         when (intent.action) {
             ACTION_DOWNLOAD_RETRY -> {
@@ -20,14 +21,14 @@ class DownloadManagerReceiver : BroadcastReceiver() {
                     GalleryMedia.Type.fromValue(it)
                 } ?: return
 
-                retry(context, url, mediaType)
+                retry(context, url, mediaType, sound)
             }
             ACTION_DOWNLOAD_CANCEL -> cancel(context)
         }
     }
 
-    private fun retry(context: Context, url: String, type: GalleryMedia.Type) {
-        MediaDownloadWorker.enqueueWork(context, url, type)
+    private fun retry(context: Context, url: String, type: GalleryMedia.Type, sound: String?) {
+        MediaDownloadWorker.enqueueWork(context, url, type, sound)
     }
 
     private fun cancel(context: Context) {
@@ -43,6 +44,7 @@ class DownloadManagerReceiver : BroadcastReceiver() {
 
         private const val KEY_URL = "KEY_URL"
         private const val KEY_TYPE = "KEY_TYPE"
+        private const val KEY_SOUND = "KEY_SOUND"
 
         fun getRetryPendingIntent(
             context: Context,

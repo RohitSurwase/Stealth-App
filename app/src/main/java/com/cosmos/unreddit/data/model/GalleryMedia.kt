@@ -17,7 +17,7 @@ data class GalleryMedia(
 ) : Parcelable {
 
     enum class Type(val value: Int) {
-        IMAGE(0), VIDEO(1);
+        IMAGE(0), VIDEO(1), AUDIO(2);
 
         companion object {
             fun fromValue(value: Int): Type? = values().find { it.value == value }
