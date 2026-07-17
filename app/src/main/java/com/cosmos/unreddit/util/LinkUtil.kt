@@ -13,7 +13,7 @@ object LinkUtil {
     private val HTTP_REGEX = Regex("^\\bhttp\\b")
 
     private val GIF_REGEX = Regex("gif(v)?")
-    private val REDDIT_VIDEO_REGEX = Regex("DASH_(\\d+)")
+    private val REDDIT_VIDEO_REGEX = Regex("(DASH|CMAF)_(\\d+)")
 
     private val SUBREDDIT_REGEX = Regex("/r/[A-Za-z0-9_-]{3,21}")
     private val USER_REGEX = Regex("/u/[A-Za-z0-9_-]{3,20}")
@@ -24,7 +24,7 @@ object LinkUtil {
     private val REDGIFS_LINK = Regex("(.+?\\.)?redgifs\\.com")
     private val STREAMABLE_LINK = Regex("(.+?)\\.streamable\\.com")
 
-    private const val REDDIT_SOUNDTRACK_NAME: String = "DASH_AUDIO_128"
+    private const val REDDIT_SOUNDTRACK_NAME: String = "_AUDIO_128"
 
     val String.https: String
         get() = this.replace(HTTP_REGEX, "https")
@@ -55,7 +55,12 @@ object LinkUtil {
     }
 
     fun getRedditSoundTrack(link: String): String {
-        return link.replace(REDDIT_VIDEO_REGEX, REDDIT_SOUNDTRACK_NAME)
+        val match = REDDIT_VIDEO_REGEX.find(link)
+            ?: error("Invalid reddit video URL: $link")
+
+        val format = match.groupValues[1]
+        return link.replace(REDDIT_VIDEO_REGEX, "$format$REDDIT_SOUNDTRACK_NAME")
+
     }
 
     fun isRedditSoundTrack(link: String): Boolean {
