@@ -49,6 +49,14 @@ abstract class PostViewHolder(
         postMetricsBinding.buttonSave.setOnClickListener {
             listener.onSaveClick(bindingAdapterPosition)
         }
+
+        postMetricsBinding.buttonUser.setOnClickListener {
+            listener.onUserClick(bindingAdapterPosition)
+        }
+
+        postMetricsBinding.buttonSubreddit.setOnClickListener {
+            listener.onSubredditClick(bindingAdapterPosition)
+        }
     }
 
     open fun bind(

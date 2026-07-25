@@ -146,6 +146,14 @@ class PostAdapter(
                 postClickListener.onSaveClick(post)
             }
 
+            binding.includePostMetrics.buttonUser.setOnClickListener {
+                postClickListener.onUserClick(post)
+            }
+
+            binding.includePostMetrics.buttonSubreddit.setOnClickListener {
+                postClickListener.onSubredditClick(post)
+            }
+
             when {
                 post.crosspost != null -> {
                     binding.includeCrosspost.run {
