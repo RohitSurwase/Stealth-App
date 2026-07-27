@@ -87,8 +87,32 @@
             app:layout_constraintTop_toTopOf="@id/image_vote_icon"
             app:layout_constraintBottom_toBottomOf="@id/image_vote_icon"
             app:layout_constraintEnd_toStartOf="@id/button_more"
-            android:layout_marginEnd="@dimen/post_padding_horizontal"
+            android:layout_marginEnd="@dimen/post_margin_horizontal"
             app:srcCompat="@drawable/save" />
+
+        <ImageButton
+            android:id="@+id/button_subreddit"
+            android:layout_width="@dimen/post_icon_size"
+            android:layout_height="@dimen/post_icon_size"
+            app:layout_constraintTop_toTopOf="@id/image_vote_icon"
+            app:layout_constraintBottom_toBottomOf="@id/image_vote_icon"
+            app:layout_constraintEnd_toStartOf="@id/button_save"
+            android:layout_marginEnd="@dimen/post_margin_horizontal"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/post_open_subreddit"
+            app:srcCompat="@drawable/icon_reddit_placeholder"/>
+
+        <ImageButton
+            android:id="@+id/button_user"
+            android:layout_width="@dimen/post_icon_size"
+            android:layout_height="@dimen/post_icon_size"
+            app:layout_constraintTop_toTopOf="@id/image_vote_icon"
+            app:layout_constraintBottom_toBottomOf="@id/image_vote_icon"
+            app:layout_constraintEnd_toStartOf="@id/button_subreddit"
+            android:layout_marginEnd="@dimen/post_margin_horizontal"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/post_open_user"
+            app:srcCompat="@drawable/ic_profile_post"/>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

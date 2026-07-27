@@ -103,6 +103,8 @@
 
     <string name="post_load_discussion">View Entire Discussion</string>
     <string name="post_crosspost">Crosspost</string>
+    <string name="post_open_user">Open user profile</string>
+    <string name="post_open_subreddit">Open subreddit</string>
 
     <string name="network_retry_message">Something went wrong</string>
     <string name="network_retry_action">Retry</string>

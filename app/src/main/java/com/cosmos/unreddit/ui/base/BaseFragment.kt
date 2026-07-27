@@ -132,6 +132,16 @@ open class BaseFragment : Fragment(), PostListAdapter.PostClickListener,
         viewModel?.toggleSavePost(post)
     }
 
+    override fun onUserClick(post: PostEntity) {
+        openUser(post.author)
+    }
+
+    override fun onSubredditClick(post: PostEntity) {
+        // Same normalization as PostMenuFragment: the subreddit is stored with its "r/" prefix,
+        // but the navigation argument expects the bare name.
+        openSubreddit(post.subreddit.removePrefix("r/"))
+    }
+
     open fun openSubreddit(subreddit: String) {
         navigate(NavigationGraphDirections.openSubreddit(subreddit))
     }

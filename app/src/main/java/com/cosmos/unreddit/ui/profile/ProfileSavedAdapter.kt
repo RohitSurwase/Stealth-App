@@ -109,6 +109,18 @@ class ProfileSavedAdapter(
                 notifyItemChanged(position, it)
             }
         }
+
+        override fun onUserClick(position: Int) {
+            getPost(position)?.let {
+                postClickListener.onUserClick(it)
+            }
+        }
+
+        override fun onSubredditClick(position: Int) {
+            getPost(position)?.let {
+                postClickListener.onSubredditClick(it)
+            }
+        }
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
