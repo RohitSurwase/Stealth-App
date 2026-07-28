@@ -16,7 +16,7 @@ import com.google.android.material.card.MaterialCardView
 class InfoBarView @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
-    defStyleAttr: Int = R.attr.materialCardViewStyle
+    defStyleAttr: Int = com.google.android.material.R.attr.materialCardViewStyle
 ) : MaterialCardView(context, attrs, defStyleAttr) {
 
     private val transition: Slide by lazy {

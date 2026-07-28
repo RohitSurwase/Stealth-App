@@ -108,14 +108,14 @@ class LinkHandler @Inject constructor(
             .show()
     }
 
-    fun openGallery(images: List<GalleryMedia>) {
-        MediaViewerFragment.newInstance(images).run {
+    fun openGallery(images: List<GalleryMedia>, author: String? = null) {
+        MediaViewerFragment.newInstance(images, author).run {
             show(fragment.parentFragmentManager, MediaViewerFragment.TAG)
         }
     }
 
-    fun openMedia(link: String, mediaType: MediaType) {
-        MediaViewerFragment.newInstance(link, mediaType).run {
+    fun openMedia(link: String, mediaType: MediaType, author: String? = null) {
+        MediaViewerFragment.newInstance(link, mediaType, author).run {
             show(fragment.parentFragmentManager, MediaViewerFragment.TAG)
         }
     }

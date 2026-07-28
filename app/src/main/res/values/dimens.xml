@@ -14,9 +14,11 @@
 
     <dimen name="post_text_padding">16dp</dimen>
     <dimen name="post_text_max_height">200dp</dimen>
+    <dimen name="post_text_max_height_large">400dp</dimen>
     <dimen name="post_text_card_radius">15dp</dimen>
 
     <dimen name="post_image_height">250dp</dimen>
+    <dimen name="post_image_height_large">500dp</dimen>
 
     <dimen name="post_link_image_size">100dp</dimen>
     <dimen name="post_link_image_margin_horizontal">8dp</dimen>

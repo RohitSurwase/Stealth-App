@@ -139,6 +139,7 @@
 
     <string name="preference_category_ui">UI</string>
     <string name="preference_category_content">CONTENT</string>
+    <string name="preference_category_downloads">DOWNLOADS</string>
     <string name="preference_category_data">DATA</string>
     <string name="preference_category_misc">MISC.</string>
 
@@ -153,6 +154,11 @@
     <string name="preference_show_nsfw">Show NSFW content</string>
     <string name="preference_show_nsfw_preview">Show NSFW preview</string>
     <string name="preference_show_spoiler_preview">Show Spoiler preview</string>
+    <string name="preference_large_preview">Large previews</string>
+    <string name="preference_large_preview_summary">Double the height of image, video and text previews in post lists</string>
+
+    <string name="preference_download_filename_author">Name downloads after the poster</string>
+    <string name="preference_download_filename_author_summary">Save images and videos as username_timestamp instead of Stealth_timestamp</string>
 
     <string name="preference_reddit_source">Reddit Source</string>
     <string name="preference_reddit_source_reddit">Reddit</string>
@@ -204,6 +210,9 @@
 
     <string name="dialog_delete_profile_title">Delete Profile</string>
     <string name="dialog_delete_profile_message">Are you sure you want to delete this profile?\nSubscriptions, history and saved items for this profile will be lost.</string>
+
+    <string name="dialog_unsubscribe_title">Remove Subscription</string>
+    <string name="dialog_unsubscribe_message">Are you sure you want to remove %1$s from your subscriptions?</string>
 
     <string name="dialog_cancel">Cancel</string>
     <string name="dialog_yes">Yes</string>

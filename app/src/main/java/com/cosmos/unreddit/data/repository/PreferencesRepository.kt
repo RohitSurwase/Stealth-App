@@ -94,6 +94,20 @@ class PreferencesRepository @Inject constructor(
         )
     }
 
+    suspend fun setLargePreview(largePreview: Boolean) {
+        preferencesDatastore.setValue(
+            ContentPreferences.PreferencesKeys.LARGE_PREVIEW,
+            largePreview
+        )
+    }
+
+    fun getLargePreview(defaultValue: Boolean = false): Flow<Boolean> {
+        return preferencesDatastore.getValue(
+            ContentPreferences.PreferencesKeys.LARGE_PREVIEW,
+            defaultValue
+        )
+    }
+
     suspend fun setRedditSource(redditSource: Int) {
         preferencesDatastore.setValue(
             DataPreferences.PreferencesKeys.REDDIT_SOURCE,
@@ -157,7 +171,9 @@ class PreferencesRepository @Inject constructor(
                 preferences[ContentPreferences.PreferencesKeys.SHOW_NSFW_PREVIEW] ?: false
             val showSpoilerPreview =
                 preferences[ContentPreferences.PreferencesKeys.SHOW_SPOILER_PREVIEW] ?: false
-            ContentPreferences(showNsfw, showNsfwPreview, showSpoilerPreview)
+            val largePreview =
+                preferences[ContentPreferences.PreferencesKeys.LARGE_PREVIEW] ?: false
+            ContentPreferences(showNsfw, showNsfwPreview, showSpoilerPreview, largePreview)
         }
     }
 
@@ -189,6 +205,20 @@ class PreferencesRepository @Inject constructor(
 
     suspend fun setMuteVideo(muteVideo: Boolean) {
         preferencesDatastore.setValue(MediaPreferences.PreferencesKeys.MUTE_VIDEO, muteVideo)
+    }
+
+    fun getDownloadFilenameAuthor(defaultValue: Boolean = false): Flow<Boolean> {
+        return preferencesDatastore.getValue(
+            MediaPreferences.PreferencesKeys.DOWNLOAD_FILENAME_AUTHOR,
+            defaultValue
+        )
+    }
+
+    suspend fun setDownloadFilenameAuthor(downloadFilenameAuthor: Boolean) {
+        preferencesDatastore.setValue(
+            MediaPreferences.PreferencesKeys.DOWNLOAD_FILENAME_AUTHOR,
+            downloadFilenameAuthor
+        )
     }
 
     //endregion

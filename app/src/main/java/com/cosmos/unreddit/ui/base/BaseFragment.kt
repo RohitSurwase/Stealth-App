@@ -73,7 +73,9 @@ open class BaseFragment : Fragment(), PostListAdapter.PostClickListener,
     }
 
     override fun onClick(post: PostEntity) {
-        onClick(parentFragmentManager, post)
+        // Must be the activity's FragmentManager, not the NavHost's: FragmentNavigator throws for
+        // any fragment added to the manager it owns without going through navigate().
+        onClick(requireActivity().supportFragmentManager, post)
     }
 
     protected open fun onClick(fragmentManager: FragmentManager, post: PostEntity) {
@@ -104,15 +106,15 @@ open class BaseFragment : Fragment(), PostListAdapter.PostClickListener,
     override fun onImageClick(post: PostEntity) {
         viewModel?.insertPostInHistory(post.id)
         if (post.gallery.isNotEmpty()) {
-            linkHandler.openGallery(post.gallery)
+            linkHandler.openGallery(post.gallery, post.author)
         } else {
-            linkHandler.openMedia(post.mediaUrl, post.mediaType)
+            linkHandler.openMedia(post.mediaUrl, post.mediaType, post.author)
         }
     }
 
     override fun onVideoClick(post: PostEntity) {
         viewModel?.insertPostInHistory(post.id)
-        linkHandler.openMedia(post.mediaUrl, post.mediaType)
+        linkHandler.openMedia(post.mediaUrl, post.mediaType, post.author)
     }
 
     override fun onLinkClick(post: PostEntity) {

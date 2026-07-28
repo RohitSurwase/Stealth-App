@@ -13,11 +13,22 @@ import androidx.core.view.ViewCompat
 import androidx.interpolator.view.animation.FastOutLinearInInterpolator
 import androidx.interpolator.view.animation.LinearOutSlowInInterpolator
 
-class HideBottomViewBehavior<V: View> @JvmOverloads constructor(
-    private val leftHandedMode: Boolean = false,
-    context: Context? = null,
-    attrs: AttributeSet? = null
-) : CoordinatorLayout.Behavior<V>(context, attrs) {
+class HideBottomViewBehavior<V: View> : CoordinatorLayout.Behavior<V> {
+
+    private val leftHandedMode: Boolean
+
+    @JvmOverloads
+    constructor(leftHandedMode: Boolean = false) : super() {
+        this.leftHandedMode = leftHandedMode
+    }
+
+    /**
+     * Used when the behavior is inflated from an `app:layout_behavior` attribute, which cannot
+     * supply [leftHandedMode].
+     */
+    constructor(context: Context, attrs: AttributeSet?) : super(context, attrs) {
+        this.leftHandedMode = false
+    }
 
     private val LINEAR_OUT_SLOW_IN_INTERPOLATOR = FastOutLinearInInterpolator()
     private val FAST_OUT_LINEAR_IN_INTERPOLATOR = LinearOutSlowInInterpolator()

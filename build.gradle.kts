@@ -9,6 +9,7 @@ buildscript {
         classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:${Dependencies.Versions.kotlin}")
         classpath("com.google.dagger:hilt-android-gradle-plugin:${Dependencies.Versions.hiltGradlePlugin}")
         classpath("androidx.navigation:navigation-safe-args-gradle-plugin:${Dependencies.Versions.navigation}")
+        classpath("com.google.devtools.ksp:com.google.devtools.ksp.gradle.plugin:${Dependencies.Versions.ksp}")
     }
 }
 
@@ -21,5 +22,5 @@ allprojects {
 }
 
 tasks.register("clean", Delete::class) {
-    delete(rootProject.buildDir)
+    delete(rootProject.layout.buildDirectory)
 }

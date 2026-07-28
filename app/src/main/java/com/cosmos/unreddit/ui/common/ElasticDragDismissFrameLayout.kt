@@ -38,7 +38,7 @@ import kotlin.math.min
 class ElasticDragDismissFrameLayout @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
-    defStyleAttr: Int = R.attr.materialCardViewStyle
+    defStyleAttr: Int = com.google.android.material.R.attr.materialCardViewStyle
 ) : MaterialCardView(context, attrs, defStyleAttr) {
 
     // configurable attribs
