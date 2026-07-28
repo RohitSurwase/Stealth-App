@@ -1,6 +1,5 @@
 package com.cosmos.unreddit.ui.profilemanager
 
-import android.content.DialogInterface
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -16,13 +15,12 @@ import androidx.recyclerview.widget.RecyclerView
 import com.cosmos.unreddit.R
 import com.cosmos.unreddit.data.model.ProfileItem
 import com.cosmos.unreddit.data.model.db.Profile
-import com.cosmos.unreddit.databinding.DialogAddProfileBinding
 import com.cosmos.unreddit.databinding.FragmentProfileManagerBinding
 import com.cosmos.unreddit.ui.common.CarouselPageTransformer
+import com.cosmos.unreddit.ui.common.ProfileNameDialog
 import com.cosmos.unreddit.util.extension.doAndDismiss
 import com.cosmos.unreddit.util.extension.getRecyclerView
 import com.cosmos.unreddit.util.extension.parcelable
-import com.cosmos.unreddit.util.extension.text
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
@@ -86,82 +84,32 @@ class ProfileManagerDialogFragment : DialogFragment(), ProfileManagerAdapter.Pro
     }
 
     private fun showAddProfileDialog() {
-        val profileBinding = DialogAddProfileBinding.inflate(
-            requireActivity().layoutInflater
-        )
-        MaterialAlertDialogBuilder(requireContext())
-            .setView(profileBinding.root)
-            .setTitle(R.string.dialog_create_profile_title)
-            .setPositiveButton(R.string.dialog_create_profile_button) { _, _ ->
-                // Ignore
-            }
-            .setNeutralButton(R.string.dialog_cancel) { dialog, _ ->
-                dialog.dismiss()
-            }
-            .setCancelable(false)
-            .show()
-            .apply {
-                getButton(DialogInterface.BUTTON_POSITIVE).setOnClickListener {
-                    val name = profileBinding.inputName.text().toString()
-                    val errorMessage = validateProfile(name)
-                    if (errorMessage == null) {
-                        name.let { viewModel.addProfile(it) }
-                        this.dismiss()
-                    } else {
-                        profileBinding.inputName.error = errorMessage
-                    }
-                }
-            }
+        ProfileNameDialog.show(
+            fragment = this,
+            title = R.string.dialog_create_profile_title,
+            positiveButton = R.string.dialog_create_profile_button,
+            existingNames = existingProfileNames()
+        ) { name ->
+            viewModel.addProfile(name)
+        }
     }
 
     private fun showRenameProfileDialog(profile: Profile) {
-        val profileBinding = DialogAddProfileBinding.inflate(
-            requireActivity().layoutInflater
-        ).apply {
-            inputName.editText?.setText(profile.name)
+        ProfileNameDialog.show(
+            fragment = this,
+            title = R.string.dialog_rename_profile_title,
+            positiveButton = R.string.dialog_rename_profile_button,
+            existingNames = existingProfileNames(),
+            initialName = profile.name
+        ) { name ->
+            viewModel.renameProfile(profile, name)
         }
-        MaterialAlertDialogBuilder(requireContext())
-            .setView(profileBinding.root)
-            .setTitle(R.string.dialog_rename_profile_title)
-            .setPositiveButton(R.string.dialog_rename_profile_button) { _, _ ->
-                // Ignore
-            }
-            .setNeutralButton(R.string.dialog_cancel) { dialog, _ ->
-                dialog.dismiss()
-            }
-            .setCancelable(false)
-            .show()
-            .apply {
-                getButton(DialogInterface.BUTTON_POSITIVE).setOnClickListener {
-                    val name = profileBinding.inputName.text().toString()
-                    val errorMessage = validateProfile(name)
-                    if (errorMessage == null) {
-                        name.let { viewModel.renameProfile(profile, it) }
-                        this.dismiss()
-                    } else {
-                        profileBinding.inputName.error = errorMessage
-                    }
-                }
-            }
     }
 
-    private fun validateProfile(text: String): String? {
-        return when {
-            text.length !in PROFILE_NAME_MIN..PROFILE_NAME_MAX -> {
-                getString(R.string.profile_name_length_error)
-            }
-            profileAdapter.currentList.any {
-                it is ProfileItem.UserProfile && it.profile.name.equals(text, true)
-            } -> {
-                getString(R.string.profile_already_exists_error)
-            }
-            text.isBlank() -> {
-                getString(R.string.profile_blank_error)
-            }
-            else -> {
-                null
-            }
-        }
+    private fun existingProfileNames(): List<String> {
+        return profileAdapter.currentList
+            .filterIsInstance<ProfileItem.UserProfile>()
+            .map { it.profile.name }
     }
 
     private fun showDeleteProfileDialog(profile: Profile) {
@@ -205,9 +153,6 @@ class ProfileManagerDialogFragment : DialogFragment(), ProfileManagerAdapter.Pro
 
     companion object {
         private const val TAG = "ProfileManagerDialogFragment"
-
-        private const val PROFILE_NAME_MIN = 3
-        private const val PROFILE_NAME_MAX = 20
 
         private const val KEY_CURRENT_PROFILE = "KEY_PROFILE"
 

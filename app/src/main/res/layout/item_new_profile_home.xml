@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_marginVertical="8dp"
+        tools:layout_width="92dp">
+
+        <!-- Same reserved box as a profile row so every avatar in the tray lines up -->
+        <FrameLayout
+            android:layout_width="@dimen/profile_home_ring_size"
+            android:layout_height="@dimen/profile_home_ring_size"
+            android:layout_gravity="center_horizontal">
+
+            <com.google.android.material.imageview.ShapeableImageView
+                android:id="@+id/image_add"
+                android:layout_width="@dimen/profile_home_size"
+                android:layout_height="@dimen/profile_home_size"
+                android:layout_gravity="center"
+                android:background="@color/profile_new_background"
+                android:contentDescription="@string/profile_manager_add_profile"
+                app:contentPadding="6dp"
+                app:shapeAppearanceOverlay="@style/CircularImageViewStyle"
+                app:srcCompat="@drawable/ic_add" />
+
+        </FrameLayout>
+
+        <TextView
+            android:id="@+id/label_add"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:layout_marginTop="@dimen/profile_name_margin"
+            android:text="@string/profile_manager_add_profile" />
+
+    </LinearLayout>
+
+</layout>

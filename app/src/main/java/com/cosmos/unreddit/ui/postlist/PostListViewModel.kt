@@ -8,6 +8,7 @@ import com.cosmos.unreddit.data.model.Data
 import com.cosmos.unreddit.data.model.Sort
 import com.cosmos.unreddit.data.model.Sorting
 import com.cosmos.unreddit.data.model.db.PostEntity
+import com.cosmos.unreddit.data.model.ProfileItem
 import com.cosmos.unreddit.data.model.db.Profile
 import com.cosmos.unreddit.data.model.preferences.ContentPreferences
 import com.cosmos.unreddit.data.repository.PostListRepository
@@ -46,7 +47,15 @@ class PostListViewModel
     val contentPreferences: Flow<ContentPreferences> =
         preferencesRepository.getContentPreferences()
 
-    val profiles: Flow<List<Profile>> = repository.getAllProfiles()
+    val profiles: Flow<List<ProfileItem>> = repository.getAllProfiles()
+        .map { profiles ->
+            mutableListOf<ProfileItem>().apply {
+                addAll(profiles.map { ProfileItem.UserProfile(it) })
+                // Trailing entry that opens the create-profile dialog
+                add(ProfileItem.NewProfile)
+            }
+        }
+        .flowOn(defaultDispatcher)
 
     private val _sorting: MutableStateFlow<Sorting> = MutableStateFlow(DEFAULT_SORTING)
     val sorting: StateFlow<Sorting> = _sorting
@@ -115,6 +124,18 @@ class PostListViewModel
     fun selectProfile(profile: Profile) {
         viewModelScope.launch {
             preferencesRepository.setCurrentProfile(profile.id)
+        }
+    }
+
+    fun deleteProfile(profile: Profile) {
+        viewModelScope.launch {
+            repository.deleteProfile(profile.id)
+        }
+    }
+
+    fun addProfile(name: String) {
+        viewModelScope.launch {
+            repository.addProfile(name)
         }
     }
 

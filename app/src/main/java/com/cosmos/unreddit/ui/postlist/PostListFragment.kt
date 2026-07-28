@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewTreeObserver
+import android.widget.Toast
 import androidx.core.view.GravityCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
@@ -19,10 +20,12 @@ import androidx.paging.LoadState
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.cosmos.unreddit.R
 import com.cosmos.unreddit.UiViewModel
+import com.cosmos.unreddit.data.model.ProfileItem
 import com.cosmos.unreddit.data.model.db.Profile
 import com.cosmos.unreddit.data.repository.PostListRepository
 import com.cosmos.unreddit.databinding.FragmentPostBinding
 import com.cosmos.unreddit.ui.base.BaseFragment
+import com.cosmos.unreddit.ui.common.ProfileNameDialog
 import com.cosmos.unreddit.ui.common.widget.PullToRefreshLayout
 import com.cosmos.unreddit.ui.common.widget.PullToRefreshView
 import com.cosmos.unreddit.ui.loadstate.NetworkLoadStateAdapter
@@ -40,6 +43,7 @@ import com.cosmos.unreddit.util.extension.onRefreshFromNetwork
 import com.cosmos.unreddit.util.extension.setNavigationListener
 import com.cosmos.unreddit.util.extension.setSortingListener
 import com.google.android.material.appbar.AppBarLayout
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -173,6 +177,7 @@ class PostListFragment : BaseFragment(), PullToRefreshLayout.OnRefreshListener {
 
             launch {
                 viewModel.currentProfile.collect {
+                    profileAdapter.currentProfileId = it.id
                     binding.appBar.profileImage.setText(it.name)
                 }
             }
@@ -204,7 +209,11 @@ class PostListFragment : BaseFragment(), PullToRefreshLayout.OnRefreshListener {
             })
         }
 
-        profileAdapter = ProfileAdapter { onProfileClick(it) }
+        profileAdapter = ProfileAdapter(
+            onClickListener = { onProfileClick(it) },
+            onLongClickListener = { onProfileLongClick(it) },
+            onNewProfileClickListener = { onNewProfileClick() }
+        )
 
         binding.listProfiles.apply {
             layoutManager = LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
@@ -322,6 +331,48 @@ class PostListFragment : BaseFragment(), PullToRefreshLayout.OnRefreshListener {
         closeProfileDrawer()
         // Show app bar on profile change to prevent weird scrolling behaviors
         binding.appBarLayout.setExpanded(true)
+    }
+
+    private fun onProfileLongClick(profile: Profile) {
+        if (profile.id == profileAdapter.currentProfileId) {
+            // Same rule as the profile manager, which hides its delete icon for the active
+            // profile: deleting it would leave the app pointing at a profile that no longer
+            // exists. Long pressing it is silent otherwise, so explain why nothing happened.
+            Toast.makeText(
+                requireContext(),
+                R.string.profile_delete_current_error,
+                Toast.LENGTH_SHORT
+            ).show()
+        } else {
+            showDeleteProfileDialog(profile)
+        }
+    }
+
+    private fun onNewProfileClick() {
+        ProfileNameDialog.show(
+            fragment = this,
+            title = R.string.dialog_create_profile_title,
+            positiveButton = R.string.dialog_create_profile_button,
+            existingNames = profileAdapter.currentList
+                .filterIsInstance<ProfileItem.UserProfile>()
+                .map { it.profile.name }
+        ) { name ->
+            viewModel.addProfile(name)
+        }
+    }
+
+    private fun showDeleteProfileDialog(profile: Profile) {
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle(R.string.dialog_delete_profile_title)
+            .setMessage(getString(R.string.dialog_delete_profile_named_message, profile.name))
+            .setPositiveButton(R.string.dialog_yes) { _, _ ->
+                viewModel.deleteProfile(profile)
+            }
+            .setNegativeButton(R.string.dialog_no) { dialog, _ ->
+                dialog.dismiss()
+            }
+            .setCancelable(false)
+            .show()
     }
 
     override fun onRefresh() {

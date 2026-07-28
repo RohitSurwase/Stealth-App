@@ -10,7 +10,6 @@ import androidx.recyclerview.widget.RecyclerView.Adapter
 import androidx.recyclerview.widget.RecyclerView.Adapter.StateRestorationPolicy.PREVENT_WHEN_EMPTY
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import com.cosmos.unreddit.R
-import com.cosmos.unreddit.data.model.db.PostEntity
 import com.cosmos.unreddit.databinding.ItemListContentBinding
 import com.cosmos.unreddit.ui.base.BaseFragment
 import com.cosmos.unreddit.ui.common.PostDividerItemDecoration
@@ -18,7 +17,6 @@ import com.cosmos.unreddit.ui.common.widget.PullToRefreshLayout
 import com.cosmos.unreddit.ui.common.widget.PullToRefreshView
 import com.cosmos.unreddit.util.DateUtil
 import com.cosmos.unreddit.util.extension.applyWindowInsets
-import com.cosmos.unreddit.util.extension.currentNavigationFragment
 
 abstract class ListFragment<T : Adapter<out ViewHolder>> : BaseFragment(),
     PullToRefreshLayout.OnRefreshListener {
@@ -49,12 +47,6 @@ abstract class ListFragment<T : Adapter<out ViewHolder>> : BaseFragment(),
         super.onViewCreated(view, savedInstanceState)
         initRecyclerView()
         binding.pullRefresh.enablePullToRefresh = enablePullToRefresh
-    }
-
-    override fun onClick(post: PostEntity) {
-        activity?.currentNavigationFragment?.let { currentFragment ->
-            onClick(currentFragment.parentFragmentManager, post)
-        }
     }
 
     protected open fun initRecyclerView() {

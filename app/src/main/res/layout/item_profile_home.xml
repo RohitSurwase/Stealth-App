@@ -16,26 +16,41 @@
         android:layout_marginVertical="8dp"
         tools:layout_width="92dp">
 
-        <com.cosmos.unreddit.ui.common.widget.AvatarView
-            android:id="@+id/profile_avatar"
-            android:layout_width="@dimen/profile_home_size"
-            android:layout_height="@dimen/profile_home_size"
-            android:layout_gravity="center_horizontal"
-            app:text="@{profile.name}"
-            tools:text="S"/>
+        <!--
+        The ring is a sibling rather than a background on the avatar so that the space it needs is
+        reserved whether or not it is visible, keeping every row the same height.
+        -->
+        <FrameLayout
+            android:layout_width="@dimen/profile_home_ring_size"
+            android:layout_height="@dimen/profile_home_ring_size"
+            android:layout_gravity="center_horizontal">
+
+            <View
+                android:id="@+id/profile_selected_ring"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@drawable/profile_selected_ring"
+                android:visibility="gone"
+                tools:visibility="visible" />
+
+            <com.cosmos.unreddit.ui.common.widget.AvatarView
+                android:id="@+id/profile_avatar"
+                android:layout_width="@dimen/profile_home_size"
+                android:layout_height="@dimen/profile_home_size"
+                android:layout_gravity="center"
+                app:text="@{profile.name}"
+                tools:text="S" />
+
+        </FrameLayout>
 
         <TextView
             android:id="@+id/profile_name"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/profile_avatar"
-            app:layout_constraintBottom_toBottomOf="parent"
             android:gravity="center"
             android:layout_marginTop="@dimen/profile_name_margin"
             android:text="@{profile.name}"
-            tools:text="Profile"/>
+            tools:text="Profile" />
 
     </LinearLayout>
 

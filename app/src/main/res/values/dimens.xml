@@ -160,6 +160,8 @@
     <dimen name="backup_operation_card_height">84dp</dimen>
 
     <dimen name="profile_home_size">36dp</dimen>
+    <!-- Leaves room for the active-profile ring, so rows do not resize when the selection moves -->
+    <dimen name="profile_home_ring_size">46dp</dimen>
     <dimen name="profile_home_app_bar_size">32dp</dimen>
     <dimen name="profile_home_drawer_width">92dp</dimen>
 

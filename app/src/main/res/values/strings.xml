@@ -204,6 +204,10 @@
 
     <string name="dialog_delete_profile_title">Delete Profile</string>
     <string name="dialog_delete_profile_message">Are you sure you want to delete this profile?\nSubscriptions, history and saved items for this profile will be lost.</string>
+    <string name="dialog_delete_profile_named_message">Are you sure you want to delete %1$s?\nSubscriptions, history and saved items for this profile will be lost.</string>
+
+    <string name="dialog_unsubscribe_title">Remove Subscription</string>
+    <string name="dialog_unsubscribe_message">Are you sure you want to remove %1$s from your subscriptions?</string>
 
     <string name="dialog_cancel">Cancel</string>
     <string name="dialog_yes">Yes</string>
@@ -219,6 +223,7 @@
     <string name="profile_name_length_error">Profile name must be between 3 and 20 characters</string>
     <string name="profile_already_exists_error">Profile already exists</string>
     <string name="profile_blank_error">Profile name cannot be blank</string>
+    <string name="profile_delete_current_error">The profile in use cannot be deleted</string>
 
     <string name="profile_manager_add_profile">Add Profile</string>
 
