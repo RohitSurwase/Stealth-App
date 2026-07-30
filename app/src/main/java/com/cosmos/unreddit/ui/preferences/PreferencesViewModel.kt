@@ -36,6 +36,8 @@ class PreferencesViewModel @Inject constructor(
 
     val showSpoilerPreview: Flow<Boolean> = preferencesRepository.getShowSpoilerPreview()
 
+    val largePreview: Flow<Boolean> = preferencesRepository.getLargePreview()
+
     val redditSource: SharedFlow<Pair<Int, String>> = combine(
         preferencesRepository.getRedditSource(),
         preferencesRepository.getRedditSourceInstance("teddit.net")
@@ -95,6 +97,12 @@ class PreferencesViewModel @Inject constructor(
     fun setShowSpoilerPreview(showSpoilerPreview: Boolean) {
         viewModelScope.launch {
             preferencesRepository.setShowSpoilerPreview(showSpoilerPreview)
+        }
+    }
+
+    fun setLargePreview(largePreview: Boolean) {
+        viewModelScope.launch {
+            preferencesRepository.setLargePreview(largePreview)
         }
     }
 

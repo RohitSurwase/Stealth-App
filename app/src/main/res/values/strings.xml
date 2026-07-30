@@ -153,6 +153,8 @@
     <string name="preference_show_nsfw">Show NSFW content</string>
     <string name="preference_show_nsfw_preview">Show NSFW preview</string>
     <string name="preference_show_spoiler_preview">Show Spoiler preview</string>
+    <string name="preference_large_preview">Large previews</string>
+    <string name="preference_large_preview_summary">Double the height of image, video and text previews in post lists</string>
 
     <string name="preference_reddit_source">Reddit Source</string>
     <string name="preference_reddit_source_reddit">Reddit</string>

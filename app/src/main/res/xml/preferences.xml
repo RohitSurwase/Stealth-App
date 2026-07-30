@@ -37,6 +37,12 @@
             app:title="@string/preference_show_spoiler_preview"
             app:persistent="false"/>
 
+        <SwitchPreferenceCompat
+            app:key="large_preview"
+            app:title="@string/preference_large_preview"
+            app:summary="@string/preference_large_preview_summary"
+            app:persistent="false"/>
+
     </PreferenceCategory>
 
     <PreferenceCategory

@@ -49,6 +49,7 @@ class PreferencesFragment : PreferenceFragmentCompat() {
     private var showNsfwPreference: SwitchPreferenceCompat? = null
     private var showNsfwPreviewPreference: SwitchPreferenceCompat? = null
     private var showSpoilerPreviewPreference: SwitchPreferenceCompat? = null
+    private var largePreviewPreference: SwitchPreferenceCompat? = null
     private var backupPreference: Preference? = null
     private var sourcePreference: Preference? = null
     private var privacyEnhancerPreference: Preference? = null
@@ -135,6 +136,15 @@ class PreferencesFragment : PreferenceFragmentCompat() {
         )?.apply {
             setOnPreferenceChangeListener { _, newValue ->
                 viewModel.setShowSpoilerPreview(newValue as Boolean)
+                true
+            }
+        }
+
+        largePreviewPreference = findPreference<SwitchPreferenceCompat>(
+            PreferencesKeys.LARGE_PREVIEW.name
+        )?.apply {
+            setOnPreferenceChangeListener { _, newValue ->
+                viewModel.setLargePreview(newValue as Boolean)
                 true
             }
         }
@@ -251,6 +261,12 @@ class PreferencesFragment : PreferenceFragmentCompat() {
             launch {
                 viewModel.showSpoilerPreview.collect { showSpoilerPreview ->
                     showSpoilerPreviewPreference?.isChecked = showSpoilerPreview
+                }
+            }
+
+            launch {
+                viewModel.largePreview.collect { largePreview ->
+                    largePreviewPreference?.isChecked = largePreview
                 }
             }
 
