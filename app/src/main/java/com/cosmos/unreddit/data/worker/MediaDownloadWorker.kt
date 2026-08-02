@@ -29,8 +29,10 @@ import com.cosmos.unreddit.BuildConfig
 import com.cosmos.unreddit.R
 import com.cosmos.unreddit.data.model.GalleryMedia
 import com.cosmos.unreddit.data.receiver.DownloadManagerReceiver
+import com.cosmos.unreddit.data.repository.PreferencesRepository
 import com.cosmos.unreddit.di.DispatchersModule.IoDispatcher
 import com.cosmos.unreddit.util.DateUtil
+import com.cosmos.unreddit.util.FilenameUtil
 import com.cosmos.unreddit.util.IntentUtil
 import com.cosmos.unreddit.util.extension.cancelAllWorkByTag
 import com.cosmos.unreddit.util.extension.cancelNotification
@@ -41,6 +43,7 @@ import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -56,16 +59,27 @@ import java.nio.ByteBuffer
 class MediaDownloadWorker @AssistedInject constructor (
     @Assisted appContext: Context,
     @Assisted params: WorkerParameters,
-    @IoDispatcher private val ioDispatcher: CoroutineDispatcher
+    @IoDispatcher private val ioDispatcher: CoroutineDispatcher,
+    private val preferencesRepository: PreferencesRepository
 ) : CoroutineWorker(appContext, params) {
 
-    private val filename: String
-        get() = applicationContext.getString(R.string.app_name) +
+    /**
+     * Base name of the downloaded files, either the app name or the author of the post the media
+     * comes from, depending on the user preference.
+     */
+    private suspend fun getFilename(author: String?): String {
+        val name = author
+            ?.takeIf { preferencesRepository.getDownloadFilenameAuthor().first() }
+            ?.let { FilenameUtil.sanitize(it) }
+            ?: applicationContext.getString(R.string.app_name)
+
+        return name +
             "_" +
             DateUtil.getFormattedDate(
                 applicationContext.getString(R.string.file_date_format),
                 Date()
             )
+    }
 
     override suspend fun doWork(): Result {
         val url = inputData.getString(KEY_URL) ?: return Result.failure()
@@ -74,6 +88,7 @@ class MediaDownloadWorker @AssistedInject constructor (
         } ?: return Result.failure()
         val sound = inputData.getString(KEY_SOUND)
         val soundType = GalleryMedia.Type.AUDIO
+        val filename = getFilename(inputData.getString(KEY_AUTHOR))
 
         val builder = createDownloadManagerBuilder()
             .setProgress(0, 0, true)
@@ -174,7 +189,7 @@ class MediaDownloadWorker @AssistedInject constructor (
                     .setContentText(
                         applicationContext.getString(R.string.notification_download_content_failed)
                     )
-                    .addAction(getRetryAction(url, type))
+                    .addAction(getRetryAction(url, type, sound, inputData.getString(KEY_AUTHOR)))
 
                 applicationContext.showNotification(NOTIFICATION_ID, builder.build())
 
@@ -357,11 +372,22 @@ class MediaDownloadWorker @AssistedInject constructor (
         )
     }
 
-    private fun getRetryAction(url: String, type: GalleryMedia.Type): NotificationCompat.Action {
+    private fun getRetryAction(
+        url: String,
+        type: GalleryMedia.Type,
+        sound: String?,
+        author: String?
+    ): NotificationCompat.Action {
         return NotificationCompat.Action.Builder(
             null,
             applicationContext.getString(R.string.notification_download_action_retry),
-            DownloadManagerReceiver.getRetryPendingIntent(applicationContext, url, type)
+            DownloadManagerReceiver.getRetryPendingIntent(
+                applicationContext,
+                url,
+                type,
+                sound,
+                author
+            )
         ).build()
     }
 
@@ -384,15 +410,23 @@ class MediaDownloadWorker @AssistedInject constructor (
         private const val KEY_URL = "KEY_URL"
         private const val KEY_TYPE = "KEY_TYPE"
         private const val KEY_SOUND = "KEY_SOUND"
+        private const val KEY_AUTHOR = "KEY_AUTHOR"
 
-        fun enqueueWork(context: Context, url: String, type: GalleryMedia.Type, sound: String?) {
+        fun enqueueWork(
+            context: Context,
+            url: String,
+            type: GalleryMedia.Type,
+            sound: String?,
+            author: String? = null
+        ) {
             val downloadRequest = OneTimeWorkRequestBuilder<MediaDownloadWorker>()
                 .addTag(WORK_TAG)
                 .setInputData(
                     workDataOf(
                         KEY_URL to url,
                         KEY_TYPE to type.value,
-                        KEY_SOUND to sound
+                        KEY_SOUND to sound,
+                        KEY_AUTHOR to author
                     )
                 )
                 .build()

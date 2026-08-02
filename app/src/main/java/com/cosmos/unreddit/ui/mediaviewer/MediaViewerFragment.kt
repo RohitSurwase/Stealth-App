@@ -308,7 +308,8 @@ class MediaViewerFragment : FullscreenBottomSheetFragment() {
                 requireContext().applicationContext,
                 it.url,
                 it.type,
-                it.sound
+                it.sound,
+                arguments?.getString(BUNDLE_KEY_AUTHOR)
             )
 
             Toast.makeText(
@@ -405,17 +406,27 @@ class MediaViewerFragment : FullscreenBottomSheetFragment() {
         private const val BUNDLE_KEY_IMAGES = "BUNDLE_KEY_IMAGES"
         private const val BUNDLE_KEY_LINK = "BUNDLE_KEY_LINK"
         private const val BUNDLE_KEY_TYPE = "BUNDLE_KEY_TYPE"
+        private const val BUNDLE_KEY_AUTHOR = "BUNDLE_KEY_AUTHOR"
 
-        fun newInstance(images: List<GalleryMedia>) = MediaViewerFragment().apply {
+        fun newInstance(
+            images: List<GalleryMedia>,
+            author: String? = null
+        ) = MediaViewerFragment().apply {
             arguments = bundleOf(
-                BUNDLE_KEY_IMAGES to images
+                BUNDLE_KEY_IMAGES to images,
+                BUNDLE_KEY_AUTHOR to author
             )
         }
 
-        fun newInstance(link: String, type: MediaType) = MediaViewerFragment().apply {
+        fun newInstance(
+            link: String,
+            type: MediaType,
+            author: String? = null
+        ) = MediaViewerFragment().apply {
             arguments = bundleOf(
                 BUNDLE_KEY_LINK to link,
-                BUNDLE_KEY_TYPE to type
+                BUNDLE_KEY_TYPE to type,
+                BUNDLE_KEY_AUTHOR to author
             )
         }
     }

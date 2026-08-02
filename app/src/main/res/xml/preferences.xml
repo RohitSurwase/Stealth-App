@@ -40,6 +40,18 @@
     </PreferenceCategory>
 
     <PreferenceCategory
+        app:key="downloads_category"
+        app:title="@string/preference_category_downloads">
+
+        <SwitchPreferenceCompat
+            app:key="download_filename_author"
+            app:title="@string/preference_download_filename_author"
+            app:summary="@string/preference_download_filename_author_summary"
+            app:persistent="false"/>
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
         app:key="data_category"
         app:title="@string/preference_category_data">
 

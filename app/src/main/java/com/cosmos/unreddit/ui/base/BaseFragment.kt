@@ -104,15 +104,15 @@ open class BaseFragment : Fragment(), PostListAdapter.PostClickListener,
     override fun onImageClick(post: PostEntity) {
         viewModel?.insertPostInHistory(post.id)
         if (post.gallery.isNotEmpty()) {
-            linkHandler.openGallery(post.gallery)
+            linkHandler.openGallery(post.gallery, post.author)
         } else {
-            linkHandler.openMedia(post.mediaUrl, post.mediaType)
+            linkHandler.openMedia(post.mediaUrl, post.mediaType, post.author)
         }
     }
 
     override fun onVideoClick(post: PostEntity) {
         viewModel?.insertPostInHistory(post.id)
-        linkHandler.openMedia(post.mediaUrl, post.mediaType)
+        linkHandler.openMedia(post.mediaUrl, post.mediaType, post.author)
     }
 
     override fun onLinkClick(post: PostEntity) {

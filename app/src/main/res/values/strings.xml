@@ -139,6 +139,7 @@
 
     <string name="preference_category_ui">UI</string>
     <string name="preference_category_content">CONTENT</string>
+    <string name="preference_category_downloads">DOWNLOADS</string>
     <string name="preference_category_data">DATA</string>
     <string name="preference_category_misc">MISC.</string>
 
@@ -153,6 +154,9 @@
     <string name="preference_show_nsfw">Show NSFW content</string>
     <string name="preference_show_nsfw_preview">Show NSFW preview</string>
     <string name="preference_show_spoiler_preview">Show Spoiler preview</string>
+
+    <string name="preference_download_filename_author">Name downloads after the poster</string>
+    <string name="preference_download_filename_author_summary">Save images and videos as username_timestamp instead of Stealth_timestamp</string>
 
     <string name="preference_reddit_source">Reddit Source</string>
     <string name="preference_reddit_source_reddit">Reddit</string>

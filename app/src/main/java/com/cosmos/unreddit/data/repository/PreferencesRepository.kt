@@ -191,6 +191,20 @@ class PreferencesRepository @Inject constructor(
         preferencesDatastore.setValue(MediaPreferences.PreferencesKeys.MUTE_VIDEO, muteVideo)
     }
 
+    fun getDownloadFilenameAuthor(defaultValue: Boolean = false): Flow<Boolean> {
+        return preferencesDatastore.getValue(
+            MediaPreferences.PreferencesKeys.DOWNLOAD_FILENAME_AUTHOR,
+            defaultValue
+        )
+    }
+
+    suspend fun setDownloadFilenameAuthor(downloadFilenameAuthor: Boolean) {
+        preferencesDatastore.setValue(
+            MediaPreferences.PreferencesKeys.DOWNLOAD_FILENAME_AUTHOR,
+            downloadFilenameAuthor
+        )
+    }
+
     //endregion
 
     //region Policy Disclaimer
