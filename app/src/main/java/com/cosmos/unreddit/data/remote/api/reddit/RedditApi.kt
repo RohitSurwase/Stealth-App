@@ -110,7 +110,7 @@ interface RedditApi {
     //endregion
 
     companion object {
-        const val BASE_URL = "https://www.reddit.com/"
+        const val BASE_URL = "https://oauth.reddit.com/"
         const val BASE_URL_OLD = "https://old.reddit.com/"
     }
 }
