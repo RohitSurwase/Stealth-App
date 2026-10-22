@@ -68,3 +68,16 @@ On Windows: use `gradlew.bat` instead of `./gradlew`.
 - Test coverage is currently minimal. Most business logic (repositories, ViewModels, scrapers) lacks dedicated tests.
 - The `DateUtilTest.kt` in `androidTest` requires an Android context, making it an instrumented test despite testing pure utility logic (consider migrating to local unit test with mock context).
 - Room, DataStore, and network layers are not tested. Consider adding unit tests with `MockWebServer` for APIs and an in-memory Room database for DAOs.
+
+## Coverage Gaps for Recent Changes
+
+None of the post-`ada4bd9` changes have tests:
+
+| Change | Untested surface |
+|---|---|
+| `45fc13e` cookie hotfix | `RedditCookieInitializationInterceptor` (challenge parsing, `executeOperation`, failure fallback) and `RedditCookieJar` (`CookieManager` round-trip, `over18=1` injection) |
+| `bcfe7c2` CMAF audio | `LinkUtil.getRedditSoundTrack()` with `CMAF_<n>` URLs; `isRedditSoundTrack()` |
+| `dfa795f` download audio | `MediaDownloadWorker.muxAudioVideo()` and the API < 29 failure path |
+| `b8474ec` shortcuts | Navigation from post cards/details to user/subreddit screens |
+
+The cookie interceptor is a good first target: `executeOperation()` is a pure function, so it can be unit-tested without Android. The two-request flow can be tested with `MockWebServer` plus a fake cookie store, and `RedditCookieJar` can be tested with a mocked `CookieManager` or an instrumented test.

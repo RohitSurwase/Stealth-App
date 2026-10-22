@@ -1,6 +1,6 @@
 # 03 - Source Structure
 
-This document details the code package structure in `app/src/main/java/com/cosmos/unreddit`, mapping every package and class to its responsibility.
+This document maps the current `app/src/main/java/com/cosmos/unreddit` tree (HEAD `07577e5`). Class names and package contents are taken directly from the files, and the interceptor/cookie entries reflect the `45fc13e` hotfix.
 
 ---
 
@@ -9,306 +9,272 @@ This document details the code package structure in `app/src/main/java/com/cosmo
 ```text
 com.cosmos.unreddit/
 │
-├── UnredditApplication.kt          # Hilt Application — Coil, WorkManager, theme init
-├── MainActivity.kt                 # Single Activity — NavHost + bottom nav + left-handed mode
-├── UiViewModel.kt                  # Activity-scoped ViewModel — nav visibility, left-hand, disclaimer
+├── UnredditApplication.kt              # Hilt Application — theme, Coil, WorkManager, crash handler
+├── MainActivity.kt                     # Single Activity — NavHost, bottom nav, left-handed mode
+├── UiViewModel.kt                      # Activity-scoped ViewModel — nav visibility, left-hand, disclaimer
 │
-├── data/                           # Data layer
-│   ├── local/                      #   Room DB, DAOs, mappers, backup
-│   ├── model/                      #   Domain / DB / preference / backup models
-│   ├── receiver/                   #   BroadcastReceiver (download retry/cancel)
-│   ├── remote/                     #   Retrofit APIs, scrapers, OkHttp interceptors, PagingSources
-│   ├── repository/                 #   Repository singletons
-│   └── worker/                     #   WorkManager workers
+├── data/                               # Data layer
+│   ├── local/                          #   Room DB, DAOs, mappers, backup
+│   ├── model/                          #   Domain, DB, preference and backup models
+│   ├── receiver/                       #   BroadcastReceiver for download retry/cancel
+│   ├── remote/                         #   Retrofit APIs, scrapers, interceptors, PagingSources
+│   ├── repository/                     #   Repository singletons
+│   └── worker/                         #   WorkManager workers
 │
-├── di/                             # Hilt modules (5 modules)
-│
-├── ui/                             # Feature-based UI packages (22 packages)
-│
-└── util/                           # Utilities & extensions (22 files/dirs)
+├── di/                                 # Hilt modules (5)
+├── ui/                                 # Feature-based UI packages (22)
+└── util/                               # Utilities and extensions (21 files + 18 extensions)
 ```
 
 ---
 
-## 1. `data/` — Data Layer
-
-### `data/local/` — Room Database & Offline Storage
+## 1. Root Files
 
 | File | Responsibility |
 |---|---|
-| `RedditDatabase.kt` | Room DB (v4, export schema). Entities: Subscription, History, Profile, PostEntity, CommentEntity, Redirect. Contains 3 migrations (1→2, 2→3, 3→4) + default-profile callback. |
-| `Converters.kt` | Room type converters (lists, enums, timestamps). |
+| `UnredditApplication.kt` | `@HiltAndroidApp`; reads `night_mode` from DataStore with `runBlocking`, applies Light/Dark/Amoled themes, installs `FileUncaughtExceptionHandler`, supplies the Coil `ImageLoader` and WorkManager `Configuration` with `HiltWorkerFactory`. |
+| `MainActivity.kt` | Single activity; `setTheme(appTheme)` before `super.onCreate`; hosts `NavHostFragment`; builds the floating bottom navigation; flips gravity/corners for left-handed mode; hides the nav outside the four tab destinations; shows the policy disclaimer Snackbar. |
+| `UiViewModel.kt` | Exposes `navigationVisibility`, `leftHandedMode` and `policyDisclaimerShown` as flows derived from preferences and navigation state. |
 
-**`local/dao/`** — Data Access Objects:
+---
 
-| DAO | Key Operations |
+## 2. `data/` — Data Layer
+
+### `data/local/` — Room and offline storage
+
+| File | Responsibility |
 |---|---|
-| `BaseDao.kt` | Generic upsert / delete / insert helpers |
-| `SubscriptionDao.kt` | CRUD subscriptions by profile |
-| `HistoryDao.kt` | Insert / get / delete post view history |
-| `ProfileDao.kt` | Create / delete / get / update profiles |
-| `PostDao.kt` | Save / unsave / get saved posts |
-| `CommentDao.kt` | Save / unsave / get saved comments |
-| `RedirectDao.kt` | URL redirect rules (service→target) |
+| `RedditDatabase.kt` | Room DB `reddit_db`, **version 4**, `exportSchema = true`. Entities: `Subscription`, `History`, `Profile`, `PostEntity`, `Comment.CommentEntity`, `Redirect`. Migrations `1→2`, `2→3`, `3→4`; first-creation callback inserts profile `id=1`, name `"Stealth"`. |
+| `Converters.kt` | Room type converters. |
 
-**`local/mapper/`** — Entity ↔ Domain mappers:
+**`local/dao/`**
 
-| Mapper | Maps |
+| DAO | Operations |
 |---|---|
-| `Mapper.kt` | Base mapper interface |
-| `PostMapper2.kt` | PostChild/PostEntity ↔ domain PostType |
-| `CommentMapper2.kt` | CommentChild/CommentEntity ↔ domain Comment |
-| `SubredditMapper2.kt` | Subreddit data → domain models |
-| `UserMapper2.kt` | User data → domain models |
-| `SavedMapper2.kt` | Saved posts/comments → UI models |
-| `ProfileMapper.kt` | Profile DB ↔ domain |
-| `SubscriptionMapper.kt` | Subscription DB ↔ domain |
-| `BackupPostMapper.kt` | Post ↔ backup model |
-| `BackupCommentMapper.kt` | Comment ↔ backup model |
+| `BaseDao.kt` | Generic insert/upsert/delete helpers |
+| `SubscriptionDao.kt` | CRUD subscriptions by `profile_id` |
+| `HistoryDao.kt` | Insert/read/delete post view history by profile |
+| `ProfileDao.kt` | Create/delete/get/update profiles |
+| `PostDao.kt` | Save/unsave/get saved posts by profile |
+| `CommentDao.kt` | Save/unsave/get saved comments by profile |
+| `RedirectDao.kt` | Redirect rules (`service` primary key) |
 
-**`local/backup/`** — Export/Import:
+**`local/mapper/`** — entity/domain mapping:
+
+`Mapper.kt`, `PostMapper2.kt`, `CommentMapper2.kt`, `SubredditMapper2.kt`, `UserMapper2.kt`, `SavedMapper2.kt`, `ProfileMapper.kt`, `SubscriptionMapper.kt`, `BackupPostMapper.kt`, `BackupCommentMapper.kt`.
+
+**`local/backup/`**
 
 | File | Purpose |
 |---|---|
 | `BackupManager.kt` | Abstract backup interface |
-| `RedditBackupManager.kt` | SharedPreferences-based backup |
-| `StealthBackupManager.kt` | Full Room backup (proprietary format) |
+| `RedditBackupManager.kt` | Reddit-format backup |
+| `StealthBackupManager.kt` | Full Room backup in Stealth's own format |
 
----
+### `data/model/` — Domain models
 
-### `data/model/` — Data Models
+Root models (23 files):
 
-**Root models** (26 files in `model/` root):
+`Award.kt`, `BackupTypeItem.kt`, `Block.kt`, `Comment.kt`, `CommentType.kt`, `CreditItem.kt`, `Data.kt`, `Flair.kt`, `GalleryMedia.kt`, `HtmlBlock.kt`, `MediaType.kt`, `PosterType.kt`, `PostType.kt`, `ProfileItem.kt`, `RedditText.kt`, `Resource.kt`, `SavedItem.kt`, `ServiceExternal.kt`, `ServiceRedirect.kt`, `Sort.kt`, `Sorting.kt`, `TimeSorting.kt`, `User.kt`.
 
-| File | Description |
+**`model/db/`**
+
+| File | Role |
 |---|---|
-| `PostType.kt` | Domain model for Reddit posts |
-| `Comment.kt` | Domain model for comments (includes nested `CommentEntity`) |
-| `MediaType.kt` | Enum: IMAGE, VIDEO, GIF, AUDIO, LINK, SELF, GALLERY, etc. |
-| `RedditText.kt` | Rich text representation (HTML + awards) |
-| `Resource.kt` | Generic sealed class: Success / Error / Loading |
-| `Sort.kt` / `Sorting.kt` / `TimeSorting.kt` | Sort enums and wrappers |
-| `Award.kt` / `Flair.kt` | Award / image-flair data |
-| `User.kt` / `Block.kt` / `SavedItem.kt` | User, block-list, saved-item models |
-| `Data.kt` | Generic wrapper for Reddit API data nodes |
-| `HtmlBlock.kt` / `CreditItem.kt` | HTML block segments, credit attributions |
-| `BackupTypeItem.kt` | Backup-type selection item |
-| `PosterType.kt` | Enum: USER, MOD, ADMIN, OP, etc. |
-| `GalleryMedia.kt` | Gallery media parcelable |
-| `ServiceExternal.kt` / `ServiceRedirect.kt` | External/redirect service models |
-| `CommentType.kt` | Comment kind enum |
+| `Subscription.kt` | `subscription` entity: name, time, icon, `profile_id` |
+| `History.kt` | `history` entity: `post_id`, time, `profile_id` |
+| `Profile.kt` | `profile` entity: id, name |
+| `ProfileWithDetails.kt` | Projection with subscription/post counts |
+| `PostEntity.kt` | `post` entity: full saved-post snapshot |
+| `Comment.CommentEntity` | `comment` entity: full saved-comment snapshot |
+| `Redirect.kt` | `redirect` entity: pattern, redirect host, service, `RedirectMode` |
+| `SubredditEntity.kt` | **Not a Room entity**; UI model produced by `SubredditMapper2` |
 
-**`model/db/`** — Room entity models:
+**`model/preferences/`**
 
-| Entity | Fields |
+| File | DataStore keys |
 |---|---|
-| `Subscription.kt` | name, time, icon, profileId |
-| `History.kt` | postId, time, profileId |
-| `Profile.kt` | id, name |
-| `ProfileWithDetails.kt` | Profile + sub count, post count |
-| `PostEntity.kt` | Full post data for saved posts |
-| `Comment.CommentEntity.kt` | Full comment data for saved comments |
-| `Redirect.kt` | pattern, redirect, service, mode |
-| `SubredditEntity.kt` | Cached subreddit metadata |
+| `UiPreferences.kt` | `night_mode`, `left_handed_mode` (`NightMode`: LIGHT, DARK, AMOLED `434`, FOLLOW_SYSTEM) |
+| `DataPreferences.kt` | `reddit_source`, `reddit_source_instance`, `privacy_enhancer` (`RedditSource`: REDDIT=0, TEDDIT=1, REDDIT_SCRAP=2) |
+| `ContentPreferences.kt` | `show_nsfw`, `show_nsfw_preview`, `show_spoiler_preview` |
+| `MediaPreferences.kt` | `mute_video` |
+| `ProfilePreferences.kt` | `current_profile` |
+| `PolicyDisclaimerPreferences.kt` | `policy_disclaimer_shown` |
 
-**`model/preferences/`** — DataStore preference models:
+**`model/backup/`**
 
-| File | Settings Group |
-|---|---|
-| `UiPreferences.kt` | Theme (Light/Dark/Amoled), left-handed mode |
-| `DataPreferences.kt` | Reddit source, instance URL, backup enable |
-| `ContentPreferences.kt` | NSFW toggle, blur NSFW |
-| `MediaPreferences.kt` | Autoplay, HD toggle |
-| `ProfilePreferences.kt` | Active profile ID |
-| `PolicyDisclaimerPreferences.kt` | Disclaimer shown flag |
+`BackupType.kt` (`REDDIT`, `STEALTH`), `Post.kt`, `Comment.kt`, `Profile.kt`, `Subscription.kt`.
 
-**`model/backup/`** — Backup data models:
+### `data/receiver/`
 
 | File | Purpose |
 |---|---|
-| `BackupType.kt` | Enum: REDDIT / STEALTH |
-| `Post.kt` / `Comment.kt` | Backup-serializable post/comment |
-| `Profile.kt` / `Subscription.kt` | Backup-serializable profile/subscription |
+| `DownloadManagerReceiver.kt` | Handles `<applicationId>.ACTION_DOWNLOAD_RETRY` and `.ACTION_DOWNLOAD_CANCEL` for media-download notifications |
 
----
+### `data/remote/` — Network layer
 
-### `data/receiver/` — Broadcast Receivers
+**`remote/` root**
 
 | File | Purpose |
 |---|---|
-| `DownloadManagerReceiver.kt` | Handles `ACTION_DOWNLOAD_RETRY` / `ACTION_DOWNLOAD_CANCEL` intents for failed media downloads |
+| `RawJsonInterceptor.kt` | Appends `raw_json=1` to every request |
+| `TargetRedditInterceptor.kt` | Appends `target=reddit` for Teddit requests |
 
----
+**`remote/api/reddit/`**
 
-### `data/remote/` — Network Layer
+| File / package | Purpose |
+|---|---|
+| `RedditApi.kt` | Retrofit interface for `www.reddit.com` (`BASE_URL`) and `old.reddit.com` (`BASE_URL_OLD`) |
+| `TedditApi.kt` | Retrofit interface for a Teddit instance (`?api` endpoints, default `https://teddit.net/`) |
+| `JsonInterceptor.kt` | Appends `.json` as a path segment |
+| `RedditCookieInitializationInterceptor.kt` | **Added by `45fc13e`**; detects a missing `token_v2` cookie and solves Reddit's JS challenge to obtain it |
+| `RedditCookieJar.kt` | **Rewritten by `45fc13e`**; reads/writes Android `CookieManager`, adds `over18=1` for reddit hosts |
+| `SortingConverterFactory.kt` | Converts `Sort` / `TimeSorting` to their `type` strings |
+| `source/` | `BaseRedditSource`, `CurrentSource` (strategy wrapper), `RedditSource`, `TedditSource`, `RedditScrapingSource` |
+| `model/` | 29 JSON/domain models: `Listing`, `ListingData`, `PostData`, `CommentData`, `Child`, `Media`, `MediaMetadata`, `MediaPreview`, `RedditVideoPreview`, `GalleryData`, `GalleryDataItem`, `GalleryImage`, `GalleryItem`, `Crosspost`, `Awarding`, `RichText`, `AboutData`, `AboutUserData`, `MoreChildren`, `MoreData`, `TedditUser`, `Variants`, `Tagline`, `Subreddit`, `Embed`, `Image`, `ImageSource`, `Data`, `JsonMore` |
+| `adapter/` | `RepliesAdapter`, `EditedAdapter`, `MediaMetadataAdapter`, `NullToEmptyStringAdapter` |
+| `scraper/` | `RedditScraper` (base), `PostScraper`, `CommentScraper`, `SubredditScraper`, `SubredditSearchScraper`, `UserScaper`, `Over18Scraper` |
 
-**`remote/` root:**
+**Other APIs**
+
+| Package | Files |
+|---|---|
+| `api/imgur/` | `ImgurApi.kt`, `adapter/AlbumData.kt`, `model/Album.kt`, `model/Data.kt`, `model/Image.kt` |
+| `api/gfycat/` | `GfycatApi.kt`, `model/ContentUrls.kt`, `Gif.kt`, `GfyItem.kt`, `Item.kt` |
+| `api/redgifs/` | `RedgifsApi.kt`, `RedgifsToken.kt`, `model/Gif.kt`, `Token.kt`, `Item.kt`, `Urls.kt` |
+| `api/streamable/` | `StreamableApi.kt`, `model/Files.kt`, `VideoFile.kt`, `Video.kt` |
+| `remote/scraper/` | `Scraper.kt` — abstract Jsoup base class (timeout, IO dispatcher, selectors) |
+
+**`remote/datasource/`** — Paging 3 sources:
+
+| DataSource | Feeds |
+|---|---|
+| `SmartPostListDataSource.kt` | Home / multi-subreddit feed; **splits >100 subs into parallel chunks** |
+| `PostListDataSource.kt` | Generic post list paging |
+| `UserPostsDataSource.kt` | User submitted posts |
+| `CommentsDataSource.kt` | User comments |
+| `SearchPostDataSource.kt` | Global post search |
+| `SearchUserDataSource.kt` | User search |
+| `SearchSubredditDataSource.kt` | Subreddit search |
+| `SubredditSearchPostDataSource.kt` | In-subreddit search |
+
+### `data/repository/`
+
+| Repository | Role |
+|---|---|
+| `PostListRepository.kt` | Pager creation, subscriptions, history, profiles, saved posts/comments, search; page size 25 |
+| `PreferencesRepository.kt` | Typed access to every DataStore key |
+| `BackupRepository.kt` | Export/import backups |
+| `ImgurRepository.kt` | Imgur album/image metadata |
+| `GfycatRepository.kt` | Gfycat metadata |
+| `RedgifsRepository.kt` | Redgifs metadata (token + GIF URL) |
+| `StreamableRepository.kt` | Streamable metadata |
+| `AssetsRepository.kt` | Reads bundled assets (licenses) |
+
+### `data/worker/`
 
 | File | Purpose |
 |---|---|
-| `RawJsonInterceptor.kt` | OkHttp interceptor that forces `raw_json=1` query param |
-| `TargetRedditInterceptor.kt` | Rewrites request URL target (for Teddit) |
-
-**`remote/api/`** — Retrofit service interfaces:
-
-```
-api/
-├── reddit/          # Reddit JSON API + Teddit API + scrapers + model JSON adapters
-├── gfycat/          # Gfycat video metadata API
-├── imgur/           # Imgur album/image API (with AlbumDataAdapter)
-├── redgifs/         # Redgifs NSFW video API
-└── streamable/      # Streamable video API
-```
-
-**`remote/api/reddit/`** — Reddit API (largest API package, ~50 files):
-
-| Sub-package / File | Purpose |
-|---|---|
-| `RedditApi.kt` / `TedditApi.kt` | Retrofit interfaces for JSON & Teddit endpoints |
-| `RedditCookieJar.kt` | In-memory cookie jar for scraped session |
-| `JsonInterceptor.kt` | Manipulates JSON API request headers |
-| `SortingConverterFactory.kt` | Retrofit converter for Sort/TimeSorting params |
-| `source/` | `BaseRedditSource` interface + 3 implementations: `RedditSource`, `TedditSource`, `RedditScrapingSource` + strategy wrapper `CurrentSource` |
-| `model/` | ~30 JSON data classes: `Listing`, `ListingData`, `PostData`, `CommentData`, `Child` (polymorphic), `Media`, `MediaMetadata`, `GalleryData`, `Crosspost`, `Awarding`, `RichText`, `AboutData`, `AboutUserData`, `MoreChildren`, `MoreData`, etc. |
-| `adapter/` | Custom Moshi adapters: `RepliesAdapter`, `EditedAdapter`, `MediaMetadataAdapter`, `NullToEmptyStringAdapter` |
-| `scraper/` | Jsoup scrapers: `RedditScraper` (base), `PostScraper`, `CommentScraper`, `SubredditScraper`, `SubredditSearchScraper`, `UserScaper`, `Over18Scraper` |
-
-**`remote/datasource/`** — Paging 3 data sources:
-
-| DataSource | Backed By | Feeds |
-|---|---|---|
-| `SmartPostListDataSource.kt` | `CurrentSource` | Home feed, multi-reddit |
-| `PostListDataSource.kt` | `CurrentSource` | Generic post list paging |
-| `UserPostsDataSource.kt` | `CurrentSource` | User post history |
-| `CommentsDataSource.kt` | `CurrentSource` | User comment history |
-| `SearchPostDataSource.kt` | `CurrentSource` | Global post search |
-| `SearchUserDataSource.kt` | `CurrentSource` | User search |
-| `SearchSubredditDataSource.kt` | `CurrentSource` | Subreddit search |
-| `SubredditSearchPostDataSource.kt` | `CurrentSource` | In-subreddit search |
-
-**`remote/scraper/`:**
-
-| File | Purpose |
-|---|---|
-| `Scraper.kt` | Abstract base class for Jsoup-based scrapers. Defines common selectors, timeout, IO dispatcher. |
+| `MediaDownloadWorker.kt` | `@HiltWorker`; downloads media, splits v.reddit video/audio, muxes on API 29+, posts progress/retry/cancel notifications |
 
 ---
 
-### `data/repository/` — Repositories
-
-| Repository | Role / Key Methods |
-|---|---|
-| `PostListRepository.kt` | Central repository: posts (Pager), subscriptions CRUD, profiles CRUD, history, save/unsave posts/comments, search |
-| `PreferencesRepository.kt` | DataStore access: theme, source, NSFW, left-hand, instance URL, disclaimer, etc. |
-| `BackupRepository.kt` | Initiate/restore DB backups |
-| `ImgurRepository.kt` | Fetch Imgur album by ID |
-| `GfycatRepository.kt` | Fetch Gfycat video metadata |
-| `RedgifsRepository.kt` | Fetch Redgifs video metadata |
-| `StreamableRepository.kt` | Fetch Streamable video metadata |
-| `AssetsRepository.kt` | Read raw asset files (e.g., license text) |
-
----
-
-### `data/worker/` — WorkManager
-
-| File | Purpose |
-|---|---|
-| `MediaDownloadWorker.kt` | Background file download with retry support; enqueued with ForegroundInfo for Android 12+ |
-
----
-
-## 2. `di/` — Dependency Injection (Hilt)
+## 3. `di/` — Dependency Injection
 
 All modules install into `SingletonComponent`:
 
 | Module | Provides |
 |---|---|
-| `NetworkModule.kt` | 4 OkHttpClients (RedditOfficial, Teddit, RedditScrap, Generic), 2 RedditApis (official + old), TedditApi, ImgurApi, StreamableApi, GfycatApi, RedgifsApi; 3 Moshi instances (RedditMoshi, BasicMoshi, ImgurMoshi). 9 qualifiers total. |
-| `DatabaseModule.kt` | Singleton `RedditDatabase` with migrations |
-| `PreferencesModule.kt` | Singleton `DataStore<Preferences>` named `"preferences"` |
-| `DispatchersModule.kt` | 4 named dispatchers: `@DefaultDispatcher`, `@IoDispatcher`, `@MainDispatcher`, `@MainImmediateDispatcher` |
-| `CoroutinesScopesModule.kt` | `@ApplicationScope` — `CoroutineScope(SupervisorJob() + Dispatchers.Default)` |
+| `NetworkModule.kt` | 3 Moshi instances (`@RedditMoshi`, `@BasicMoshi`, `@ImgurMoshi`), 4 OkHttp clients (`@RedditOkHttp`, `@TedditOkHttp`, `@RedditScrapOkHttp`, `@GenericOkHttp`), `RedditApi` × 2 (`@RedditOfficial`, `@RedditScrap`), `TedditApi`, `ImgurApi`, `StreamableApi`, `GfycatApi`, `RedgifsApi` |
+| `DatabaseModule.kt` | `RedditDatabase` singleton with all migrations |
+| `PreferencesModule.kt` | `DataStore<Preferences>` named `"preferences"` |
+| `DispatchersModule.kt` | `@DefaultDispatcher`, `@IoDispatcher`, `@MainDispatcher`, `@MainImmediateDispatcher` |
+| `CoroutinesScopesModule.kt` | `@ApplicationScope` = `CoroutineScope(SupervisorJob() + Dispatchers.Default)` |
+
+`NetworkModule` contains 9 qualifiers total (`RedditMoshi`, `BasicMoshi`, `ImgurMoshi`, `RedditOkHttp`, `TedditOkHttp`, `GenericOkHttp`, `RedditScrapOkHttp`, `RedditOfficial`, `RedditScrap`).
 
 ---
 
-## 3. `ui/` — Feature-Based UI Packages (22 packages)
+## 4. `ui/` — Feature Packages (22)
 
-Each package follows MVVM: 0–1 Fragment, 0–1 ViewModel, 0–N Adapters/Dialogs.
-
-| Package | Fragment(s) / Dialogs | Purpose |
+| Package | Main classes | Purpose |
 |---|---|---|
-| `postlist/` | `PostListFragment` | Paginated feed (home, multi-reddit) |
-| `postdetails/` | `PostDetailsFragment` | Post body + threaded comments |
-| `mediaviewer/` | `MediaViewerFragment` | Fullscreen ExoPlayer / `TouchImageView` gallery |
-| `subreddit/` | `SubredditFragment` | Browse a specific subreddit |
-| `user/` | `UserFragment` | Browse a user's posts & comments |
-| `subscriptions/` | `SubscriptionsFragment` | Manage subscribed subreddits |
-| `profile/` | `ProfileFragment` | View profile details & saved items |
-| `profilemanager/` | `ProfileManagerDialogFragment` | Multi-profile CRUD |
-| `preferences/` | `PreferencesFragment` | Theme, source, NSFW, left-hand, privacy settings |
-| `search/` | `SearchFragment` | Search posts/subreddits/users |
-| `sort/` | `SortDialogFragment` | Sort picker (Hot/New/Top/Controversial) |
-| `commentmenu/` | `CommentMenuBottomSheet` | Long-press actions on comments |
-| `postmenu/` | `PostMenuBottomSheet` | Long-press actions on posts |
-| `linkmenu/` | `LinkMenuBottomSheet` | Long-press actions on links |
-| `redditsource/` | `RedditSourceDialogFragment` | Choose data source (Reddit/Teddit/Scraped) |
-| `policydisclaimer/` | `PolicyDisclaimerDialogFragment` | Privacy policy acceptance dialog |
-| `backup/` | Backup/restore dialogs | Export/import DB backup |
-| `about/` | About screen | App info, license, credits |
-| `privacyenhancer/` | N/A (might be part of preferences) | Privacy enhancement toggles |
-| `loadstate/` | Shared load-state UI | Paging loading/error/empty indicators |
-| `base/` | Base Fragment/Adapter classes | Shared UI plumbing |
-| `common/` | Common widgets | Dividers, spacers, shared layouts |
+| `about/` | `AboutFragment`, `CreditAdapter` | App info, license, credits |
+| `backup/` | `BackupFragment`, `BackupChoiceFragment`, `BackupLoadingFragment`, `BackupLocationFragment`, `BackupOperationFragment`, `BackupViewModel` | Export/import Room backup |
+| `base/` | `BaseFragment`, `BaseViewModel` | Shared navigation helpers and profile-scoped flows |
+| `commentmenu/` | `CommentMenuFragment` | Comment long-press actions |
+| `common/` | `FragmentAdapter`, `ListFragment`, `PagingListFragment`, `FullscreenBottomSheetFragment`, span classes, widgets (`CradleView`, `RedditTextView`, `PullToRefreshLayout`, …) | Shared UI plumbing |
+| `linkmenu/` | `LinkMenuFragment` | Link long-press actions |
+| `loadstate/` | `NetworkLoadStateAdapter`, `ResourceStateAdapter` | Paging load/error/empty indicators |
+| `mediaviewer/` | `MediaViewerFragment`, `MediaViewerViewModel`, `MediaViewerAdapter`, `MediaViewerThumbnailAdapter` | Fullscreen image/video viewer |
+| `policydisclaimer/` | `PolicyDisclaimerDialogFragment`, `PolicyDisclaimerViewModel` | First-run privacy disclaimer |
+| `postdetails/` | `PostDetailsFragment`, `PostDetailsViewModel`, `PostAdapter`, `CommentAdapter` | Post body + threaded comments |
+| `postlist/` | `PostListFragment`, `PostListViewModel`, `PostListAdapter`, `PostViewHolder`, `ProfileAdapter` | Feed / profile list |
+| `postmenu/` | `PostMenuFragment` | Post long-press actions |
+| `preferences/` | `PreferencesFragment`, `PreferencesViewModel` | Settings screen |
+| `privacyenhancer/` | `PrivacyEnhancerFragment`, `PrivacyEnhancerViewModel`, `PrivacyEnhancerInstanceAdapter`, `PrivacyEnhancerServiceDialog` | Redirect rules and per-service mode |
+| `profile/` | `ProfileFragment`, `ProfileSavedFragment`, `ProfileViewModel`, `ProfileSavedAdapter` | Profile details + saved items |
+| `profilemanager/` | `ProfileManagerDialogFragment`, `ProfileManagerViewModel`, `ProfileManagerAdapter` | Multi-profile CRUD |
+| `redditsource/` | `RedditSourceDialogFragment` | Choose Reddit / Teddit / scraped |
+| `search/` | `SearchFragment`, `SearchPostFragment`, `SearchSubredditFragment`, `SearchUserFragment`, `SearchViewModel`, `SearchSubredditAdapter`, `SearchUserAdapter` | Search posts/users/subreddits |
+| `sort/` | `SortFragment` | Sort picker |
+| `subreddit/` | `SubredditFragment`, `SubredditSearchFragment`, `SubredditViewModel`, `SubredditSearchViewModel` | Subreddit browsing + in-sub search |
+| `subscriptions/` | `SubscriptionsFragment`, `SubscriptionsViewModel`, `SubscriptionsAdapter` | Subscription management |
+| `user/` | `UserFragment`, `UserPostFragment`, `UserCommentFragment`, `UserViewModel`, `UserCommentsAdapter` | User posts/comments |
+
+### Post shortcut buttons (`b8474ec`)
+
+`b8474ec` added user and subreddit shortcut buttons to post views:
+
+- `ui/base/BaseFragment.kt` — `openUser` / `openSubreddit` navigation helpers.
+- `ui/postdetails/PostAdapter.kt` — shortcut binding in post details.
+- `ui/postlist/PostListAdapter.kt` — click listeners for the buttons.
+- `ui/postlist/PostViewHolder.kt` — attaches the shortcut listeners.
+- `ui/profile/ProfileSavedAdapter.kt` — same behavior for saved posts.
+- Layout `res/layout/include_post_metrics.xml` and drawable `ic_profile_post.xml`; strings added to `res/values/strings.xml`.
 
 ---
 
-## 4. `util/` — Utilities & Extensions
+## 5. `util/` — Utilities
 
-**Root util files** (21 files):
+**Root files (21):**
 
 | File | Purpose |
 |---|---|
-| `LinkHandler.kt` | Resolves Reddit links, custom schemes, external media URLs |
-| `LinkValidator.kt` | URL validation (scheme, host, path checks) |
-| `LinkRedirector.kt` | Follows HTTP redirects to resolve final media URL |
-| `LinkUtil.kt` | Utility extractors for domain, query params |
-| `RedditUri.kt` | Parses Reddit deep links into structured paths |
-| `ExoPlayerHelper.kt` | ExoPlayer lifecycle, playback controls, audio focus |
-| `HtmlParser.kt` | Parses Reddit's rich-text HTML into `RedditText` |
-| `RedditTagHandler.kt` | Custom `Html.TagHandler` for Reddit-specific tags |
-| `CommentUtil.kt` | Comment formatting helpers |
-| `PostUtil.kt` | Post type detection, domain extraction |
-| `RedditUtil.kt` | General Reddit string/number formatting |
+| `LinkHandler.kt` | Classifies links and routes them to navigation, media viewer or browser |
+| `LinkValidator.kt` | Adds `https://` if missing and validates with OkHttp |
+| `LinkRedirector.kt` | Privacy Enhancer redirect rules (regex host → host) |
+| `LinkUtil.kt` | Media URL helpers, `REDDIT_VIDEO_REGEX`, `_AUDIO_128` soundtrack URL |
+| `RedditUri.kt` | Parses Reddit deep links |
+| `ExoPlayerHelper.kt` | ExoPlayer data source, 100 MB disk cache, request properties |
+| `HtmlParser.kt` | Parses Reddit HTML into `RedditText` |
+| `RedditTagHandler.kt` | Custom HTML tag handling |
+| `CommentUtil.kt` | Comment formatting |
+| `PostUtil.kt` | Post mapping/filtering and post-type detection |
+| `RedditUtil.kt` | Joins subreddit lists with `+` |
 | `SearchUtil.kt` | Search query sanitization |
-| `DateUtil.kt` | Relative time formatting ("6h ago", "2y ago") |
-| `FileUncaughtExceptionHandler.kt` | Writes uncaught exceptions to file |
-| `HideBottomViewBehavior.kt` | `CoordinatorLayout.Behavior` for bottom nav slide-out |
-| `IntentUtil.kt` | Intent builders (share, open in browser) |
-| `DrawerContent.kt` | Bottom drawer content state holders |
-| `ClickableMovementMethod.kt` | `LinkMovementMethod` that respects `ClickableSpan` |
-| `BlurTransformation.kt` | Coil image transformation for NSFW blur |
-| `PagerHelper.kt` | ViewPager2 page indicator / behavior helpers |
-| `Util.kt` | Generic helpers (display metrics, dp/px, keyboard) |
+| `DateUtil.kt` | Relative time formatting, file-date formatting |
+| `FileUncaughtExceptionHandler.kt` | Writes crash logs to `externalFilesDir/uncaught` and exits |
+| `HideBottomViewBehavior.kt` | `CoordinatorLayout.Behavior` that slides the bottom nav |
+| `IntentUtil.kt` | Share/open intents and `PendingIntent` flags |
+| `DrawerContent.kt` | Bottom drawer state |
+| `ClickableMovementMethod.kt` | Link movement that respects `ClickableSpan` |
+| `BlurTransformation.kt` | Coil NSFW blur |
+| `PagerHelper.kt` | ViewPager2 helpers |
+| `Util.kt` | Misc helpers |
 
-**`util/extension/`** — Kotlin extension functions (18 files):
+**`util/extension/` (18):**
 
-| File | Extensions on |
-|---|---|
-| `ActivityExt.kt` | Activity lifecycle helpers |
-| `ApplicationExt.kt` | Application-scoped access |
-| `BindingExt.kt` | View/ViewBinding helpers |
-| `BundleExt.kt` | Bundle key/value helpers |
-| `DataStoreExt.kt` | DataStore read/write flows |
-| `DateExt.kt` | `toSeconds`, `timeAgo` |
-| `Ext.kt` | General-purpose extensions |
-| `FragmentExt.kt` | Fragment lifecycle, `launchRepeat` |
-| `IterableExt.kt` | Collection operations |
-| `NotificationExt.kt` | Notification channel/build helpers |
-| `NumberExt.kt` | `toPx`, `toDp`, `toTimeStamp` |
-| `PermissionExt.kt` | Runtime permission helpers |
-| `StringExt.kt` | String manipulation |
-| `UriExt.kt` | URI parsing helpers |
-| `ViewExt.kt` | `clearWindowInsetsListener`, `isVisible`, insets |
-| `ViewModelExt.kt` | ViewModel scope helpers |
-| `ViewPagerExt.kt` | ViewPager2 behavior helpers |
-| `WorkManagerExt.kt` | WorkManager enqueue helpers |
+`ActivityExt.kt`, `ApplicationExt.kt`, `BindingExt.kt`, `BundleExt.kt`, `DataStoreExt.kt`, `DateExt.kt`, `Ext.kt`, `FragmentExt.kt`, `IterableExt.kt`, `NotificationExt.kt`, `NumberExt.kt`, `PermissionExt.kt`, `StringExt.kt`, `UriExt.kt`, `ViewExt.kt`, `ViewModelExt.kt`, `ViewPagerExt.kt`, `WorkManagerExt.kt`.
+
+---
+
+## 6. Tests
+
+```text
+app/src/test/java/com/cosmos/unreddit/ExampleUnitTest.kt
+app/src/androidTest/java/com/cosmos/unreddit/ExampleInstrumentedTest.kt
+app/src/androidTest/java/com/cosmos/unreddit/util/DateUtilTest.kt
+```
+
+See [07-Testing.md](07-Testing.md).
