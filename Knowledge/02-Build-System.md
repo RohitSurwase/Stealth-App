@@ -1,56 +1,86 @@
 # 02 - Build System and Dependencies
 
-This document provides a detailed overview of the build system, configurations, dependencies, and compilation commands for the **Stealth for Reddit** (`unReddit`) project.
-
-## Build Setup Overview
-
-The project is built using **Gradle Kotlin DSL (`.gradle.kts`)** and implements the `buildSrc` pattern to manage build logic and dependencies in a clean, type-safe, and centralized manner.
-
-### Project Properties and Gradle Versions
-- **Kotlin Gradle Plugin Version:** `1.7.20`
-- **Android Gradle Plugin Version:** `7.3.1`
-- **Gradle Wrapper Version:** Defined in `gradle/wrapper/gradle-wrapper.properties` (typically compatible with AGP 7.3.1).
-- **Hilt Gradle Plugin Version:** `2.44.2`
-- **Navigation Safe Args Plugin:** `2.5.3`
+This document reflects the current Gradle configuration at HEAD (`07577e5`), including the `3.0.0` bump and the post-`ada4bd9` build changes (`302922c`, `1349c1f`, `e216456`).
 
 ---
 
-## Centralized Configurations (`buildSrc`)
+## Build Setup Overview
 
-The custom Kotlin project under `buildSrc` defines the key configurations, dependency versions, and argument providers.
+- **Gradle wrapper:** `7.5.1` (`gradle/wrapper/gradle-wrapper.properties`).
+- **Gradle Kotlin DSL** with the `buildSrc` pattern for type-safe, centralized configuration.
+- **Root project name:** `unReddit` (`settings.gradle.kts`).
+- **Modules:** one module, `:app`.
+- **JDK:** JDK 17 is required for AGP 7.3.1; kapt needs the module-access flags described below.
 
-### 1. SDK and Project Constants (`Config.kt`)
-Found in `buildSrc/src/main/kotlin/Config.kt`:
-- **Namespace:** `com.cosmos.unreddit`
-- **Application ID:** `com.cosmos.unreddit`
-- **Minimum SDK (minSdk):** `23` (Android 6.0 Marshmallow)
-- **Compile SDK (compileSdk):** `33` (Android 13.0)
-- **Target SDK (targetSdk):** `33` (Android 13.0)
-- **Version Code:** `23`
-- **Version Name:** `2.3.1`
+### Toolchain versions
 
-### 2. Dependency Management (`Dependencies.kt`)
-All dependencies are centralized under `buildSrc/src/main/kotlin/Dependencies.kt`. Some key libraries include:
-- **Hilt (DI):** `2.44.2`
-- **Jetpack Navigation:** `2.5.3`
-- **Room Database:** `2.4.3`
-- **Paging 3:** `3.1.1`
-- **WorkManager:** `2.7.1`
-- **ExoPlayer:** `2.18.1` (used for video/audio rendering)
-- **Retrofit & Moshi:** `2.9.0` and `1.14.0` (REST client & serialization)
-- **Coil:** `2.2.2` (image and GIF loading)
-- **Jsoup:** `1.15.3` (HTML parsing/scraping)
+| Component | Version | Source |
+|---|---|---|
+| Android Gradle Plugin | `7.3.1` | `buildSrc/src/main/kotlin/Dependencies.kt` |
+| Kotlin | `1.7.20` | same |
+| Hilt Gradle Plugin | `2.44.2` | same |
+| Navigation Safe Args | `2.5.3` | same |
+| Gradle wrapper | `7.5.1` | `gradle/wrapper/gradle-wrapper.properties` |
 
-### 3. Room Schema Provider (`RoomSchemaArgProvider.kt`)
-Custom implementation to export Room schemas relative to the project directory for version history and testing.
+---
+
+## Centralized Configuration (`buildSrc`)
+
+### `Config.kt`
+
+`buildSrc/src/main/kotlin/Config.kt`:
+
+```kotlin
+object Config {
+    const val namespace = "com.cosmos.unreddit"
+    const val applicationId = "com.rohitss.stealth"
+
+    const val minSdk = 23
+    const val compileSdk = 33
+    const val targetSdk = 33
+
+    const val versionCode = 30
+    const val versionName = "3.0.0"
+}
+```
+
+| Setting | Value |
+|---|---|
+| Namespace | `com.cosmos.unreddit` |
+| Release application ID | `com.rohitss.stealth` |
+| Debug application ID | `com.rohitss.stealth.dev` (`.dev` suffix) |
+| minSdk | 23 |
+| compileSdk / targetSdk | 33 |
+| versionCode / versionName | 30 / `3.0.0` |
+
+### `Dependencies.kt`
+
+All library versions are centralized in `buildSrc/src/main/kotlin/Dependencies.kt`:
+
+| Area | Libraries / versions |
+|---|---|
+| DI | Hilt `2.44.2`, AndroidX Hilt `1.0.0` |
+| AndroidX | core-ktx `1.9.0`, appcompat `1.5.1`, constraintlayout `2.1.4`, recyclerview `1.2.1`, fragment `1.5.4`, lifecycle `2.5.1`, coordinatorlayout `1.2.0`, viewpager2 `1.0.0`, preference `1.2.0` |
+| Navigation | `2.5.3` |
+| Persistence | Room `2.4.3`, DataStore `1.0.0` |
+| Paging / Work | Paging 3 `3.1.1`, WorkManager `2.7.1` |
+| UI | Material `1.7.0`, browser `1.4.0`, core-splashscreen `1.0.0`, TouchImageView `3.0.3`, drawer `1.0.3` |
+| Media | ExoPlayer `2.18.1`, Coil `2.2.2` (+ `coil-gif`) |
+| Network | Retrofit `2.9.0`, Moshi `1.14.0`, Okio `3.2.0`, Jsoup `1.15.3` |
+| Tests | JUnit `4.13.2`, AndroidX Test `1.1.4`, runner `1.5.1`, Espresso `3.5.0` |
+
+`kotlinx-coroutines` is declared as `1.4.1` but only used transitively through the AndroidX/Kotlin dependencies.
+
+### Room schema output
+
+`RoomSchemaArgProvider.kt` exports Room schemas to `app/schemas` via the kapt argument provider (`app/build.gradle.kts:56-60`). The generated schema for the current database is under `app/schemas/com.cosmos.unreddit.data.local.RedditDatabase/`.
 
 ---
 
 ## App Build Configuration (`app/build.gradle.kts`)
 
-The app module leverages the following plugins and features:
+### Plugins
 
-### Plugins Applied
 ```kotlin
 plugins {
     id("com.android.application")
@@ -62,86 +92,127 @@ plugins {
 }
 ```
 
-### Build Features Enabled
-- **View Binding:** `true` (enables type-safe layout reference bindings)
-- **Data Binding:** `true` (enables declarative UI bindings)
+- **View Binding:** `true`.
+- **Data Binding:** `true`.
+- **Java/Kotlin target:** JVM 1.8 (`compileOptions`, `kotlinOptions`).
+- **Opt-in:** `kotlinx.coroutines.ExperimentalCoroutinesApi`.
 
-### Build Types
-1. **Debug**
-   - Application ID Suffix: `.dev` (allowing parallel installation with production build)
-   - Debuggable: `true`
-2. **Release**
-   - Minify (Proguard/R8): `true`
-   - Shrink Resources: `true`
-   - Signing config: Configured dynamically via `keystore.properties` under the root project directory.
+### kapt on JDK 16+ (`1349c1f`)
+
+AGP 7.3.1 / Kotlin 1.7.20 kapt fails on JDK 16+ without access to internal `javac` packages (KT-45545). The project applies two layers of flags:
+
+1. `kapt { javacOptions { ... } }` in `app/build.gradle.kts:22-36`:
+   - `-Xss4m`
+   - `-J--add-exports` / `-J--add-opens` for `com.sun.tools.javac.main`, `.tree`, `.util`, `.code`
+2. The same flags plus `-Xmx2048m -Xss4m` in `gradle.properties:10` for the Gradle daemon.
+
+If kapt is ever replaced with KSP, these flags can be removed.
+
+### Build types
+
+| Build type | Configuration |
+|---|---|
+| `debug` | `applicationIdSuffix = ".dev"`, `isDebuggable = true` |
+| `release` | `isMinifyEnabled = true`, `isShrinkResources = true`, ProGuard `proguard-android-optimize.txt` + `proguard-rules.pro`, release signing config |
+
+### Signing (`302922c`)
+
+The release signing config reads `../keys/keystore.properties` **relative to the `app/` module**, i.e. **`keys/keystore.properties` at the repo root** (`app/build.gradle.kts:13`):
+
+```kotlin
+val keystorePropertiesFile = file("../keys/keystore.properties")
+```
+
+- If the file is absent, Gradle sets `storeFile = "keystore.jks"` (`:19`); the property values stay empty, so a release build cannot be signed.
+- The configured `storeFile` path is resolved with `file(...)` from the `app/` module.
+- `.gitignore` ignores `keystore.properties`, `*.jks` and `*.keystore`; the `keys/` directory does not exist in a fresh checkout and must be created locally.
+- Debug builds use the default Android debug keystore and do not need this file.
 
 ---
 
-## Build, Build Verification and Running Commands
+## Build and Run Commands
 
-All commands below assume execution from the project root. On Windows systems, use `gradlew.bat` instead of `./gradlew`.
+Run from the repository root. On Windows use `gradlew.bat`.
 
 ### Prerequisites
-- **JDK 17** (or compatible version for AGP 7.3)
-- **Android SDK** with Command Line Tools and Compile SDK 33 installed.
-- Ensure `ANDROID_HOME` or `ANDROID_SDK_ROOT` environment variables are properly set.
 
-### Standard Build Tasks
+- **JDK 17** (or a JDK compatible with AGP 7.3.1). The kapt flags assume JDK 16+.
+- **Android SDK** with **Compile SDK 33** and Build Tools installed.
+- `ANDROID_HOME` or `ANDROID_SDK_ROOT` set, or a valid `local.properties`.
+- For **F-Droid-style reproducible builds**, no `keys/keystore.properties` is needed for `assembleDebug`.
+
+### Tasks
 
 | Command | Action |
 |---|---|
-| `./gradlew clean` | Cleans the build directories of all modules. |
-| `./gradlew assembleDebug` | Compiles the debug variant and outputs `app-debug.apk`. |
-| `./gradlew assembleRelease` | Compiles the obfuscated production variant. |
-| `./gradlew installDebug` | Builds and installs the debug APK on a connected emulator/device. |
-| `./gradlew lintDebug` | Runs Android Lint rules for static code analysis. |
-| `./gradlew testDebugUnitTest` | Executes local unit tests (`test` directories). |
-| `./gradlew connectedDebugAndroidTest` | Runs instrumented UI tests on a connected device (`androidTest` directories). |
-| `./gradlew tasks` | Displays all registered Gradle tasks. |
+| `./gradlew clean` | Delete all module build directories |
+| `./gradlew assembleDebug` | Build `app-debug.apk` with application ID `com.rohitss.stealth.dev` |
+| `./gradlew assembleRelease` | Build the minified/shrunk release APK/AAB; requires `keys/keystore.properties` |
+| `./gradlew installDebug` | Install the debug APK on a connected device/emulator |
+| `./gradlew lintDebug` | Run Android Lint on the debug variant |
+| `./gradlew testDebugUnitTest` | Run JVM unit tests (`app/src/test`) |
+| `./gradlew connectedDebugAndroidTest` | Run instrumented tests on a device (`app/src/androidTest`) |
+| `./gradlew tasks` | List all available tasks |
+
+### Useful variants
+
+```bash
+# Build and install only the debug variant
+./gradlew :app:assembleDebug
+
+# Compile kapt/Room schemas without packaging
+./gradlew :app:kaptDebugKotlin
+
+# Run a single unit test class
+./gradlew testDebugUnitTest --tests "com.cosmos.unreddit.ExampleUnitTest"
+
+# Run a single instrumented test class
+./gradlew connectedDebugAndroidTest -Pandroid.testInstrumentationRunnerArguments.class=com.cosmos.unreddit.util.DateUtilTest
+```
 
 ---
 
-## Build & Release Pipeline
+## Build and Release Pipeline
 
-### No CI/CD Pipeline in Repository
+### No CI/CD in the repository
 
-There is **no automated build pipeline** committed to this repository:
+There is **no** GitHub Actions, GitLab CI, CircleCI, Travis or Jenkins configuration in the tree. All builds are local/manual through the Gradle wrapper.
 
-- No GitHub Actions (`.github/workflows/`), GitLab CI (`.gitlab-ci.yml`), CircleCI (`.circleci/`), Travis (`.travis.yml`), or Jenkinsfile exist.
-- All builds are produced **locally / manually** via the Gradle wrapper using the commands above.
-- The `release` build type requires a signing key. It reads `keystore.properties` (expected at the project root) for `keyAlias`, `keyPassword`, `storeFile`, and `storePassword`. If that file is absent, Gradle falls back to a placeholder `keystore.jks` name, which means a release build will fail without proper signing configuration. Debug builds use the default `androiddebugkey` and the `.dev` application-id suffix.
+### `fastlane/` is metadata only
 
-### `fastlane/` — Store Metadata Only (Not a Build Pipeline)
-
-The repository contains a `fastlane/` directory, but it is **not** a CI/task pipeline. It holds **F-Droid / store publishing metadata** only:
+The repository ships F-Droid/store metadata, not a Fastlane build pipeline:
 
 ```text
-fastlane/
-└── metadata/
-    └── android/
-        ├── en-US/
-        │   ├── full_description.txt
-        │   ├── short_description.txt
-        │   ├── changelogs/        # 1.txt … 23.txt (one per versionCode)
-        │   └── images/            # icon + 8 phone screenshots
-        └── es-AR/
-            ├── full_description.txt
-            └── short_description.txt
+fastlane/metadata/android/
+├── en-US/
+│   ├── full_description.txt
+│   ├── short_description.txt
+│   ├── changelogs/1.txt … 23.txt
+│   └── images/
+│       ├── icon.png
+│       └── phoneScreenshots/01_home.png … 08_preferences.png
+└── es-AR/
+    ├── full_description.txt
+    └── short_description.txt
 ```
 
-There is **no `Fastfile` and no `Appfile`**, so `fastlane` cannot actually build, sign, or upload from this repo. The metadata is consumed by the **F-Droid** build server (the app is published at `f-droid.org/packages/com.cosmos.unreddit/`), which builds releases independently from its own pipeline.
+There is **no `Fastfile` and no `Appfile`**, so Fastlane cannot build, sign or upload from this repository. F-Droid consumes the metadata and builds from source independently.
 
-### Release Workflow (Manual)
+### Manual release checklist
 
-1. Bump `versionCode` / `versionName` in `buildSrc/src/main/kotlin/Config.kt`.
+1. Bump `versionCode` and `versionName` in `buildSrc/src/main/kotlin/Config.kt`.
 2. Add a matching changelog at `fastlane/metadata/android/en-US/changelogs/<versionCode>.txt`.
-3. Provide `keystore.properties` at the repo root.
-4. Run `./gradlew assembleRelease` → produces an obfuscated, shrink-wrapped APK/AAB.
-5. Publish metadata to F-Droid (external pipeline handles the actual build & signing).
+3. Create `keys/keystore.properties`:
+   ```properties
+   keyAlias=...
+   keyPassword=...
+   storeFile=/absolute/path/to/release.jks
+   storePassword=...
+   ```
+4. Ensure the keystore file exists and `storeFile` is reachable from the `app/` module.
+5. Run `./gradlew assembleRelease`.
+6. Publish the APK/AAB and update the Fastlane metadata consumed by F-Droid.
 
-### List of Source Files Reviewed for This Section
+### Version history note
 
-- `app/build.gradle.kts` (signingConfigs, buildTypes)
-- `buildSrc/src/main/kotlin/Config.kt` (versioning)
-- Repository root (no CI config found)
-- `fastlane/` (metadata only, no `Fastfile`/`Appfile`)
+The current tree is `3.0.0` (`versionCode 30`). The newest changelog file in `fastlane/` is still `23.txt`; the `e216456` version bump did not add changelogs `24.txt`–`30.txt`.
