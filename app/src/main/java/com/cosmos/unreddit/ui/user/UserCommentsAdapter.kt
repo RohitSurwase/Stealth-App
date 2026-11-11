@@ -50,6 +50,15 @@ class UserCommentsAdapter(
         fun bind(comment: CommentEntity) {
             binding.comment = comment
             binding.includeItemComment.comment = comment
+            // Flush the data-binding expressions before overriding the link
+            // info text, otherwise the pending bindings overwrite it.
+            binding.executePendingBindings()
+            // Redlib does not expose the author of the linked post, so show
+            // only the subreddit instead of a dangling "u/null".
+            binding.commentLinkInfo.text = comment.linkAuthor
+                ?.takeIf { it.isNotBlank() }
+                ?.let { binding.root.context.getString(R.string.comment_link_info, comment.subreddit, it) }
+                ?: comment.subreddit
 
             with(comment) {
                 binding.includeItemComment.commentScore.blurText(scoreHidden)

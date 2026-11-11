@@ -3,26 +3,20 @@ package com.cosmos.unreddit.ui.preferences
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.cosmos.unreddit.data.remote.api.reddit.source.CurrentSource
-import com.cosmos.unreddit.data.repository.AssetsRepository
 import com.cosmos.unreddit.data.repository.PreferencesRepository
-import com.cosmos.unreddit.di.DispatchersModule.DefaultDispatcher
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 @HiltViewModel
 class PreferencesViewModel @Inject constructor(
     private val preferencesRepository: PreferencesRepository,
-    private val assetsRepository: AssetsRepository,
-    private val currentSource: CurrentSource,
-    @DefaultDispatcher private val defaultDispatcher: CoroutineDispatcher
+    private val currentSource: CurrentSource
 ) : ViewModel() {
 
     val nightMode: SharedFlow<Int> = preferencesRepository.getNightMode()
@@ -38,7 +32,7 @@ class PreferencesViewModel @Inject constructor(
 
     val redditSource: SharedFlow<Pair<Int, String>> = combine(
         preferencesRepository.getRedditSource(),
-        preferencesRepository.getRedditSourceInstance("teddit.net")
+        preferencesRepository.getRedditSourceInstance(REDLIB_INSTANCES.first())
     ) { source, instance ->
         Pair(source, instance)
     }.shareIn(viewModelScope, SharingStarted.WhileSubscribed(), 1)
@@ -47,25 +41,17 @@ class PreferencesViewModel @Inject constructor(
         .getPrivacyEnhancerEnabled()
         .shareIn(viewModelScope, SharingStarted.WhileSubscribed(), 1)
 
-    var tedditInstances: List<String> = emptyList()
+    var redlibInstances: List<String> = REDLIB_INSTANCES
         private set
 
-    init {
-        viewModelScope.launch { loadTedditInstances() }
-    }
-
-    private suspend fun loadTedditInstances() {
-        assetsRepository.getServiceInstances()
-            .onSuccess { services ->
-                withContext(defaultDispatcher) {
-                    services
-                        .firstOrNull { it.service == "reddit" }
-                        ?.redirect
-                        ?.firstOrNull { it.name == "teddit" }
-                        ?.instances
-                        ?.let { tedditInstances = it }
-                }
-            }
+    private companion object {
+        // Hardcoded non-onion Redlib instances. Kept static until a
+        // dynamic/verified instance list is warranted.
+        private val REDLIB_INSTANCES = listOf(
+            "redlib.freedit.eu",
+            "redlib.cow.rip",
+            "redlib.privadency.com"
+        )
     }
 
     fun setNightMode(nightMode: Int) {

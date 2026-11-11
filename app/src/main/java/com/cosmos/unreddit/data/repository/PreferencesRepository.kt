@@ -101,7 +101,7 @@ class PreferencesRepository @Inject constructor(
         )
     }
 
-    fun getRedditSource(defaultValue: Int = DataPreferences.RedditSource.REDDIT.value): Flow<Int> {
+    fun getRedditSource(defaultValue: Int = DataPreferences.RedditSource.TEDDIT.value): Flow<Int> {
         return preferencesDatastore.getValue(
             DataPreferences.PreferencesKeys.REDDIT_SOURCE,
             defaultValue

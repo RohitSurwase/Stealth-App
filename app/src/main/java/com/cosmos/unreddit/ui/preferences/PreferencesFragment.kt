@@ -312,7 +312,7 @@ class PreferencesFragment : PreferenceFragmentCompat() {
             childFragmentManager,
             DataPreferences.RedditSource.fromValue(source),
             instance,
-            viewModel.tedditInstances
+            viewModel.redlibInstances
         )
     }
 

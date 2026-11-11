@@ -28,6 +28,11 @@
             </intent-filter>
         </activity>
 
+        <activity
+            android:name=".ui.redditsource.RedlibVerificationActivity"
+            android:exported="false"
+            android:theme="@style/AppTheme" />
+
         <receiver android:name=".data.receiver.DownloadManagerReceiver"  android:exported="false">
             <intent-filter>
                 <action android:name="${applicationId}.ACTION_DOWNLOAD_RETRY"/>

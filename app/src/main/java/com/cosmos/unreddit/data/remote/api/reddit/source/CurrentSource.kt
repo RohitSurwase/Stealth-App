@@ -57,8 +57,7 @@ class CurrentSource @Inject constructor(
     }
 
     override suspend fun getMoreChildren(children: String, linkId: String): MoreChildren {
-        // TODO: Replace by source when an endpoint is available for Teddit
-        return redditSource.getMoreChildren(children, linkId)
+        return source.getMoreChildren(children, linkId)
     }
 
     override suspend fun getUserInfo(user: String): Child {
@@ -89,8 +88,7 @@ class CurrentSource @Inject constructor(
         timeSorting: TimeSorting?,
         after: String?
     ): Listing {
-        // TODO: Replace by source when an endpoint is available for Teddit
-        return redditSource.searchPost(query, sort, timeSorting, after)
+        return source.searchPost(query, sort, timeSorting, after)
     }
 
     override suspend fun searchUser(
@@ -99,8 +97,7 @@ class CurrentSource @Inject constructor(
         timeSorting: TimeSorting?,
         after: String?
     ): Listing {
-        // TODO: Replace by source when an endpoint is available for Teddit
-        return redditSource.searchUser(query, sort, timeSorting, after)
+        return source.searchUser(query, sort, timeSorting, after)
     }
 
     override suspend fun searchSubreddit(

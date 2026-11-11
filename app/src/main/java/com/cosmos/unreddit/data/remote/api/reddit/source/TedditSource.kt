@@ -4,13 +4,36 @@ import com.cosmos.unreddit.data.model.Sort
 import com.cosmos.unreddit.data.model.TimeSorting
 import com.cosmos.unreddit.data.remote.api.reddit.TedditApi
 import com.cosmos.unreddit.data.remote.api.reddit.model.Child
+import com.cosmos.unreddit.data.remote.api.reddit.model.JsonMore
+import com.cosmos.unreddit.data.remote.api.reddit.model.Data
 import com.cosmos.unreddit.data.remote.api.reddit.model.Listing
+import com.cosmos.unreddit.data.remote.api.reddit.model.ListingData
 import com.cosmos.unreddit.data.remote.api.reddit.model.MoreChildren
+import com.cosmos.unreddit.data.remote.api.reddit.scraper.redlib.RedlibCommentScraper
+import com.cosmos.unreddit.data.remote.api.reddit.scraper.redlib.RedlibPostScraper
+import com.cosmos.unreddit.data.remote.api.reddit.scraper.redlib.RedlibSubredditScraper
+import com.cosmos.unreddit.data.remote.api.reddit.scraper.redlib.RedlibSubredditSearchScraper
+import com.cosmos.unreddit.data.remote.api.reddit.scraper.redlib.RedlibUserCommentScraper
+import com.cosmos.unreddit.data.remote.api.reddit.scraper.redlib.RedlibUserScraper
+import com.cosmos.unreddit.di.DispatchersModule.IoDispatcher
+import com.cosmos.unreddit.di.NetworkModule.RedlibBaseUrl
+import kotlinx.coroutines.CoroutineDispatcher
+import okhttp3.HttpUrl
 import javax.inject.Inject
 import javax.inject.Singleton
 
+/**
+ * Redlib source: fetches the HTML pages served by a Redlib instance and parses
+ * them with the Jsoup scrapers in `scraper.redlib`.
+ */
 @Singleton
-class TedditSource @Inject constructor(private val tedditApi: TedditApi) : BaseRedditSource {
+class TedditSource @Inject constructor(
+    private val tedditApi: TedditApi,
+    @RedlibBaseUrl private val baseUrl: HttpUrl,
+    @IoDispatcher private val ioDispatcher: CoroutineDispatcher
+) : BaseRedditSource {
+
+    private val baseUrlString = baseUrl.toString()
 
     override suspend fun getSubreddit(
         subreddit: String,
@@ -18,11 +41,18 @@ class TedditSource @Inject constructor(private val tedditApi: TedditApi) : BaseR
         timeSorting: TimeSorting?,
         after: String?
     ): Listing {
-        return tedditApi.getSubreddit(subreddit, sort, timeSorting, after)
+        val response = tedditApi.getSubreddit(
+            subreddit,
+            sort.toSubredditSort(),
+            timeSorting,
+            after
+        )
+        return RedlibPostScraper(ioDispatcher, baseUrlString).scrap(response.string())
     }
 
     override suspend fun getSubredditInfo(subreddit: String): Child {
-        return tedditApi.getSubredditInfo(subreddit)
+        val response = tedditApi.getSubredditInfo(subreddit)
+        return RedlibSubredditScraper(ioDispatcher, baseUrlString).scrap(response.string())
     }
 
     override suspend fun searchInSubreddit(
@@ -32,19 +62,43 @@ class TedditSource @Inject constructor(private val tedditApi: TedditApi) : BaseR
         timeSorting: TimeSorting?,
         after: String?
     ): Listing {
-        return tedditApi.searchInSubreddit(subreddit, query, sort, timeSorting, after)
+        val response = tedditApi.searchInSubreddit(
+            subreddit,
+            query,
+            sort?.toSearchSort(),
+            timeSorting,
+            after = after
+        )
+        return RedlibPostScraper(ioDispatcher, baseUrlString).scrap(response.string())
     }
 
     override suspend fun getPost(permalink: String, limit: Int?, sort: Sort): List<Listing> {
-        return tedditApi.getPost(permalink, limit, sort)
+        val response = tedditApi.getPost(permalink, sort)
+        val body = response.string()
+
+        val post = RedlibPostScraper(ioDispatcher, baseUrlString).scrap(body)
+
+        val subreddit = SUBREDDIT_REGEX.find(permalink)?.groupValues?.getOrNull(1).orEmpty()
+        val postId = POST_ID_REGEX.find(permalink)?.groupValues?.getOrNull(1).orEmpty()
+
+        val comments = RedlibCommentScraper(
+            ioDispatcher,
+            baseUrlString,
+            "t3_$postId",
+            subreddit
+        ).scrap(body)
+
+        return listOf(post, comments)
     }
 
     override suspend fun getMoreChildren(children: String, linkId: String): MoreChildren {
-        throw UnsupportedOperationException("No API endpoint")
+        // Redlib does not expose Reddit's /api/morechildren endpoint
+        return MoreChildren(JsonMore(Data(emptyList())))
     }
 
     override suspend fun getUserInfo(user: String): Child {
-        return tedditApi.getUserPosts(user, Sort.HOT, null).about
+        val response = tedditApi.getUserInfo(user)
+        return RedlibUserScraper(ioDispatcher, baseUrlString).scrap(response.string())
     }
 
     override suspend fun getUserPosts(
@@ -53,7 +107,13 @@ class TedditSource @Inject constructor(private val tedditApi: TedditApi) : BaseR
         timeSorting: TimeSorting?,
         after: String?
     ): Listing {
-        return tedditApi.getUserPosts(user, sort, timeSorting, after).overview
+        val response = tedditApi.getUserPosts(
+            user,
+            sort.toUserSort(),
+            timeSorting,
+            after
+        )
+        return RedlibPostScraper(ioDispatcher, baseUrlString).scrap(response.string())
     }
 
     override suspend fun getUserComments(
@@ -62,7 +122,14 @@ class TedditSource @Inject constructor(private val tedditApi: TedditApi) : BaseR
         timeSorting: TimeSorting?,
         after: String?
     ): Listing {
-        return tedditApi.getUserComments(user, sort, timeSorting, after).overview
+        val response = tedditApi.getUserComments(
+            user,
+            sort.toUserSort(),
+            timeSorting,
+            after
+        )
+        return RedlibUserCommentScraper(ioDispatcher, baseUrlString, user)
+            .scrap(response.string())
     }
 
     override suspend fun searchPost(
@@ -71,7 +138,13 @@ class TedditSource @Inject constructor(private val tedditApi: TedditApi) : BaseR
         timeSorting: TimeSorting?,
         after: String?
     ): Listing {
-        throw UnsupportedOperationException("No API endpoint")
+        val response = tedditApi.searchPost(
+            query,
+            sort?.toSearchSort(),
+            timeSorting,
+            after
+        )
+        return RedlibPostScraper(ioDispatcher, baseUrlString).scrap(response.string())
     }
 
     override suspend fun searchUser(
@@ -80,7 +153,8 @@ class TedditSource @Inject constructor(private val tedditApi: TedditApi) : BaseR
         timeSorting: TimeSorting?,
         after: String?
     ): Listing {
-        throw UnsupportedOperationException("No API endpoint")
+        // Redlib does not support searching users
+        return Listing("t2", ListingData(null, null, emptyList(), null, null))
     }
 
     override suspend fun searchSubreddit(
@@ -89,6 +163,51 @@ class TedditSource @Inject constructor(private val tedditApi: TedditApi) : BaseR
         timeSorting: TimeSorting?,
         after: String?
     ): Listing {
-        return tedditApi.searchSubreddit(query, sort, timeSorting, after)
+        val response = tedditApi.searchSubreddit(
+            query,
+            sort?.toSearchSort(),
+            timeSorting,
+            after
+        )
+        return RedlibSubredditSearchScraper(ioDispatcher, baseUrlString)
+            .scrap(response.string())
+    }
+
+    /**
+     * Normalises a sort to one of the values accepted by Redlib's subreddit
+     * route (hot/new/top/rising/controversial).
+     */
+    private fun Sort.toSubredditSort(): Sort {
+        return when (this) {
+            Sort.HOT, Sort.NEW, Sort.TOP, Sort.RISING, Sort.CONTROVERSIAL -> this
+            else -> Sort.HOT
+        }
+    }
+
+    /**
+     * Normalises a sort to one of the values accepted by Redlib's user route
+     * (hot/new/top/controversial).
+     */
+    private fun Sort.toUserSort(): Sort {
+        return when (this) {
+            Sort.HOT, Sort.NEW, Sort.TOP, Sort.CONTROVERSIAL -> this
+            else -> Sort.HOT
+        }
+    }
+
+    /**
+     * Normalises a sort to one of the values accepted by Redlib's search
+     * route (relevance/hot/top/new/comments).
+     */
+    private fun Sort.toSearchSort(): Sort {
+        return when (this) {
+            Sort.RELEVANCE, Sort.HOT, Sort.TOP, Sort.NEW, Sort.COMMENTS -> this
+            else -> Sort.RELEVANCE
+        }
+    }
+
+    companion object {
+        private val SUBREDDIT_REGEX = Regex("/r/([^/]+)/comments/")
+        private val POST_ID_REGEX = Regex("/comments/([^/?#]+)")
     }
 }

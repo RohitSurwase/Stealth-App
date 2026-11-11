@@ -1,7 +1,9 @@
 package com.cosmos.unreddit.di
 
+import android.content.Context
+import com.cosmos.unreddit.data.remote.BrowserLikeInterceptor
+import com.cosmos.unreddit.data.remote.BrowserUserAgent
 import com.cosmos.unreddit.data.remote.RawJsonInterceptor
-import com.cosmos.unreddit.data.remote.TargetRedditInterceptor
 import com.cosmos.unreddit.data.remote.api.gfycat.GfycatApi
 import com.cosmos.unreddit.data.remote.api.imgur.ImgurApi
 import com.cosmos.unreddit.data.remote.api.imgur.adapter.AlbumDataAdapter
@@ -33,9 +35,11 @@ import com.squareup.moshi.adapters.PolymorphicJsonAdapterFactory
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.runBlocking
+import okhttp3.HttpUrl
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
@@ -85,6 +89,10 @@ object NetworkModule {
     @Qualifier
     @Retention(AnnotationRetention.BINARY)
     annotation class RedditScrap
+
+    @Qualifier
+    @Retention(AnnotationRetention.BINARY)
+    annotation class RedlibBaseUrl
 
     @RedditMoshi
     @Provides
@@ -141,10 +149,12 @@ object NetworkModule {
     @TedditOkHttp
     @Provides
     @Singleton
-    fun provideTedditOkHttpClient(): OkHttpClient {
+    fun provideTedditOkHttpClient(
+        @ApplicationContext context: Context
+    ): OkHttpClient {
         return OkHttpClient.Builder()
-            .addInterceptor(RawJsonInterceptor())
-            .addInterceptor(TargetRedditInterceptor())
+            .addInterceptor(BrowserLikeInterceptor(BrowserUserAgent.fromWebView(context)))
+            .cookieJar(RedditCookieJar())
             .connectTimeout(TIMEOUT.first, TIMEOUT.second)
             .readTimeout(TIMEOUT.first, TIMEOUT.second)
             .writeTimeout(TIMEOUT.first, TIMEOUT.second)
@@ -206,27 +216,33 @@ object NetworkModule {
             .create(RedditApi::class.java)
     }
 
+    @RedlibBaseUrl
     @Provides
     @Singleton
-    fun provideTedditApi(
-        @RedditMoshi moshi: Moshi,
-        @TedditOkHttp okHttpClient: OkHttpClient,
-        preferencesRepository: PreferencesRepository
-    ): TedditApi {
-        // Get the saved instance unless it's empty, then take Teddit's default instance
+    fun provideRedlibBaseUrl(preferencesRepository: PreferencesRepository): HttpUrl {
+        // Get the saved instance unless it's empty, then take Redlib's default instance
         val url = runBlocking {
             preferencesRepository
                 .getRedditSourceInstance()
                 .firstOrNull()
-                .takeUnless { it.isNullOrEmpty() }
+                .takeUnless {
+                    it.isNullOrEmpty() ||
+                        it.contains("teddit.net", ignoreCase = true)
+                }
                 ?: TedditApi.BASE_URL
         }
 
-        val httpUrl = LinkValidator(url).validUrl ?: TedditApi.BASE_URL.toHttpUrl()
+        return LinkValidator(url).validUrl ?: TedditApi.BASE_URL.toHttpUrl()
+    }
 
+    @Provides
+    @Singleton
+    fun provideTedditApi(
+        @RedlibBaseUrl baseUrl: HttpUrl,
+        @TedditOkHttp okHttpClient: OkHttpClient
+    ): TedditApi {
         return Retrofit.Builder()
-            .baseUrl(httpUrl)
-            .addConverterFactory(MoshiConverterFactory.create(moshi))
+            .baseUrl(baseUrl)
             .addConverterFactory(SortingConverterFactory())
             .client(okHttpClient)
             .build()

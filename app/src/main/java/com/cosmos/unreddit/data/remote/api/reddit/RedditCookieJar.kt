@@ -14,9 +14,11 @@ class RedditCookieJar : CookieJar {
         val cookies = mutableListOf<Cookie>()
         val savedCookies = cookieManager.getCookie(url.toString())
         if (savedCookies != null) {
-            val splitCookies = savedCookies.split("[,;]".toRegex())
-            for (cookieString in splitCookies) {
-                cookies.add(Cookie.parse(url, cookieString.trim())!!)
+            // CookieManager returns "name=value; name2=value2". Ignore any
+            // fragment OkHttp cannot parse instead of crashing the request.
+            for (cookieString in savedCookies.split(';')) {
+                val cookie = Cookie.parse(url, cookieString.trim()) ?: continue
+                cookies.add(cookie)
             }
         }
         if (url.host.contains("reddit.com")) {
