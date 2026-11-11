@@ -11,10 +11,12 @@ import coil.decode.GifDecoder
 import coil.decode.ImageDecoderDecoder
 import com.cosmos.unreddit.data.model.preferences.UiPreferences
 import com.cosmos.unreddit.data.repository.PreferencesRepository
+import com.cosmos.unreddit.di.NetworkModule.TedditOkHttp
 import com.cosmos.unreddit.util.FileUncaughtExceptionHandler
 import dagger.hilt.android.HiltAndroidApp
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
+import okhttp3.OkHttpClient
 import javax.inject.Inject
 
 @HiltAndroidApp
@@ -25,6 +27,10 @@ class UnredditApplication : Application(), ImageLoaderFactory, Configuration.Pro
 
     @Inject
     lateinit var workerFactory: HiltWorkerFactory
+
+    @Inject
+    @TedditOkHttp
+    lateinit var imageOkHttpClient: OkHttpClient
 
     var appTheme: Int = -1
         set(mode) {
@@ -51,6 +57,10 @@ class UnredditApplication : Application(), ImageLoaderFactory, Configuration.Pro
 
     override fun newImageLoader(): ImageLoader {
         return ImageLoader.Builder(applicationContext)
+            // Redlib proxies some media through its own origin, so image
+            // requests need the same browser headers and challenge cookies the
+            // API client uses.
+            .callFactory(imageOkHttpClient)
             .components {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
                     add(ImageDecoderDecoder.Factory())

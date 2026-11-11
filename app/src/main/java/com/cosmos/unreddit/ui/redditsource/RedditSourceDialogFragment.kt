@@ -5,6 +5,7 @@ import android.content.DialogInterface
 import android.content.DialogInterface.OnShowListener
 import android.os.Bundle
 import android.widget.ArrayAdapter
+import android.widget.Filter
 import androidx.appcompat.app.AlertDialog
 import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
@@ -68,17 +69,54 @@ class RedditSourceDialogFragment : DialogFragment(), OnShowListener {
 
             radioTeddit.isChecked = isTeddit
             listInstances.isVisible = isTeddit
+            verifyInstance.isVisible = isTeddit
 
             radioGroup.setOnCheckedChangeListener { _, checkedId ->
-                listInstances.isVisible = checkedId == R.id.radio_teddit
+                val isRedlib = checkedId == R.id.radio_teddit
+                listInstances.isVisible = isRedlib
+                verifyInstance.isVisible = isRedlib
+            }
+
+            verifyInstance.setOnClickListener {
+                val linkValidator = LinkValidator(textListInstances.text.toString())
+                val host = linkValidator.validUrl?.host
+                if (host.isNullOrEmpty()) {
+                    listInstances.error = getString(R.string.instance_invalid_error)
+                    return@setOnClickListener
+                }
+                listInstances.error = null
+                startActivity(RedlibVerificationActivity.intent(requireContext(), host))
             }
         }
     }
 
     private fun initSpinner() {
-        val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_list_item_1, instances)
+        // A plain ArrayAdapter filters the dropdown by the current text, which
+        // would leave only the already selected instance visible. Keep the full
+        // list every time the menu is opened instead.
+        val adapter = object : ArrayAdapter<String>(
+            requireContext(),
+            android.R.layout.simple_list_item_1,
+            instances
+        ) {
+            override fun getFilter(): Filter {
+                return object : Filter() {
+                    override fun performFiltering(constraint: CharSequence?): FilterResults {
+                        return FilterResults().apply {
+                            values = instances
+                            count = instances.size
+                        }
+                    }
 
-        val savedInstance = instance.orEmpty().ifEmpty { adapter.getItem(0) }
+                    @Suppress("UNCHECKED_CAST")
+                    override fun publishResults(constraint: CharSequence?, results: FilterResults?) {
+                        notifyDataSetChanged()
+                    }
+                }
+            }
+        }
+
+        val savedInstance = instance.orEmpty().ifEmpty { adapter.getItem(0).orEmpty() }
 
         binding.textListInstances.run {
             setAdapter(adapter)
@@ -154,7 +192,7 @@ class RedditSourceDialogFragment : DialogFragment(), OnShowListener {
                 arguments = bundleOf(
                     KEY_SOURCE to source,
                     KEY_INSTANCE to instance,
-                    KEY_INSTANCES to instances
+                    KEY_INSTANCES to ArrayList(instances)
                 )
             }.show(fragmentManager, TAG)
         }
