@@ -7,8 +7,6 @@ import android.webkit.CookieManager
 
 class RedditCookieJar : CookieJar {
 
-    private val cookies = listOf(OVER_18)
-
     override fun loadForRequest(url: HttpUrl): List<Cookie> {
         val cookieManager = CookieManager.getInstance()
         val cookies = mutableListOf<Cookie>()
