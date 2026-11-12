@@ -304,8 +304,4 @@ abstract class PostViewHolder(
             }
         }
     }
-
-    class PollPostViewHolder() {
-
-    }
 }
