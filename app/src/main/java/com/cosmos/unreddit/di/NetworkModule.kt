@@ -37,6 +37,7 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.runBlocking
 import okhttp3.HttpUrl
@@ -169,7 +170,13 @@ object NetworkModule {
                     customUserAgent
                 }
             })
-            .cookieJar(RedditCookieJar())
+            // Redlib hides NSFW listings unless the show_nsfw cookie is present;
+            // the user's subscriptions would otherwise come back empty. Injected
+            // in the cookie jar (not an interceptor) because OkHttp's built-in
+            // cookie interceptor replaces any application-set Cookie header.
+            .cookieJar(RedditCookieJar {
+                runBlocking { preferencesRepository.getShowNsfw().first() }
+            })
             .connectTimeout(TIMEOUT.first, TIMEOUT.second)
             .readTimeout(TIMEOUT.first, TIMEOUT.second)
             .writeTimeout(TIMEOUT.first, TIMEOUT.second)

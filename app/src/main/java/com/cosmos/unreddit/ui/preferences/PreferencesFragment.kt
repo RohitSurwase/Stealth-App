@@ -54,6 +54,7 @@ class PreferencesFragment : PreferenceFragmentCompat() {
     private var showSpoilerPreviewPreference: SwitchPreferenceCompat? = null
     private var backupPreference: Preference? = null
     private var sourcePreference: Preference? = null
+    private var redditSourceValue: Int = REDDIT.value
     private var customUserAgentPreference: EditTextPreference? = null
     private var privacyEnhancerPreference: Preference? = null
     private var aboutPreference: Preference? = null
@@ -120,8 +121,18 @@ class PreferencesFragment : PreferenceFragmentCompat() {
             PreferencesKeys.SHOW_NSFW.name
         )?.apply {
             setOnPreferenceChangeListener { _, newValue ->
-                viewModel.setShowNsfw(newValue as Boolean)
-                true
+                val willBeOn = newValue as Boolean
+                // Turning NSFW off always works (app-side filter). Turning it
+                // on while Redlib is active may not, because Redlib decides from
+                // its own settings and only honours the cookie we send — gate it
+                // behind the caveat dialog and apply once acknowledged.
+                if (willBeOn && redditSourceValue == TEDDIT.value) {
+                    showRedlibNsfwCaveat { viewModel.setShowNsfw(true) }
+                    false
+                } else {
+                    viewModel.setShowNsfw(willBeOn)
+                    true
+                }
             }
         }
 
@@ -301,6 +312,7 @@ class PreferencesFragment : PreferenceFragmentCompat() {
 
             launch {
                 viewModel.redditSource.collect { value ->
+                    redditSourceValue = value.first
                     DataPreferences.RedditSource.fromValue(value.first).let {
                         val summary = when (it) {
                             REDDIT -> getString(R.string.preference_reddit_source_reddit)
@@ -318,6 +330,14 @@ class PreferencesFragment : PreferenceFragmentCompat() {
                             }
                         }
                         sourcePreference?.summary = summary
+                        // The NSFW toggle's cookie only matters for Redlib, so
+                        // surface the caveat there and keep the plain wording for
+                        // the other sources.
+                        showNsfwPreference?.summary = if (it == TEDDIT) {
+                            getString(R.string.preference_show_nsfw_summary_redlib)
+                        } else {
+                            getString(R.string.preference_show_nsfw_summary)
+                        }
                     }
                 }
             }
@@ -409,6 +429,15 @@ class PreferencesFragment : PreferenceFragmentCompat() {
             }
     }
 
+    private fun showRedlibNsfwCaveat(onConfirm: () -> Unit) {
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle(R.string.dialog_redlib_nsfw_caveat_title)
+            .setMessage(R.string.dialog_redlib_nsfw_caveat_body)
+            .setPositiveButton(R.string.ok) { _, _ -> onConfirm() }
+            .setNegativeButton(R.string.dialog_cancel, null)
+            .show()
+    }
+
     private fun updateRedditSource(source: Int, instance: String? = null) {
         viewModel.setRedditSource(source, instance)
     }
@@ -430,12 +459,6 @@ class PreferencesFragment : PreferenceFragmentCompat() {
             PreferencesFragmentDirections.openPrivacyEnhancer(),
             navOptions
         )
-    }
-
-    override fun onStop() {
-        super.onStop()
-        childFragmentManager
-            .clearFragmentResultListener(RedditSourceDialogFragment.REQUEST_KEY_SOURCE)
     }
 
     override fun onDestroyView() {

@@ -134,6 +134,9 @@
     <string name="dialog_reddit_source_disclaimer_body">This is an experimental feature.\nRedlib doesn\'t provide an API for all of Reddit\'s content. Therefore, some requests will still be sent to reddit.com.</string>
     <string name="dialog_reddit_source_scrap_disclaimer_body">This is an experimental feature.\nSome data are missing compared to the official APIs, and some features are not implemented/implementable.\nThis source uses old.reddit.com.</string>
 
+    <string name="dialog_redlib_nsfw_caveat_title">Redlib NSFW note</string>
+    <string name="dialog_redlib_nsfw_caveat_body">Redlib manages NSFW content with its own settings. This toggle sends a cookie to Redlib to try to match it, but that isn\'t guaranteed. It can stop working if you change instances. The app also hides NSFW posts locally, so turning this off will always hide them.</string>
+
     <string name="empty_data">Nothing to see here…</string>
     <string name="empty_data_subscriptions">You have no subscriptions yet.\nUse the search feature to look for Subreddits.</string>
 
@@ -151,6 +154,8 @@
     <string name="preference_left_handed_mode">Left-handed mode</string>
 
     <string name="preference_show_nsfw">Show NSFW content</string>
+    <string name="preference_show_nsfw_summary">Hide NSFW posts from your feed</string>
+    <string name="preference_show_nsfw_summary_redlib">Redlib instance change requires re-verification</string>
     <string name="preference_show_nsfw_preview">Show NSFW preview</string>
     <string name="preference_show_spoiler_preview">Show Spoiler preview</string>
 
