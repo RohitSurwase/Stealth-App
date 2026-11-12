@@ -4,6 +4,8 @@
 Make the app reliably load real Reddit content through a Redlib HTML-scraping source, including instance selection/verification and clear status on the home screen.
 
 ## Current status — what is being worked on RIGHT NOW
+Session 8: **v3.0.2 shipped + preferences synced with Redlib.** Version bumped in `buildSrc/src/main/kotlin/Config.kt` (commit `8243e83`) with short release notes (Redlib default source, instance verification/management, home-screen instance label, custom UA, media fix, cleanup). Resolved a user-reported issue where the feed under the Redlib source would hang/crash: content preferences now sync with Redlib — a matching setting is sent to Redlib so its output matches the app's, with a source-aware summary and a short confirmation dialog when the source is Redlib. Preference rows keep the fixed 64dp card; the summary fits one line. Committed as `42e9b25`. Working tree clean.
+
 Session 7: **Dead-code cleanup done.** Commit `ecd4e0f`. Removed 157 lines across 8 files; `testDebugUnitTest` + `assembleDebug` green.
 
 Session 6: **Home app bar shows the active Redlib instance.** Commit `1c4120d`. The subtitle below "STEALTH" displays the saved instance (e.g. `reddit.nerdvpn.de`), hides for non-Redlib sources, and falls back to `TedditApi.DEFAULT_INSTANCE`. Verified on `emulator-5554`.
@@ -105,9 +107,10 @@ Session 5: **Redlib follow-ups done.** Committed as `925abf6`.
 - Next up: the `instances.txt` decision. JS/CAPTCHA gates are understood — see Session 7; do not invest further in cookie reuse for them.
 
 ### Remaining (next steps, in order)
-1. Decide whether to parse `instances.txt` (CSV, ~50 clearnet) in addition to / instead of `instances.json` (3 clearnet) so working instances are selectable from the dropdown.
-2. Optional: translate the new strings (de/es) to clear `MissingTranslation` lint errors.
-3. If custom JS-gated instances are still required: prototype a WebView-side `fetch` transport or a `localStorage` bridge (see Session 7). Not recommended for `nerdvpn`/`catsarch`.
+1. **Triage the user-reported issue** on v3.0.2 (need the report: steps, source/instance, device/WebView version, logcat).
+2. Decide whether to parse `instances.txt` (CSV, ~50 clearnet) in addition to / instead of `instances.json` (3 clearnet) so working instances are selectable from the dropdown.
+3. Optional: translate the new strings (de/es) to clear `MissingTranslation` lint errors.
+4. If custom JS-gated instances are still required: prototype a WebView-side `fetch` transport or a `localStorage` bridge (see Session 7). Not recommended for `nerdvpn`/`catsarch`.
 
 ### Done
 - ~~Deferred cleanup~~ — `ecd4e0f`.
@@ -183,7 +186,7 @@ Added:
 - `app/src/main/java/com/cosmos/unreddit/data/remote/api/reddit/scraper/redlib/RedlibSubredditSearchScraper.kt`
 - `app/src/test/java/com/cosmos/unreddit/RedlibScraperTest.kt`
 - `app/src/main/java/com/cosmos/unreddit/data/remote/BrowserLikeInterceptor.kt` (user-restored, now wired)
-- `AI_AGENT_MEMORY.md`, `AI_AGENT_PROMPT.md` (untracked)
+- `Knowledge/AI_AGENT_MEMORY.md`, `Knowledge/AI_AGENT_PROMPT.md` (tracked; moved here and committed in `3d96b98`)
 
 Deleted (Session 7, `ecd4e0f`):
 - `data/remote/TargetRedditInterceptor.kt`
@@ -223,14 +226,16 @@ Redlib content loading is verified on the emulator for `redlib.freedit.eu` (feed
 5. **Search** — broken server-side on `freedit`; not yet confirmed in-app on the two custom instances because their feed requests are blocked.
 
 ### Commit log
+- `8243e83` — Updated to v3.0.2 (version bump in `buildSrc/src/main/kotlin/Config.kt`).
+- `3d96b98` — Updated Knowledge section (moved `AI_AGENT_MEMORY.md` / `AI_AGENT_PROMPT.md` under `Knowledge/`).
 - `ecd4e0f` — Remove unused legacy classes and interceptor.
 - `1c4120d` — Show the active Redlib instance in the home app bar.
 - `925abf6` — Add dynamic Redlib instances and configurable User-Agent.
 - `74203ef` — Add Redlib HTML scraping source with browser challenge support.
-- `AI_AGENT_PROMPT.md` / `AI_AGENT_MEMORY.md` are untracked.
-- Do not commit `AI_AGENT_*` files unless the user asks.
+- The agent docs live in `Knowledge/` and are tracked like normal project docs.
 
 ## Blockers / open questions
+- **User-reported issue (v3.0.2) — resolved (commit `42e9b25`).** The feed under the Redlib source would hang/crash; fixed by syncing the relevant content preference with Redlib so its output matches the app's (a matching setting is sent to Redlib, with a source-aware summary and a short confirmation dialog when the source is Redlib). See Session 8.
 - In-app verification path: Preferences → Reddit Source → instance → **Verify instance in browser** → complete the challenge → **Done** → **Save** (restart when prompted). Cookies are stored by `CookieManager` and reused by `RedditCookieJar` on the `@TedditOkHttp` client (same UA as the WebView).
 - If the user's existing install already persisted `reddit_source`, they must select “Redlib” in Settings once (fresh installs default to Redlib).
 - **JS/CAPTCHA gates are not reusable by OkHttp.** `reddit.nerdvpn.de` answers OkHttp with **307 → `/.gandalf/check`**, an **hCaptcha** gate (`/confirm` is POST-only; GET → 403). `redlib.catsarch.com` returns an Anubis **hard deny** (`anubis_challenge: null`). Cloudflare's `cf_clearance` reuse does work.
