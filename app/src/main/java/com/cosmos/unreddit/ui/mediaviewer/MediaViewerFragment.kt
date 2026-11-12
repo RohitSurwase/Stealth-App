@@ -2,6 +2,7 @@ package com.cosmos.unreddit.ui.mediaviewer
 
 import android.Manifest
 import android.os.Build
+import android.util.Log
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -23,12 +24,14 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager2.widget.ViewPager2
 import com.cosmos.unreddit.R
+import com.cosmos.unreddit.di.NetworkModule.TedditOkHttp
 import com.cosmos.unreddit.data.model.GalleryMedia
 import com.cosmos.unreddit.data.model.MediaType
 import com.cosmos.unreddit.data.model.Resource
 import com.cosmos.unreddit.data.worker.MediaDownloadWorker
 import com.cosmos.unreddit.databinding.FragmentMediaViewerBinding
 import com.cosmos.unreddit.ui.common.FullscreenBottomSheetFragment
+import com.cosmos.unreddit.ui.redditsource.RedlibVerificationActivity
 import com.cosmos.unreddit.util.extension.betterSmoothScrollToPosition
 import com.cosmos.unreddit.util.extension.clearWindowInsetsListener
 import com.cosmos.unreddit.util.extension.getRecyclerView
@@ -39,10 +42,12 @@ import com.cosmos.unreddit.util.extension.serializable
 import com.cosmos.unreddit.util.extension.showWithAlpha
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
+import okhttp3.OkHttpClient
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class MediaViewerFragment : FullscreenBottomSheetFragment() {
@@ -59,6 +64,10 @@ class MediaViewerFragment : FullscreenBottomSheetFragment() {
 
     private lateinit var mediaAdapter: MediaViewerAdapter
     private lateinit var thumbnailAdapter: MediaViewerThumbnailAdapter
+
+    @Inject
+    @TedditOkHttp
+    lateinit var teditOkHttpClient: OkHttpClient
 
     private val requestStoragePermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
@@ -79,6 +88,18 @@ class MediaViewerFragment : FullscreenBottomSheetFragment() {
     ) {
         // Download media regardless of the result
         downloadMedia()
+    }
+
+    /**
+     * Inline verification for a redlib instance whose HLS video was blocked by the
+     * bot challenge. Once completed, the fresh clearance cookie is used to retry
+     * the paused playback.
+     */
+    private val redlibVerificationLauncher = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) {
+        android.webkit.CookieManager.getInstance().flush()
+        mediaAdapter.retryPendingRedlib()
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -187,7 +208,14 @@ class MediaViewerFragment : FullscreenBottomSheetFragment() {
             },
             hasAudio = {
                 binding.buttonMute.isVisible = it
-            }
+            },
+            onRetry = { retry() },
+            onRedlibChallenge = { instance ->
+                redlibVerificationLauncher.launch(
+                    RedlibVerificationActivity.intent(requireContext(), instance)
+                )
+            },
+            okHttpClient = teditOkHttpClient
         )
 
         binding.buttonMute.run {
@@ -320,6 +348,7 @@ class MediaViewerFragment : FullscreenBottomSheetFragment() {
     }
 
     private fun handleError(code: Int?) {
+        Log.e(TAG, "handleError code=$code link=${args.link ?: arguments?.getString(BUNDLE_KEY_LINK)}")
         when (code) {
             403, 404 -> showNotFoundDialog()
             else -> showRetryBar()
@@ -327,6 +356,7 @@ class MediaViewerFragment : FullscreenBottomSheetFragment() {
     }
 
     private fun retry() {
+        Log.e(TAG, "retry link=${args.link ?: arguments?.getString(BUNDLE_KEY_LINK)} type=${args.type}")
         if (args.link != null) {
             viewerViewModel.loadMedia(args.link!!, args.type, true)
         } else {

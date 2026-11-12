@@ -81,6 +81,16 @@
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 
+            <!-- Full-screen host for the inline Redlib verification overlay.
+                 Added as the last CoordinatorLayout child so it draws on top
+                 of the feed. The verification fragment is added to this
+                 container by ID; adding it to the DrawerLayout without an
+                 explicit container left its root view 0x0 (never laid out). -->
+            <FrameLayout
+                android:id="@+id/verification_container"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+
         </androidx.coordinatorlayout.widget.CoordinatorLayout>
     </androidx.cardview.widget.CardView>
 

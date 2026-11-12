@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewTreeObserver
+import android.webkit.CookieManager
 import androidx.core.view.GravityCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
@@ -14,15 +15,19 @@ import androidx.core.view.updateLayoutParams
 import androidx.core.view.updatePadding
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.fragment.app.activityViewModels
+import androidx.fragment.app.setFragmentResultListener
 import androidx.lifecycle.Lifecycle
 import androidx.paging.LoadState
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.cosmos.unreddit.R
 import com.cosmos.unreddit.UiViewModel
 import com.cosmos.unreddit.data.model.db.Profile
+import com.cosmos.unreddit.data.remote.api.reddit.scraper.redlib.RedlibBlockedException
 import com.cosmos.unreddit.data.repository.PostListRepository
 import com.cosmos.unreddit.databinding.FragmentPostBinding
 import com.cosmos.unreddit.ui.base.BaseFragment
+import com.cosmos.unreddit.ui.redditsource.RedlibVerificationFragment
+import com.cosmos.unreddit.util.LinkValidator
 import com.cosmos.unreddit.ui.common.widget.PullToRefreshLayout
 import com.cosmos.unreddit.ui.common.widget.PullToRefreshView
 import com.cosmos.unreddit.ui.loadstate.NetworkLoadStateAdapter
@@ -83,6 +88,13 @@ class PostListFragment : BaseFragment(), PullToRefreshLayout.OnRefreshListener {
     private lateinit var postListAdapter: PostListAdapter
 
     private lateinit var profileAdapter: ProfileAdapter
+
+    /**
+     * The Redlib instance currently shown in the app bar, captured so a bot
+     * challenge can be verified against the same host when the exact listing
+     * URL is unavailable.
+     */
+    private var currentInstance: String? = null
 
     @Inject
     lateinit var repository: PostListRepository
@@ -177,8 +189,9 @@ class PostListFragment : BaseFragment(), PullToRefreshLayout.OnRefreshListener {
                 }
             }
 
-            launch {
+            launch { 
                 viewModel.redlibInstance.collect { instance ->
+                    currentInstance = instance
                     binding.appBar.instance.text = instance
                     binding.appBar.instance.isVisible = !instance.isNullOrBlank()
                 }
@@ -252,7 +265,30 @@ class PostListFragment : BaseFragment(), PullToRefreshLayout.OnRefreshListener {
                 }
 
                 val errorState = loadState.source.refresh as? LoadState.Error
-                errorState?.let {
+                errorState?.let { state ->
+                    val blocked = state.error as? RedlibBlockedException
+                    if (blocked != null) {
+                        // A bot-challenge page (HTTP 200, no content) is a distinct
+                        // failure from a network error: offer inline verification
+                        // against the exact listing rather than a generic retry.
+                        binding.infoRetry.setMessage(
+                            getString(R.string.error_instance_blocked)
+                        )
+                        binding.infoRetry.setActionText(
+                            getString(R.string.redlib_verification_verify)
+                        )
+                        binding.infoRetry.setActionClickListener {
+                            launchVerification(blocked.url)
+                        }
+                    } else {
+                        binding.infoRetry.setMessage(
+                            getString(R.string.network_retry_message)
+                        )
+                        binding.infoRetry.setActionText(
+                            getString(R.string.network_retry_action)
+                        )
+                        binding.infoRetry.setActionClickListener { postListAdapter.retry() }
+                    }
                     binding.infoRetry.show()
                 }
             }
@@ -291,6 +327,16 @@ class PostListFragment : BaseFragment(), PullToRefreshLayout.OnRefreshListener {
         setNavigationListener { showNavigation ->
             uiViewModel.setNavigationVisibility(showNavigation && onOffsetChangedListener.visible)
         }
+
+        childFragmentManager.setFragmentResultListener(
+            RedlibVerificationFragment.REQUEST_KEY_VERIFICATION,
+            viewLifecycleOwner
+        ) { _, _ ->
+            // The user completed the inline challenge: flush the clearance
+            // cookie so OkHttp can reuse it, then reload the page they were on.
+            CookieManager.getInstance().flush()
+            postListAdapter.retry()
+        }
     }
 
     fun scrollToTop() {
@@ -299,6 +345,24 @@ class PostListFragment : BaseFragment(), PullToRefreshLayout.OnRefreshListener {
 
     private fun showSortDialog() {
         SortFragment.show(childFragmentManager, viewModel.sorting.value)
+    }
+
+    /**
+     * Opens the inline challenge overlay over the feed. Prefers the exact
+     * listing that was blocked (Cloudflare challenges can be path-specific);
+     * falls back to the instance root when that URL is unknown.
+     */
+    private fun launchVerification(url: String?) {
+        val target = url
+            ?: currentInstance?.let { LinkValidator(it).validUrl?.toString() }
+            ?: return
+
+        RedlibVerificationFragment.show(
+            childFragmentManager,
+            R.id.verification_container,
+            target,
+            currentInstance.orEmpty()
+        )
     }
 
     private fun updateContainerView(

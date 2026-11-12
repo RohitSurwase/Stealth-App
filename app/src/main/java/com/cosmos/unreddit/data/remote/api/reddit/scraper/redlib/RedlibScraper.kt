@@ -107,6 +107,20 @@ abstract class RedlibScraper<Result>(
         return (number * multiplier).toInt()
     }
 
+    override suspend fun scrap(body: String): Result {
+        // Redlib anti-bot challenges (and instances that redirect instead of
+        // serving content) answer with HTTP 200, so the failure is invisible to
+        // the network layer: Jsoup would parse the challenge/redirect page into
+        // an empty listing and the UI would render a blank screen. Detect it
+        // here and fail loudly so Paging shows the standard error screen.
+        if (RedlibChallenge.isChallengePage(body)) {
+            throw RedlibBlockedException(
+                "Redlib instance returned an anti-bot challenge page instead of content"
+            )
+        }
+        return super.scrap(body)
+    }
+
     companion object {
         private val REDLIB_FORMATS = listOf(
             "MMM d yyyy, HH:mm:ss z",

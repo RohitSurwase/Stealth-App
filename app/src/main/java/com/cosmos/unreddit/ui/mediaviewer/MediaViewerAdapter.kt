@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
+import android.util.Log
 import androidx.recyclerview.widget.RecyclerView
 import coil.Coil
 import coil.request.CachePolicy
@@ -25,6 +26,7 @@ import com.google.android.exoplayer2.Tracks
 import com.google.android.exoplayer2.source.MergingMediaSource
 import com.google.android.exoplayer2.upstream.HttpDataSource
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
+import okhttp3.OkHttpClient
 import java.net.HttpURLConnection
 
 class MediaViewerAdapter(
@@ -32,14 +34,22 @@ class MediaViewerAdapter(
     var muteVideo: Boolean,
     private val onMediaClick: () -> Unit,
     private val showControls: (Boolean) -> Unit,
-    private val hasAudio: (Boolean) -> Unit
+    private val hasAudio: (Boolean) -> Unit,
+    private val onRetry: () -> Unit,
+    private val onRedlibChallenge: (String) -> Unit,
+    okHttpClient: OkHttpClient
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+
+    private val TAG = "MediaViewer"
 
     private val media: MutableList<GalleryMedia> = mutableListOf()
 
     private val players: MutableList<Player> = mutableListOf()
 
-    private val exoPlayerHelper by lazy { ExoPlayerHelper(context) }
+    private val exoPlayerHelper by lazy { ExoPlayerHelper(context, okHttpClient) }
+
+    /** Player whose redlib HLS load failed on a bot challenge; retried after verification. */
+    private var pendingChallengeRetry: Player? = null
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         val inflater = LayoutInflater.from(parent.context)
@@ -89,12 +99,24 @@ class MediaViewerAdapter(
             player.release()
         }
         players.clear()
+        pendingChallengeRetry = null
         exoPlayerHelper.clearCache()
     }
 
+    /**
+     * Retries the redlib HLS player that failed on a bot challenge, after the user
+     * completed the inline verification and the fresh clearance cookie is available.
+     */
+    fun retryPendingRedlib() {
+        pendingChallengeRetry?.let { player ->
+            Log.d(TAG, "Verification finished; retrying redlib HLS playback")
+            pendingChallengeRetry = null
+            player.prepare()
+        }
+    }
+
     @SuppressLint("ClickableViewAccessibility")
-    inner class ImageViewHolder(
-        private val binding: ItemImageBinding
+    inner class ImageViewHolder(        private val binding: ItemImageBinding
     ) : RecyclerView.ViewHolder(binding.root), View.OnTouchListener {
 
         init {
@@ -182,8 +204,31 @@ class MediaViewerAdapter(
         private val binding: ItemVideoBinding
     ) : RecyclerView.ViewHolder(binding.root), Player.Listener {
 
+        private var currentUrl: String? = null
+        private var currentSound: String? = null
+
         fun bind(video: GalleryMedia) {
-            val url = video.url.toHttpUrlOrNull() ?: return
+            currentUrl = video.url
+            currentSound = video.sound
+            Log.d(TAG, "bind video: url=${video.url} sound=${video.sound}")
+            val url = video.url.toHttpUrlOrNull()
+            if (url == null) {
+                // No usable video URL (e.g. a REDDIT_VIDEO with no stream).
+                // Show the retry bar instead of a dead blank player.
+                binding.infoRetry.show()
+                binding.infoRetry.setActionClickListener(onRetry)
+                return
+            }
+
+            // redlib HLS sits behind a Cloudflare/Anubis challenge bound to the browser
+            // User-Agent + request headers + clearance cookie. Route the m3u8 playlist and
+            // every segment through the app's browser-like OkHttp client via the OkHttp-backed
+            // DataSource; non-Cloudflare hosts keep the default (cached) factory.
+            val factory = if (url.host.contains("redlib", ignoreCase = true)) {
+                exoPlayerHelper.redlibMediaSourceFactory
+            } else {
+                exoPlayerHelper.defaultMediaSourceFactory
+            }
 
             if (url.host.contains("redgifs", ignoreCase = true)) {
                 val requestProperties = url
@@ -194,14 +239,14 @@ class MediaViewerAdapter(
             }
 
             val player = SimpleExoPlayer.Builder(binding.video.context)
-                .setMediaSourceFactory(exoPlayerHelper.defaultMediaSourceFactory)
+                .setMediaSourceFactory(factory)
                 .build()
 
             val videoItem = exoPlayerHelper.getMediaItem(video.url)
 
             if (video.sound != null) {
-                val videoSource = exoPlayerHelper.getMediaSource(videoItem)
-                val audioSource = exoPlayerHelper.getMediaSource(video.sound)
+                val videoSource = exoPlayerHelper.getMediaSource(videoItem, factory)
+                val audioSource = exoPlayerHelper.getMediaSource(exoPlayerHelper.getMediaItem(video.sound), factory)
                 val mergedSource = MergingMediaSource(videoSource, audioSource)
 
                 player.setMediaSource(mergedSource)
@@ -209,11 +254,14 @@ class MediaViewerAdapter(
                 // Add special listener for Reddit videos with audio
                 player.addListener(object : Player.Listener {
                     override fun onPlayerError(error: PlaybackException) {
+                        Log.e(TAG, "onPlayerError (merged). url=$currentUrl sound=$currentSound code=${error.errorCode} msg=${error.message}", error)
                         if (isErrorFromAudio(error)) {
                             // Retry without audio if an error is thrown
+                            Log.d(TAG, "Audio-track error detected; retrying without audio")
                             player.setMediaItem(videoItem)
                             player.prepare()
                         } else {
+                            handleChallenge(error, player)
                             binding.infoRetry.show()
                         }
                     }
@@ -221,9 +269,16 @@ class MediaViewerAdapter(
                     override fun onTracksChanged(tracks: Tracks) {
                         initAudioVolume(tracks)
                     }
+
+                    override fun onPlaybackStateChanged(playbackState: Int) {
+                        if (playbackState == Player.STATE_READY) {
+                            // Playback recovered (e.g. after the inline verification retry).
+                            binding.infoRetry.hide()
+                        }
+                    }
                 })
             } else {
-                player.setMediaSource(exoPlayerHelper.getMediaSource(videoItem))
+                player.setMediaSource(exoPlayerHelper.getMediaSource(videoItem, factory))
                 player.addListener(this)
             }
 
@@ -249,6 +304,7 @@ class MediaViewerAdapter(
             if (error.errorCode == PlaybackException.ERROR_CODE_IO_BAD_HTTP_STATUS) {
                 val cause = error.cause as? HttpDataSource.InvalidResponseCodeException
                 cause?.dataSpec?.key?.let { link ->
+                    Log.d(TAG, "IO_BAD_HTTP_STATUS link=$link responseCode=${cause.responseCode} isRedditSound=${LinkUtil.isRedditSoundTrack(link)}")
                     return (cause.responseCode == HttpURLConnection.HTTP_FORBIDDEN ||
                             cause.responseCode == HttpURLConnection.HTTP_NOT_FOUND) &&
                             LinkUtil.isRedditSoundTrack(link)
@@ -287,7 +343,34 @@ class MediaViewerAdapter(
         }
 
         override fun onPlayerError(error: PlaybackException) {
+            Log.e(TAG, "onPlayerError (no-sound). url=$currentUrl code=${error.errorCode} msg=${error.message}", error)
+            handleChallenge(error, checkNotNull(binding.video.player))
             binding.infoRetry.show()
+        }
+
+        override fun onPlaybackStateChanged(playbackState: Int) {
+            if (playbackState == Player.STATE_READY) {
+                // Playback recovered (e.g. after the inline verification retry).
+                binding.infoRetry.hide()
+            }
+        }
+
+        /**
+         * If the failing request was a redlib HLS URL rejected by the bot challenge
+         * (403/429), open the inline verification flow for that instance and retry
+         * playback once the user completes it.
+         */
+        private fun handleChallenge(error: PlaybackException, player: Player) {
+            val cause = error.cause as? HttpDataSource.InvalidResponseCodeException
+            val httpUrl = cause?.dataSpec?.uri?.toString()?.toHttpUrlOrNull()
+            if (cause == null || httpUrl == null) return
+            if (cause.responseCode != HttpURLConnection.HTTP_FORBIDDEN &&
+                cause.responseCode != 429) return
+            if (!httpUrl.host.contains("redlib", ignoreCase = true)) return
+            if (pendingChallengeRetry != null) return
+            Log.d(TAG, "redlib HLS blocked by bot challenge; launching verification for ${httpUrl.host}")
+            pendingChallengeRetry = player
+            onRedlibChallenge(httpUrl.host)
         }
 
         override fun onTracksChanged(tracks: Tracks) {

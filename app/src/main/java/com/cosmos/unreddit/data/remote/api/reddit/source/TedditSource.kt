@@ -9,6 +9,8 @@ import com.cosmos.unreddit.data.remote.api.reddit.model.Data
 import com.cosmos.unreddit.data.remote.api.reddit.model.Listing
 import com.cosmos.unreddit.data.remote.api.reddit.model.ListingData
 import com.cosmos.unreddit.data.remote.api.reddit.model.MoreChildren
+import com.cosmos.unreddit.data.remote.api.reddit.scraper.redlib.RedlibBlockedException
+import com.cosmos.unreddit.data.remote.api.reddit.scraper.redlib.RedlibChallenge
 import com.cosmos.unreddit.data.remote.api.reddit.scraper.redlib.RedlibCommentScraper
 import com.cosmos.unreddit.data.remote.api.reddit.scraper.redlib.RedlibPostScraper
 import com.cosmos.unreddit.data.remote.api.reddit.scraper.redlib.RedlibSubredditScraper
@@ -19,6 +21,7 @@ import com.cosmos.unreddit.di.DispatchersModule.IoDispatcher
 import com.cosmos.unreddit.di.NetworkModule.RedlibBaseUrl
 import kotlinx.coroutines.CoroutineDispatcher
 import okhttp3.HttpUrl
+import retrofit2.HttpException
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -41,13 +44,36 @@ class TedditSource @Inject constructor(
         timeSorting: TimeSorting?,
         after: String?
     ): Listing {
-        val response = tedditApi.getSubreddit(
-            subreddit,
-            sort.toSubredditSort(),
-            timeSorting,
-            after
-        )
-        return RedlibPostScraper(ioDispatcher, baseUrlString).scrap(response.string())
+        val normalizedSort = sort.toSubredditSort()
+        // Record the exact listing URL so a bot-challenge failure can be
+        // retried against the same path (Cloudflare challenges can be
+        // path-specific) rather than just the instance root.
+        val listingUrl = "${baseUrlString.trimEnd('/')}/r/$subreddit/${normalizedSort.type}"
+        return try {
+            val response = tedditApi.getSubreddit(
+                subreddit,
+                normalizedSort,
+                timeSorting,
+                after
+            )
+            RedlibPostScraper(ioDispatcher, baseUrlString).scrap(response.string())
+        } catch (exception: RedlibBlockedException) {
+            throw RedlibBlockedException(exception.message ?: "Instance blocked", listingUrl)
+        } catch (exception: HttpException) {
+            // Cloudflare/Anubis challenges are often served with a non-2xx
+            // status (e.g. 403), so Retrofit throws before the scraper parses
+            // the body. Inspect the error body for challenge markers and fail
+            // loudly so the feed shows the inline-verification error instead of
+            // a blank screen. Non-challenge errors are re-thrown unchanged.
+            val body = (exception.response()?.body() as? okhttp3.ResponseBody)?.string().orEmpty()
+            if (RedlibChallenge.isChallenge(exception.code(), body)) {
+                throw RedlibBlockedException(
+                    "Redlib instance returned an anti-bot challenge page instead of content",
+                    listingUrl
+                )
+            }
+            throw exception
+        }
     }
 
     override suspend fun getSubredditInfo(subreddit: String): Child {

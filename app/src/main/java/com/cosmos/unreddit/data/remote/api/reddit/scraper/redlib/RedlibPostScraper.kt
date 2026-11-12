@@ -93,7 +93,14 @@ class RedlibPostScraper(
             ?.filter { it.isNotBlank() }
             ?: emptyList()
 
-        val videoUrl = video?.attr("src")?.toAbsoluteUrl()
+        // redlib serves HLS streams on a <source> child (m3u8), not on the <video> element.
+        // Prefer the m3u8 HLS source, fall back to any non-empty <source>, then to video.src.
+        val streamSrc = video
+            ?.select("source")
+            ?.firstOrNull { it.attr("src").isNotBlank() }
+            ?.attr("src")
+            ?: video?.attr("src")
+        val videoUrl = streamSrc?.toAbsoluteUrl()
         val posterUrl = video?.attr("poster")?.toAbsoluteUrl()
 
         val thumbnailElement = selectFirst(Selector.POST_THUMBNAIL)

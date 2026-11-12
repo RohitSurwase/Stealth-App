@@ -54,9 +54,9 @@ object LinkUtil {
         return link.replace(GIF_REGEX, "mp4")
     }
 
-    fun getRedditSoundTrack(link: String): String {
+    fun getRedditSoundTrack(link: String): String? {
         val match = REDDIT_VIDEO_REGEX.find(link)
-            ?: error("Invalid reddit video URL: $link")
+            ?: return null
 
         val format = match.groupValues[1]
         return link.replace(REDDIT_VIDEO_REGEX, "$format$REDDIT_SOUNDTRACK_NAME")
