@@ -38,8 +38,15 @@ This build loads Reddit through [Redlib](https://github.com/redlib-org/redlib) i
 
 - Redlib instances are fetched from [`instances.json`](https://github.com/redlib-org/redlib-instances/blob/main/instances.json).
 - You can enter your own Redlib instance URL.
-- Redlib relies on a Cloudflare challenge that must be passed manually — use the **"Verify Instance in Browser"** option to complete it.
-- Redlib has its own NSFW settings. The app tries to sync its preferences with the Redlib instance, but the setting resets on instance change, so run **"Verify Instance in Browser"** again whenever you toggle **"Show NSFW content"**.
+- Redlib instances sit behind a Cloudflare/Anubis bot challenge. The app detects it and shows an
+  **inline verification** (a WebView overlay over the feed) that solves the challenge and retries
+  automatically — no external browser needed. A **"Verify Instance in Browser"** option is also
+  available in Settings as a manual fallback.
+- Video posts play in the app's media player. On instances that serve video as HLS, playback is
+  routed through the verified instance session.
+- Search depends on the instance: some instances don't support it (the app says so), and searching
+  users is not supported by Redlib at all.
+- Redlib has its own NSFW settings. The app tries to sync its preferences with the Redlib instance, but the setting resets on instance change, so re-run the verification (inline or from Settings) whenever you toggle **"Show NSFW content"** or switch instances.
 - The active Redlib instance is shown under the app title.
 - A custom User-Agent string can be set, useful if instance verification fails with the default User-Agent.
 
