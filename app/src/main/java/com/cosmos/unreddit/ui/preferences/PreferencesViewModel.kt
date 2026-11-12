@@ -13,7 +13,6 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.launch
-import okhttp3.HttpUrl.Companion.toHttpUrl
 import javax.inject.Inject
 
 @HiltViewModel
@@ -39,7 +38,7 @@ class PreferencesViewModel @Inject constructor(
 
     val redditSource: SharedFlow<Pair<Int, String>> = combine(
         preferencesRepository.getRedditSource(),
-        preferencesRepository.getRedditSourceInstance(DEFAULT_INSTANCE)
+        preferencesRepository.getRedditSourceInstance(TedditApi.DEFAULT_INSTANCE)
     ) { source, instance ->
         Pair(source, instance)
     }.shareIn(viewModelScope, SharingStarted.WhileSubscribed(), 1)
@@ -54,7 +53,7 @@ class PreferencesViewModel @Inject constructor(
      */
     var redlibInstances: List<String> = redlibInstancesRepository
         .getCachedInstances()
-        .ifEmpty { listOf(DEFAULT_INSTANCE) }
+        .ifEmpty { listOf(TedditApi.DEFAULT_INSTANCE) }
         private set
 
     init {
@@ -112,13 +111,5 @@ class PreferencesViewModel @Inject constructor(
             currentSource.setRedditSource(source)
             instance?.let { preferencesRepository.setRedditSourceInstance(it) }
         }
-    }
-
-    private companion object {
-        /**
-         * Only used before the online instance list has been downloaded for the
-         * first time, so the app always has a usable instance.
-         */
-        private val DEFAULT_INSTANCE: String = TedditApi.BASE_URL.toHttpUrl().host
     }
 }

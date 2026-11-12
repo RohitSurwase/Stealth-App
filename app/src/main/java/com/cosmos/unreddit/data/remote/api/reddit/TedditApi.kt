@@ -2,6 +2,7 @@ package com.cosmos.unreddit.data.remote.api.reddit
 
 import com.cosmos.unreddit.data.model.Sort
 import com.cosmos.unreddit.data.model.TimeSorting
+import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.ResponseBody
 import retrofit2.http.GET
 import retrofit2.http.Path
@@ -91,5 +92,10 @@ interface TedditApi {
 
     companion object {
         const val BASE_URL = "https://redlib.freedit.eu/"
+
+        /**
+         * Instance used until the user selects one or the online list is cached.
+         */
+        val DEFAULT_INSTANCE: String = BASE_URL.toHttpUrl().host
     }
 }

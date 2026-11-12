@@ -176,6 +176,13 @@ class PostListFragment : BaseFragment(), PullToRefreshLayout.OnRefreshListener {
                     binding.appBar.profileImage.setText(it.name)
                 }
             }
+
+            launch {
+                viewModel.redlibInstance.collect { instance ->
+                    binding.appBar.instance.text = instance
+                    binding.appBar.instance.isVisible = !instance.isNullOrBlank()
+                }
+            }
             
             launch { 
                 viewModel.lastRefresh.collect {
