@@ -10,6 +10,8 @@ import com.cosmos.unreddit.data.model.Sorting
 import com.cosmos.unreddit.data.model.db.PostEntity
 import com.cosmos.unreddit.data.model.db.Profile
 import com.cosmos.unreddit.data.model.preferences.ContentPreferences
+import com.cosmos.unreddit.data.model.preferences.DataPreferences
+import com.cosmos.unreddit.data.remote.api.reddit.TedditApi
 import com.cosmos.unreddit.data.repository.PostListRepository
 import com.cosmos.unreddit.data.repository.PreferencesRepository
 import com.cosmos.unreddit.di.DispatchersModule.DefaultDispatcher
@@ -45,6 +47,21 @@ class PostListViewModel
 
     val contentPreferences: Flow<ContentPreferences> =
         preferencesRepository.getContentPreferences()
+
+    /**
+     * The instance currently used by the Redlib source, or null when another
+     * source is selected. Shown as a subtitle in the home app bar.
+     */
+    val redlibInstance: Flow<String?> = combine(
+        preferencesRepository.getRedditSource(),
+        preferencesRepository.getRedditSourceInstance()
+    ) { source, instance ->
+        if (source == DataPreferences.RedditSource.TEDDIT.value) {
+            instance.ifBlank { TedditApi.DEFAULT_INSTANCE }
+        } else {
+            null
+        }
+    }.distinctUntilChanged()
 
     val profiles: Flow<List<Profile>> = repository.getAllProfiles()
 
