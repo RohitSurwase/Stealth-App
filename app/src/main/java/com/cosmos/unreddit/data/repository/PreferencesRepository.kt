@@ -122,6 +122,20 @@ class PreferencesRepository @Inject constructor(
         )
     }
 
+    suspend fun setCustomUserAgent(userAgent: String) {
+        preferencesDatastore.setValue(
+            DataPreferences.PreferencesKeys.CUSTOM_USER_AGENT,
+            userAgent
+        )
+    }
+
+    fun getCustomUserAgent(defaultValue: String = ""): Flow<String> {
+        return preferencesDatastore.getValue(
+            DataPreferences.PreferencesKeys.CUSTOM_USER_AGENT,
+            defaultValue
+        )
+    }
+
     suspend fun setPrivacyEnhancerEnabled(enablePrivacyEnhancer: Boolean) {
         preferencesDatastore.setValue(
             DataPreferences.PreferencesKeys.PRIVACY_ENHANCER,

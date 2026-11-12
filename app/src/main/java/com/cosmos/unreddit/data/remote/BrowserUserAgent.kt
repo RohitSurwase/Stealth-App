@@ -31,6 +31,15 @@ object BrowserUserAgent {
         return sanitize(WebSettings.getDefaultUserAgent(context))
     }
 
+    /**
+     * The User-Agent used by both the verification WebView and OkHttp.
+     * A non-blank [customUserAgent] takes precedence over the WebView default,
+     * which keeps the value in sync with the installed WebView engine otherwise.
+     */
+    fun resolve(context: Context, customUserAgent: String?): String {
+        return customUserAgent?.takeIf { it.isNotBlank() } ?: fromWebView(context)
+    }
+
     fun isMobile(userAgent: String): Boolean {
         return userAgent.contains("Android", ignoreCase = true) ||
             userAgent.contains("Mobile", ignoreCase = true)

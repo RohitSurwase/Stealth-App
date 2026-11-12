@@ -106,7 +106,7 @@
     <string name="post_open_user">Open user profile</string>
     <string name="post_open_subreddit">Open subreddit</string>
 
-    <string name="network_retry_message">Something went wrong</string>
+    <string name="network_retry_message">Something went wrong.\nIf this keeps happening, set Reddit Source to Redlib and verify the instance in Settings.</string>
     <string name="network_retry_action">Retry</string>
 
     <string name="dialog_subreddit_not_found_title">Subreddit not found</string>
@@ -159,6 +159,10 @@
     <string name="preference_reddit_source_reddit_scrap">Reddit (Web Scraping)</string>
     <string name="preference_reddit_source_teddit">Redlib</string>
 
+    <string name="preference_custom_user_agent">Custom User-Agent</string>
+    <string name="preference_custom_user_agent_message">Leave blank to use the WebView\'s current User-Agent. Setting a custom value requires verifying the Redlib instance again.</string>
+    <string name="preference_custom_user_agent_default">Default (WebView)</string>
+
     <string name="preference_backup">Import/Export</string>
 
     <string name="preference_about">About</string>
@@ -175,6 +179,8 @@
     <string name="instance_empty_error">Instance cannot be empty</string>
     <string name="instance_invalid_error">Instance URL is invalid</string>
     <string name="redlib_verify_instance">Verify instance in browser</string>
+    <string name="redlib_refresh_instances">Refresh instance list</string>
+    <string name="redlib_refresh_instances_failed">Could not refresh the instance list. Keeping the cached list.</string>
     <string name="redlib_verification_title">Verify Redlib instance</string>
     <string name="redlib_verification_done">Done</string>
     <string name="redlib_verification_hint">Some Redlib instances require a Cloudflare/Anubis browser check. Complete it here once (tap “Done” afterwards), then the app can reuse the resulting cookies for its requests.</string>

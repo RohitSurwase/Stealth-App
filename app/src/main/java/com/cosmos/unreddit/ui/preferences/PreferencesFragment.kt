@@ -3,14 +3,17 @@ package com.cosmos.unreddit.ui.preferences
 import android.content.DialogInterface
 import android.os.Bundle
 import android.view.View
+import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.addCallback
 import androidx.annotation.StringRes
 import androidx.core.view.children
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavOptions
 import androidx.navigation.fragment.findNavController
+import androidx.preference.EditTextPreference
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.SwitchPreferenceCompat
@@ -51,6 +54,7 @@ class PreferencesFragment : PreferenceFragmentCompat() {
     private var showSpoilerPreviewPreference: SwitchPreferenceCompat? = null
     private var backupPreference: Preference? = null
     private var sourcePreference: Preference? = null
+    private var customUserAgentPreference: EditTextPreference? = null
     private var privacyEnhancerPreference: Preference? = null
     private var aboutPreference: Preference? = null
     private var policyDisclaimerPreference: Preference? = null
@@ -157,6 +161,15 @@ class PreferencesFragment : PreferenceFragmentCompat() {
             }
         }
 
+        customUserAgentPreference = findPreference<EditTextPreference>(
+            DataPreferences.PreferencesKeys.CUSTOM_USER_AGENT.name
+        )?.apply {
+            setOnPreferenceChangeListener { _, newValue ->
+                viewModel.setCustomUserAgent(newValue?.toString().orEmpty().trim())
+                true
+            }
+        }
+
         privacyEnhancerPreference = findPreference<Preference?>(
             DataPreferences.PreferencesKeys.PRIVACY_ENHANCER.name
         )?.apply {
@@ -186,6 +199,27 @@ class PreferencesFragment : PreferenceFragmentCompat() {
             RedditSourceDialogFragment.REQUEST_KEY_SOURCE,
             viewLifecycleOwner
         ) { _, bundle ->
+            if (bundle.getBoolean(RedditSourceDialogFragment.KEY_REFRESH, false)) {
+                val source = bundle.serializable<DataPreferences.RedditSource>(
+                    RedditSourceDialogFragment.KEY_SOURCE
+                ) ?: REDDIT
+                val instance = bundle.serializable<String>(
+                    RedditSourceDialogFragment.KEY_INSTANCE
+                ).orEmpty()
+                viewLifecycleOwner.lifecycleScope.launch {
+                    val refreshed = viewModel.refreshRedlibInstances()
+                    if (!refreshed) {
+                        Toast.makeText(
+                            requireContext(),
+                            R.string.redlib_refresh_instances_failed,
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                    showRedditSourceDialog(source.value, instance)
+                }
+                return@setFragmentResultListener
+            }
+
             val source = bundle.serializable(RedditSourceDialogFragment.KEY_SOURCE)
                 ?: REDDIT
             val instance = bundle.serializable<String>(RedditSourceDialogFragment.KEY_INSTANCE)
@@ -225,6 +259,17 @@ class PreferencesFragment : PreferenceFragmentCompat() {
                         val nightModeArray =
                             resources.getStringArray(R.array.pref_night_mode_labels)
                         nightModePreference?.summary = nightModeArray.getOrNull(index)
+                    }
+                }
+            }
+
+            launch {
+                viewModel.customUserAgent.collect { userAgent ->
+                    customUserAgentPreference?.apply {
+                        text = userAgent
+                        summary = userAgent.ifBlank {
+                            getString(R.string.preference_custom_user_agent_default)
+                        }
                     }
                 }
             }

@@ -150,10 +150,25 @@ object NetworkModule {
     @Provides
     @Singleton
     fun provideTedditOkHttpClient(
-        @ApplicationContext context: Context
+        @ApplicationContext context: Context,
+        preferencesRepository: PreferencesRepository
     ): OkHttpClient {
+        // The default User-Agent follows the installed WebView engine; users
+        // can override it in Settings. Both this client and the verification
+        // WebView must send the same value, otherwise cf_clearance is rejected.
+        // The provider is evaluated per request, so changes apply immediately.
+        val defaultUserAgent = BrowserUserAgent.fromWebView(context)
         return OkHttpClient.Builder()
-            .addInterceptor(BrowserLikeInterceptor(BrowserUserAgent.fromWebView(context)))
+            .addInterceptor(BrowserLikeInterceptor {
+                val customUserAgent = runBlocking {
+                    preferencesRepository.getCustomUserAgent().firstOrNull()
+                }
+                if (customUserAgent.isNullOrBlank()) {
+                    defaultUserAgent
+                } else {
+                    customUserAgent
+                }
+            })
             .cookieJar(RedditCookieJar())
             .connectTimeout(TIMEOUT.first, TIMEOUT.second)
             .readTimeout(TIMEOUT.first, TIMEOUT.second)

@@ -12,6 +12,7 @@ data class DataPreferences(
     object PreferencesKeys {
         val REDDIT_SOURCE = intPreferencesKey("reddit_source")
         val REDDIT_SOURCE_INSTANCE = stringPreferencesKey("reddit_source_instance")
+        val CUSTOM_USER_AGENT = stringPreferencesKey("custom_user_agent")
         val PRIVACY_ENHANCER = booleanPreferencesKey("privacy_enhancer")
     }
 

@@ -9,14 +9,17 @@ import okhttp3.Response
  * are what trigger Cloudflare's bot challenge on URLs that a real browser on the
  * same machine can open without one.
  *
- * [userAgent] must be the same string the verification WebView uses, otherwise
- * Cloudflare will reject the clearance cookie obtained there.
+ * [userAgentProvider] must return the same string the verification WebView
+ * uses, otherwise Cloudflare will reject the clearance cookie obtained there.
+ * It is evaluated per request so a changed user preference takes effect
+ * without restarting the app.
  */
 class BrowserLikeInterceptor(
-    private val userAgent: String
+    private val userAgentProvider: () -> String
 ) : Interceptor {
 
     override fun intercept(chain: Interceptor.Chain): Response {
+        val userAgent = userAgentProvider()
         val request = chain.request()
         val builder = request.newBuilder()
             .header("User-Agent", userAgent)
@@ -25,9 +28,10 @@ class BrowserLikeInterceptor(
 
         // Only advertise client hints that are consistent with the User-Agent.
         // A mobile Chrome UA must not be paired with desktop Sec-CH-UA values.
-        if (!BrowserUserAgent.isMobile(userAgent)) {
+        val chromeVersion = CHROME_VERSION.find(userAgent)?.groupValues?.getOrNull(1)
+        if (!BrowserUserAgent.isMobile(userAgent) && chromeVersion != null) {
             builder
-                .header("Sec-CH-UA", SEC_CH_UA)
+                .header("Sec-CH-UA", secChUa(chromeVersion))
                 .header("Sec-CH-UA-Mobile", "?0")
                 .header("Sec-CH-UA-Platform", "\"Windows\"")
         }
@@ -41,12 +45,14 @@ class BrowserLikeInterceptor(
     }
 
     companion object {
+        private val CHROME_VERSION = Regex("""Chrome/(\d+)""")
+
         private const val ACCEPT =
             "text/html,application/xhtml+xml,application/xml;q=0.9," +
                 "image/avif,image/webp,image/apng,*/*;q=0.8"
 
-        private const val SEC_CH_UA =
-            "\"Not/A)Brand\";v=\"8\", \"Chromium\";v=\"126\", " +
-                "\"Google Chrome\";v=\"126\""
+        private fun secChUa(majorVersion: String): String =
+            "\"Not/A)Brand\";v=\"8\", \"Chromium\";v=\"$majorVersion\", " +
+                "\"Google Chrome\";v=\"$majorVersion\""
     }
 }

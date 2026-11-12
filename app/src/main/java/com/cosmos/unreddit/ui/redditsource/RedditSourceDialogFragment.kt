@@ -70,11 +70,13 @@ class RedditSourceDialogFragment : DialogFragment(), OnShowListener {
             radioTeddit.isChecked = isTeddit
             listInstances.isVisible = isTeddit
             verifyInstance.isVisible = isTeddit
+            refreshInstances.isVisible = isTeddit
 
             radioGroup.setOnCheckedChangeListener { _, checkedId ->
                 val isRedlib = checkedId == R.id.radio_teddit
                 listInstances.isVisible = isRedlib
                 verifyInstance.isVisible = isRedlib
+                refreshInstances.isVisible = isRedlib
             }
 
             verifyInstance.setOnClickListener {
@@ -87,6 +89,28 @@ class RedditSourceDialogFragment : DialogFragment(), OnShowListener {
                 listInstances.error = null
                 startActivity(RedlibVerificationActivity.intent(requireContext(), host))
             }
+
+            refreshInstances.setOnClickListener {
+                doAndDismiss {
+                    setFragmentResult(
+                        REQUEST_KEY_SOURCE,
+                        bundleOf(
+                            KEY_REFRESH to true,
+                            KEY_SOURCE to selectedSource(),
+                            KEY_INSTANCE to textListInstances.text.toString()
+                        )
+                    )
+                }
+            }
+        }
+    }
+
+    private fun selectedSource(): DataPreferences.RedditSource {
+        return when (binding.radioGroup.checkedRadioButtonId) {
+            R.id.radio_reddit -> DataPreferences.RedditSource.REDDIT
+            R.id.radio_reddit_scrap -> DataPreferences.RedditSource.REDDIT_SCRAP
+            R.id.radio_teddit -> DataPreferences.RedditSource.TEDDIT
+            else -> DataPreferences.RedditSource.REDDIT
         }
     }
 
@@ -125,12 +149,7 @@ class RedditSourceDialogFragment : DialogFragment(), OnShowListener {
     }
 
     private fun save() {
-        val source = when (binding.radioGroup.checkedRadioButtonId) {
-            R.id.radio_reddit -> DataPreferences.RedditSource.REDDIT
-            R.id.radio_reddit_scrap -> DataPreferences.RedditSource.REDDIT_SCRAP
-            R.id.radio_teddit -> DataPreferences.RedditSource.TEDDIT
-            else -> DataPreferences.RedditSource.REDDIT
-        }
+        val source = selectedSource()
         val instance = binding.textListInstances.text.toString()
         val linkValidator = LinkValidator(instance)
 
@@ -180,6 +199,7 @@ class RedditSourceDialogFragment : DialogFragment(), OnShowListener {
 
         const val KEY_SOURCE = "KEY_SOURCE"
         const val KEY_INSTANCE = "KEY_INSTANCE"
+        const val KEY_REFRESH = "KEY_REFRESH"
         private const val KEY_INSTANCES = "KEY_INSTANCES"
 
         fun show(
