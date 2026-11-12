@@ -18,6 +18,7 @@ import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.withContext
 import retrofit2.HttpException
 import java.io.IOException
+import java.util.concurrent.CancellationException
 import kotlin.math.ceil
 
 class SmartPostListDataSource(
@@ -42,10 +43,20 @@ class SmartPostListDataSource(
         return try {
             if (query.size > REDDIT_SUBREDDIT_LIMIT) getSmartData(params) else getData(params)
         } catch (exception: IOException) {
+            android.util.Log.e(DEBUG_TAG, "load failed", exception)
             LoadResult.Error(exception)
         } catch (exception: HttpException) {
+            android.util.Log.e(DEBUG_TAG, "load failed", exception)
             LoadResult.Error(exception)
         } catch (exception: JsonDataException) {
+            android.util.Log.e(DEBUG_TAG, "load failed", exception)
+            LoadResult.Error(exception)
+        } catch (exception: CancellationException) {
+            throw exception
+        } catch (exception: Exception) {
+            // Surface unexpected parsing/network failures instead of leaving
+            // the paging source stuck in its initial loading state.
+            android.util.Log.e(DEBUG_TAG, "unexpected load failure", exception)
             LoadResult.Error(exception)
         }
     }
@@ -124,6 +135,7 @@ class SmartPostListDataSource(
     }
 
     companion object {
+        private const val DEBUG_TAG = "PostListSource"
         private const val REDDIT_SUBREDDIT_LIMIT = 100
     }
 }
