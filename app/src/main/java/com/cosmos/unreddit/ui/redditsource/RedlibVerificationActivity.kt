@@ -2,19 +2,11 @@ package com.cosmos.unreddit.ui.redditsource
 
 import android.content.Context
 import android.content.Intent
-import android.graphics.Bitmap
 import android.os.Bundle
-import android.util.Log
 import android.webkit.CookieManager
-import android.webkit.WebResourceError
-import android.webkit.WebResourceRequest
-import android.webkit.WebResourceResponse
-import android.webkit.WebView
-import android.webkit.WebViewClient
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
 import com.cosmos.unreddit.databinding.ActivityRedlibVerificationBinding
-import com.cosmos.unreddit.data.remote.BrowserUserAgent
 import com.cosmos.unreddit.data.repository.PreferencesRepository
 import com.cosmos.unreddit.util.LinkValidator
 import com.cosmos.unreddit.util.extension.unredditApplication
@@ -57,76 +49,13 @@ class RedlibVerificationActivity : AppCompatActivity() {
             preferencesRepository.getCustomUserAgent().firstOrNull()
         }
 
-        binding.webView.settings.apply {
-            javaScriptEnabled = true
-            domStorageEnabled = true
-            databaseEnabled = true
-            // The verification page never needs local files/content providers.
-            allowFileAccess = false
-            allowContentAccess = false
-            // Must match the User-Agent used by OkHttp, otherwise Cloudflare's
-            // clearance cookie will be rejected on the app's requests.
-            userAgentString = BrowserUserAgent.resolve(
-                this@RedlibVerificationActivity,
-                customUserAgent
-            )
-            useWideViewPort = true
-            loadWithOverviewMode = true
-        }
-
-        CookieManager.getInstance().apply {
-            setAcceptCookie(true)
-            setAcceptThirdPartyCookies(binding.webView, true)
-        }
-
-        binding.webView.webViewClient = object : WebViewClient() {
-            override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
-                binding.progress.isVisible = true
-            }
-
-            override fun onPageFinished(view: WebView?, url: String?) {
-                binding.progress.isVisible = false
-            }
-
-            override fun onReceivedError(
-                view: WebView?,
-                request: WebResourceRequest?,
-                error: WebResourceError?
-            ) {
-                Log.w(TAG, "error ${request?.url}: ${error?.description}")
-            }
-
-            override fun onReceivedHttpError(
-                view: WebView?,
-                request: WebResourceRequest?,
-                errorResponse: WebResourceResponse?
-            ) {
-                Log.w(TAG, "http ${errorResponse?.statusCode} ${request?.url}")
-            }
-
-            override fun shouldInterceptRequest(
-                view: WebView?,
-                request: WebResourceRequest?
-            ): WebResourceResponse? {
-                val path = request?.url?.path ?: return null
-                // Cloudflare answers 403 for Anubis' worker script when it is
-                // requested from an Android WebView. Serve the equivalent
-                // upstream worker locally so the proof-of-work can complete.
-                if (path.contains("/.within.website/x/cmd/anubis/static/js/worker/sha256-") &&
-                    path.endsWith(".mjs")
-                ) {
-                    return WebResourceResponse(
-                        "text/javascript",
-                        "utf-8",
-                        200,
-                        "OK",
-                        mapOf("Cache-Control" to "no-store"),
-                        assets.open("anubis/sha256-webcrypto.mjs")
-                    )
-                }
-                return null
-            }
-        }
+        RedlibWebView.applySettings(binding.webView, this, customUserAgent)
+        RedlibWebView.enableCookies(binding.webView)
+        binding.webView.webViewClient = RedlibWebView.client(
+            context = this,
+            onPageStarted = { binding.progress.isVisible = true },
+            onPageFinished = { binding.progress.isVisible = false }
+        )
 
         binding.webView.loadUrl(url.toString())
 
@@ -148,7 +77,6 @@ class RedlibVerificationActivity : AppCompatActivity() {
     }
 
     companion object {
-        private const val TAG = "RedlibWebView"
         private const val EXTRA_INSTANCE = "EXTRA_INSTANCE"
 
         fun intent(context: Context, instance: String): Intent {

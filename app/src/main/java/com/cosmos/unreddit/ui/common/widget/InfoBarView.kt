@@ -99,11 +99,19 @@ class InfoBarView @JvmOverloads constructor(
         transition.slideEdge = slideEdge
     }
 
+    fun setActionText(text: String) {
+        this.action.text = text
+    }
+
     fun setActionClickListener(action: () -> Unit) {
         this.action.setOnClickListener {
             action.invoke()
             hide()
         }
+    }
+
+    fun setMessage(text: String) {
+        this.message.text = text
     }
 
     fun show() {

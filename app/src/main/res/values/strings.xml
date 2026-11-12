@@ -108,6 +108,7 @@
 
     <string name="network_retry_message">Something went wrong.\nIf this keeps happening, set Reddit Source to Redlib and verify the instance in Settings.</string>
     <string name="network_retry_action">Retry</string>
+    <string name="error_instance_blocked">This instance is blocking automated requests.\nTap “Verify” to complete the browser check here, then it retries automatically.</string>
 
     <string name="dialog_subreddit_not_found_title">Subreddit not found</string>
     <string name="dialog_subreddit_not_found_body">This subreddit does not exist or may have been banned.</string>
@@ -188,6 +189,7 @@
     <string name="redlib_refresh_instances_failed">Could not refresh the instance list. Keeping the cached list.</string>
     <string name="redlib_verification_title">Verify Redlib instance</string>
     <string name="redlib_verification_done">Done</string>
+    <string name="redlib_verification_verify">Verify</string>
     <string name="redlib_verification_hint">Some Redlib instances require a Cloudflare/Anubis browser check. Complete it here once (tap “Done” afterwards), then the app can reuse the resulting cookies for its requests.</string>
 
     <string name="redirect_mode_on">ON</string>

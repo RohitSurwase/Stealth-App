@@ -9,10 +9,13 @@ import com.cosmos.unreddit.data.remote.api.reddit.scraper.redlib.RedlibCommentSc
 import com.cosmos.unreddit.data.remote.api.reddit.scraper.redlib.RedlibPostScraper
 import com.cosmos.unreddit.data.remote.api.reddit.scraper.redlib.RedlibSubredditScraper
 import com.cosmos.unreddit.data.remote.api.reddit.scraper.redlib.RedlibSubredditSearchScraper
+import com.cosmos.unreddit.data.remote.api.reddit.scraper.redlib.RedlibBlockedException
+import com.cosmos.unreddit.data.remote.api.reddit.scraper.redlib.RedlibChallenge
 import com.cosmos.unreddit.data.remote.api.reddit.scraper.redlib.RedlibUserCommentScraper
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -102,6 +105,92 @@ class RedlibScraperTest {
         assertEquals("Some thread", data.linkTitle)
         assertEquals("pics", data.subreddit)
         assertEquals("t1_c9", data.name)
+    }
+
+    @Test
+    fun `anti-bot challenge page is rejected`() {
+        runBlocking {
+            val challenge =
+                "<!doctype html><html lang=\"en\"><head><title>Making sure you&#39;re not a bot!</title>" +
+                    "<link rel=\"stylesheet\" href=\"/.within.website/x/xess/xess.min.css\">" +
+                    "<meta name=\"robots\" content=\"noindex\"></head><body><p>check your browser</p></body></html>"
+
+            val error = try {
+                RedlibPostScraper(Dispatchers.Unconfined, baseUrl).scrap(challenge)
+                null
+            } catch (e: Exception) {
+                e
+            }
+            assertTrue(error is RedlibBlockedException)
+        }
+    }
+
+    @Test
+    fun `meta-refresh redirect page is rejected`() {
+        runBlocking {
+            val redirect =
+                "<!doctype html><html lang=\"en\"><head><title>Redirect</title>" +
+                    "<meta http-equiv=\"refresh\" content=\"2;url=https://redlib-2.example/r/pics\">" +
+                    "</head><body></body></html>"
+
+            val error = try {
+                RedlibPostScraper(Dispatchers.Unconfined, baseUrl).scrap(redirect)
+                null
+            } catch (e: Exception) {
+                e
+            }
+            assertTrue(error is RedlibBlockedException)
+        }
+    }
+
+    @Test
+    fun `cloudflare challenge page is rejected`() = runBlocking {
+        val cloudflare =
+            "<!doctype html><html lang=\"en\"><head><title>Just a moment...</title>" +
+                "<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\">" +
+                "<title>Checking your browser before accessing</title></head><body>" +
+                "<p>Checking your browser before accessing the website.</p></body></html>"
+
+        val error = try {
+            RedlibPostScraper(Dispatchers.Unconfined, baseUrl).scrap(cloudflare)
+            null
+        } catch (e: Exception) {
+            e
+        }
+        assertTrue(error is RedlibBlockedException)
+    }
+
+    @Test
+    fun `real content is not rejected`() = runBlocking {
+        // The bot-detection scan must not trip on ordinary listing markup.
+        val listing = RedlibPostScraper(Dispatchers.Unconfined, baseUrl).scrap(LISTING)
+        assertEquals(4, listing.data.children.size)
+    }
+
+    @Test
+    fun `challenge served with a non-2xx status is detected`() = runBlocking {
+        // A challenge served with a non-2xx status (e.g. Cloudflare's 403)
+        // reaches the app as an HttpException whose body must still be
+        // recognised, since Retrofit throws before the scraper parses it.
+        val cloudflare403 =
+            "<!doctype html><html lang=\"en-US\"><head><title>Just a moment...</title>" +
+                "<meta http-equiv=\"refresh\" content=\"360\"></head><body>" +
+                "<div class=\"main-content\"><noscript>Enable JavaScript and cookies " +
+                "to continue</noscript></div></body></html>"
+
+        assertTrue(RedlibChallenge.isChallengePage(cloudflare403))
+        assertFalse(RedlibChallenge.isChallengePage(LISTING))
+    }
+
+    @Test
+    fun `empty-body 403 is detected by status code`() = runBlocking {
+        // Cloudflare serves the challenge with an empty body to non-browser
+        // clients (OkHttp), so the body-marker scan misses it; the status code
+        // must catch it. 404 (real not-found) must NOT be treated as a challenge.
+        assertTrue(RedlibChallenge.isChallenge(403, ""))
+        assertTrue(RedlibChallenge.isChallenge(429, ""))
+        assertFalse(RedlibChallenge.isChallenge(404, ""))
+        assertFalse(RedlibChallenge.isChallenge(200, LISTING))
     }
 
     companion object {
