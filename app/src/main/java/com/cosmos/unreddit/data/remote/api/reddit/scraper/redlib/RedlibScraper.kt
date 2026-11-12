@@ -1,5 +1,6 @@
 package com.cosmos.unreddit.data.remote.api.reddit.scraper.redlib
 
+import com.cosmos.unreddit.data.remote.api.reddit.RedlibInstanceInfo
 import com.cosmos.unreddit.data.remote.scraper.Scraper
 import kotlinx.coroutines.CoroutineDispatcher
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
@@ -118,7 +119,22 @@ abstract class RedlibScraper<Result>(
                 "Redlib instance returned an anti-bot challenge page instead of content"
             )
         }
-        return super.scrap(body)
+        return super.scrap(body).also { extractInstanceVersion() }
+    }
+
+    /**
+     * The footer carries the instance's build identifier, in one of two
+     * upstream formats: a `span#version` (e.g. `v0.40.0`) or the `a#source`
+     * link text (`version-commit`, forks: a bare commit hash). Taken as-is —
+     * no parsing — so the label shows exactly what the instance advertises.
+     * Remembered per instance host so the UI can show which build serves the
+     * content.
+     */
+    private fun extractInstanceVersion() {
+        val element = document?.selectFirst("#version, a#source") ?: return
+        val text = element.ownText().ifBlank { element.text() }.trim()
+        val host = baseUrl.toHttpUrlOrNull()?.host ?: return
+        RedlibInstanceInfo.update(host, text)
     }
 
     companion object {

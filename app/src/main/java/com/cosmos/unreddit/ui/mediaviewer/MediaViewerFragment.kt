@@ -244,7 +244,7 @@ class MediaViewerFragment : FullscreenBottomSheetFragment() {
         if (args.images != null) {
             viewerViewModel.setMedia(args.images!!.toList())
         } else if (args.link != null && args.type != MediaType.NO_MEDIA) {
-            viewerViewModel.loadMedia(args.link!!, args.type)
+            viewerViewModel.loadMedia(args.link!!, args.type, permalink = args.permalink)
         } else {
             arguments?.let { bundle ->
                 if (bundle.containsKey(BUNDLE_KEY_IMAGES)) {
@@ -255,7 +255,11 @@ class MediaViewerFragment : FullscreenBottomSheetFragment() {
                 } else if (bundle.containsKey(BUNDLE_KEY_LINK)) {
                     val link = bundle.getString(BUNDLE_KEY_LINK, "")
                     val type = bundle.serializable(BUNDLE_KEY_TYPE) ?: MediaType.LINK
-                    viewerViewModel.loadMedia(link, type)
+                    viewerViewModel.loadMedia(
+                        link,
+                        type,
+                        permalink = bundle.getString(BUNDLE_KEY_PERMALINK)
+                    )
                 }
                 isLegacyNavigation = true
             }
@@ -358,12 +362,17 @@ class MediaViewerFragment : FullscreenBottomSheetFragment() {
     private fun retry() {
         Log.e(TAG, "retry link=${args.link ?: arguments?.getString(BUNDLE_KEY_LINK)} type=${args.type}")
         if (args.link != null) {
-            viewerViewModel.loadMedia(args.link!!, args.type, true)
+            viewerViewModel.loadMedia(args.link!!, args.type, true, args.permalink)
         } else {
             val link = arguments?.getString(BUNDLE_KEY_LINK)
             val type = arguments?.serializable<MediaType>(BUNDLE_KEY_TYPE)
             if (link != null && type != null) {
-                viewerViewModel.loadMedia(link, type, true)
+                viewerViewModel.loadMedia(
+                    link,
+                    type,
+                    true,
+                    arguments?.getString(BUNDLE_KEY_PERMALINK)
+                )
             }
         }
     }
@@ -435,6 +444,7 @@ class MediaViewerFragment : FullscreenBottomSheetFragment() {
         private const val BUNDLE_KEY_IMAGES = "BUNDLE_KEY_IMAGES"
         private const val BUNDLE_KEY_LINK = "BUNDLE_KEY_LINK"
         private const val BUNDLE_KEY_TYPE = "BUNDLE_KEY_TYPE"
+        private const val BUNDLE_KEY_PERMALINK = "BUNDLE_KEY_PERMALINK"
 
         fun newInstance(images: List<GalleryMedia>) = MediaViewerFragment().apply {
             arguments = bundleOf(
@@ -442,11 +452,15 @@ class MediaViewerFragment : FullscreenBottomSheetFragment() {
             )
         }
 
-        fun newInstance(link: String, type: MediaType) = MediaViewerFragment().apply {
-            arguments = bundleOf(
-                BUNDLE_KEY_LINK to link,
-                BUNDLE_KEY_TYPE to type
-            )
-        }
+        fun newInstance(link: String, type: MediaType) = newInstance(link, type, null)
+
+        fun newInstance(link: String, type: MediaType, permalink: String?) =
+            MediaViewerFragment().apply {
+                arguments = bundleOf(
+                    BUNDLE_KEY_LINK to link,
+                    BUNDLE_KEY_TYPE to type,
+                    BUNDLE_KEY_PERMALINK to permalink
+                )
+            }
     }
 }

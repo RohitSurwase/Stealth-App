@@ -138,8 +138,144 @@ Keep-worthy logs that remain in the code:
 - Instances that disable `/search` answer 404 — surfaced with the friendly message; user search
   is unsupported on all redlib instances.
 
+## 9. FOLLOW-UP (Nov 13 2026): reddit.nerdvpn.de — Gandalf + media-stripped feed
+
+A user switched to `https://reddit.nerdvpn.de/` (search works there). Two new facts:
+
+1. **New bot-challenge variant: "Gandalf"** (nerdvpn's own self-hosted botblocker,
+   https://gandalf.nerdvpn.de, v4.3.1). Flow: 307 → `/.gandalf/check?gandalf_id=…&gandalf_redir=…&gandalf_type=gaia`
+   → 403 page with obfuscated JS (3 steps, browser fingerprinting via `v4/v6.gandalf.nerdvpn.de`,
+   confirm token POST to `/.gandalf/confirm`). Not Cloudflare/Anubis — but the EXISTING inline
+   verification (`RedlibVerificationFragment`) solves it as-is, and `RedditCookieJar` reuses the
+   clearance for feed, `/preview/` images, and HLS. `RedlibChallenge.isChallengePage` detects the
+   200-wrapped challenge body correctly. No code change was needed. The challenge can re-trigger
+   under rapid successive requests (rate limiting); the VERIFY bar recovers.
+2. **Newer redlib builds strip inline media from feed listings.** Image posts in the feed carry
+   only a proxied 140px `post_thumbnail` (`/preview/pre/…` for reddit-hosted media,
+   `/preview/external-pre/…` for external) plus a `<span>` label (`image` / `video`) naming the
+   media type — no `post_media_image` anchor, no `<video>`, no `div.gallery`. The scraper
+   therefore classified them as LINK with `preview=null` → blank rounded boxes.
+
+**Fix (instance-agnostic, generic redlib markup):** `RedlibPostScraper.toPost()` now reads the
+`post_thumbnail`'s `<span>` label; when the label is exactly `image` and no inline media was
+found, the proxied thumbnail URL becomes the post URL (`hint="image"` → `MediaType.IMAGE`).
+Link posts are unaffected (their span holds the external domain, e.g. `bsky.app`/`gallery`,
+which never matches). Older redlib builds are unaffected (the fallback only applies when
+`imageUrl` is null). Unit test: `proxied thumbnail with media label classifies as image post`.
+
+**Known side effects / accepted for now:**
+- Full-size view: RESOLVED — see below.
+- `domain` for such image posts is the instance host (not `i.redd.it`), because the post URL is
+  the proxied preview. Cosmetic: the link-info row shows the instance domain.
+- Feed video posts still render blank (label `video` is intentionally NOT mapped: no video URL
+  exists in the feed and a fake URL would break the player; videos work via the post detail
+  page, which does carry real media markup).
+
+### Full-size image in the viewer (Nov 13 2026)
+
+Detail pages on these redlib builds DO carry full-size media: `<!-- post_type: image -->` plus
+`a.post_media_image` → `/img/<id>.jpeg` (full-res instance media proxy, distinct from `/preview/`
+thumbnails). The existing `RedlibPostScraper` already extracts that anchor on detail pages.
+
+Flow when the viewer opens an image whose URL is only a `/preview/` URL:
+`BaseFragment.onImageClick` passes `post.permalink` → `LinkHandler.openMedia(link, type,
+permalink)` → `MediaViewerFragment` (new optional `permalink` nav/bundle arg) →
+`MediaViewerViewModel.resolveFullSizeImage()`: shows the preview immediately, then fetches the
+detail page via `postListRepository.getPost(permalink)` (same mechanism as `REDDIT_GALLERY`) and
+swaps in the full-size URL when `postType == IMAGE` and the URL is not another `/preview/`.
+Failure keeps the preview (no error state). Older instances (direct `i.redd.it` URLs) never
+contain `/preview/`, so no extra fetch happens — fully instance-agnostic.
+
+**Debugging tips used (Gandalf-protected instances):** host-side curl only sees the challenge;
+use the app on-device with a temporary interceptor on `@TedtitOkHttp`/scraper to log/dump real
+traffic, or solve the challenge in the app's WebView first. Gandalf's manual-confirm endpoint
+requires the JS steps (curl-only confirm → 403).
+
 ## 8. GIT STATE
 
 - `5605018` — Redlib HLS playback behind bot challenge + inline verification (the main change set).
 - `6e24506` — Search friendly message + taller info bar.
 - No debug/temp code remains in the tree; all diagnostic hooks were removed before commit.
+
+---
+
+## 10. REDLIB INSTANCE COMPATIBILITY — SESSION RECORD (Nov 13 2026, shipped in v3.0.5)
+
+**Goal:** Redlib instance-compatibility fixes triggered by `reddit.nerdvpn.de`, all
+instance-agnostic (never key logic on a host name; capability/markup detection only). Verified
+on-device against a second instance (`redlib.freedit.eu`, upstream v0.40.0). Emulator
+`emulator-5554`, app `com.rohitss.stealth` (package `com.cosmos.unreddit`). Build with
+`JAVA_HOME=/home/rohit_surwase/.jdks/jbr-17.0.14 ./gradlew :app:assembleRelease` (run `clean`
+first if a resource-merge StackOverflowError appears), install with
+`adb install -r app/build/outputs/apk/release/app-release.apk`, launch
+`com.rohitss.stealth/com.cosmos.unreddit.MainActivity`.
+
+**Change set (all verified on-device on BOTH instances, unit tests pass):**
+1. `RedlibPostScraper.kt` — feed image posts classified via the `post_thumbnail` `<span>` label
+   (`image`) when a redlib build strips inline media from listings; proxied `/preview/…`
+   thumbnail becomes the post URL. Link posts (`bsky.app` etc. labels) unaffected. Video label
+   intentionally NOT mapped (no video URL exists in the stripped feed).
+2. `RedlibScraper.kt` — (a) challenge detection unchanged; (b) NEW `extractInstanceVersion()`:
+   selects footer `#version, a#source` and stores its text AS-IS (no regex, no `v` stripping —
+   upstream emits `<span id="version">v0.40.0</span>`, forks emit
+   `<a id="source">82235ec</a>`) via `RedlibInstanceInfo.update(host, text)`.
+3. `RedlibInstanceInfo.kt` (NEW file) — in-memory singleton, `StateFlow<Map<host, version>>`;
+   repopulates on first scrape after restart; no persistence.
+4. Full-size viewer resolution:
+   - `BaseFragment.onImageClick` → `LinkHandler.openMedia(mediaUrl, mediaType, post.permalink)`.
+   - `LinkHandler.openMedia(link, type, permalink = null)` →
+     `MediaViewerFragment.newInstance(link, type, permalink)` (new legacy-bundle key
+     `BUNDLE_KEY_PERMALINK`; also added optional `permalink` nav arg in `res/navigation/viewer.xml`).
+   - `MediaViewerViewModel.loadMedia(link, type, forceUpdate, permalink)` →
+     `retrieveMedia(..., permalink)`; in the `IMAGE` branch, after showing the preview,
+     `resolveFullSizeImage()` runs only when `permalink != null && link.contains("/preview/")`:
+     collects `postListRepository.getPost(permalink, Sorting(Sort.BEST))` (it's a FLOW, not
+     suspend), maps `PostUtil.getPostData(listings)`, and swaps in `postData.url` when
+     `postType == IMAGE && url !contains("/preview/") && url != link`; `.catch { }` keeps the
+     preview. Verified sharp on-device (both detail→viewer and feed→viewer paths).
+5. `PostListFragment.kt` — app-bar subtitle `#<version> : <instance>` (user-chosen format, text
+   as-is including `v`) via `updateInstanceLabel()`; collects `RedlibInstanceInfo.versions` to
+   refresh when the version arrives; falls back to plain URL when no version known.
+6. `RedlibScraperTest.kt` — new test `proxied thumbnail with media label classifies as image post`
+   (includes the no_thumbnail/`bsky.app` negative case). `assertNull` import added.
+7. This knowledge file — section 9 (Gandalf + media-stripped feed), the "Full-size image in the
+   viewer" subsection, and this section 10.
+
+**Verified facts about reddit.nerdvpn.de:**
+- Uses **Gandalf** botblocker (not Cloudflare/Anubis): 307 → `/.gandalf/check?gandalf_id=…&gandalf_redir=…&gandalf_type=gaia`
+  → 403/200 obfuscated-JS PoW page (3 steps, `v4/v6.gandalf.nerdvpn.de`, confirm token POST to
+  `/.gandalf/confirm`; curl-only confirm → 403). Existing inline verification WebView solves it;
+  cookies reused via `RedditCookieJar`. It rate-limits aggressively — re-challenges happen and
+  the VERIFY bar recovers (expect one VERIFY tap when testing).
+- Newer redlib build (fork `Nachtalb/redlib`, footer shows commit `82235ec`): feed listings have
+  NO inline media (no `post_media_image`/`<video>`/`div.gallery`), only 140px proxied thumbnails
+  (`/preview/pre/…`, `/preview/external-pre/…`) + `<span>image|video</span>` label.
+- **Detail pages** carry full media: `<!-- post_type: image -->` + `a.post_media_image` →
+  `/img/<id>.jpeg` (full-res proxy; distinct from `/preview/`). Standard scraper already extracts it.
+
+**Comparison run vs `redlib.freedit.eu` (Nov 13 2026 — all verified on-device):**
+- freedit.eu = **upstream redlib v0.40.0**, behind Cloudflare (host-side curl/webfetch get 403
+  challenge; the app passes with its cookies). Feed markup still has inline media
+  (`post_media_image`/`<video>` + play button), so video posts show frame previews there (on
+  nerdvpn they render blank by design — label-`video` posts have no URL in the stripped feed).
+- Viewer: full-size image opened DIRECTLY (direct media URL, no `/preview/` → no resolution
+  fetch). Video playback via detail page works (HLS fullscreen verified). Link posts (`yhoo.it`
+  domain) correctly stay links.
+- **Footer version format differs by build:** upstream redlib emits
+  `<span id="version">v0.40.0</span>`; forks (Nachtalb) emit `<a id="source" href="…" >82235ec</a>`.
+  `extractInstanceVersion()` selects `#version, a#source` and takes the text AS-IS (no regex, no
+  `v` stripping — user decision). Title bar verified: `#v0.40.0 : redlib.freedit.eu` (freedit),
+  `#82235ec : reddit.nerdvpn.de` (nerdvpn).
+- Temporary DebugDump hooks were re-added briefly to capture freedit's footer, then removed again
+  (third time); tree contains only feature changes.
+
+**Release v3.0.5 (Nov 13 2026):** user handles the release; the change set above ships as-is.
+Release notes were drafted in the established style (see conversation). Remaining release-prep
+steps done by the user: bump `buildSrc/src/main/kotlin/Config.kt` (versionCode 35,
+versionName "3.0.5"), commit (first `git add RedlibInstanceInfo.kt`), tag `v3.0.5`.
+**Cleanup verified:** no debug/temp code in the tree (DebugDump hooks were added and removed
+three times; final tree contains only feature changes + this doc).
+
+**Cleanup rule:** any temporary DebugDump/dump hooks or logging interceptors must be removed
+before commit. Currently none in the tree (removed twice already). Untracked file to `git add`:
+`RedlibInstanceInfo.kt`. Commit not yet requested — ask user before committing.

@@ -17,6 +17,7 @@ import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -47,6 +48,55 @@ class RedlibScraperTest {
         val galleryPost = (listing.data.children[3] as PostChild).data
         assertEquals(2, galleryPost.gallery.size)
         assertEquals(listOf("image", "video"), galleryPost.gallery.map { it.type.name.lowercase() })
+    }
+
+    @Test
+    fun `proxied thumbnail with media label classifies as image post`() = runBlocking {
+        // Newer redlib builds (e.g. reddit.nerdvpn.de) strip inline media from
+        // listings and only expose a proxied thumbnail plus a <span> label.
+        val body = HEADER +
+            "<div id=\"posts\">" +
+            "<div class=\"post\" id=\"img2\">" +
+            "<p class=\"post_header\"><a class=\"post_subreddit\" href=\"/r/meirl\">r/meirl</a>" +
+            "<a class=\"post_author\" href=\"/u/op\">u/op</a>" +
+            "<span class=\"created\" title=\"Nov 11 2026, 06:33:12 UTC\">5h ago</span></p>" +
+            "<h2 class=\"post_title\"><a href=\"/r/meirl/comments/img2/meirl/\">Meirl</a></h2>" +
+            "<a class=\"post_thumbnail\" href=\"/r/meirl/comments/img2/meirl/\" rel=\"nofollow\">" +
+            "<div style=\"max-width:140px;max-height:140px;\">" +
+            "<img width=\"100%\" height=\"100%\" loading=\"lazy\" alt=\"Thumbnail\" " +
+            "src=\"/preview/pre/pic.jpeg?width=140&#38;height=82&#38;auto=webp&#38;s=abc\"/>" +
+            "</div>" +
+            "<span>image</span>" +
+            "</a>" +
+            "<div class=\"post_score\" title=\"10\">10</div>" +
+            "<div class=\"post_footer\"><a href=\"/r/meirl/comments/img2/meirl/\" " +
+            "class=\"post_comments\" title=\"2 comments\">2 comments</a></div>" +
+            "</div>" +
+            "<div class=\"post\" id=\"noimg1\">" +
+            "<p class=\"post_header\"><a class=\"post_subreddit\" href=\"/r/pics\">r/pics</a>" +
+            "<a class=\"post_author\" href=\"/u/op\">u/op</a>" +
+            "<span class=\"created\" title=\"Nov 11 2026, 06:33:12 UTC\">5h ago</span></p>" +
+            "<h2 class=\"post_title\"><a href=\"/r/pics/comments/noimg1/link_title/\">Link title</a></h2>" +
+            "<a class=\"post_thumbnail no_thumbnail\" href=\"https://bsky.app/profile/x\">" +
+            "<svg viewBox=\"0 0 100 106\"><title>Thumbnail</title></svg>" +
+            "<span>bsky.app</span></a>" +
+            "<div class=\"post_score\" title=\"10\">10</div>" +
+            "<div class=\"post_footer\"><a href=\"/r/pics/comments/noimg1/link_title/\" " +
+            "class=\"post_comments\" title=\"2 comments\">2 comments</a></div>" +
+            "</div>" +
+            "</div>" + FOOTER
+
+        val listing = RedlibPostScraper(Dispatchers.Unconfined, baseUrl).scrap(body)
+
+        val imagePost = (listing.data.children[0] as PostChild).data
+        assertEquals("https://redlib.example/preview/pre/pic.jpeg?width=140&height=82&auto=webp&s=abc", imagePost.url)
+        assertEquals("image", imagePost.hint)
+        assertEquals("redlib.example", imagePost.domain)
+
+        // A link post's label is the external domain — it must not classify as media.
+        val linkPost = (listing.data.children[1] as PostChild).data
+        assertEquals("https://bsky.app/profile/x", linkPost.url)
+        assertNull(linkPost.hint)
     }
 
     @Test
