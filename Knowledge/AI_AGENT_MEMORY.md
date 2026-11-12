@@ -4,7 +4,9 @@
 Make the app reliably load real Reddit content through a Redlib HTML-scraping source, including instance selection/verification and clear status on the home screen.
 
 ## Current status — what is being worked on RIGHT NOW
-Session 8: **v3.0.2 shipped + preferences synced with Redlib.** Version bumped in `buildSrc/src/main/kotlin/Config.kt` (commit `8243e83`) with short release notes (Redlib default source, instance verification/management, home-screen instance label, custom UA, media fix, cleanup). Resolved a user-reported issue where the feed under the Redlib source would hang/crash: content preferences now sync with Redlib — a matching setting is sent to Redlib so its output matches the app's, with a source-aware summary and a short confirmation dialog when the source is Redlib. Preference rows keep the fixed 64dp card; the summary fits one line. Committed as `42e9b25`. Working tree clean.
+Session 8: **v3.0.3 shipped + preferences synced with Redlib.** Version bumped in `buildSrc/src/main/kotlin/Config.kt` (commit `7147b4d`) with short release notes (Redlib default source, instance verification/management, home-screen instance label, custom UA, media fix, cleanup). Resolved a user-reported issue where the feed under the Redlib source would hang/crash: content preferences now sync with Redlib — a matching setting is sent to Redlib so its output matches the app's, with a source-aware summary and a short confirmation dialog when the source is Redlib. Preference rows keep the fixed 64dp card; the summary fits one line. Committed as `42e9b25`. Working tree clean.
+
+Session 9: **README documentation updated.** Added a `## Redlib support` section (instances fetched from `instances.json`, custom instance URLs, manual Cloudflare challenge via "Verify Instance in Browser", NSFW-settings sync with the re-verify-on-toggle caveat, active-instance label under the title, custom User-Agent) and a `## Maintenance & contributions` section (only necessary patches to keep the core app working; PR-based contributions). Added a note to follow Issue #15 for the app's current status. README.md edits uncommitted. Working tree: `README.md` modified.
 
 Session 7: **Dead-code cleanup done.** Commit `ecd4e0f`. Removed 157 lines across 8 files; `testDebugUnitTest` + `assembleDebug` green.
 
@@ -226,6 +228,8 @@ Redlib content loading is verified on the emulator for `redlib.freedit.eu` (feed
 5. **Search** — broken server-side on `freedit`; not yet confirmed in-app on the two custom instances because their feed requests are blocked.
 
 ### Commit log
+- `7147b4d` — Updated to v3.0.3 (version bump in `buildSrc/src/main/kotlin/Config.kt`).
+- `c825f82` — Updated Knowledge section.
 - `8243e83` — Updated to v3.0.2 (version bump in `buildSrc/src/main/kotlin/Config.kt`).
 - `3d96b98` — Updated Knowledge section (moved `AI_AGENT_MEMORY.md` / `AI_AGENT_PROMPT.md` under `Knowledge/`).
 - `ecd4e0f` — Remove unused legacy classes and interceptor.
@@ -235,7 +239,7 @@ Redlib content loading is verified on the emulator for `redlib.freedit.eu` (feed
 - The agent docs live in `Knowledge/` and are tracked like normal project docs.
 
 ## Blockers / open questions
-- **User-reported issue (v3.0.2) — resolved (commit `42e9b25`).** The feed under the Redlib source would hang/crash; fixed by syncing the relevant content preference with Redlib so its output matches the app's (a matching setting is sent to Redlib, with a source-aware summary and a short confirmation dialog when the source is Redlib). See Session 8.
+- **User-reported issue (v3.0.3) — resolved (commit `42e9b25`).** The feed under the Redlib source would hang/crash; fixed by syncing the relevant content preference with Redlib so its output matches the app's (a matching setting is sent to Redlib, with a source-aware summary and a short confirmation dialog when the source is Redlib). See Session 8.
 - In-app verification path: Preferences → Reddit Source → instance → **Verify instance in browser** → complete the challenge → **Done** → **Save** (restart when prompted). Cookies are stored by `CookieManager` and reused by `RedditCookieJar` on the `@TedditOkHttp` client (same UA as the WebView).
 - If the user's existing install already persisted `reddit_source`, they must select “Redlib” in Settings once (fresh installs default to Redlib).
 - **JS/CAPTCHA gates are not reusable by OkHttp.** `reddit.nerdvpn.de` answers OkHttp with **307 → `/.gandalf/check`**, an **hCaptcha** gate (`/confirm` is POST-only; GET → 403). `redlib.catsarch.com` returns an Anubis **hard deny** (`anubis_challenge: null`). Cloudflare's `cf_clearance` reuse does work.
