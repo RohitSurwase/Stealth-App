@@ -27,6 +27,16 @@ abstract class PagingListFragment<T : PagingDataAdapter<R, out ViewHolder>, R : 
         binding.loadingState.infoRetry.setActionClickListener { adapter.retry() }
     }
 
+    /**
+     * Called when a page load fails. Sets the retry-bar message; subclasses can
+     * override to show an error-specific message (e.g. unsupported search).
+     */
+    protected open fun onLoadError(error: Throwable) {
+        binding.loadingState.infoRetry
+            .setMessage(getString(com.cosmos.unreddit.R.string.network_retry_message))
+        showRetryBar()
+    }
+
     protected open fun bindViewModel() {
         launchRepeat(Lifecycle.State.STARTED) {
             launch {
@@ -45,8 +55,8 @@ abstract class PagingListFragment<T : PagingDataAdapter<R, out ViewHolder>, R : 
 
     final override fun createAdapter(): T {
         return createPagingAdapter().apply {
-            addLoadStateListener(binding.listContent, binding.loadingState, binding.pullRefresh) {
-                showRetryBar()
+            addLoadStateListener(binding.listContent, binding.loadingState, binding.pullRefresh) { error ->
+                onLoadError(error)
             }
             withLoadStateHeaderAndFooter(
                 header = NetworkLoadStateAdapter { adapter.retry() },

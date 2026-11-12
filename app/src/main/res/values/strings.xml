@@ -107,6 +107,7 @@
     <string name="post_open_subreddit">Open subreddit</string>
 
     <string name="network_retry_message">Something went wrong.\nIf this keeps happening, set Reddit Source to Redlib and verify the instance in Settings.</string>
+    <string name="search_instance_no_support">This instance doesn\'t support search — try another instance.</string>
     <string name="network_retry_action">Retry</string>
     <string name="error_instance_blocked">This instance is blocking automated requests.\nTap “Verify” to complete the browser check here, then it retries automatically.</string>
 

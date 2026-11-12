@@ -163,7 +163,7 @@ fun PagingDataAdapter<out Any, out RecyclerView.ViewHolder>.addLoadStateListener
     list: RecyclerView,
     binding: IncludeLoadingStateBinding,
     pullToRefreshLayout: PullToRefreshLayout? = null,
-    onError: () -> Unit
+    onError: (Throwable) -> Unit
 ) {
     addLoadStateListener { loadState ->
         val isLoading = loadState.source.refresh is LoadState.Loading
@@ -181,7 +181,7 @@ fun PagingDataAdapter<out Any, out RecyclerView.ViewHolder>.addLoadStateListener
 
         val errorState = loadState.source.refresh as? LoadState.Error
         errorState?.let {
-            onError.invoke()
+            onError.invoke(it.error)
         }
 
         // TODO: Animation
