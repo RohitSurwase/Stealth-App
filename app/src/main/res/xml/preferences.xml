@@ -48,6 +48,13 @@
             app:title="@string/preference_reddit_source"
             app:persistent="false"/>
 
+        <EditTextPreference
+            app:key="custom_user_agent"
+            app:title="@string/preference_custom_user_agent"
+            app:dialogTitle="@string/preference_custom_user_agent"
+            app:dialogMessage="@string/preference_custom_user_agent_message"
+            app:persistent="false"/>
+
         <Preference
             app:key="privacy_enhancer"
             app:title="@string/preference_privacy_enhancer"

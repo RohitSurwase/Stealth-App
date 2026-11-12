@@ -15,15 +15,24 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
 import com.cosmos.unreddit.databinding.ActivityRedlibVerificationBinding
 import com.cosmos.unreddit.data.remote.BrowserUserAgent
+import com.cosmos.unreddit.data.repository.PreferencesRepository
 import com.cosmos.unreddit.util.LinkValidator
 import com.cosmos.unreddit.util.extension.unredditApplication
+import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.runBlocking
+import javax.inject.Inject
 
 /**
  * Lets the user complete the Cloudflare/Anubis browser challenge of a Redlib
  * instance once. The cookies obtained here are stored in [CookieManager] and
  * reused by `RedditCookieJar` for the app's own OkHttp requests.
  */
+@AndroidEntryPoint
 class RedlibVerificationActivity : AppCompatActivity() {
+
+    @Inject
+    lateinit var preferencesRepository: PreferencesRepository
 
     private lateinit var binding: ActivityRedlibVerificationBinding
 
@@ -44,6 +53,10 @@ class RedlibVerificationActivity : AppCompatActivity() {
 
         binding.title.text = url.host
 
+        val customUserAgent = runBlocking {
+            preferencesRepository.getCustomUserAgent().firstOrNull()
+        }
+
         binding.webView.settings.apply {
             javaScriptEnabled = true
             domStorageEnabled = true
@@ -53,7 +66,10 @@ class RedlibVerificationActivity : AppCompatActivity() {
             allowContentAccess = false
             // Must match the User-Agent used by OkHttp, otherwise Cloudflare's
             // clearance cookie will be rejected on the app's requests.
-            userAgentString = BrowserUserAgent.fromWebView(this@RedlibVerificationActivity)
+            userAgentString = BrowserUserAgent.resolve(
+                this@RedlibVerificationActivity,
+                customUserAgent
+            )
             useWideViewPort = true
             loadWithOverviewMode = true
         }

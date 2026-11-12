@@ -63,4 +63,13 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/list_instances" />
 
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/refresh_instances"
+        style="@style/Widget.MaterialComponents.Button.TextButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/redlib_refresh_instances"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/verify_instance" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>
