@@ -15,13 +15,13 @@ import androidx.core.view.updateLayoutParams
 import androidx.core.view.updatePadding
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.fragment.app.activityViewModels
-import androidx.fragment.app.setFragmentResultListener
 import androidx.lifecycle.Lifecycle
 import androidx.paging.LoadState
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.cosmos.unreddit.R
 import com.cosmos.unreddit.UiViewModel
 import com.cosmos.unreddit.data.model.db.Profile
+import com.cosmos.unreddit.data.remote.api.reddit.RedlibInstanceInfo
 import com.cosmos.unreddit.data.remote.api.reddit.scraper.redlib.RedlibBlockedException
 import com.cosmos.unreddit.data.repository.PostListRepository
 import com.cosmos.unreddit.databinding.FragmentPostBinding
@@ -189,14 +189,21 @@ class PostListFragment : BaseFragment(), PullToRefreshLayout.OnRefreshListener {
                 }
             }
 
-            launch { 
+            launch {
                 viewModel.redlibInstance.collect { instance ->
                     currentInstance = instance
-                    binding.appBar.instance.text = instance
-                    binding.appBar.instance.isVisible = !instance.isNullOrBlank()
+                    updateInstanceLabel(instance)
                 }
             }
-            
+
+            launch {
+                // Redlib instances report their build (version/commit) in the
+                // footer of every scraped page; refresh the label when it arrives.
+                RedlibInstanceInfo.versions.collect {
+                    updateInstanceLabel(currentInstance)
+                }
+            }
+
             launch { 
                 viewModel.lastRefresh.collect {
                     val time = getString(R.string.last_refresh, DateUtil.getLocalizedTime(it))
@@ -204,6 +211,17 @@ class PostListFragment : BaseFragment(), PullToRefreshLayout.OnRefreshListener {
                 }
             }
         }
+    }
+
+    private fun updateInstanceLabel(instance: String?) {
+        val version = instance?.let { RedlibInstanceInfo.versions.value[it] }
+        binding.appBar.instance.text = when {
+            instance.isNullOrBlank() -> null
+            version.isNullOrBlank() -> instance
+            // "#<version> : <instance>" — the hash marks it as a build id
+            else -> "#$version : $instance"
+        }
+        binding.appBar.instance.isVisible = !instance.isNullOrBlank()
     }
 
     private fun initDrawer() {

@@ -84,6 +84,26 @@ class RedlibPostScraper(
             ?: imageAnchor?.selectFirst("img[src]")?.attr("src")?.toAbsoluteUrl()
             ?: mediaContent?.selectFirst("img[src]")?.attr("src")?.toAbsoluteUrl()
 
+        val thumbnailElement = selectFirst(Selector.POST_THUMBNAIL)
+        val thumbnailUrl = thumbnailElement
+            ?.selectFirst("svg image[href]")
+            ?.attr("href")
+            ?.toAbsoluteUrl()
+            ?: thumbnailElement
+                ?.selectFirst("img[src]")
+                ?.attr("src")
+                ?.toAbsoluteUrl()
+
+        // Newer redlib builds (e.g. reddit.nerdvpn.de) strip inline media from
+        // listings: image posts carry only a proxied 140px thumbnail plus a
+        // <span> label naming the media type ("image"/"video"). Use the label
+        // to classify image posts so they do not fall back to LINK and render
+        // without a preview. The label of link posts is the external domain
+        // ("bsky.app", "gallery", …), which never matches here.
+        val mediaLabel = thumbnailElement?.selectFirst("span")?.text()?.trim()?.lowercase()
+        val resolvedImageUrl = imageUrl
+            ?: thumbnailUrl?.takeIf { mediaLabel == "image" }
+
         val galleryUrls = selectFirst("div.gallery")
             ?.select("figure")
             ?.mapNotNull { figure ->
@@ -103,16 +123,6 @@ class RedlibPostScraper(
         val videoUrl = streamSrc?.toAbsoluteUrl()
         val posterUrl = video?.attr("poster")?.toAbsoluteUrl()
 
-        val thumbnailElement = selectFirst(Selector.POST_THUMBNAIL)
-        val thumbnailUrl = thumbnailElement
-            ?.selectFirst("svg image[href]")
-            ?.attr("href")
-            ?.toAbsoluteUrl()
-            ?: thumbnailElement
-                ?.selectFirst("img[src]")
-                ?.attr("src")
-                ?.toAbsoluteUrl()
-
         val externalUrl = selectFirst("a#post_url")?.attr("href")?.toAbsoluteUrl()
             ?: thumbnailElement
                 ?.attr("href")
@@ -120,13 +130,13 @@ class RedlibPostScraper(
 
         val isGallery = galleryUrls.isNotEmpty()
         val isVideo = videoUrl != null
-        val isImage = !isGallery && !isVideo && imageUrl != null
+        val isImage = !isGallery && !isVideo && resolvedImageUrl != null
         val isLink = !isGallery && !isVideo && !isImage && externalUrl != null
 
         val url = when {
             isGallery -> galleryUrls.first()
             isVideo -> videoUrl.orEmpty()
-            isImage -> imageUrl.orEmpty()
+            isImage -> resolvedImageUrl.orEmpty()
             isLink -> externalUrl.orEmpty()
             else -> permalink.toAbsoluteUrl()
         }

@@ -23,6 +23,11 @@
             android:name="type"
             app:argType="com.cosmos.unreddit.data.model.MediaType"
             android:defaultValue="NO_MEDIA"/>
+        <argument
+            android:name="permalink"
+            app:argType="string"
+            app:nullable="true"
+            android:defaultValue="@null"/>
     </fragment>
 
 </navigation>

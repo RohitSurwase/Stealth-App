@@ -7,6 +7,7 @@ import com.cosmos.unreddit.data.model.GalleryMedia
 import com.cosmos.unreddit.data.model.GalleryMedia.Type
 import com.cosmos.unreddit.data.model.MediaType
 import com.cosmos.unreddit.data.model.Resource
+import com.cosmos.unreddit.data.model.PostType
 import com.cosmos.unreddit.data.model.Sort
 import com.cosmos.unreddit.data.model.Sorting
 import com.cosmos.unreddit.data.repository.GfycatRepository
@@ -73,19 +74,25 @@ class MediaViewerViewModel
         viewModelScope.launch { preferencesRepository.getMuteVideo(false).first() }
     }
 
-    fun loadMedia(link: String, mediaType: MediaType, forceUpdate: Boolean = false) {
+    fun loadMedia(
+        link: String,
+        mediaType: MediaType,
+        forceUpdate: Boolean = false,
+        permalink: String? = null
+    ) {
         if (_media.value !is Resource.Success || forceUpdate) {
             viewModelScope.launch {
                 val httpsLink = withContext(defaultDispatcher) { link.https }
-                retrieveMedia(httpsLink, mediaType)
+                retrieveMedia(httpsLink, mediaType, permalink)
             }
         }
     }
 
-    private suspend fun retrieveMedia(link: String, mediaType: MediaType) {
+    private suspend fun retrieveMedia(link: String, mediaType: MediaType, permalink: String? = null) {
         when (mediaType) {
             MediaType.IMGUR_IMAGE, MediaType.IMAGE -> {
                 setMedia(GalleryMedia.singleton(Type.IMAGE, link))
+                resolveFullSizeImage(link, permalink)
             }
             MediaType.IMGUR_LINK -> {
                 val id = LinkUtil.getImageIdFromImgurLink(link)
@@ -200,6 +207,40 @@ class MediaViewerViewModel
             is IOException -> _media.value = Resource.Error(message = throwable.message)
             is HttpException -> _media.value = Resource.Error(throwable.code(), throwable.message())
             else -> _media.value = Resource.Error()
+        }
+    }
+
+    /**
+     * Some redlib builds strip full-size media from listings and only expose a
+     * small signed preview (`/preview/pre/…`, 140px). When that URL is opened
+     * in the viewer, fetch the post's detail page and swap in the full-size
+     * image it carries (e.g. `/img/…`). The preview is shown immediately and
+     * replaced once the full-size URL resolves; any failure keeps the preview.
+     */
+    private fun resolveFullSizeImage(link: String, permalink: String?) {
+        if (permalink == null || !link.contains("/preview/")) return
+
+        viewModelScope.launch {
+            postListRepository.getPost(permalink, Sorting(Sort.BEST))
+                .map { listings ->
+                    val postData = PostUtil.getPostData(listings)
+                    val fullSize = postData.url
+                    if (postData.postType == PostType.IMAGE &&
+                        fullSize.isNotBlank() &&
+                        !fullSize.contains("/preview/") &&
+                        fullSize != link
+                    ) {
+                        GalleryMedia.singleton(Type.IMAGE, fullSize)
+                    } else {
+                        null
+                    }
+                }
+                .catch {
+                    // Keep the already-shown preview — no error state.
+                }
+                .collect { media ->
+                    media?.let { setMedia(it) }
+                }
         }
     }
 

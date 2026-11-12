@@ -114,8 +114,8 @@ class LinkHandler @Inject constructor(
         }
     }
 
-    fun openMedia(link: String, mediaType: MediaType) {
-        MediaViewerFragment.newInstance(link, mediaType).run {
+    fun openMedia(link: String, mediaType: MediaType, permalink: String? = null) {
+        MediaViewerFragment.newInstance(link, mediaType, permalink).run {
             show(fragment.parentFragmentManager, MediaViewerFragment.TAG)
         }
     }

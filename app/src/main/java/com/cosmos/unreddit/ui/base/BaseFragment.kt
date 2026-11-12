@@ -106,7 +106,9 @@ open class BaseFragment : Fragment(), PostListAdapter.PostClickListener,
         if (post.gallery.isNotEmpty()) {
             linkHandler.openGallery(post.gallery)
         } else {
-            linkHandler.openMedia(post.mediaUrl, post.mediaType)
+            // Permalink lets the viewer resolve full-size media for posts whose
+            // URL is only a small redlib preview (`/preview/…`).
+            linkHandler.openMedia(post.mediaUrl, post.mediaType, post.permalink)
         }
     }
 
