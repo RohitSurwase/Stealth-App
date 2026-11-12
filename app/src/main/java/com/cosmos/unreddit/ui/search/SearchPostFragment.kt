@@ -48,4 +48,13 @@ class SearchPostFragment : PagingListFragment<PostListAdapter, PostEntity>() {
     override fun createPagingAdapter(): PostListAdapter {
         return PostListAdapter(repository, this, this)
     }
+
+    override fun onLoadError(error: Throwable) {
+        if ((error as? retrofit2.HttpException)?.code() == 404) {
+            binding.loadingState.infoRetry.setMessage(getString(R.string.search_instance_no_support))
+        } else {
+            binding.loadingState.infoRetry.setMessage(getString(R.string.network_retry_message))
+        }
+        showRetryBar()
+    }
 }

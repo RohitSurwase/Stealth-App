@@ -128,7 +128,12 @@ class SubredditSearchFragment : BaseFragment(), PostListAdapter.PostClickListene
 
     private fun initRecyclerView() {
         postListAdapter = PostListAdapter(repository, this, this).apply {
-            addLoadStateListener(binding.listPost, binding.loadingState) {
+            addLoadStateListener(binding.listPost, binding.loadingState) { error ->
+                if ((error as? retrofit2.HttpException)?.code() == 404) {
+                    binding.loadingState.infoRetry.setMessage(getString(R.string.search_instance_no_support))
+                } else {
+                    binding.loadingState.infoRetry.setMessage(getString(R.string.network_retry_message))
+                }
                 showRetryBar()
             }
         }
