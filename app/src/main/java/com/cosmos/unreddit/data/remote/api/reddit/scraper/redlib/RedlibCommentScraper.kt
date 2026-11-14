@@ -72,8 +72,13 @@ class RedlibCommentScraper(
             ?.substringBefore("#")
             .orEmpty()
 
-        val replies = select("blockquote.replies > div.comment")
-            .map { it.toComment(depth + 1) }
+        val replies = selectFirst("blockquote.replies")
+            ?.children()
+            ?.asSequence()
+            ?.filter { it.hasClass("comment") }
+            ?.map { it.toComment(depth + 1) }
+            ?.toList()
+            .orEmpty()
             .let { children ->
                 if (children.isEmpty()) {
                     null
