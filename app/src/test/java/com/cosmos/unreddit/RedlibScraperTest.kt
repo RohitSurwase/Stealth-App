@@ -128,6 +128,47 @@ class RedlibScraperTest {
     }
 
     @Test
+    fun `nested replies are only included under their direct parent`() = runBlocking {
+        val html = """
+            <div class="thread">
+                <div id="root" class="comment">
+                    <a class="comment_author">root-author</a>
+                    <blockquote class="replies">
+                        <div id="reply" class="comment">
+                            <a class="comment_author">reply-author</a>
+                            <blockquote class="replies">
+                                <div id="nested" class="comment">
+                                    <a class="comment_author">nested-author</a>
+                                    <blockquote class="replies"></blockquote>
+                                </div>
+                            </blockquote>
+                        </div>
+                        <div id="sibling" class="comment">
+                            <a class="comment_author">sibling-author</a>
+                            <blockquote class="replies"></blockquote>
+                        </div>
+                    </blockquote>
+                </div>
+            </div>
+        """.trimIndent()
+
+        val listing = RedlibCommentScraper(
+            Dispatchers.Unconfined,
+            baseUrl,
+            "t3_post",
+            "pics"
+        ).scrap(html)
+
+        val root = listing.data.children.single() as CommentChild
+        val replies = root.data.replies!!.data.children
+        assertEquals(listOf("reply", "sibling"), replies.map { (it as CommentChild).data.id })
+
+        val nestedReplies = (replies.first() as CommentChild).data.replies!!.data.children
+        assertEquals("nested", (nestedReplies.single() as CommentChild).data.id)
+        assertEquals(2, (nestedReplies.single() as CommentChild).data.depth)
+    }
+
+    @Test
     fun `subreddit info is parsed`() = runBlocking {
         val child = RedlibSubredditScraper(Dispatchers.Unconfined, baseUrl).scrap(SUBREDDIT) as AboutChild
         assertEquals("pics", child.data.displayName)
