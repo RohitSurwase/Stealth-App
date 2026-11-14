@@ -87,7 +87,12 @@ class RedditSourceDialogFragment : DialogFragment(), OnShowListener {
                     return@setOnClickListener
                 }
                 listInstances.error = null
-                startActivity(RedlibVerificationActivity.intent(requireContext(), host))
+                startActivity(
+                    RedlibVerificationActivity.intent(
+                        requireContext(),
+                        linkValidator.validUrl.toString()
+                    )
+                )
             }
 
             refreshInstances.setOnClickListener {
@@ -173,7 +178,7 @@ class RedditSourceDialogFragment : DialogFragment(), OnShowListener {
                 REQUEST_KEY_SOURCE,
                 bundleOf(
                     KEY_SOURCE to source,
-                    KEY_INSTANCE to linkValidator.validUrl?.host?.ifEmpty { "" }
+                    KEY_INSTANCE to linkValidator.validUrl?.toString()
                 )
             )
         }
