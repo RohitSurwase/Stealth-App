@@ -23,12 +23,8 @@ abstract class RedlibScraper<Result>(
 
     protected fun String.toAbsoluteUrl(): String {
         if (isBlank()) return this
-        if (startsWith("http://", ignoreCase = true) ||
-            startsWith("https://", ignoreCase = true)
-        ) {
-            return this
-        }
-        return baseUrl.trimEnd('/') + "/" + trimStart('/')
+        val base = baseUrl.toHttpUrlOrNull() ?: return this
+        return base.resolve(this)?.toString() ?: this
     }
 
     protected fun Element.absoluteUrl(attribute: String = "href"): String {

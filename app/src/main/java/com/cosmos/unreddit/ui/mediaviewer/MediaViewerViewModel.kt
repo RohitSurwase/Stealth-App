@@ -17,8 +17,8 @@ import com.cosmos.unreddit.data.repository.PreferencesRepository
 import com.cosmos.unreddit.data.repository.RedgifsRepository
 import com.cosmos.unreddit.data.repository.StreamableRepository
 import com.cosmos.unreddit.di.DispatchersModule.DefaultDispatcher
+import com.cosmos.unreddit.di.NetworkModule.RedlibBaseUrl
 import com.cosmos.unreddit.util.LinkUtil
-import com.cosmos.unreddit.util.LinkUtil.https
 import com.cosmos.unreddit.util.PostUtil
 import com.cosmos.unreddit.util.extension.updateValue
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -36,6 +36,7 @@ import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import okhttp3.HttpUrl
 import retrofit2.HttpException
 import java.io.IOException
 import javax.inject.Inject
@@ -50,6 +51,7 @@ class MediaViewerViewModel
     private val postListRepository: PostListRepository,
     private val postMapper: PostMapper2,
     private val preferencesRepository: PreferencesRepository,
+    @RedlibBaseUrl private val redlibBaseUrl: HttpUrl,
     @DefaultDispatcher private val defaultDispatcher: CoroutineDispatcher
 ) : ViewModel() {
 
@@ -82,8 +84,10 @@ class MediaViewerViewModel
     ) {
         if (_media.value !is Resource.Success || forceUpdate) {
             viewModelScope.launch {
-                val httpsLink = withContext(defaultDispatcher) { link.https }
-                retrieveMedia(httpsLink, mediaType, permalink)
+                val mediaUrl = withContext(defaultDispatcher) {
+                    LinkUtil.normalizeMediaUrl(link, redlibBaseUrl)
+                }
+                retrieveMedia(mediaUrl, mediaType, permalink)
             }
         }
     }
