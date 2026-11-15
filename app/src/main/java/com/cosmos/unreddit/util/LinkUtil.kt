@@ -4,6 +4,7 @@ import android.webkit.MimeTypeMap
 import com.cosmos.unreddit.data.model.MediaType
 import com.cosmos.unreddit.data.remote.api.imgur.model.Image
 import com.cosmos.unreddit.util.extension.extension
+import okhttp3.HttpUrl
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 
 object LinkUtil {
@@ -28,6 +29,11 @@ object LinkUtil {
 
     val String.https: String
         get() = this.replace(HTTP_REGEX, "https")
+
+    fun isRedlibUrl(link: String, redlibBaseUrl: HttpUrl): Boolean {
+        val url = redlibBaseUrl.resolve(link) ?: link.toHttpUrlOrNull() ?: return false
+        return url.host == redlibBaseUrl.host && url.port == redlibBaseUrl.port
+    }
 
     fun getImageIdFromImgurLink(link: String): String {
         return link.toHttpUrlOrNull()?.pathSegments?.getOrNull(0) ?: ""
@@ -126,5 +132,10 @@ object LinkUtil {
 
     fun getPermalinkFromMediaUrl(link: String): String {
         return link.toHttpUrlOrNull()?.pathSegments?.lastOrNull() ?: link
+    }
+
+    fun getPermalinkFromRedlibMediaUrl(link: String): String {
+        val path = link.toHttpUrlOrNull()?.encodedPath ?: link
+        return path.takeIf { "/comments/" in it } ?: link
     }
 }
