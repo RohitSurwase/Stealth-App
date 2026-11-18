@@ -13,6 +13,12 @@ import com.cosmos.unreddit.util.ClickableMovementMethod
 sealed class Block {
     data class TextBlock(val text: CharSequence) : Block()
 
+    data class ImageBlock(
+        val url: String,
+        val linkUrl: String,
+        val altText: String?
+    ) : Block()
+
     class TableBlock : Block() {
         private val rows = mutableListOf<Row>()
 
