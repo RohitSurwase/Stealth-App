@@ -8,9 +8,8 @@ import android.view.View
 import android.view.ViewGroup
 import android.util.Log
 import androidx.recyclerview.widget.RecyclerView
-import coil.Coil
+import coil.load
 import coil.request.CachePolicy
-import coil.request.ImageRequest
 import coil.size.Precision
 import coil.size.Scale
 import com.cosmos.unreddit.data.model.GalleryMedia
@@ -132,43 +131,37 @@ class MediaViewerAdapter(
         }
 
         private fun loadImage(image: GalleryMedia) {
-            with(binding.image) {
-                Coil.imageLoader(context).enqueue(
-                    ImageRequest.Builder(context).apply {
-                        data(image.url)
-                        crossfade(true)
-                        scale(Scale.FILL)
-                        precision(Precision.AUTOMATIC)
-                        memoryCachePolicy(CachePolicy.READ_ONLY)
-                        diskCachePolicy(CachePolicy.READ_ONLY)
-                        listener(
-                            onStart = {
-                                binding.run {
-                                    loadingCradle.isVisible = true
-                                    infoRetry.hide()
-                                }
-                            },
-                            onCancel = {
-                                binding.run {
-                                    loadingCradle.isVisible = false
-                                }
-                            },
-                            onError = { _, _ ->
-                                binding.run {
-                                    loadingCradle.isVisible = false
-                                    showControls.invoke(false)
-                                    infoRetry.show()
-                                }
-                            },
-                            onSuccess = { _, _ ->
-                                binding.run {
-                                    loadingCradle.isVisible = false
-                                    showControls.invoke(true)
-                                }
-                            }
-                        )
-                        target { drawable -> setImageDrawable(drawable) }
-                    }.build()
+            binding.image.load(image.url) {
+                crossfade(true)
+                scale(Scale.FILL)
+                precision(Precision.AUTOMATIC)
+                memoryCachePolicy(CachePolicy.READ_ONLY)
+                diskCachePolicy(CachePolicy.READ_ONLY)
+                listener(
+                    onStart = {
+                        binding.run {
+                            loadingCradle.isVisible = true
+                            infoRetry.hide()
+                        }
+                    },
+                    onCancel = {
+                        binding.run {
+                            loadingCradle.isVisible = false
+                        }
+                    },
+                    onError = { _, _ ->
+                        binding.run {
+                            loadingCradle.isVisible = false
+                            showControls.invoke(false)
+                            infoRetry.show()
+                        }
+                    },
+                    onSuccess = { _, _ ->
+                        binding.run {
+                            loadingCradle.isVisible = false
+                            showControls.invoke(true)
+                        }
+                    }
                 )
             }
         }
