@@ -19,6 +19,11 @@ sealed class Block {
         val altText: String?
     ) : Block()
 
+    data class VideoBlock(
+        val url: String,
+        val linkUrl: String
+    ) : Block()
+
     class TableBlock : Block() {
         private val rows = mutableListOf<Row>()
 

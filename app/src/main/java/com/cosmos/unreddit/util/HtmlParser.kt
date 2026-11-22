@@ -5,6 +5,7 @@ import androidx.core.text.HtmlCompat
 import com.cosmos.unreddit.data.model.Block.ImageBlock
 import com.cosmos.unreddit.data.model.Block.TableBlock
 import com.cosmos.unreddit.data.model.Block.TextBlock
+import com.cosmos.unreddit.data.model.Block.VideoBlock
 import com.cosmos.unreddit.data.model.HtmlBlock
 import com.cosmos.unreddit.data.model.RedditText
 import kotlinx.coroutines.CoroutineDispatcher
@@ -18,7 +19,11 @@ class HtmlParser(private val defaultDispatcher: CoroutineDispatcher) {
     private val TABLE_REGEX = Regex("<table>.*?</table>", RegexOption.DOT_MATCHES_ALL)
     private val CODE_REGEX = Regex("<pre><code>(.*?)</code></pre>", RegexOption.DOT_MATCHES_ALL)
     private val FIGURE_REGEX = Regex("<figure\\b[^>]*>.*?</figure>", RegexOption.DOT_MATCHES_ALL)
-    private val PLACEHOLDER_REGEX = Regex("<(table|code|image)_placeholder/>")
+    private val VIDEO_REGEX = Regex(
+        """<a\b[^>]*>\s*<video\b[^>]*>.*?</video\s*>\s*</a\s*>|<video\b[^>]*>.*?</video\s*>""",
+        RegexOption.DOT_MATCHES_ALL
+    )
+    private val PLACEHOLDER_REGEX = Regex("<(table|code|image|video)_placeholder/>")
 
     private val tagHandler = RedditTagHandler()
 
@@ -30,6 +35,7 @@ class HtmlParser(private val defaultDispatcher: CoroutineDispatcher) {
             val tables = LinkedList<String>()
             val codes = LinkedList<String>()
             val images = LinkedList<ImageBlock>()
+            val videos = LinkedList<VideoBlock>()
 
             var newHtml = html
 
@@ -60,12 +66,29 @@ class HtmlParser(private val defaultDispatcher: CoroutineDispatcher) {
                 }
             }
 
+            newHtml = newHtml.replace(VIDEO_REGEX) {
+                val video = Jsoup.parse(it.value).selectFirst("video")
+                val sourceUrl = video?.selectFirst("source[src]")?.attr("src").orEmpty()
+                val videoUrl = video?.attr("src")?.ifBlank { sourceUrl }.orEmpty()
+                if (video == null || videoUrl.isBlank()) {
+                    it.value
+                } else {
+                    val linkUrl = video.parents()
+                        .firstOrNull { parent -> parent.normalName() == "a" }
+                        ?.attr("href")
+                        ?.ifBlank { videoUrl }
+                        ?: videoUrl
+                    videos.add(VideoBlock(videoUrl, linkUrl))
+                    VIDEO_PLACEHOLDER
+                }
+            }
+
             if (PLACEHOLDER_REGEX.containsMatchIn(newHtml)) {
                 var lastIndex = 0
 
                 for (match in PLACEHOLDER_REGEX.findAll(newHtml)) {
-                    if (match.range.first > 0) {
-                        val previousBlock = newHtml.substring(lastIndex, match.range.first - 1)
+                    if (match.range.first > lastIndex) {
+                        val previousBlock = newHtml.substring(lastIndex, match.range.first)
                         redditText.addBlock(getTextBlock(previousBlock), HtmlBlock.BlockType.TEXT)
                     }
 
@@ -82,6 +105,9 @@ class HtmlParser(private val defaultDispatcher: CoroutineDispatcher) {
                         }
                         "image" -> {
                             redditText.addBlock(images.pop(), HtmlBlock.BlockType.IMAGE)
+                        }
+                        "video" -> {
+                            redditText.addBlock(videos.removeFirst(), HtmlBlock.BlockType.VIDEO)
                         }
                     }
                 }
@@ -158,5 +184,6 @@ class HtmlParser(private val defaultDispatcher: CoroutineDispatcher) {
         private const val TABLE_PLACEHOLDER = "<table_placeholder/>"
         private const val CODE_PLACEHOLDER = "<code_placeholder/>"
         private const val IMAGE_PLACEHOLDER = "<image_placeholder/>"
+        private const val VIDEO_PLACEHOLDER = "<video_placeholder/>"
     }
 }

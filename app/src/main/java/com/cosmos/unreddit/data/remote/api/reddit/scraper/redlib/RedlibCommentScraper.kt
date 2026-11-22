@@ -129,8 +129,8 @@ class RedlibCommentScraper(
         body.select("[href]").forEach { link ->
             link.attr("href", link.absoluteUrl())
         }
-        body.select("img[src]").forEach { image ->
-            image.attr("src", image.absoluteUrl("src"))
+        body.select("img[src], video[src], video source[src]").forEach { media ->
+            media.attr("src", media.absoluteUrl("src"))
         }
         return body.outerHtml()
     }
