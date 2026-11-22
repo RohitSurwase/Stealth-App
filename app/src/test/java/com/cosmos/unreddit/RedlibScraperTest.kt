@@ -99,6 +99,28 @@ class RedlibScraperTest {
         assertNull(linkPost.hint)
     }
 
+        @Test
+        fun `relative image URL keeps configured local http scheme and port`() = runBlocking {
+                val body = """
+                        <div id="posts">
+                            <div class="post" id="local-image">
+                                <p class="post_header"><a class="post_subreddit" href="/r/pics">r/pics</a></p>
+                                <h2 class="post_title"><a href="/r/pics/comments/local-image/test/">Test</a></h2>
+                                <div class="post_media_content">
+                                    <a class="post_media_image" href="/img/full.jpeg"><img src="/preview/thumb.jpeg"></a>
+                                </div>
+                            </div>
+                        </div>
+                """.trimIndent()
+
+                val post = (RedlibPostScraper(
+                        Dispatchers.Unconfined,
+                        "http://localdomain:8080/"
+                ).scrap(body).data.children.first() as PostChild).data
+
+                assertEquals("http://localdomain:8080/img/full.jpeg", post.url)
+        }
+
     @Test
     fun `post detail and comments are parsed`() = runBlocking {
         val postListing = RedlibPostScraper(Dispatchers.Unconfined, baseUrl).scrap(DETAIL)

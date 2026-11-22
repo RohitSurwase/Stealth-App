@@ -214,14 +214,20 @@ class PostListFragment : BaseFragment(), PullToRefreshLayout.OnRefreshListener {
     }
 
     private fun updateInstanceLabel(instance: String?) {
-        val version = instance?.let { RedlibInstanceInfo.versions.value[it] }
+        val url = instance?.let { LinkValidator(it).validUrl }
+        val host = url?.host
+        val label = url?.let {
+            val defaultPort = if (it.isHttps) 443 else 80
+            if (it.port == defaultPort) it.host else "${it.host}:${it.port}"
+        } ?: instance
+        val version = host?.let { RedlibInstanceInfo.versions.value[it] }
         binding.appBar.instance.text = when {
-            instance.isNullOrBlank() -> null
-            version.isNullOrBlank() -> instance
+            label.isNullOrBlank() -> null
+            version.isNullOrBlank() -> label
             // "#<version> : <instance>" — the hash marks it as a build id
-            else -> "#$version : $instance"
+            else -> "#$version : $label"
         }
-        binding.appBar.instance.isVisible = !instance.isNullOrBlank()
+        binding.appBar.instance.isVisible = !label.isNullOrBlank()
     }
 
     private fun initDrawer() {
