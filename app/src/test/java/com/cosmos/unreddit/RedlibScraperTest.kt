@@ -235,6 +235,35 @@ class RedlibScraperTest {
     }
 
     @Test
+    fun `comment image URLs become absolute without changing image markup`() = runBlocking {
+        val html = """
+            <div class="thread">
+                <div id="image-comment" class="comment">
+                    <a class="comment_author">someone</a>
+                    <div class="comment_body">
+                        <div class="md">
+                            <figure><a href="/img/01vjx9tui62i1.jpeg">
+                                <img src="/img/01vjx9tui62i1.jpeg" loading="lazy">
+                            </a></figure>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        """.trimIndent()
+
+        val comment = RedlibCommentScraper(
+            Dispatchers.Unconfined,
+            baseUrl,
+            "t3_post",
+            "pics"
+        ).scrap(html).data.children.single() as CommentChild
+
+        assertTrue(comment.data.bodyHtml.contains("""href="https://redlib.example/img/01vjx9tui62i1.jpeg""""))
+        assertTrue(comment.data.bodyHtml.contains("""src="https://redlib.example/img/01vjx9tui62i1.jpeg""""))
+        assertTrue(comment.data.bodyHtml.contains("<img"))
+    }
+
+    @Test
     fun `subreddit info is parsed`() = runBlocking {
         val child = RedlibSubredditScraper(Dispatchers.Unconfined, baseUrl).scrap(SUBREDDIT) as AboutChild
         assertEquals("pics", child.data.displayName)

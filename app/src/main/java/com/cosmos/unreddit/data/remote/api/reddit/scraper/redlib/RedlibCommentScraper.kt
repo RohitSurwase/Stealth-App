@@ -64,7 +64,7 @@ class RedlibCommentScraper(
             ?: -1L
 
         val bodyElement = selectFirst("div.comment_body")
-        val bodyHtml = bodyElement?.outerHtml().orEmpty()
+        val bodyHtml = bodyElement?.toCommentBodyHtml().orEmpty()
 
         val permalink = createdElement
             ?.attr("href")
@@ -122,6 +122,17 @@ class RedlibCommentScraper(
         )
 
         return CommentChild(data)
+    }
+
+    private fun Element.toCommentBodyHtml(): String {
+        val body = clone()
+        body.select("[href]").forEach { link ->
+            link.attr("href", link.absoluteUrl())
+        }
+        body.select("img[src]").forEach { image ->
+            image.attr("src", image.absoluteUrl("src"))
+        }
+        return body.outerHtml()
     }
 
     companion object {
