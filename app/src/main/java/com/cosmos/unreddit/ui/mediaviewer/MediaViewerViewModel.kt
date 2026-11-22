@@ -189,8 +189,13 @@ class MediaViewerViewModel
                     }
             }
             MediaType.REDDIT_GALLERY -> {
-                val permalink = LinkUtil.getPermalinkFromMediaUrl(link)
-                postListRepository.getPost(permalink, Sorting(Sort.BEST)).onStart {
+                val postPermalink = if (LinkUtil.isRedlibUrl(link, redlibBaseUrl)) {
+                    permalink?.takeIf { it.isNotBlank() }
+                        ?: LinkUtil.getPermalinkFromRedlibMediaUrl(link)
+                } else {
+                    LinkUtil.getPermalinkFromMediaUrl(link)
+                }
+                postListRepository.getPost(postPermalink, Sorting(Sort.BEST)).onStart {
                     _media.value = Resource.Loading()
                 }.catch {
                     catchError(it)

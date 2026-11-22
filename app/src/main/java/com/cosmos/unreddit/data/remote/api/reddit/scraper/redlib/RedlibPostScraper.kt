@@ -128,13 +128,13 @@ class RedlibPostScraper(
                 ?.attr("href")
                 ?.takeIf { it.startsWith("http", ignoreCase = true) && !it.contains("/comments/") }
 
-        val isGallery = galleryUrls.isNotEmpty()
+        val isGallery = galleryUrls.isNotEmpty() || mediaLabel == "gallery"
         val isVideo = videoUrl != null
         val isImage = !isGallery && !isVideo && resolvedImageUrl != null
         val isLink = !isGallery && !isVideo && !isImage && externalUrl != null
 
         val url = when {
-            isGallery -> galleryUrls.first()
+            isGallery -> galleryUrls.firstOrNull() ?: permalink.toAbsoluteUrl()
             isVideo -> videoUrl.orEmpty()
             isImage -> resolvedImageUrl.orEmpty()
             isLink -> externalUrl.orEmpty()

@@ -5,6 +5,7 @@ import com.cosmos.unreddit.data.remote.api.reddit.model.CommentChild
 import com.cosmos.unreddit.data.remote.api.reddit.model.CommentData
 import com.cosmos.unreddit.data.remote.api.reddit.model.Listing
 import com.cosmos.unreddit.data.remote.api.reddit.model.PostChild
+import com.cosmos.unreddit.data.model.PostType
 import com.cosmos.unreddit.data.remote.api.reddit.scraper.redlib.RedlibCommentScraper
 import com.cosmos.unreddit.data.remote.api.reddit.scraper.redlib.RedlibPostScraper
 import com.cosmos.unreddit.data.remote.api.reddit.scraper.redlib.RedlibSubredditScraper
@@ -120,6 +121,49 @@ class RedlibScraperTest {
 
                 assertEquals("http://localdomain:8080/img/full.jpeg", post.url)
         }
+
+    @Test
+    fun `gallery thumbnail in listing is classified as gallery and detail images are parsed`() = runBlocking {
+        val listingHtml = HEADER +
+            "<div id=\"posts\"><div class=\"post\" id=\"gallery1\">" +
+            "<p class=\"post_header\"><a class=\"post_subreddit\" href=\"/r/comics\">r/comics</a>" +
+            "<a class=\"post_author\" href=\"/u/op\">u/op</a>" +
+            "<span class=\"created\" title=\"Nov 14 2026, 23:59:09 UTC\">8h ago</span></p>" +
+            "<h2 class=\"post_title\"><a href=\"/r/comics/comments/gallery1/title/\">Gallery</a></h2>" +
+            "<a class=\"post_thumbnail\" href=\"/r/comics/comments/gallery1/title/\">" +
+            "<img src=\"/preview/pre/first.png?width=140&amp;height=140\"/>" +
+            "<span>gallery</span></a>" +
+            "<div class=\"post_footer\"><a class=\"post_comments\" " +
+            "href=\"/r/comics/comments/gallery1/title/\" title=\"5 comments\">5 comments</a></div>" +
+            "</div></div>" + FOOTER
+
+        val listingPost = (RedlibPostScraper(Dispatchers.Unconfined, baseUrl)
+            .scrap(listingHtml).data.children.single() as PostChild).data
+
+        assertTrue(listingPost.isRedditGallery == true)
+        assertEquals("https://redlib.example/r/comics/comments/gallery1/title/", listingPost.url)
+        assertEquals(
+            "https://redlib.example/preview/pre/first.png?width=140&height=140",
+            listingPost.thumbnail
+        )
+        assertEquals(PostType.IMAGE, listingPost.postType)
+
+        val detailHtml = HEADER +
+            "<div class=\"post highlighted\"><p class=\"post_header\">" +
+            "<a class=\"post_subreddit\" href=\"/r/comics\">r/comics</a>" +
+            "<a class=\"post_author\" href=\"/u/op\">u/op</a></p>" +
+            "<h1 class=\"post_title\">Gallery</h1><div class=\"gallery\">" +
+            "<figure><a href=\"/img/first.png\"><img src=\"/img/first.png\"/></a></figure>" +
+            "<figure><a href=\"/img/second.png\"><img src=\"/img/second.png\"/></a></figure>" +
+            "</div><div class=\"post_footer\"><ul id=\"post_links\">" +
+            "<li><a href=\"/r/comics/comments/gallery1/title/\">permalink</a></li>" +
+            "</ul></div></div>" + FOOTER
+        val detailPost = (RedlibPostScraper(Dispatchers.Unconfined, baseUrl)
+            .scrap(detailHtml).data.children.single() as PostChild).data
+
+        assertEquals(2, detailPost.gallery.size)
+        assertEquals("https://redlib.example/img/first.png", detailPost.gallery.first().url)
+    }
 
     @Test
     fun `post detail and comments are parsed`() = runBlocking {

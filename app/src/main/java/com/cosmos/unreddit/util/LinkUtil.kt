@@ -36,6 +36,11 @@ object LinkUtil {
         return if (isRedlibOrigin) url.toString() else url.toString().https
     }
 
+    fun isRedlibUrl(link: String, redlibBaseUrl: HttpUrl): Boolean {
+        val url = redlibBaseUrl.resolve(link) ?: link.toHttpUrlOrNull() ?: return false
+        return url.host == redlibBaseUrl.host && url.port == redlibBaseUrl.port
+    }
+
     fun getImageIdFromImgurLink(link: String): String {
         return link.toHttpUrlOrNull()?.pathSegments?.getOrNull(0) ?: ""
     }
@@ -133,5 +138,10 @@ object LinkUtil {
 
     fun getPermalinkFromMediaUrl(link: String): String {
         return link.toHttpUrlOrNull()?.pathSegments?.lastOrNull() ?: link
+    }
+
+    fun getPermalinkFromRedlibMediaUrl(link: String): String {
+        val path = link.toHttpUrlOrNull()?.encodedPath ?: link
+        return path.takeIf { "/comments/" in it } ?: link
     }
 }
