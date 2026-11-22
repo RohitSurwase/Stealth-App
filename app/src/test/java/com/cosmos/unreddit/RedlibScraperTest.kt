@@ -264,6 +264,45 @@ class RedlibScraperTest {
     }
 
     @Test
+    fun `giphy video URLs become absolute in comment body`() = runBlocking {
+        val html = """
+            <div class="thread">
+                <div id="giphy-comment" class="comment">
+                    <a class="comment_author">someone</a>
+                    <div class="comment_body">
+                        <div class="md">
+                            <div class="giphy-embed-container">
+                                <a href="/giphy/JYMmdZpwKC5VeU6VFn/gif">
+                                    <video class="giphy-embed" src="/giphy/JYMmdZpwKC5VeU6VFn/mp4"
+                                        autoplay muted loop playsinline></video>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        """.trimIndent()
+
+        val comment = RedlibCommentScraper(
+            Dispatchers.Unconfined,
+            baseUrl,
+            "t3_post",
+            "pics"
+        ).scrap(html).data.children.single() as CommentChild
+
+        assertTrue(
+            comment.data.bodyHtml.contains(
+                """href="https://redlib.example/giphy/JYMmdZpwKC5VeU6VFn/gif""""
+            )
+        )
+        assertTrue(
+            comment.data.bodyHtml.contains(
+                """src="https://redlib.example/giphy/JYMmdZpwKC5VeU6VFn/mp4""""
+            )
+        )
+    }
+
+    @Test
     fun `subreddit info is parsed`() = runBlocking {
         val child = RedlibSubredditScraper(Dispatchers.Unconfined, baseUrl).scrap(SUBREDDIT) as AboutChild
         assertEquals("pics", child.data.displayName)
