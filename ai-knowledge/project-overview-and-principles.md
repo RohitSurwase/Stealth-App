@@ -1,8 +1,8 @@
 # Project overview & principles
-AI-generated, verified against the files listed below on 2026-11-22 (HEAD c0aad3f, v3.0.5). Check before relying on it.
+AI-generated, verified against the files listed below on 2026-11-22 (HEAD 40a36e6, v3.0.6). Check before relying on it.
 
 ## Summary
-Stealth (unReddit) is an account-free, privacy-oriented Reddit client for Android, GPLv3. It never asks for Reddit credentials and stores all user state locally. Namespace `com.cosmos.unreddit` (`buildSrc/src/main/kotlin/Config.kt`), applicationId `com.rohitss.stealth` (debug appends `.dev`), versionCode 35 / `3.0.5`, minSdk 23, compile/targetSdk 33. It is a fork of `cosmosapps/stealth` that kept the upstream namespace but changed the app id/branding. The tree is a single-Activity Hilt app: one `MainActivity` hosts a `NavHostFragment`; all screens are fragments/bottom sheets; five `@InstallIn(SingletonComponent::class)` DI modules wire the network stack, Room, DataStore, dispatchers and an app scope.
+Stealth (unReddit) is an account-free, privacy-oriented Reddit client for Android, GPLv3. It never asks for Reddit credentials and stores all user state locally. Namespace `com.cosmos.unreddit` (`buildSrc/src/main/kotlin/Config.kt`), applicationId `com.rohitss.stealth` (debug appends `.dev`), versionCode 36 / `3.0.6`, minSdk 23, compile/targetSdk 33. It is a fork of `cosmosapps/stealth` that kept the upstream namespace but changed the app id/branding. The tree is a single-Activity Hilt app: one `MainActivity` hosts a `NavHostFragment`; all screens are fragments/bottom sheets; five `@InstallIn(SingletonComponent::class)` DI modules wire the network stack, Room, DataStore, dispatchers and an app scope.
 
 ## Identity & features
 - No login screen, no user account. Local identity = profiles, subscriptions, history, saved posts/comments, all scoped by `profile_id` (no global user state).
@@ -50,7 +50,7 @@ Historical (removed 2026-10-22): the earlier `RedditCookieInitializationIntercep
 ## Media pipeline (classify → resolve → render)
 - **Classify** is data-driven: `PostData.mediaType` decides the type from API fields, not the tapped URL (`is_self`→NO_MEDIA, `is_gallery`→REDDIT_GALLERY, `is_video`→REDDIT_VIDEO/GIF, Imgur/Gfycat/Redgifs/Streamable/v.redd.it/i.redd.it → respective types).
 - **Route**: `LinkHandler.handleLink()` — subreddit/user/permalink → navigation; media types → `MediaViewerFragment`; everything else → Privacy Enhancer → Custom Tab.
-- **Resolve**: `MediaViewerViewModel.retrieveMedia()` — galleries re-fetch by permalink; third-party APIs called; `v.reddit` gets a separate audio URL via `LinkUtil.getRedditSoundTrack()` (matches `DASH_`/`CMAF_`, replaces with `_AUDIO_128`, preserving format).
+- **Resolve**: `MediaViewerViewModel.loadMedia()` resolves the media URL via `LinkUtil.normalizeMediaUrl(link, redlibBaseUrl)` (resolves against the redlib base, keeps the redlib origin, else applies `https`); galleries re-fetch by permalink — `LinkUtil.getPermalinkFromRedlibMediaUrl(link)` for redlib links, `getPermalinkFromMediaUrl(link)` otherwise; third-party APIs called; `v.reddit` gets a separate audio URL via `LinkUtil.getRedditSoundTrack()` (matches `DASH_`/`CMAF_`, replaces with `_AUDIO_128`, preserving format).
 - **Render**: `MediaViewerAdapter` — Coil for images; ExoPlayer with `MergingMediaSource(video, audio)` for video+audio, video-only retry on 403/404; 100 MB `SimpleCache`.
 - **Download**: reuses resolved `GalleryMedia`, forwards `sound`; muxes on API 29+ via `MediaMuxer` (fails silently below API 29).
 
@@ -61,7 +61,7 @@ Redlib (a public/self-hosted Reddit HTML proxy) sits behind a Cloudflare/Anubis 
 - **Detection**: `RedlibChallenge.isChallenge(code, body)` (status 403/429 + body-marker scan for Cloudflare/Anubis/Gandalf) → `RedlibBlockedException` carrying the listing URL.
 - **Inline overlay**: `PostListFragment` opens `RedlibVerificationFragment` (WebView over the feed); `RedlibWebView` provides a WebView-identical UA (`BrowserUserAgent`), cookie enablement, and a locally-served Anubis proof-of-work worker. Solving sets `cf_clearance` in `CookieManager` → flush → reuse via `RedditCookieJar` on every OkHttp request.
 - **Media verification**: `MediaViewerAdapter.handleChallenge()` — on 403/429 against a redlib URL, launches `RedlibVerificationActivity` for the instance host; on completion, flushes cookies and `retryPendingRedlib()` re-prepares the player; retry bar hides on `STATE_READY`.
-- **Feed image posts on media-stripped redlib builds**: listings carry only a 140px proxied `post_thumbnail` + a `<span>` label (`image`/`video`); `RedlibPostScraper.toPost()` classifies `image`-labelled proxied thumbnails as `MediaType.IMAGE` (link-post labels like `bsky.app` are unaffected; `video` label intentionally not mapped — no URL in the stripped feed). Detail pages still carry full-size media.
+- **Feed media posts on media-stripped redlib builds**: listings carry only a 140px proxied `post_thumbnail` + a `<span>` label (`image`/`gallery`/`video`); `RedlibPostScraper.toPost()` classifies `image`-labelled thumbnails as `MediaType.IMAGE` and `gallery`-labelled as `REDDIT_GALLERY` (link-post labels like `bsky.app` are unaffected; `video` label intentionally not mapped — no URL in the stripped feed); gallery URLs fall back to the post permalink. Detail pages still carry full-size media.
 - **Full-size viewer**: opening a `/preview/` image fetches the detail page via `getPost(permalink)` and swaps in the full-size URL when `postType == IMAGE` and the URL isn't another `/preview/`; failure keeps the preview.
 - **Instance build label**: `RedlibScraper.extractInstanceVersion()` selects `#version, a#source` and stores the text AS-IS (upstream `<span id="version">v0.40.0</span>`, forks `<a id="source">82235ec</a>`); `RedlibInstanceInfo` is an in-memory `StateFlow<Map<host,version>>`, no persistence.
 - **Gandalf** (nerdvpn's self-hosted botblocker) is a different challenge variant but the existing inline WebView solves it as-is; no code change needed.
@@ -79,7 +79,7 @@ Redlib (a public/self-hosted Reddit HTML proxy) sits behind a Cloudflare/Anubis 
 ## Evolution
 - **Upstream (2020-2025)**: `cosmosapps/stealth` fork; feature-by-feature build; tags 0.1.0→2.0.0; key upstream fixes (Reddit audio `DASH_AUDIO_128`, Redgifs `vthumbnail` removal, Android 14 launch fix, policy disclaimer 2023-06-10).
 - **Fork line (2026-07-17 → HEAD)**: `59295de` rebrand (appId `com.rohitss.stealth`), `45fc13e` cookie hotfix (later removed), `bcfe7c2` CMAF audio, `dfa795f` downloaded-audio mux, `302922c` keystore move, `1349c1f` kapt JDK16+ flags, `e216456` v3.0.0, `b8474ec` post shortcut buttons, `07577e5` merge PR#6 (the baseline the `Knowledge/` docs were generated at).
-  - **What changed since v3.0.0 (`07577e5` to HEAD `c0aad3f`, v3.0.5):**
+  - **What changed since v3.0.0 (`07577e5` to HEAD `40a36e6`, v3.0.6):**
     - **OAuth workaround (`85980e1`, 2026-10-22 emulator investigation)** — Reddit blocks anonymous `.json` server-side; removed the broken token-based bypass and added the app-only OAuth flow (`RedditOAuthManager` mints an anonymous app token via `POST …/auth/v2/oauth/access-token/loid` with client id `ohXpoqrZYub1kg`, `RedditOAuthInterceptor`, `RedditPathInterceptor` `%2f` route encoding, `RedditApi.BASE_URL = oauth.reddit.com`).
     - **Redlib HTML scraping source (`74203ef`)** — added the `scraper/redlib/` package (`RedlibScraper` + post/comment/subreddit/user/search scrapers), rewrote `TedditSource`/`TedditApi` to scrape Redlib HTML routes, wired `BrowserLikeInterceptor` + `@RedlibBaseUrl`, added `RedlibScraperTest`. Default source → Redlib.
     - **Dynamic instances + custom UA (`925abf6`)** — `RedlibInstancesRepository` downloads/clearnet-filters the instance list; `custom_user_agent` DataStore key; `BrowserLikeInterceptor` takes a per-request UA provider.
@@ -89,8 +89,9 @@ Redlib (a public/self-hosted Reddit HTML proxy) sits behind a Cloudflare/Anubis 
     - **HLS video playback behind bot challenge + inline verification (`5605018`)** — `OkHttpDataSource` routes the m3u8/segments through the browser-like client; `RedlibChallenge`/`RedlibBlockedException` detection; `RedlibVerificationFragment`/`RedlibWebView` inline Cloudflare/Anubis solving; `RedlibLoadErrorPolicy` (no retry on 403/429).
     - **Search friendly message (`6e24506`)** — instances without `/search` get a friendly error + taller info bar.
     - **v3.0.5 media-stripped feed fixes (`72fa56d`)** — feed image posts classified via the `post_thumbnail` `<span>` label; full-size `/preview/` image resolution in the viewer; `RedlibInstanceInfo` in-memory instance-build label (`extractInstanceVersion()`).
-    - Version bumps: v3.0.1 (`cb19d7a`), v3.0.2 (`8243e83`), v3.0.3 (`7147b4d`), v3.0.4 (`1f277bd`), v3.0.5 (`c0aad3f`).
-- Note: `versionCode 35` but changelogs still end at `23.txt` (no `24.txt`–`30.txt`).
+    - **Redlib gallery media fixes (`9adab45`, `0408333`) + GIF playback fix (`20d8a8b`)** — `LinkUtil` gains `normalizeMediaUrl`/`isRedlibUrl`/`getPermalinkFromRedlibMediaUrl`; `MediaViewerViewModel.loadMedia()` resolves media via `normalizeMediaUrl` and uses redlib-specific gallery permalinks; `RedlibPostScraper` classifies `gallery`-labelled thumbnails and falls back to the post permalink; `MediaViewerAdapter` uses Coil's `load()` DSL.
+    - Version bumps: v3.0.1 (`cb19d7a`), v3.0.2 (`8243e83`), v3.0.3 (`7147b4d`), v3.0.4 (`1f277bd`), v3.0.5 (`c0aad3f`), v3.0.6 (`40a36e6`).
+- Note: `versionCode 36` but changelogs still end at `23.txt` (no `24.txt`–`30.txt`).
 
 ## Issue → fix register
 - **3.1 Reddit anonymous JSON block (Oct 2026)** — tried cookie bootstrap + challenge solving; ruled out UA/Accept/DNS/TLS/IP; server still `403`s anonymous `.json`; chose app-only OAuth + `%2f` route encoding.
@@ -114,7 +115,7 @@ Redlib (a public/self-hosted Reddit HTML proxy) sits behind a Cloudflare/Anubis 
 - NSFW filtering is client-side (downloaded then discarded).
 - Blocking DataStore reads on hot paths.
 - No CI; only `ExampleUnitTest`, `ExampleInstrumentedTest`, `DateUtilTest`.
-- Version/changelog mismatch (`35`/`3.0.5` vs changelog `23.txt`).
+- Version/changelog mismatch (`36`/`3.0.6` vs changelog `23.txt`).
 
 ## Covers
 - app/src/main/java/com/cosmos/unreddit
@@ -139,25 +140,25 @@ Listing: 2b89584ee8ac
 - app/src/main/java/com/cosmos/unreddit/di/CoroutinesScopesModule.kt 9c5729d81a4b
 - app/src/main/java/com/cosmos/unreddit/util/LinkHandler.kt 319e3593d017
 - app/src/main/java/com/cosmos/unreddit/util/LinkRedirector.kt 2be56e380dba
-- app/src/main/java/com/cosmos/unreddit/util/LinkUtil.kt c074edc0b19c
+- app/src/main/java/com/cosmos/unreddit/util/LinkUtil.kt 551b4d0f991f
 - app/src/main/java/com/cosmos/unreddit/util/ExoPlayerHelper.kt 54120e034636
 - app/src/main/java/com/cosmos/unreddit/util/OkHttpDataSource.kt 82a0ff5b0ad3
 - app/src/main/java/com/cosmos/unreddit/util/PostUtil.kt 176b70ec814c
-- app/src/main/java/com/cosmos/unreddit/ui/mediaviewer/MediaViewerAdapter.kt ea6e42db3006
-- app/src/main/java/com/cosmos/unreddit/ui/mediaviewer/MediaViewerViewModel.kt 07b2b12e8880
+- app/src/main/java/com/cosmos/unreddit/ui/mediaviewer/MediaViewerAdapter.kt d7ad7161d84b
+- app/src/main/java/com/cosmos/unreddit/ui/mediaviewer/MediaViewerViewModel.kt 43895f34deca
 - app/src/main/java/com/cosmos/unreddit/ui/redditsource/RedlibVerificationFragment.kt c0719390f35b
 - app/src/main/java/com/cosmos/unreddit/ui/redditsource/RedlibWebView.kt 7b1bd051da8b
 - app/src/main/java/com/cosmos/unreddit/data/remote/api/reddit/RedditOAuthManager.kt 780c993b3735
 - app/src/main/java/com/cosmos/unreddit/data/remote/api/reddit/RedditOAuthInterceptor.kt f309d399132b
 - app/src/main/java/com/cosmos/unreddit/data/remote/api/reddit/RedditPathInterceptor.kt dd8cecd8ef98
 - app/src/main/java/com/cosmos/unreddit/data/remote/api/reddit/RedditApi.kt 6131cade4532
-- app/src/main/java/com/cosmos/unreddit/data/remote/api/reddit/scraper/redlib/RedlibPostScraper.kt 44185eae6132
+- app/src/main/java/com/cosmos/unreddit/data/remote/api/reddit/scraper/redlib/RedlibPostScraper.kt eb55390706d9
 - app/src/main/java/com/cosmos/unreddit/data/remote/api/reddit/scraper/redlib/RedlibChallenge.kt 692b884b68f8
-- app/src/main/java/com/cosmos/unreddit/data/remote/api/reddit/scraper/redlib/RedlibScraper.kt 426d926686a2
+- app/src/main/java/com/cosmos/unreddit/data/remote/api/reddit/scraper/redlib/RedlibScraper.kt 108eb99bd8af
 - app/src/main/java/com/cosmos/unreddit/data/remote/api/reddit/RedlibInstanceInfo.kt d71a6e9c7484
 - app/src/main/java/com/cosmos/unreddit/data/local/RedditDatabase.kt a59fb8d67a3f
 - app/src/main/java/com/cosmos/unreddit/data/remote/api/reddit/source/CurrentSource.kt 894f821b6a6c
-- buildSrc/src/main/kotlin/Config.kt 4cf1a474a1f6
+- buildSrc/src/main/kotlin/Config.kt faa6670fe8b5
 - buildSrc/src/main/kotlin/Dependencies.kt 0e8efd0e0ce0
 - build.gradle.kts 4bfa4fab0db4
 - settings.gradle.kts e2b1f43980b5

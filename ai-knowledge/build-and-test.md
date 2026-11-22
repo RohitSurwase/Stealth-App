@@ -28,17 +28,17 @@ Run from the repository root (use `gradlew.bat` on Windows). All stay inside thi
 
 ## Files
 - app/build.gradle.kts bb4133aa9b17
-- buildSrc/src/main/kotlin/Config.kt 4cf1a474a1f6
+- buildSrc/src/main/kotlin/Config.kt faa6670fe8b5
 - buildSrc/src/main/kotlin/Dependencies.kt 0e8efd0e0ce0
 - buildSrc/src/main/kotlin/RoomSchemaArgProvider.kt 235803acfdb0
 - gradle.properties 91827aa447c1
 - gradle/wrapper/gradle-wrapper.properties 1912447f3c54
 - settings.gradle.kts e2b1f43980b5
 
-## Folded-in Knowledge (02-Build-System, 07-Testing) — verified against current source at HEAD `c0aad3f` (v3.0.5)
+## Folded-in Knowledge (02-Build-System, 07-Testing) — verified against current source at HEAD `40a36e6` (v3.0.6)
 
-### Cross-check: Knowledge was generated at v3.0.0 (`07577e5`); current is v3.0.5 (`c0aad3f`).
-- **STALE — versions bumped:** `Config.kt` now declares `versionCode = 35`, `versionName = "3.0.5"` (doc said `30` / `3.0.0`). Everything else in the toolchain table is unchanged.
+### Cross-check: Knowledge was generated at v3.0.0 (`07577e5`); current is v3.0.6 (`40a36e6`).
+- **MATCHES (after refresh):** `Config.kt` now declares `versionCode = 36`, `versionName = "3.0.6"` (was `35` / `3.0.5`; doc originally said `30` / `3.0.0`). Everything else in the toolchain table is unchanged.
 - **MATCHES (verified in current files):** Gradle wrapper `7.5.1`; AGP `7.3.1`; Kotlin `1.7.20`; Hilt Gradle plugin `2.44.2`; Navigation Safe Args `2.5.3` (plugin id `androidx.navigation.safeargs.kotlin`); namespace `com.cosmos.unreddit`; release applicationId `com.rohitss.stealth`; debug `.dev` suffix; minSdk `23`, compileSdk/targetSdk `33`; JVM 1.8 target; ViewBinding + DataBinding `true`; opt-in `kotlinx.coroutines.ExperimentalCoroutinesApi`.
 - **MATCHES — library versions** in `Dependencies.kt`: AndroidX core-ktx `1.9.0`, appcompat `1.5.1`, constraintlayout `2.1.4`, recyclerview `1.2.1`, fragment `1.5.4`, lifecycle `2.5.1`, coordinatorlayout `1.2.0`, viewpager2 `1.0.0`, preference `1.2.0`; Navigation `2.5.3`; Room `2.4.3`, DataStore `1.0.0`; Paging 3 `3.1.1`, WorkManager `2.7.1`; Material `1.7.0`, browser `1.4.0`, core-splashscreen `1.0.0`, TouchImageView `3.0.3`, drawer `1.0.3`; ExoPlayer `2.18.1`, Coil `2.2.2` (+ `coil-gif`); Retrofit `2.9.0`, Moshi `1.14.0`, Okio `3.2.0`, Jsoup `1.15.3`; Hilt `1.0.0`; coroutines `1.4.1` (transitive only).
 - **MATCHES — kapt JDK 16+ flags** (`--add-exports/--add-opens` for `com.sun.tools.javac.main/.tree/.util/.code`), in both `app/build.gradle.kts` and `gradle.properties`. (Doc wrote the module prefix as bare `com.sun.tools.javac.main`; current uses the `jdk.compiler/` prefix — functionally identical.)

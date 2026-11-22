@@ -8,11 +8,11 @@ The UI layer is a single `MainActivity` hosting a `NavHostFragment`; every scree
 - `app/src/main/java/com/cosmos/unreddit/MainActivity.kt`: single activity; `setTheme(appTheme)` before `super.onCreate`; hosts NavHostFragment; builds floating bottom nav; left-handed gravity/corners; hides nav outside the four tabs; policy-disclaimer Snackbar.
 - `app/src/main/java/com/cosmos/unreddit/ui/base/BaseFragment.kt`: `@AndroidEntryPoint`; `navigate(NavDirections)`; `openUser`/`openSubreddit` shortcut helpers.
 - `app/src/main/java/com/cosmos/unreddit/ui/base/BaseViewModel.kt`: shared profile scope — `currentProfile`, `historyIds`, `subscriptions`, `savedPostIds` via `flatMapLatest`.
-- `app/src/main/java/com/cosmos/unreddit/ui/postlist/PostListFragment.kt`: feed; shows the instance build label `#version : instance` in the app bar; hosts the inline challenge overlay.
+- `app/src/main/java/com/cosmos/unreddit/ui/postlist/PostListFragment.kt`: feed; shows the instance build label `#version : host[:port]` in the app bar (version looked up by host from the scraped footer; host normalized via `LinkValidator`, non-default port kept); hosts the inline challenge overlay.
 - `app/src/main/java/com/cosmos/unreddit/ui/postlist/PostViewHolder.kt`: binds the user/subreddit shortcut buttons in feed cards.
 - `app/src/main/java/com/cosmos/unreddit/ui/mediaviewer/MediaViewerFragment.kt`: fullscreen media; resolves IMAGE→Coil, VIDEO→ExoPlayer; launches the challenge activity for redlib HLS.
 - `app/src/main/java/com/cosmos/unreddit/ui/mediaviewer/MediaViewerAdapter.kt`: ExoPlayer HLS + redlib bot-challenge detection/retry; Redgifs query params; v.reddit audio merge.
-- `app/src/main/java/com/cosmos/unreddit/ui/redditsource/RedditSourceDialogFragment.kt`: source picker; Teddit/Redlib instance spinner, verify + refresh instance buttons.
+- `app/src/main/java/com/cosmos/unreddit/ui/redditsource/RedditSourceDialogFragment.kt`: source picker; Teddit/Redlib instance spinner, verify + refresh instance buttons; passes the instance as a full URL (not just the host) to the verification activity and source bundle.
 - `app/src/main/java/com/cosmos/unreddit/ui/redditsource/RedlibVerificationFragment.kt`: inline WebView overlay solving the Cloudflare/Anubis challenge, sharing cookies with OkHttp.
 - `app/src/main/java/com/cosmos/unreddit/ui/search/SearchPostFragment.kt`: search; shows a friendly message when the instance has no search support.
 
@@ -35,10 +35,10 @@ Listing: 16651f6b5949
 - app/src/main/java/com/cosmos/unreddit/MainActivity.kt 5abbf4a689d6
 - app/src/main/java/com/cosmos/unreddit/ui/base/BaseFragment.kt ffc07f0fba4f
 - app/src/main/java/com/cosmos/unreddit/ui/base/BaseViewModel.kt 82c8fbd374f7
-- app/src/main/java/com/cosmos/unreddit/ui/postlist/PostListFragment.kt 6e9790087fc7
+- app/src/main/java/com/cosmos/unreddit/ui/postlist/PostListFragment.kt 323bc8e72f9b
 - app/src/main/java/com/cosmos/unreddit/ui/postlist/PostViewHolder.kt 27a4359f043e
 - app/src/main/java/com/cosmos/unreddit/ui/mediaviewer/MediaViewerFragment.kt 2316933242c1
-- app/src/main/java/com/cosmos/unreddit/ui/mediaviewer/MediaViewerAdapter.kt ea6e42db3006
-- app/src/main/java/com/cosmos/unreddit/ui/redditsource/RedditSourceDialogFragment.kt 1c63c5f14afd
+- app/src/main/java/com/cosmos/unreddit/ui/mediaviewer/MediaViewerAdapter.kt d7ad7161d84b
+- app/src/main/java/com/cosmos/unreddit/ui/redditsource/RedditSourceDialogFragment.kt 9a242d59aadb
 - app/src/main/java/com/cosmos/unreddit/ui/redditsource/RedlibVerificationFragment.kt c0719390f35b
 - app/src/main/java/com/cosmos/unreddit/ui/search/SearchPostFragment.kt f0e505c67734
